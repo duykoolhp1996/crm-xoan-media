@@ -50,15 +50,15 @@ export const CustomerList: React.FC = () => {
     });
   }, [customers, searchTerm, selectedSource, selectedStage]);
 
-  // Stage badges colors on dark glass
+  // Stage badges colors on light glass
   const stageBadges: Record<string, string> = {
-    'New Lead': 'bg-white/[0.08] text-white/70 border-white/[0.15]',
-    'Đang tư vấn': 'bg-sky-500/20 text-sky-300 border-sky-500/30',
-    'Đã gửi báo giá': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    'Đã đặt cọc': 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-    'Đã Booking': 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    'Hoàn thành': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    'Lost': 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+    'New Lead': 'bg-neutral-100 text-neutral-700 border-neutral-200',
+    'Đang tư vấn': 'bg-sky-50 text-sky-700 border-sky-200',
+    'Đã gửi báo giá': 'bg-purple-50 text-purple-700 border-purple-200',
+    'Đã đặt cọc': 'bg-amber-50 text-amber-800 border-amber-200',
+    'Đã Booking': 'bg-blue-50 text-blue-700 border-blue-200',
+    'Hoàn thành': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    'Lost': 'bg-rose-50 text-rose-700 border-rose-200'
   };
 
   return (
@@ -66,11 +66,11 @@ export const CustomerList: React.FC = () => {
       {/* Top Action Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-5 sm:p-6 rounded-3xl">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-            <Users className="w-5 h-5 text-orange-400" />
+          <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-neutral-900" />
             Hồ Sơ Khách Hàng & Leads Kỷ Yếu
           </h1>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Quản lý tập trung thông tin lớp, ban đại diện, nhu cầu concept và nguồn tiếp cận
           </p>
         </div>
@@ -78,7 +78,7 @@ export const CustomerList: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2.5 glass-btn-primary rounded-xl text-xs font-semibold flex items-center gap-2"
+            className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-2xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
             Thêm Khách Hàng Mới
@@ -90,23 +90,23 @@ export const CustomerList: React.FC = () => {
       <div className="glass-panel-subtle p-3.5 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center gap-3">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Tìm theo tên học sinh, SĐT, trường (Ams, Chu Văn An...), lớp..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 glass-input rounded-xl text-xs"
+            className="w-full pl-9 pr-4 py-2 bg-white border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
           />
         </div>
 
         {/* Source Filter */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-white/50 shrink-0">Nguồn:</span>
+          <span className="text-xs font-semibold text-neutral-500 shrink-0">Nguồn:</span>
           <select
             value={selectedSource}
             onChange={(e) => setSelectedSource(e.target.value)}
-            className="px-3 py-2 glass-input rounded-xl text-xs font-medium text-white/80 cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+            className="px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
           >
             <option value="all">Tất cả nguồn ({customers.length})</option>
             <option value="Facebook Ads">Facebook Ads</option>
@@ -119,11 +119,11 @@ export const CustomerList: React.FC = () => {
 
         {/* Stage Filter */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-white/50 shrink-0">Trạng thái:</span>
+          <span className="text-xs font-semibold text-neutral-500 shrink-0">Trạng thái:</span>
           <select
             value={selectedStage}
             onChange={(e) => setSelectedStage(e.target.value)}
-            className="px-3 py-2 glass-input rounded-xl text-xs font-medium text-white/80 cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+            className="px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
           >
             <option value="all">Tất cả giai đoạn</option>
             <option value="New Lead">New Lead</option>
@@ -138,11 +138,11 @@ export const CustomerList: React.FC = () => {
       </div>
 
       {/* Customer Data Table */}
-      <div className="glass-panel rounded-3xl overflow-hidden shadow-2xl">
+      <div className="glass-panel rounded-3xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-white/[0.03] text-white/45 font-bold border-b border-white/[0.08] uppercase tracking-wider">
+              <tr className="bg-neutral-50/80 text-neutral-400 font-bold border-b border-black/[0.05] uppercase tracking-wider">
                 <th className="py-3.5 px-4">Lớp & Trường Học</th>
                 <th className="py-3.5 px-4">Người Đại Diện</th>
                 <th className="py-3.5 px-4">Gói & Concept</th>
@@ -152,10 +152,10 @@ export const CustomerList: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">Thao Tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.05] font-medium text-white/80">
+            <tbody className="divide-y divide-black/[0.04] font-medium text-neutral-800">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-white/40">
+                  <td colSpan={7} className="py-12 text-center text-neutral-400">
                     Không tìm thấy khách hàng nào phù hợp với bộ lọc hiện tại.
                   </td>
                 </tr>
@@ -163,24 +163,24 @@ export const CustomerList: React.FC = () => {
                 filteredCustomers.map((cust) => (
                   <tr
                     key={cust.id}
-                    className="hover:bg-white/[0.06] transition-colors group cursor-pointer"
+                    className="hover:bg-neutral-50 transition-colors group cursor-pointer"
                     onClick={() => setSelectedCustomerId(cust.id)}
                   >
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-7 h-7 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 font-extrabold flex items-center justify-center text-xs shrink-0">
+                        <span className="w-7 h-7 rounded-xl bg-[#B8F23D]/30 border border-[#B8F23D]/50 text-neutral-900 font-extrabold flex items-center justify-center text-xs shrink-0">
                           {cust.className.slice(0, 3)}
                         </span>
                         <div>
-                          <p className="font-bold text-white group-hover:text-orange-300 transition-colors">
+                          <p className="font-bold text-neutral-900 group-hover:text-neutral-700 transition-colors">
                             {cust.className}
                           </p>
-                          <p className="text-[11px] text-white/45 flex items-center gap-1">
-                            <School className="w-3 h-3 text-white/30" /> {cust.schoolName}
+                          <p className="text-[11px] text-neutral-500 flex items-center gap-1">
+                            <School className="w-3 h-3 text-neutral-400" /> {cust.schoolName}
                           </p>
                           {(cust.district || cust.city || cust.region) && (
-                            <p className="text-[10px] text-orange-400/80 flex items-center gap-1 mt-0.5">
-                              <MapPin className="w-2.5 h-2.5 text-orange-400/70" />
+                            <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-2.5 h-2.5 text-neutral-400" />
                               <span>{cust.district ? `${cust.district}, ` : ''}{cust.city || cust.region}</span>
                             </p>
                           )}
@@ -189,45 +189,40 @@ export const CustomerList: React.FC = () => {
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <p className="font-semibold text-white/90">{cust.name}</p>
-                      <p className="text-[11px] text-white/45 flex items-center gap-1">
-                        <Phone className="w-3 h-3 text-white/30" /> {cust.phone} ({cust.representativeRole})
+                      <p className="font-semibold text-neutral-900">{cust.name}</p>
+                      <p className="text-[11px] text-neutral-500 flex items-center gap-1">
+                        <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone} ({cust.representativeRole})
                       </p>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <p className="font-semibold text-white/90">{cust.servicePackageName || 'Chưa chọn'}</p>
-                      <p className="text-[11px] text-orange-400 font-medium">Concept: {cust.concept}</p>
+                      <p className="font-semibold text-neutral-900">{cust.servicePackageName || 'Chưa chọn'}</p>
+                      <p className="text-[11px] text-[#79ba07] font-semibold">Concept: {cust.concept}</p>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="font-medium bg-white/[0.08] border border-white/[0.1] text-white/80 px-2 py-0.5 rounded-full text-[11px]">
+                      <span className="text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md font-medium text-[11px]">
                         {cust.source}
                       </span>
-                      {cust.campaignName && (
-                        <p className="text-[10px] text-white/40 mt-1 truncate max-w-[120px]">
-                          {cust.campaignName}
-                        </p>
-                      )}
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
-                          stageBadges[cust.pipelineStage] || 'bg-white/[0.08] text-white/70 border-white/[0.1]'
-                        }`}
-                      >
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border inline-block ${
+                        stageBadges[cust.pipelineStage] || 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                      }`}>
                         {cust.pipelineStage}
                       </span>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <p className="font-bold text-white">
-                        {cust.expectedBudget.toLocaleString('vi-VN')}đ
-                      </p>
-                      <p className="text-[10px] text-emerald-400">
-                        Đã cọc: {cust.paidAmount.toLocaleString('vi-VN')}đ
-                      </p>
+                      <div>
+                        <p className="font-bold text-neutral-900">
+                          {(cust.totalRevenue || cust.expectedBudget).toLocaleString('vi-VN')}đ
+                        </p>
+                        <p className="text-[11px] text-emerald-700 font-semibold">
+                          Đã cọc: {(cust.paidAmount || 0).toLocaleString('vi-VN')}đ
+                        </p>
+                      </div>
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
@@ -236,10 +231,10 @@ export const CustomerList: React.FC = () => {
                           e.stopPropagation();
                           setSelectedCustomerId(cust.id);
                         }}
-                        className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] text-white/40 hover:text-white inline-flex items-center justify-center transition-colors"
-                        title="Xem Customer 360"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-900 hover:text-[#B8F23D] text-neutral-800 text-[11px] font-bold transition-all"
                       >
-                        <ChevronRight className="w-4 h-4" />
+                        Chi tiết
+                        <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>
@@ -248,15 +243,9 @@ export const CustomerList: React.FC = () => {
             </tbody>
           </table>
         </div>
-
-        {/* Table Footer */}
-        <div className="p-3.5 bg-white/[0.02] border-t border-white/[0.08] flex items-center justify-between text-xs text-white/45">
-          <span>Hiển thị <strong className="text-white/80">{filteredCustomers.length}</strong> / {customers.length} khách hàng</span>
-          <span>Click vào dòng để mở chi tiết <strong className="text-white/80">Customer 360</strong></span>
-        </div>
       </div>
 
-      {/* Customer 360 Drawer */}
+      {/* Customer 360 Detail Drawer / Modal */}
       {selectedCustomerId && (
         <CustomerDetail360
           customerId={selectedCustomerId}
@@ -264,7 +253,7 @@ export const CustomerList: React.FC = () => {
         />
       )}
 
-      {/* Create Modal */}
+      {/* Add Customer Modal */}
       <CustomerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

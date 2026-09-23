@@ -39,21 +39,21 @@ export const KanbanPipeline: React.FC = () => {
     'Chăm sóc lại'
   ];
 
-  // Stage highlight accent colors
+  // Stage highlight accent colors (top borders)
   const stageHeaderAccents: Record<PipelineStage, string> = {
     'New Lead': 'border-t-slate-400',
-    'Đã liên hệ': 'border-t-cyan-400',
-    'Đang tư vấn': 'border-t-sky-400',
-    'Đã gửi báo giá': 'border-t-indigo-400',
-    'Đang thương lượng': 'border-t-purple-400',
-    'Đã đặt cọc': 'border-t-amber-400',
-    'Đã Booking': 'border-t-orange-500',
-    'Đã chụp': 'border-t-blue-400',
-    'Đang hậu kỳ': 'border-t-violet-400',
-    'Đã bàn giao': 'border-t-teal-400',
-    'Hoàn thành': 'border-t-emerald-400',
+    'Đã liên hệ': 'border-t-cyan-500',
+    'Đang tư vấn': 'border-t-sky-500',
+    'Đã gửi báo giá': 'border-t-indigo-500',
+    'Đang thương lượng': 'border-t-purple-500',
+    'Đã đặt cọc': 'border-t-[#79ba07]',
+    'Đã Booking': 'border-t-amber-500',
+    'Đã chụp': 'border-t-blue-500',
+    'Đang hậu kỳ': 'border-t-violet-500',
+    'Đã bàn giao': 'border-t-teal-500',
+    'Hoàn thành': 'border-t-emerald-500',
     'Lost': 'border-t-rose-500',
-    'Chăm sóc lại': 'border-t-pink-400'
+    'Chăm sóc lại': 'border-t-pink-500'
   };
 
   // Drag & drop handlers
@@ -80,18 +80,18 @@ export const KanbanPipeline: React.FC = () => {
       {/* Top Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-5 rounded-3xl">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-            <KanbanIcon className="w-5 h-5 text-orange-400" />
+          <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+            <KanbanIcon className="w-5 h-5 text-neutral-900" />
             Customer Pipeline (13 Trạng Thái Kỷ Yếu)
           </h1>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Kéo thả để cập nhật tiến độ từ Lead mới đến khi bàn giao trọn gói kỷ yếu
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 glass-btn-primary rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0"
+          className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-sm transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
           Thêm Lead Vào Pipeline
@@ -109,27 +109,27 @@ export const KanbanPipeline: React.FC = () => {
               key={stage}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, stage)}
-              className={`w-72 shrink-0 bg-white/[0.035] backdrop-blur-2xl rounded-2xl border border-white/[0.1] shadow-lg flex flex-col max-h-[75vh] border-t-4 ${stageHeaderAccents[stage]}`}
+              className={`w-72 shrink-0 bg-white rounded-2xl border border-black/[0.08] shadow-xs flex flex-col max-h-[75vh] border-t-4 ${stageHeaderAccents[stage]}`}
             >
               {/* Column Header */}
-              <div className="p-3.5 border-b border-white/[0.08] bg-white/[0.02]">
+              <div className="p-3.5 border-b border-black/[0.05] bg-neutral-50/60">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-white tracking-wide truncate" title={stage}>
+                  <h3 className="text-xs font-bold text-neutral-900 tracking-tight truncate" title={stage}>
                     {stage}
                   </h3>
-                  <span className="text-[10px] font-bold bg-white/[0.1] text-white/80 border border-white/[0.15] px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold bg-neutral-200/70 text-neutral-800 px-2 py-0.5 rounded-full">
                     {stageCustomers.length}
                   </span>
                 </div>
-                <p className="text-[10px] text-white/45 mt-1 font-medium">
-                  Tổng: <strong className="text-white/80">{(stageTotalMoney / 1000000).toFixed(1)}M đ</strong>
+                <p className="text-[10px] text-neutral-400 mt-1 font-medium">
+                  Tổng: <strong className="text-neutral-700">{(stageTotalMoney / 1000000).toFixed(1)}M đ</strong>
                 </p>
               </div>
 
               {/* Cards List */}
-              <div className="p-2 space-y-2 overflow-y-auto flex-1 custom-scrollbar min-h-[160px]">
+              <div className="p-2 space-y-2 overflow-y-auto flex-1 custom-scrollbar min-h-[160px] bg-neutral-50/30">
                 {stageCustomers.length === 0 ? (
-                  <div className="py-8 text-center text-white/30 text-[11px] italic border border-dashed border-white/10 rounded-2xl m-1">
+                  <div className="py-8 text-center text-neutral-400 text-[11px] italic border border-dashed border-neutral-300 rounded-2xl m-1">
                     Kéo thả lead vào đây
                   </div>
                 ) : (
@@ -139,58 +139,58 @@ export const KanbanPipeline: React.FC = () => {
                       draggable
                       onDragStart={(e) => handleDragStart(e, cust.id)}
                       onClick={() => setSelectedCustomerId(cust.id)}
-                      className="bg-white/[0.05] hover:bg-white/[0.09] backdrop-blur-xl p-3.5 rounded-2xl border border-white/[0.1] hover:border-white/[0.22] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all cursor-grab active:cursor-grabbing group"
+                      className="bg-white hover:bg-neutral-50/80 p-3.5 rounded-2xl border border-black/[0.06] hover:border-black/[0.14] shadow-xs hover:shadow-sm transition-all cursor-grab active:cursor-grabbing group"
                     >
                       {/* Class & School */}
                       <div className="flex items-start justify-between gap-1">
                         <div>
-                          <span className="text-[10px] font-bold text-orange-300 bg-orange-500/20 border border-orange-500/30 px-2 py-0.5 rounded-lg">
+                          <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-lg">
                             {cust.className}
                           </span>
-                          <h4 className="text-xs font-bold text-white mt-1.5 group-hover:text-orange-300 transition-colors">
+                          <h4 className="text-xs font-bold text-neutral-900 mt-1.5 group-hover:text-neutral-700 transition-colors">
                             {cust.name}
                           </h4>
                         </div>
-                        <span className="text-[10px] text-white/50 bg-white/[0.08] px-1.5 py-0.5 rounded-md border border-white/[0.06]">
+                        <span className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded-md">
                           {cust.studentCount} bạn
                         </span>
                       </div>
 
-                      <p className="text-[11px] text-white/50 flex items-center gap-1.5 mt-1.5 truncate">
-                        <School className="w-3 h-3 text-white/30 shrink-0" />
+                      <p className="text-[11px] text-neutral-500 flex items-center gap-1.5 mt-1.5 truncate">
+                        <School className="w-3 h-3 text-neutral-400 shrink-0" />
                         <span className="truncate">{cust.schoolName}</span>
                       </p>
 
                       {/* Concept & Package */}
-                      <div className="mt-2.5 text-[10px] bg-white/[0.03] p-2 rounded-xl border border-white/[0.06]">
-                        <p className="text-white/70 truncate">
-                          ✨ <strong className="text-white/90">Concept:</strong> {cust.concept}
+                      <div className="mt-2.5 text-[10px] bg-neutral-50 p-2 rounded-xl border border-black/[0.04]">
+                        <p className="text-neutral-700 truncate">
+                          ✨ <strong className="text-neutral-900">Concept:</strong> {cust.concept}
                         </p>
-                        <p className="text-white/50 truncate mt-0.5">
+                        <p className="text-neutral-500 truncate mt-0.5">
                           📦 {cust.servicePackageName || 'Gói tùy chọn'}
                         </p>
                       </div>
 
                       {/* Footer: Phone & Budget */}
-                      <div className="mt-2.5 pt-2 border-t border-white/[0.08] flex items-center justify-between text-[11px]">
-                        <span className="text-white/50 flex items-center gap-1">
-                          <Phone className="w-3 h-3 text-white/30" />
+                      <div className="mt-2.5 pt-2 border-t border-black/[0.04] flex items-center justify-between text-[11px]">
+                        <span className="text-neutral-500 flex items-center gap-1">
+                          <Phone className="w-3 h-3 text-neutral-400" />
                           {cust.phone}
                         </span>
-                        <span className="font-bold text-white">
+                        <span className="font-bold text-neutral-900">
                           {(cust.expectedBudget / 1000000).toFixed(1)}M đ
                         </span>
                       </div>
 
                       {/* Nhanh: chuyển stage */}
-                      <div className="mt-2 pt-1.5 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-white/40">
+                      <div className="mt-2 pt-1.5 border-t border-black/[0.04] flex items-center justify-between text-[10px] text-neutral-400">
                         <span>Nguồn: {cust.source}</span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedCustomerId(cust.id);
                           }}
-                          className="text-orange-400 hover:text-orange-300 font-semibold"
+                          className="text-[#79ba07] hover:text-neutral-900 font-bold"
                         >
                           Chi tiết →
                         </button>
@@ -204,7 +204,7 @@ export const KanbanPipeline: React.FC = () => {
         })}
       </div>
 
-      {/* Customer 360 Drawer */}
+      {/* Detail Drawer */}
       {selectedCustomerId && (
         <CustomerDetail360
           customerId={selectedCustomerId}
@@ -212,7 +212,7 @@ export const KanbanPipeline: React.FC = () => {
         />
       )}
 
-      {/* Modal */}
+      {/* Add Lead Modal */}
       <CustomerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

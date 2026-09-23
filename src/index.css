@@ -46,97 +46,233 @@
   filter: blur(100px);
 }
 
-/* Soft Glassmorphism Core Classes (Light Theme) */
+/* ==========================================================================
+   SOFT GLASSMORPISM (LIGHT THEME) OVERRIDES FOR LEGACY DARK CLASSES
+   Fixes white-on-white text, transparent inputs, and invisible borders
+   ========================================================================== */
+
+/* 1. TEXT COLOR REMAPPING */
+.text-white {
+  color: #0f172a !important;
+}
+
+.text-white\/90,
+.text-white\/85,
+.text-white\/80 {
+  color: #1e293b !important;
+}
+
+.text-white\/75,
+.text-white\/70,
+.text-white\/65 {
+  color: #334155 !important;
+}
+
+.text-white\/60,
+.text-white\/50,
+.text-white\/45 {
+  color: #64748b !important;
+}
+
+.text-white\/40,
+.text-white\/35,
+.text-white\/30 {
+  color: #94a3b8 !important;
+}
+
+.text-white\/20,
+.text-white\/15,
+.text-white\/10 {
+  color: #cbd5e1 !important;
+}
+
+/* Sub-tint text fixes on light backgrounds */
+.text-orange-300 {
+  color: #ea580c !important;
+}
+.text-sky-300 {
+  color: #0284c7 !important;
+}
+.text-purple-300 {
+  color: #7c3aed !important;
+}
+.text-rose-300 {
+  color: #e11d48 !important;
+}
+.text-emerald-300 {
+  color: #059669 !important;
+}
+
+/* EXCLUSIONS: When inside dark elements, preserve white or lime text */
+button.bg-neutral-900,
+button.bg-neutral-900 *,
+button.bg-neutral-950,
+button.bg-neutral-950 *,
+button.bg-black,
+button.bg-black *,
+.bg-neutral-900 .text-white,
+.bg-neutral-900 [class*="text-white"],
+.bg-neutral-950 .text-white,
+.bg-neutral-950 [class*="text-white"],
+.bg-black .text-white,
+.bg-black [class*="text-white"],
+.keep-white,
+.keep-white * {
+  color: #ffffff !important;
+}
+
+button.bg-neutral-900 .text-\[\#B8F23D\],
+.glass-btn-primary,
+.glass-btn-primary * {
+  color: #B8F23D !important;
+}
+
+/* 2. BACKGROUND REMAPPING */
+.bg-white\/\[0\.02\],
+.bg-white\/\[0\.03\],
+.bg-white\/\[0\.035\],
+.bg-white\/\[0\.04\],
+.bg-white\/\[0\.05\],
+.bg-white\/\[0\.06\] {
+  background-color: #f8fafc !important;
+}
+
+.bg-white\/\[0\.08\],
+.bg-white\/\[0\.09\],
+.bg-white\/\[0\.1\],
+.bg-white\/\[0\.12\],
+.bg-white\/\[0\.15\] {
+  background-color: #f1f5f9 !important;
+}
+
+.bg-black\/20,
+.bg-black\/30 {
+  background-color: #f8fafc !important;
+}
+
+/* Hover backgrounds */
+.hover\:bg-white\/\[0\.04\]:hover,
+.hover\:bg-white\/\[0\.06\]:hover,
+.hover\:bg-white\/\[0\.07\]:hover,
+.hover\:bg-white\/\[0\.08\]:hover,
+.hover\:bg-white\/\[0\.09\]:hover,
+.hover\:bg-white\/\[0\.12\]:hover,
+.hover\:bg-white\/\[0\.15\]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* 3. BORDER REMAPPING */
+.border-white\/\[0\.06\],
+.border-white\/\[0\.07\],
+.border-white\/\[0\.08\],
+.border-white\/\[0\.1\],
+.border-white\/\[0\.12\],
+.border-white\/\[0\.15\],
+.border-white\/\[0\.18\],
+.border-white\/\[0\.2\],
+.border-white\/10,
+.border-white\/15,
+.border-white\/20,
+.border-white\/25,
+.border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.hover\:border-white\/\[0\.16\]:hover,
+.hover\:border-white\/\[0\.18\]:hover,
+.hover\:border-white\/\[0\.22\]:hover {
+  border-color: rgba(0, 0, 0, 0.16) !important;
+}
+
+.divide-white\/\[0\.05\] > :not([hidden]) ~ :not([hidden]),
+.divide-white\/\[0\.08\] > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 4. GLASS PANEL & CARD ARCHITECTURE */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(0, 0, 0, 0.02);
-  border-radius: 24px;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03) !important;
+  border-radius: 24px !important;
+  color: #0f172a !important;
 }
 
 .glass-panel-subtle {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 20px !important;
+  color: #0f172a !important;
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.03);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: 24px;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.03) !important;
+  border-radius: 24px !important;
+  color: #0f172a !important;
 }
 
 .glass-card:hover {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.07);
-  transform: translateY(-2px);
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.06) !important;
 }
 
 .glass-card-interactive {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: 20px;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.03) !important;
+  border-radius: 20px !important;
 }
 
 .glass-card-interactive:hover {
-  background: #ffffff;
-  border-color: #B8F23D;
-  box-shadow: 0 12px 28px -4px rgba(184, 242, 61, 0.25);
+  border-color: #B8F23D !important;
+  box-shadow: 0 10px 24px -4px rgba(184, 242, 61, 0.25) !important;
 }
 
-.glass-floating {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(36px) saturate(190%);
-  -webkit-backdrop-filter: blur(36px) saturate(190%);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.15);
-  border-radius: 24px;
+/* 5. INPUT & SELECT FORMS */
+.glass-input {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
 }
 
-/* Button & Badge Classes */
+.glass-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.glass-input:focus {
+  outline: none !important;
+  border-color: #83c906 !important;
+  box-shadow: 0 0 0 3px rgba(184, 242, 61, 0.3) !important;
+}
+
+select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* 6. PRIMARY BUTTON */
 .glass-btn-primary {
-  background: #111827;
-  color: #B8F23D;
-  border: 1px solid transparent;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-  font-weight: 700;
-  transition: all 0.2s ease;
+  background: #111827 !important;
+  color: #B8F23D !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+  font-weight: 700 !important;
+  transition: all 0.2s ease !important;
+  border-radius: 16px !important;
 }
 
 .glass-btn-primary:hover {
-  background: #1f2937;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  background: #1f2937 !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
   transform: scale(1.02);
 }
 
 .glass-btn-primary:active {
   transform: scale(0.98);
-}
-
-.glass-btn-secondary {
-  background: rgba(255, 255, 255, 0.9);
-  color: #1e293b;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
-}
-
-.glass-btn-secondary:hover {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.15);
 }
 
 .saas-lime-badge {
