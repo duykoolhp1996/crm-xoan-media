@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { BookingStatus, PaymentStatus } from '../../types';
 import { VIETNAM_LOCATIONS, getDistrictsByCity } from '../../data/vietnamLocations';
@@ -7,9 +7,10 @@ import { X, Calendar, Camera, AlertTriangle, MapPin } from 'lucide-react';
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialDate?: string;
 }
 
-export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) => {
+export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, initialDate }) => {
   const { customers, servicePackages, photographers, addBooking, getPhotographerAvailability } = useApp();
 
   const initialCustomer = customers[0];
@@ -19,7 +20,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
 
   const [formData, setFormData] = useState({
     customerId: initialCustomer?.id || '',
-    shootDate: '2024-11-20',
+    shootDate: initialDate || '2024-11-20',
     startTime: '08:00',
     endTime: '17:00',
     city: initialCity,
@@ -33,6 +34,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
     makeupStaffId: '',
     notes: ''
   });
+
+  useEffect(() => {
+    if (initialDate) {
+      setFormData(prev => ({ ...prev, shootDate: initialDate }));
+    }
+  }, [initialDate, isOpen]);
 
   const availableDistricts = getDistrictsByCity(formData.city);
 
