@@ -19,6 +19,8 @@ import { MarketingReports } from './components/reports/MarketingReports';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 
+import { SaasDashboardApp } from './components/saas/SaasDashboardApp';
+
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
 
@@ -44,6 +46,16 @@ const MainContent: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  const [viewMode, setViewMode] = React.useState<'saas' | 'crm'>('saas');
+
+  if (viewMode === 'saas') {
+    return (
+      <AppProvider>
+        <SaasDashboardApp onSwitchToCrm={() => setViewMode('crm')} />
+      </AppProvider>
+    );
+  }
+
   return (
     <AppProvider>
       <div className="relative flex h-screen bg-[#08090c] text-neutral-100 overflow-hidden font-sans selection:bg-orange-500/30 selection:text-orange-200">
@@ -55,7 +67,7 @@ export const App: React.FC = () => {
 
         {/* Main Application Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <Header />
+          <Header onSwitchToSaas={() => setViewMode('saas')} />
           <MainContent />
         </div>
 

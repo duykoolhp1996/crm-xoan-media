@@ -12,7 +12,11 @@ import {
 } from 'lucide-react';
 import { NotificationDrawer } from './NotificationDrawer';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onSwitchToSaas?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onSwitchToSaas }) => {
   const {
     currentUser,
     currentRole,
@@ -173,6 +177,17 @@ export const Header: React.FC = () => {
             )}
           </button>
         </div>
+
+        {/* Chuyển sang SaaS Dashboard */}
+        {onSwitchToSaas && (
+          <button
+            onClick={onSwitchToSaas}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#B8F23D]/20 hover:bg-[#B8F23D]/30 border border-[#B8F23D]/50 text-[#B8F23D] text-xs font-bold transition-all shadow-sm active:scale-95"
+            title="Mở SaaS Business Analytics Dashboard"
+          >
+            <span>✦ SaaS Analytics</span>
+          </button>
+        )}
 
         {/* User Profile Pill */}
         <div className="flex items-center gap-2.5 pl-2 border-l border-white/[0.08]">

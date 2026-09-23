@@ -177,3 +177,86 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.28);
 }
+
+/* ========================================================
+   SaaS Analytics Dashboard: Minimal, Soft Glass & Lime Style
+   ======================================================== */
+.saas-canvas {
+  background-color: #f6f7f9;
+  color: #111827;
+  min-height: 100vh;
+}
+
+.saas-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.5rem; /* 24px */
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.saas-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 0, 0, 0.09);
+  box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.saas-card-static {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+}
+
+.saas-sidebar-glass {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+}
+
+.saas-lime-accent {
+  color: #B8F23D;
+}
+
+.saas-lime-bg {
+  background-color: #B8F23D;
+}
+
+.saas-lime-badge {
+  background: rgba(184, 242, 61, 0.22);
+  color: #244203;
+  border: 1px solid rgba(184, 242, 61, 0.55);
+}
+
+.saas-abstract-shape-1 {
+  position: absolute;
+  top: 5%;
+  right: 10%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184, 242, 61, 0.09) 0%, rgba(220, 252, 231, 0.04) 50%, transparent 75%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.saas-abstract-shape-2 {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(224, 231, 255, 0.4) 0%, rgba(243, 244, 246, 0.2) 60%, transparent 80%);
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
