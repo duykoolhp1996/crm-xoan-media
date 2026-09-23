@@ -170,26 +170,26 @@ export const FeedbackModule: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel p-5 sm:p-6 lg:p-8 rounded-3xl space-y-8 relative text-slate-100 font-sans selection:bg-orange-500 selection:text-white">
+    <div className="glass-panel p-5 sm:p-6 lg:p-8 rounded-3xl space-y-8 relative text-neutral-900 font-sans selection:bg-[#B8F23D] selection:text-neutral-950">
       {/* Top Header Section */}
-      <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 border-b border-neutral-800 pb-6">
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 border-b border-black/[0.06] pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-serif tracking-tight text-white font-medium">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900">
             Khoảnh khắc & Feedback từ các lớp
           </h1>
-          <p className="text-xs sm:text-sm text-neutral-400 mt-2 font-light max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-neutral-500 mt-2 font-normal max-w-2xl leading-relaxed">
             Những chia sẻ, khoảnh khắc xúc động và phản hồi chân thực từ các lớp trưởng sau buổi chụp cùng Xoắn Media.
           </p>
         </div>
 
         {/* View Switcher & Action & Apple Pill Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Apple Toolbar Icons Pill Bar (Chuẩn 100% như ảnh mẫu) */}
-          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800/90 p-1.5 rounded-full backdrop-blur-xl shadow-lg shadow-black/40">
+          {/* Apple Toolbar Icons Pill Bar */}
+          <div className="flex items-center gap-1.5 bg-neutral-100 border border-black/[0.06] p-1.5 rounded-full shadow-xs">
             {/* 1. Collaborator Icon */}
             <button
               onClick={() => alert('Thành viên cộng tác: Team Xoắn Media & Đại diện các lớp')}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-white transition-all shadow-xs"
               title="Người cộng tác"
             >
               <UserCheck className="w-4 h-4" />
@@ -198,7 +198,7 @@ export const FeedbackModule: React.FC = () => {
             {/* 2. Share Icon */}
             <button
               onClick={() => alert('Đã sao chép liên kết chia sẻ Khoảnh khắc & Feedback!')}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-white transition-all shadow-xs"
               title="Chia sẻ bộ ảnh"
             >
               <Upload className="w-4 h-4" />
@@ -207,6 +207,7 @@ export const FeedbackModule: React.FC = () => {
             {/* 3. Three Dots Action Menu (Apple Glassmorphism Popover Menu) */}
             <GlassActionMenu
               align="right"
+              triggerButtonClass="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-white transition-all shadow-xs"
               onScan={() => {
                 if (posts[0]?.images[0]) setSelectedImage(posts[0].images[0]);
               }}
@@ -247,30 +248,30 @@ export const FeedbackModule: React.FC = () => {
             {/* 4. Edit / Write New Icon */}
             <button
               onClick={() => setIsFeedbackModalOpen(true)}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-white transition-all shadow-xs"
               title="Tạo chia sẻ mới"
             >
               <SquarePen className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex bg-neutral-900 border border-neutral-800 p-1 rounded-xl text-xs font-medium">
+          <div className="flex bg-neutral-100 p-1 rounded-2xl text-xs font-semibold border border-black/[0.06]">
             <button
               onClick={() => setActiveTab('threads_feed')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl transition-all ${
                 activeTab === 'threads_feed'
-                  ? 'bg-neutral-800 text-white font-semibold shadow-sm'
-                  : 'text-neutral-400 hover:text-white'
+                  ? 'bg-white text-neutral-900 shadow-xs'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               Threads Social View
             </button>
             <button
               onClick={() => setActiveTab('crm_reviews')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl transition-all ${
                 activeTab === 'crm_reviews'
-                  ? 'bg-neutral-800 text-white font-semibold shadow-sm'
-                  : 'text-neutral-400 hover:text-white'
+                  ? 'bg-white text-neutral-900 shadow-xs'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               Quản Lý Review CRM ({feedbacks.length})
@@ -279,7 +280,7 @@ export const FeedbackModule: React.FC = () => {
 
           <button
             onClick={() => setIsFeedbackModalOpen(true)}
-            className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-orange-600/20 flex items-center gap-1.5"
+            className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-2xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" /> Thêm Phản Hồi
           </button>
@@ -456,51 +457,55 @@ export const FeedbackModule: React.FC = () => {
       {/* CHẾ ĐỘ 2: QUẢN LÝ REVIEW TRONG HỆ THỐNG CRM */}
       {activeTab === 'crm_reviews' && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {feedbacks.map((fb) => (
               <div
                 key={fb.id}
-                className="bg-neutral-900/90 border border-neutral-800 rounded-2xl p-5 space-y-3 flex flex-col justify-between"
+                className="bg-white border border-black/[0.08] rounded-3xl p-6 space-y-4 flex flex-col justify-between shadow-xs hover:shadow-md transition-all"
               >
                 <div>
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">{fb.className}</span>
-                        <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded-full">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-extrabold text-neutral-900">{fb.className}</span>
+                        <span className="text-[10px] bg-neutral-100 text-neutral-700 border border-black/[0.06] px-2.5 py-0.5 rounded-full font-semibold">
                           {fb.channel}
                         </span>
                         {fb.status === 'featured' && (
-                          <span className="text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold bg-[#B8F23D]/30 text-neutral-950 border border-[#B8F23D]/60 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                             ★ Ghim Website
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-neutral-400 mt-1">{fb.schoolName}</p>
+                      <p className="text-xs text-neutral-500 mt-1 font-medium">{fb.schoolName}</p>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-lg text-xs font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400" />
+                    <div className="flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-xl text-xs font-bold shrink-0">
+                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                       {fb.rating}.0
                     </div>
                   </div>
 
-                  <p className="mt-3 text-xs text-neutral-200 bg-neutral-950 p-3 rounded-xl border border-neutral-800/80 italic leading-relaxed">
+                  <p className="mt-3.5 text-xs text-neutral-700 bg-neutral-50 p-4 rounded-2xl border border-black/[0.05] italic leading-relaxed">
                     "{fb.comment}"
                   </p>
 
                   {fb.photographerMentioned && fb.photographerMentioned.length > 0 && (
-                    <p className="text-[11px] text-neutral-400 mt-2">
-                      📷 Thợ được khen: <span className="text-white font-semibold">{fb.photographerMentioned.join(', ')}</span>
+                    <p className="text-[11px] text-neutral-500 mt-2.5 font-medium">
+                      📷 Thợ được khen: <span className="text-neutral-900 font-bold">{fb.photographerMentioned.join(', ')}</span>
                     </p>
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-neutral-800 flex items-center justify-between text-[11px] text-neutral-500">
-                  <span>Gửi bởi: <strong className="text-neutral-300">{fb.customerName}</strong> ({fb.reviewerRole})</span>
+                <div className="pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-xs text-neutral-500">
+                  <span>Gửi bởi: <strong className="text-neutral-900">{fb.customerName}</strong> ({fb.reviewerRole})</span>
                   <button
                     onClick={() => updateFeedbackStatus(fb.id, fb.status === 'featured' ? 'approved' : 'featured')}
-                    className="text-orange-400 hover:underline font-bold"
+                    className={`font-bold transition-colors ${
+                      fb.status === 'featured'
+                        ? 'text-rose-600 hover:text-rose-700'
+                        : 'text-neutral-900 hover:text-emerald-700'
+                    }`}
                   >
                     {fb.status === 'featured' ? 'Bỏ Ghim' : 'Ghim Lên Showcase'}
                   </button>

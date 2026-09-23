@@ -115,12 +115,13 @@ export const GlassActionMenu: React.FC<GlassActionMenuProps> = ({
       {isOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`absolute top-full mt-2.5 z-50 w-64 rounded-[26px] p-2.5 backdrop-blur-3xl bg-neutral-900/80 border border-white/20 shadow-[0_24px_50px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)_inset] text-white animate-in fade-in zoom-in-95 duration-150 ${
+          className={`absolute top-full mt-2.5 z-50 w-64 rounded-[26px] p-2.5 backdrop-blur-3xl bg-neutral-900/95 border border-white/20 shadow-[0_24px_50px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)_inset] text-white keep-white animate-in fade-in zoom-in-95 duration-150 ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
           style={{
             backdropFilter: 'blur(30px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(30px) saturate(180%)'
+            WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+            color: '#ffffff'
           }}
         >
           {/* Hàng icon thao tác nhanh trên cùng (Quick Actions Bar) */}
@@ -131,10 +132,11 @@ export const GlassActionMenu: React.FC<GlassActionMenuProps> = ({
                 onScan ? onScan() : alert('Quét mã / Mở toàn màn hình');
                 setIsOpen(false);
               }}
-              className="p-2 rounded-xl hover:bg-white/15 text-white/90 hover:text-white transition-colors"
+              className="p-2 rounded-xl hover:bg-white/15 text-white transition-colors"
+              style={{ color: '#ffffff' }}
               title="Quét / Phóng to"
             >
-              <Scan className="w-5 h-5 stroke-[1.75]" />
+              <Scan className="w-5 h-5 stroke-[1.75]" style={{ color: '#ffffff' }} />
             </button>
 
             {/* Action 2: Pin / Ghim */}
@@ -145,12 +147,13 @@ export const GlassActionMenu: React.FC<GlassActionMenuProps> = ({
               }}
               className={`p-2 rounded-xl transition-colors ${
                 isPinned
-                  ? 'bg-orange-500/30 text-orange-400'
-                  : 'hover:bg-white/15 text-white/90 hover:text-white'
+                  ? 'bg-[#B8F23D]/20 text-[#B8F23D]'
+                  : 'hover:bg-white/15 text-white'
               }`}
+              style={{ color: isPinned ? '#B8F23D' : '#ffffff' }}
               title="Ghim nổi bật"
             >
-              <Pin className="w-5 h-5 stroke-[1.75]" />
+              <Pin className="w-5 h-5 stroke-[1.75]" style={{ color: isPinned ? '#B8F23D' : '#ffffff' }} />
             </button>
 
             {/* Action 3: Lock / Bảo mật duyệt */}
@@ -161,12 +164,13 @@ export const GlassActionMenu: React.FC<GlassActionMenuProps> = ({
               }}
               className={`p-2 rounded-xl transition-colors ${
                 isLocked
-                  ? 'bg-amber-500/30 text-amber-400'
-                  : 'hover:bg-white/15 text-white/90 hover:text-white'
+                  ? 'bg-amber-500/30 text-amber-300'
+                  : 'hover:bg-white/15 text-white'
               }`}
+              style={{ color: isLocked ? '#fcd34d' : '#ffffff' }}
               title="Khóa / Duyệt"
             >
-              <Lock className="w-5 h-5 stroke-[1.75]" />
+              <Lock className="w-5 h-5 stroke-[1.75]" style={{ color: isLocked ? '#fcd34d' : '#ffffff' }} />
             </button>
           </div>
 
@@ -186,12 +190,18 @@ export const GlassActionMenu: React.FC<GlassActionMenuProps> = ({
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all duration-150 ${
                     item.danger
-                      ? 'text-rose-400 hover:bg-rose-500/20 hover:text-rose-300'
-                      : 'text-white/90 hover:text-white hover:bg-white/15'
+                      ? '!text-rose-400 hover:bg-rose-500/20 hover:!text-rose-300'
+                      : '!text-white hover:bg-white/15'
                   }`}
+                  style={{ color: item.danger ? '#fb7185' : '#ffffff' }}
                 >
-                  <span className="tracking-wide">{item.label}</span>
-                  <Icon className="w-4 h-4 stroke-[1.75] opacity-80" />
+                  <span className="tracking-wide" style={{ color: item.danger ? '#fb7185' : '#ffffff' }}>
+                    {item.label}
+                  </span>
+                  <Icon
+                    className="w-4 h-4 stroke-[1.75]"
+                    style={{ color: item.danger ? '#fb7185' : '#ffffff', opacity: 0.85 }}
+                  />
                 </button>
               );
             })}
