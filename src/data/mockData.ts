@@ -1,0 +1,1205 @@
+import {
+  User,
+  Customer,
+  School,
+  SchoolClass,
+  Photographer,
+  Booking,
+  ServicePackage,
+  RemarketingSegment,
+  RemarketingCampaign,
+  RemarketingWorkflow,
+  Task,
+  ActivityLog,
+  SystemNotification,
+  ClassFeedback,
+  ClassMoment
+} from '../types';
+
+export const mockUsers: User[] = [
+  {
+    id: 'user-1',
+    name: 'Nguyễn Văn Quản Trị',
+    email: 'admin@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    role: 'admin',
+    phone: '0981112233'
+  },
+  {
+    id: 'user-2',
+    name: 'Lê Hoàng Sơn (Sales Lead)',
+    email: 'son.lh@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    role: 'sales',
+    phone: '0984556677'
+  },
+  {
+    id: 'user-3',
+    name: 'Phạm Thị Thảo (Marketing)',
+    email: 'thao.pt@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    role: 'marketing',
+    phone: '0978990011'
+  },
+  {
+    id: 'user-4',
+    name: 'Trần Minh Tuấn (Photographer)',
+    email: 'tuan.tm@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    role: 'photographer',
+    phone: '0912345678'
+  },
+  {
+    id: 'user-5',
+    name: 'Đặng Mai Linh (Operation Manager)',
+    email: 'linh.dm@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    role: 'manager',
+    phone: '0933221100'
+  }
+];
+
+export const mockServicePackages: ServicePackage[] = [
+  {
+    id: 'pkg-1',
+    name: 'Gói Kỷ Yếu BASIC (Tiết Kiệm)',
+    description: 'Chụp tại trường 1 buổi, bao gồm cử nhân, áo dài, chụp tập thể và chụp đơn cho từng thành viên.',
+    price: 3500000,
+    minStudents: 30,
+    durationHours: 4,
+    leadPhotographersNeeded: 1,
+    assistantsNeeded: 1,
+    makeupIncluded: false,
+    photoCountTotal: 400,
+    photoCountEdited: 50,
+    videoIncluded: false,
+    albumIncluded: false,
+    extraFeesNote: 'Thêm thợ phụ: 500k/buổi. Thuê flycam: 800k.',
+    status: 'active'
+  },
+  {
+    id: 'pkg-2',
+    name: 'Gói Kỷ Yếu STANDARD (Bán Chạy Nhất)',
+    description: 'Chụp cả ngày (Sáng tại trường + Chiều tại Hoàng Thành / Văn Miếu). Tặng trang phục cử nhân + áo cử nhân + vòng hoa đội đầu.',
+    price: 6800000,
+    minStudents: 35,
+    durationHours: 8,
+    leadPhotographersNeeded: 2,
+    assistantsNeeded: 1,
+    makeupIncluded: true,
+    photoCountTotal: 1000,
+    photoCountEdited: 100,
+    videoIncluded: false,
+    albumIncluded: false,
+    extraFeesNote: 'Đã bao gồm chi phí vé vào cổng di tích cho ekip.',
+    status: 'active'
+  },
+  {
+    id: 'pkg-3',
+    name: 'Gói Kỷ Yếu PREMIUM CONCEPT & DẠ TIỆC',
+    description: 'Chụp trường + Phim trường ngoại cảnh + Party Night (bột màu, pháo sáng, lửa trại). Bao gồm quay Video Highlight 4K + Flycam.',
+    price: 12500000,
+    minStudents: 40,
+    durationHours: 12,
+    leadPhotographersNeeded: 2,
+    assistantsNeeded: 2,
+    makeupIncluded: true,
+    photoCountTotal: 2500,
+    photoCountEdited: 200,
+    videoIncluded: true,
+    albumIncluded: true,
+    extraFeesNote: 'Trọn gói trang phục concept Retro, Cổ phục hoặc Harry Potter theo lựa chọn của lớp.',
+    status: 'active'
+  },
+  {
+    id: 'pkg-4',
+    name: 'Gói Kỷ Yếu VIP - CINEMATIC MEMORY',
+    description: 'Gói cao cấp nhất dành cho khối đại học và lớp chọn: 3 thợ chụp, 2 thợ quay flycam + gimbal, toàn bộ trang phục dạ tiệc & make up cao cấp.',
+    price: 18900000,
+    minStudents: 40,
+    durationHours: 14,
+    leadPhotographersNeeded: 3,
+    assistantsNeeded: 2,
+    makeupIncluded: true,
+    photoCountTotal: 4000,
+    photoCountEdited: 350,
+    videoIncluded: true,
+    albumIncluded: true,
+    extraFeesNote: 'Tặng 01 Photobook cao cấp ép lụa 50 trang cho lớp & 01 bản tin phỏng vấn lưu bút.',
+    status: 'active'
+  }
+];
+
+export const mockSchools: School[] = [
+  {
+    id: 'sch-1',
+    name: 'THPT Chuyên Hà Nội - Amsterdam',
+    city: 'Hà Nội',
+    district: 'Cầu Giấy',
+    type: 'THPT',
+    totalClassesBooked: 8,
+    status: 'active'
+  },
+  {
+    id: 'sch-2',
+    name: 'THPT Chu Văn An',
+    city: 'Hà Nội',
+    district: 'Tây Hồ',
+    type: 'THPT',
+    totalClassesBooked: 12,
+    status: 'active'
+  },
+  {
+    id: 'sch-3',
+    name: 'THPT Kim Liên',
+    city: 'Hà Nội',
+    district: 'Đống Đa',
+    type: 'THPT',
+    totalClassesBooked: 6,
+    status: 'active'
+  },
+  {
+    id: 'sch-4',
+    name: 'THPT Yên Hòa',
+    city: 'Hà Nội',
+    district: 'Cầu Giấy',
+    type: 'THPT',
+    totalClassesBooked: 5,
+    status: 'active'
+  },
+  {
+    id: 'sch-5',
+    name: 'Đại học Kinh tế Quốc Dân (NEU)',
+    city: 'Hà Nội',
+    district: 'Hai Bà Trưng',
+    type: 'Đại học',
+    totalClassesBooked: 14,
+    status: 'active'
+  },
+  {
+    id: 'sch-6',
+    name: 'Đại học Bách Khoa Hà Nội (HUST)',
+    city: 'Hà Nội',
+    district: 'Hai Bà Trưng',
+    type: 'Đại học',
+    totalClassesBooked: 10,
+    status: 'active'
+  },
+  {
+    id: 'sch-7',
+    name: 'Đại học Ngoại Thương (FTU)',
+    city: 'Hà Nội',
+    district: 'Đống Đa',
+    type: 'Đại học',
+    totalClassesBooked: 9,
+    status: 'active'
+  }
+];
+
+export const mockSchoolClasses: SchoolClass[] = [
+  {
+    id: 'cls-1',
+    schoolId: 'sch-1',
+    schoolName: 'THPT Chuyên Hà Nội - Amsterdam',
+    grade: 'Khối 12',
+    name: '12 Anh 1',
+    academicYear: '2023-2024',
+    studentCount: 38,
+    representativeName: 'Vũ Thùy Linh',
+    phone: '0912883344',
+    facebook: 'fb.com/linhvu.ams',
+    zalo: '0912883344',
+    status: 'booked'
+  },
+  {
+    id: 'cls-2',
+    schoolId: 'sch-2',
+    schoolName: 'THPT Chu Văn An',
+    grade: 'Khối 12',
+    name: '12 Toán 1',
+    academicYear: '2023-2024',
+    studentCount: 42,
+    representativeName: 'Trần Hải Nam',
+    phone: '0934112233',
+    facebook: 'fb.com/namtran.cva',
+    zalo: '0934112233',
+    status: 'booked'
+  },
+  {
+    id: 'cls-3',
+    schoolId: 'sch-5',
+    schoolName: 'Đại học Kinh tế Quốc Dân (NEU)',
+    grade: 'Năm 4',
+    name: 'Marketing K62B',
+    academicYear: '2020-2024',
+    studentCount: 52,
+    representativeName: 'Nguyễn Bích Phương',
+    phone: '0988776655',
+    facebook: 'fb.com/phuong.mkt',
+    zalo: '0988776655',
+    status: 'contacted'
+  }
+];
+
+export const mockPhotographers: Photographer[] = [
+  {
+    id: 'photo-1',
+    fullName: 'Trần Minh Tuấn',
+    phone: '0912345678',
+    email: 'tuan.tm@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hà Nội', 'Bắc Ninh', 'Hưng Yên'],
+    photographerType: 'Full-time',
+    experienceYears: 5,
+    skills: ['Chụp chính', 'Flycam', 'Chỉnh màu (Colorist)'],
+    equipmentList: ['Sony A7IV', 'Lens 24-70 GM II', 'Lens 85 f1.4 GM', 'DJI Mavic Air 3', 'Flash Godox V860III'],
+    status: 'busy',
+    ratePerShoot: 1200000,
+    rating: 4.95,
+    completedShootsCount: 142,
+    notes: 'Kỹ năng khuấy động không khí kỷ yếu cực tốt, ảnh màu trong trẻo.'
+  },
+  {
+    id: 'photo-2',
+    fullName: 'Lê Đức Anh (Alex)',
+    phone: '0945678901',
+    email: 'ducanh.photo@gmail.com',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hà Nội', 'Hải Phòng'],
+    photographerType: 'Freelancer',
+    experienceYears: 4,
+    skills: ['Chụp chính', 'Quay phim'],
+    equipmentList: ['Canon R6 Mark II', 'RF 28-70 f2', 'Canon 50 1.2', 'Gimbal Ronin RS3'],
+    status: 'available',
+    ratePerShoot: 1000000,
+    rating: 4.88,
+    completedShootsCount: 98,
+    notes: 'Phong cách chụp cảm xúc cinematic, chuyên concept hoàng hôn & dạ tiệc.'
+  },
+  {
+    id: 'photo-3',
+    fullName: 'Nguyễn Hải Đăng',
+    phone: '0977889900',
+    email: 'dang.nh@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hà Nội', 'Vĩnh Phúc', 'Thái Nguyên'],
+    photographerType: 'Full-time',
+    experienceYears: 3,
+    skills: ['Chụp chính', 'Chụp phụ'],
+    equipmentList: ['Sony A7III', 'Tamron 28-75 G2', 'Sony 85 f1.8', 'Godox AD200 Pro'],
+    status: 'available',
+    ratePerShoot: 800000,
+    rating: 4.82,
+    completedShootsCount: 76,
+    notes: 'Nhiệt huyết, chiều học sinh sinh viên, hỗ trợ tạo dáng nhiệt tình.'
+  },
+  {
+    id: 'photo-4',
+    fullName: 'Hoàng Thu Thảo',
+    phone: '0983112244',
+    email: 'thao.makeup@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hà Nội'],
+    photographerType: 'Đối tác Studio',
+    experienceYears: 4,
+    skills: ['Makeup'],
+    equipmentList: ['Cốp đồ trang điểm chuyên nghiệp Hàn Quốc & Thái Lan'],
+    status: 'available',
+    ratePerShoot: 600000,
+    rating: 4.92,
+    completedShootsCount: 110,
+    notes: 'Trang điểm phong cách tone trong trẻo Hàn Quốc phù hợp áo dài & kỷ yếu học sinh.'
+  },
+  {
+    id: 'photo-5',
+    fullName: 'Vũ Thành Đạt',
+    phone: '0966554433',
+    email: 'dat.flycam@gmail.com',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hà Nội', 'Hưng Yên', 'Hải Dương'],
+    photographerType: 'Freelancer',
+    experienceYears: 3,
+    skills: ['Flycam', 'Quay phim'],
+    equipmentList: ['DJI Inspire 2', 'DJI Mavic 3 Pro', 'Sony FX3 Cinema'],
+    status: 'busy',
+    ratePerShoot: 1500000,
+    rating: 4.98,
+    completedShootsCount: 85,
+    notes: 'Chuyên gia góc máy flycam xếp chữ đại tập thể kỷ yếu 100+ bạn.'
+  }
+];
+
+export const mockCustomers: Customer[] = [
+  {
+    id: 'cust-1',
+    name: 'Vũ Thùy Linh (Lớp trưởng)',
+    phone: '0912883344',
+    email: 'thuylinh.ams@gmail.com',
+    facebook: 'facebook.com/linhvu.ams',
+    zalo: '0912883344',
+    schoolName: 'THPT Chuyên Hà Nội - Amsterdam',
+    grade: 'Khối 12',
+    className: '12 Anh 1',
+    academicYear: '2023-2024',
+    city: 'Hà Nội',
+    district: 'Cầu Giấy',
+    region: 'Cầu Giấy, Hà Nội',
+    representativeRole: 'Lớp trưởng',
+    studentCount: 38,
+    serviceType: 'Kỷ yếu Concept & Dạ tiệc',
+    servicePackageId: 'pkg-3',
+    servicePackageName: 'Gói Kỷ Yếu PREMIUM CONCEPT & DẠ TIỆC',
+    concept: 'Vintage Retro 90s + Party Bột màu dạ tiệc',
+    expectedShootDate: '2024-11-20',
+    shootingLocations: ['Trường THPT Amsterdam', 'Hoàng Thành Thăng Long', 'Phim trường Santorini'],
+    expectedBudget: 13000000,
+    specialRequests: 'Cần góc máy Flycam xếp tên lớp 12A1 và quay clip TikTok bắt trend.',
+    notes: 'Khách hàng rất nhiệt tình, đã thống nhất 100% với phụ huynh và đã chuyển cọc.',
+    source: 'Facebook Ads',
+    campaignName: 'KyYeu_MuaThu_HaNoi_Ams',
+    utm: {
+      source: 'facebook',
+      medium: 'cpc',
+      campaign: 'mua_ky_yeu_2024',
+      adSet: 'nu_sinh_thpt_hanoi',
+      adId: 'ad_concept_retro'
+    },
+    pipelineStage: 'Đã đặt cọc',
+    assignedSalesId: 'user-2',
+    assignedSalesName: 'Lê Hoàng Sơn',
+    assignedCareStaffId: 'user-5',
+    assignedCareStaffName: 'Đặng Mai Linh',
+    totalRevenue: 12500000,
+    paidAmount: 5000000,
+    createdAt: '2024-10-15T08:30:00Z',
+    updatedAt: '2024-10-22T14:15:00Z',
+    lastContactedAt: '2024-10-22T14:00:00Z'
+  },
+  {
+    id: 'cust-2',
+    name: 'Trần Hải Nam (Bí thư)',
+    phone: '0934112233',
+    email: 'nam.cva@gmail.com',
+    facebook: 'facebook.com/namtran.cva',
+    zalo: '0934112233',
+    schoolName: 'THPT Chu Văn An',
+    grade: 'Khối 12',
+    className: '12 Toán 1',
+    academicYear: '2023-2024',
+    city: 'Hà Nội',
+    district: 'Tây Hồ',
+    region: 'Tây Hồ, Hà Nội',
+    representativeRole: 'Bí thư Đoàn',
+    studentCount: 42,
+    serviceType: 'Kỷ yếu Ngoại cảnh',
+    servicePackageId: 'pkg-2',
+    servicePackageName: 'Gói Kỷ Yếu STANDARD (Bán Chạy Nhất)',
+    concept: 'Thanh xuân vườn trường & Áo dài truyền thống',
+    expectedShootDate: '2024-11-22',
+    shootingLocations: ['Trường Chu Văn An', 'Văn Miếu Quốc Tử Giám'],
+    expectedBudget: 7000000,
+    specialRequests: 'Muốn có thêm ảnh đơn chụp profile xin học bổng du học.',
+    notes: 'Đã Booking, ngày chụp sắp tới, đang chuẩn bị ekip thợ.',
+    source: 'TikTok Ads',
+    campaignName: 'Trend_AoDai_ChuVanAn',
+    utm: {
+      source: 'tiktok',
+      medium: 'video_feed',
+      campaign: 'tiktok_trend_kyyeu_2024'
+    },
+    pipelineStage: 'Đã Booking',
+    assignedSalesId: 'user-2',
+    assignedSalesName: 'Lê Hoàng Sơn',
+    totalRevenue: 6800000,
+    paidAmount: 3000000,
+    createdAt: '2024-10-18T10:00:00Z',
+    updatedAt: '2024-10-25T09:30:00Z',
+    lastContactedAt: '2024-10-25T09:00:00Z'
+  },
+  {
+    id: 'cust-3',
+    name: 'Nguyễn Bích Phương',
+    phone: '0988776655',
+    email: 'phuong.mkt.neu@gmail.com',
+    facebook: 'facebook.com/bichphuong.neu',
+    zalo: '0988776655',
+    schoolName: 'Đại học Kinh tế Quốc Dân (NEU)',
+    grade: 'Năm 4',
+    className: 'Marketing K62B',
+    academicYear: '2020-2024',
+    city: 'Hà Nội',
+    district: 'Hai Bà Trưng',
+    region: 'Hai Bà Trưng, Hà Nội',
+    representativeRole: 'Lớp phó phong trào',
+    studentCount: 52,
+    serviceType: 'Kỷ yếu VIP Đại học',
+    servicePackageId: 'pkg-4',
+    servicePackageName: 'Gói Kỷ Yếu VIP - CINEMATIC MEMORY',
+    concept: 'Doanh nhân trẻ & Dạ tiệc sang trọng Glamour',
+    expectedShootDate: '2024-12-05',
+    shootingLocations: ['Tòa nhà Thế Kỷ NEU', 'Khách sạn Daewoo'],
+    expectedBudget: 20000000,
+    notes: 'Đã gửi báo giá chi tiết, lớp đang bàn bạc lấy biểu quyết giữa 2 gói.',
+    source: 'Referral',
+    campaignName: 'Cuu_Sinh_Vien_Gioi_Thieu',
+    pipelineStage: 'Đang thương lượng',
+    assignedSalesId: 'user-2',
+    assignedSalesName: 'Lê Hoàng Sơn',
+    totalRevenue: 18900000,
+    paidAmount: 0,
+    createdAt: '2024-10-20T11:20:00Z',
+    updatedAt: '2024-10-26T16:00:00Z',
+    lastContactedAt: '2024-10-26T15:30:00Z'
+  },
+  {
+    id: 'cust-4',
+    name: 'Đặng Tuấn Kiệt',
+    phone: '0971239874',
+    email: 'kiet.bk@gmail.com',
+    zalo: '0971239874',
+    schoolName: 'Đại học Bách Khoa Hà Nội (HUST)',
+    grade: 'Năm 4',
+    className: 'Kỹ thuật Cơ khí 02 - K64',
+    academicYear: '2019-2024',
+    city: 'Hà Nội',
+    district: 'Hai Bà Trưng',
+    region: 'Hai Bà Trưng, Hà Nội',
+    representativeRole: 'Lớp trưởng',
+    studentCount: 45,
+    serviceType: 'Kỷ yếu Basic',
+    servicePackageId: 'pkg-1',
+    servicePackageName: 'Gói Kỷ Yếu BASIC (Tiết Kiệm)',
+    concept: 'Kỷ yếu nam sinh Bách Khoa năng động',
+    expectedShootDate: '2024-11-28',
+    shootingLocations: ['Cổng Parabol Bách Khoa', 'Thư viện Tạ Quang Bửu'],
+    expectedBudget: 4000000,
+    notes: 'Mới điền form đăng ký trên landing page, cần gọi xác nhận tư vấn.',
+    source: 'Website',
+    campaignName: 'SEO_LandingPage_KỷYếu_BáchKhoa',
+    pipelineStage: 'New Lead',
+    assignedSalesId: 'user-2',
+    assignedSalesName: 'Lê Hoàng Sơn',
+    totalRevenue: 3500000,
+    paidAmount: 0,
+    createdAt: '2024-10-27T08:15:00Z',
+    updatedAt: '2024-10-27T08:15:00Z'
+  },
+  {
+    id: 'cust-5',
+    name: 'Hoàng Minh Châu',
+    phone: '0965432198',
+    facebook: 'facebook.com/chau.kimlien',
+    schoolName: 'THPT Kim Liên',
+    grade: 'Khối 12',
+    className: '12A6',
+    academicYear: '2023-2024',
+    city: 'Hà Nội',
+    district: 'Đống Đa',
+    region: 'Đống Đa, Hà Nội',
+    representativeRole: 'Bí thư',
+    studentCount: 40,
+    serviceType: 'Kỷ yếu Standard',
+    servicePackageId: 'pkg-2',
+    servicePackageName: 'Gói Kỷ Yếu STANDARD (Bán Chạy Nhất)',
+    concept: 'Thanh xuân vườn trường & Cổ phục Việt',
+    expectedShootDate: '2024-11-25',
+    shootingLocations: ['Trường Kim Liên', 'Văn Miếu'],
+    expectedBudget: 7000000,
+    notes: 'Đã tư vấn qua Zalo, lớp đang chờ thu tiền từ ban phụ huynh.',
+    source: 'Facebook Organic',
+    pipelineStage: 'Đang tư vấn',
+    assignedSalesId: 'user-2',
+    assignedSalesName: 'Lê Hoàng Sơn',
+    totalRevenue: 6800000,
+    paidAmount: 0,
+    createdAt: '2024-10-22T09:00:00Z',
+    updatedAt: '2024-10-26T10:00:00Z'
+  },
+  {
+    id: 'cust-6',
+    name: 'Bùi Gia Huy',
+    phone: '0904561234',
+    email: 'giahuy.ftu@gmail.com',
+    schoolName: 'Đại học Ngoại Thương (FTU)',
+    grade: 'Năm 4',
+    className: 'Kinh tế Quốc tế K59',
+    academicYear: '2020-2024',
+    city: 'Hà Nội',
+    district: 'Đống Đa',
+    region: 'Đống Đa, Hà Nội',
+    representativeRole: 'Trưởng ban đối ngoại',
+    studentCount: 48,
+    serviceType: 'Kỷ yếu VIP',
+    servicePackageId: 'pkg-4',
+    servicePackageName: 'Gói Kỷ Yếu VIP - CINEMATIC MEMORY',
+    concept: 'Dạ tiệc Hoàng Gia (Royal Prom)',
+    expectedShootDate: '2024-10-10',
+    shootingLocations: ['FTU Campus', 'Trung tâm Hội nghị Quốc Gia'],
+    expectedBudget: 19000000,
+    notes: 'Buổi chụp hoàn tất mỹ mãn, đã trả đủ toàn bộ album photobook và video phóng sự 4K.',
+    source: 'Referral',
+    pipelineStage: 'Hoàn thành',
+    assignedSalesId: 'user-2',
+    assignedSalesName: 'Lê Hoàng Sơn',
+    totalRevenue: 18900000,
+    paidAmount: 18900000,
+    createdAt: '2024-09-01T10:00:00Z',
+    updatedAt: '2024-10-20T17:00:00Z'
+  },
+  {
+    id: 'cust-7',
+    name: 'Phan Thùy Trang',
+    phone: '0943210987',
+    schoolName: 'THPT Yên Hòa',
+    grade: 'Khối 12',
+    className: '12D2',
+    academicYear: '2023-2024',
+    city: 'Hà Nội',
+    district: 'Cầu Giấy',
+    region: 'Cầu Giấy, Hà Nội',
+    representativeRole: 'Lớp trưởng',
+    studentCount: 41,
+    serviceType: 'Kỷ yếu Standard',
+    servicePackageId: 'pkg-2',
+    servicePackageName: 'Gói Kỷ Yếu STANDARD (Bán Chạy Nhất)',
+    concept: 'Áo dài trắng & Ném bột màu',
+    shootingLocations: ['Trường THPT Yên Hòa', 'Công viên Cầu Giấy'],
+    expectedBudget: 7000000,
+    notes: 'Lớp chọn studio khác giá rẻ hơn, lý do kinh phí hạn hẹp.',
+    source: 'TikTok',
+    pipelineStage: 'Lost',
+    assignedSalesId: 'user-2',
+    assignedSalesName: 'Lê Hoàng Sơn',
+    totalRevenue: 6800000,
+    paidAmount: 0,
+    createdAt: '2024-10-05T14:20:00Z',
+    updatedAt: '2024-10-12T16:00:00Z'
+  }
+];
+
+export const mockBookings: Booking[] = [
+  {
+    id: 'bk-1',
+    code: 'BK-2024-001',
+    customerId: 'cust-1',
+    customerName: 'Vũ Thùy Linh (12 Anh 1 - THPT Amsterdam)',
+    schoolName: 'THPT Chuyên Hà Nội - Amsterdam',
+    className: '12 Anh 1',
+    shootDate: '2024-11-20',
+    startTime: '07:30',
+    endTime: '19:30',
+    city: 'Hà Nội',
+    district: 'Cầu Giấy',
+    location: 'Sáng THPT Amsterdam -> Chiều Hoàng Thành Thăng Long -> Tối Phim Trường Santorini Yên Sở',
+    studentCount: 38,
+    packageId: 'pkg-3',
+    packageName: 'Gói Kỷ Yếu PREMIUM CONCEPT & DẠ TIỆC',
+    totalAmount: 12500000,
+    depositAmount: 5000000,
+    remainingAmount: 7500000,
+    paymentStatus: 'Đã cọc',
+    bookingStatus: 'Đã đặt cọc',
+    assignments: {
+      leadPhotographerId: 'photo-1',
+      leadPhotographerName: 'Trần Minh Tuấn',
+      assistantPhotographerIds: ['photo-3'],
+      assistantNames: ['Nguyễn Hải Đăng'],
+      videographerId: 'photo-5',
+      videographerName: 'Vũ Thành Đạt (Flycam)',
+      makeupStaffId: 'photo-4',
+      makeupStaffName: 'Hoàng Thu Thảo'
+    },
+    notes: 'Concept Retro 90s + Tối có đốt lửa trại và tiệc bột màu dạ tiệc. Ekip chú ý chuẩn bị máy quay ban đêm.',
+    createdAt: '2024-10-22T14:15:00Z',
+    updatedAt: '2024-10-22T14:15:00Z'
+  },
+  {
+    id: 'bk-2',
+    code: 'BK-2024-002',
+    customerId: 'cust-2',
+    customerName: 'Trần Hải Nam (12 Toán 1 - Chu Văn An)',
+    schoolName: 'THPT Chu Văn An',
+    className: '12 Toán 1',
+    shootDate: '2024-11-20', // CÙNG NGÀY 2024-11-20 VỚI BK-1 ĐỂ DEMO CẢNH BÁO TRÙNG THỢ HOẶC LỊCH SÁT
+    startTime: '08:00',
+    endTime: '17:00',
+    city: 'Hà Nội',
+    district: 'Tây Hồ',
+    location: 'Trường Chu Văn An + Văn Miếu Quốc Tử Giám',
+    studentCount: 42,
+    packageId: 'pkg-2',
+    packageName: 'Gói Kỷ Yếu STANDARD (Bán Chạy Nhất)',
+    totalAmount: 6800000,
+    depositAmount: 3000000,
+    remainingAmount: 3800000,
+    paymentStatus: 'Đã cọc',
+    bookingStatus: 'Đã xác nhận',
+    assignments: {
+      // Giả sử bị gán photo-1 (Trần Minh Tuấn) để kích hoạt CẢNH BÁO TRÙNG LỊCH THỢ!
+      leadPhotographerId: 'photo-1',
+      leadPhotographerName: 'Trần Minh Tuấn (⚠️ Trùng Lịch!)',
+      assistantPhotographerIds: [],
+      assistantNames: []
+    },
+    notes: 'Lịch trùng với BK-1, hệ thống đã phát hiện cảnh báo xung đột!',
+    createdAt: '2024-10-25T09:30:00Z',
+    updatedAt: '2024-10-25T09:30:00Z'
+  },
+  {
+    id: 'bk-3',
+    code: 'BK-2024-003',
+    customerId: 'cust-6',
+    customerName: 'Bùi Gia Huy (Kinh tế Quốc tế K59 FTU)',
+    schoolName: 'Đại học Ngoại Thương (FTU)',
+    className: 'Kinh tế Quốc tế K59',
+    shootDate: '2024-10-10',
+    startTime: '08:00',
+    endTime: '21:00',
+    city: 'Hà Nội',
+    district: 'Đống Đa',
+    location: 'Khuôn viên FTU + Khách sạn Sheraton',
+    studentCount: 48,
+    packageId: 'pkg-4',
+    packageName: 'Gói Kỷ Yếu VIP - CINEMATIC MEMORY',
+    totalAmount: 18900000,
+    depositAmount: 18900000,
+    remainingAmount: 0,
+    paymentStatus: 'Đã thanh toán đủ',
+    bookingStatus: 'Hoàn thành',
+    assignments: {
+      leadPhotographerId: 'photo-2',
+      leadPhotographerName: 'Lê Đức Anh',
+      videographerId: 'photo-5',
+      videographerName: 'Vũ Thành Đạt'
+    },
+    notes: 'Buổi chụp hoàn tất mỹ mãn, khách chấm 5 sao trên fanpage.',
+    createdAt: '2024-09-10T09:00:00Z',
+    updatedAt: '2024-10-20T17:00:00Z'
+  },
+  {
+    id: 'bk-4',
+    code: 'BK-2024-004',
+    customerId: 'cust-5',
+    customerName: 'Hoàng Minh Châu (12A6 Kim Liên)',
+    schoolName: 'THPT Kim Liên',
+    className: '12A6',
+    shootDate: '2024-11-25',
+    startTime: '08:00',
+    endTime: '16:30',
+    city: 'Hà Nội',
+    district: 'Đống Đa',
+    location: 'Trường THPT Kim Liên & Công viên Yên Sở',
+    studentCount: 40,
+    packageId: 'pkg-2',
+    packageName: 'Gói Kỷ Yếu STANDARD',
+    totalAmount: 6800000,
+    depositAmount: 0,
+    remainingAmount: 6800000,
+    paymentStatus: 'Chưa cọc',
+    bookingStatus: 'Chờ xác nhận',
+    assignments: {}, // Chưa phân công thợ (để kích hoạt cảnh báo Unassigned Photographer)
+    notes: 'Cảnh báo: Chưa phân công Photographer dù lịch chụp sắp đến!',
+    createdAt: '2024-10-26T10:00:00Z',
+    updatedAt: '2024-10-26T10:00:00Z'
+  }
+];
+
+export const mockRemarketingSegments: RemarketingSegment[] = [
+  {
+    id: 'seg-1',
+    name: 'Lead > 3 ngày chưa Booking',
+    description: 'Khách hàng mới tiếp cận nhưng sau 72h chưa chốt gói hoặc chưa chuyển cọc.',
+    targetCriteria: 'created_at <= NOW() - INTERVAL 3 DAYS AND status NOT IN (Đã cọc, Đã Booking)',
+    customerCount: 18,
+    createdAt: '2024-10-01'
+  },
+  {
+    id: 'seg-2',
+    name: 'Đã báo giá nhưng chưa cọc',
+    description: 'Các lớp đã nhận bảng báo giá chi tiết, cần kích thích ra quyết định bằng quà tặng/ưu đãi.',
+    targetCriteria: 'pipeline_stage = Đã gửi báo giá AND deposit = 0',
+    customerCount: 12,
+    createdAt: '2024-10-05'
+  },
+  {
+    id: 'seg-3',
+    name: 'Khách hàng cũ (Đã hoàn thành)',
+    description: 'Các lớp đã chụp xong, chăm sóc để bán thêm dịch vụ ảnh tốt nghiệp gia đình hoặc giới thiệu khóa dưới.',
+    targetCriteria: 'pipeline_stage = Hoàn thành',
+    customerCount: 45,
+    createdAt: '2024-09-15'
+  },
+  {
+    id: 'seg-4',
+    name: 'Khách hàng Lost > 30 ngày',
+    description: 'Những lead từng từ chối, gửi khảo sát và coupon giảm giá mùa kỷ yếu sau.',
+    targetCriteria: 'pipeline_stage = Lost AND updated_at <= NOW() - 30 DAYS',
+    customerCount: 8,
+    createdAt: '2024-10-10'
+  },
+  {
+    id: 'seg-5',
+    name: 'Khách VIP Giá trị cao (>15 Triệu)',
+    description: 'Các khối đại học & trường quốc tế chi tiêu lớn, gửi quà tri ân photobook mini.',
+    targetCriteria: 'total_revenue >= 15000000',
+    customerCount: 14,
+    createdAt: '2024-10-12'
+  }
+];
+
+export const mockRemarketingCampaigns: RemarketingCampaign[] = [
+  {
+    id: 'camp-1',
+    name: 'Ưu đãi Đặt Cọc Sớm - Tặng Gói Flycam 4K',
+    campaignType: 'Chăm sóc Lead nguội',
+    segmentId: 'seg-2',
+    segmentName: 'Đã báo giá nhưng chưa cọc',
+    channel: 'Zalo',
+    startDate: '2024-10-25',
+    endDate: '2024-11-10',
+    content: 'Chào bạn! Xoắn Media đang có ưu đãi độc quyền cho lớp mình: Chốt cọc trong tuần này tặng ngay 01 buổi quay Flycam góc rộng trị giá 1.500.000đ!',
+    offer: 'Tặng miễn phí 100% gói Flycam 4K + 01 Clip TikTok Highlight',
+    budget: 3000000,
+    spent: 1250000,
+    reach: 120,
+    leadsGenerated: 15,
+    status: 'Running'
+  },
+  {
+    id: 'camp-2',
+    name: 'Tri Ân Khóa Cũ - Giới Thiệu Khóa Dưới Nhận 500k',
+    campaignType: 'Tri ân khách hàng cũ',
+    segmentId: 'seg-3',
+    segmentName: 'Khách hàng cũ (Đã hoàn thành)',
+    channel: 'SMS',
+    startDate: '2024-10-15',
+    endDate: '2024-11-30',
+    content: 'Xoắn Media cảm ơn bạn đã đồng hành! Giới thiệu ngay lớp khóa dưới đặt lịch chụp kỷ yếu để nhận hoa hồng 500.000đ/lớp vào tài khoản.',
+    offer: 'Thưởng 500k tiền mặt hoặc Voucher chụp ảnh tốt nghiệp',
+    budget: 2000000,
+    spent: 800000,
+    reach: 340,
+    leadsGenerated: 22,
+    status: 'Running'
+  },
+  {
+    id: 'camp-3',
+    name: 'Retargeting Facebook - Bộ Sưu Tập Concept Kỷ Yếu 2024',
+    campaignType: 'Khuyến mãi mùa kỷ yếu',
+    segmentId: 'seg-1',
+    segmentName: 'Lead > 3 ngày chưa Booking',
+    channel: 'Facebook',
+    startDate: '2024-10-01',
+    endDate: '2024-11-15',
+    content: 'Video show ảnh concept Retro 90s, Cổ phục Việt và Dạ tiệc Prom Night cực cháy của học sinh Hà Nội.',
+    offer: 'Giảm ngay 10% gói Premium cho 20 lớp đầu tiên',
+    budget: 15000000,
+    spent: 9800000,
+    reach: 48000,
+    leadsGenerated: 64,
+    status: 'Running'
+  }
+];
+
+export const mockWorkflows: RemarketingWorkflow[] = [
+  {
+    id: 'wf-1',
+    name: 'Workflow 1: Chăm sóc Lead chưa Booking sau 3 ngày',
+    description: 'Tự động gửi tin nhắn Zalo kèm portfolio sau 3 ngày, nếu không phản hồi thì tạo Task cho Sales gọi điện.',
+    triggerEvent: 'Lead mới không chuyển đổi sau 72h',
+    isActive: true,
+    steps: [
+      {
+        id: 's1',
+        title: 'Kích hoạt',
+        type: 'trigger',
+        description: 'Lead ở trạng thái "New Lead" hoặc "Đang tư vấn" > 3 ngày'
+      },
+      {
+        id: 's2',
+        title: 'Chờ 2 giờ',
+        type: 'delay',
+        description: 'Chờ đến khung giờ vàng (11:30 hoặc 19:30)'
+      },
+      {
+        id: 's3',
+        title: 'Gửi Tin nhắn Zalo Portfolio',
+        type: 'action',
+        description: 'Tự động gửi bộ ảnh mẫu theo Concept khách quan tâm qua Zalo ZNS'
+      },
+      {
+        id: 's4',
+        title: 'Kiểm tra phản hồi sau 48h',
+        type: 'condition',
+        description: 'Khách hàng có đọc tin hoặc trả lời không?'
+      },
+      {
+        id: 's5',
+        title: 'Tạo Task cho Sales gọi lại',
+        type: 'action',
+        description: 'Giao việc trực tiếp cho Sales phụ trách: Gọi tư vấn hỗ trợ giải đáp thắc mắc của lớp'
+      }
+    ]
+  },
+  {
+    id: 'wf-2',
+    name: 'Workflow 2: Bám đuổi Báo giá chưa Cọc (Chốt Sales)',
+    description: 'Gửi bảng so sánh quyền lợi sau 24h, sau 3 ngày gửi Offer Flycam/Photobook.',
+    triggerEvent: 'Khách nhận báo giá nhưng chưa cọc',
+    isActive: true,
+    steps: [
+      {
+        id: 's2-1',
+        title: 'Kích hoạt',
+        type: 'trigger',
+        description: 'Khách chuyển sang "Đã gửi báo giá"'
+      },
+      {
+        id: 's2-2',
+        title: 'Chờ 24 Giờ',
+        type: 'delay',
+        description: 'Để khách có thời gian họp bàn cùng tập thể lớp'
+      },
+      {
+        id: 's2-3',
+        title: 'Follow-up nhẹ nhàng',
+        type: 'action',
+        description: 'Gửi tin nhắn: "Lớp mình đã chốt được ngày và concept chưa, bên em hỗ trợ giữ lịch cho lớp nhé"'
+      },
+      {
+        id: 's2-4',
+        title: 'Gửi Offer Đặc Biệt sau 3 ngày',
+        type: 'action',
+        description: 'Tặng thêm 01 thợ chụp phụ hoặc nâng cấp photobook nếu chốt trong 48h'
+      }
+    ]
+  },
+  {
+    id: 'wf-3',
+    name: 'Workflow 3: Chăm sóc Khách hàng cũ & Bán chéo (Upsell)',
+    description: 'Sau khi hoàn thành 6 tháng, gửi tin chúc mừng tốt nghiệp và ưu đãi cho khóa sau.',
+    triggerEvent: 'Booking hoàn thành đạt 180 ngày',
+    isActive: false,
+    steps: [
+      {
+        id: 's3-1',
+        title: 'Kích hoạt',
+        type: 'trigger',
+        description: 'Khách hàng đã hoàn thành buổi chụp 6 tháng'
+      },
+      {
+        id: 's3-2',
+        title: 'Gửi email / Zalo chúc mừng & Tri ân',
+        type: 'action',
+        description: 'Kèm mã Voucher 10% cho dịch vụ chụp ảnh gia đình / họp lớp'
+      }
+    ]
+  }
+];
+
+export const mockTasks: Task[] = [
+  {
+    id: 'task-1',
+    title: 'Gọi điện chốt cọc cho lớp 12 Anh 1 Ams',
+    customerId: 'cust-1',
+    customerName: 'Vũ Thùy Linh',
+    schoolClass: '12 Anh 1 - THPT Chuyên Hà Nội - Amsterdam',
+    assignedToId: 'user-2',
+    assignedToName: 'Lê Hoàng Sơn',
+    dueDate: '2024-10-28',
+    dueTime: '10:00',
+    priority: 'urgent',
+    taskType: 'Follow-up',
+    status: 'pending',
+    note: 'Lớp chuẩn bị họp phụ huynh để thống nhất thu cọc đợt 1.',
+    createdAt: '2024-10-25T08:00:00Z'
+  },
+  {
+    id: 'task-2',
+    title: 'Liên hệ thợ phụ cho buổi chụp Chu Văn An',
+    customerId: 'cust-2',
+    customerName: 'Trần Hải Nam',
+    schoolClass: '12 Toán 1 - THPT Chu Văn An',
+    assignedToId: 'user-2',
+    assignedToName: 'Lê Hoàng Sơn',
+    dueDate: '2024-10-28',
+    dueTime: '14:30',
+    priority: 'high',
+    taskType: 'Xác nhận Booking',
+    status: 'pending',
+    note: 'Cần phân công thêm 01 thợ chụp phụ và điều phối xe đưa đón ekip.',
+    createdAt: '2024-10-26T09:00:00Z'
+  },
+  {
+    id: 'task-3',
+    title: 'Gửi bản demo Layout Album Photobook cho FTU K59',
+    customerId: 'cust-6',
+    customerName: 'Bùi Gia Huy',
+    schoolClass: 'Kinh tế Quốc tế K59 - ĐH Ngoại Thương',
+    assignedToId: 'user-5',
+    assignedToName: 'Đặng Mai Linh',
+    dueDate: '2024-10-29',
+    priority: 'medium',
+    taskType: 'Chăm sóc khách hàng',
+    status: 'pending',
+    note: 'Gửi file PDF cho ban đại diện kiểm duyệt tên sinh viên trước khi in ấn hàng loạt.',
+    createdAt: '2024-10-26T14:00:00Z'
+  },
+  {
+    id: 'task-4',
+    title: 'Gọi tư vấn Lead mới: 12A6 Kim Liên',
+    customerId: 'cust-5',
+    customerName: 'Hoàng Minh Châu',
+    schoolClass: '12A6 - THPT Kim Liên',
+    assignedToId: 'user-2',
+    assignedToName: 'Lê Hoàng Sơn',
+    dueDate: '2024-10-28',
+    dueTime: '16:00',
+    priority: 'high',
+    taskType: 'Gọi điện',
+    status: 'pending',
+    note: 'Khách quan tâm concept Cổ phục Việt và chụp tại Văn Miếu.',
+    createdAt: '2024-10-27T08:30:00Z'
+  }
+];
+
+export const mockActivityLogs: ActivityLog[] = [
+  {
+    id: 'act-1',
+    customerId: 'cust-1',
+    type: 'lead_created',
+    title: 'Lead mới từ Facebook Ads',
+    description: 'Vũ Thùy Linh điền form đăng ký từ chiến dịch "KyYeu_MuaThu_HaNoi_Ams".',
+    performedByName: 'Hệ thống Ads',
+    createdAt: '2024-10-15T08:30:00Z'
+  },
+  {
+    id: 'act-2',
+    customerId: 'cust-1',
+    type: 'call',
+    title: 'Cuộc gọi tư vấn 15 phút',
+    description: 'Sales Lê Hoàng Sơn đã gọi điện thoại trao đổi về số lượng học sinh 38 bạn, tư vấn concept Retro 90s và gói Premium.',
+    performedByName: 'Lê Hoàng Sơn',
+    createdAt: '2024-10-15T09:45:00Z'
+  },
+  {
+    id: 'act-3',
+    customerId: 'cust-1',
+    type: 'quote_sent',
+    title: 'Đã gửi báo giá chi tiết qua Zalo',
+    description: 'Gửi bảng báo giá Gói Premium Concept kèm phụ lục trang phục phụ kiện và quà tặng Photobook.',
+    performedByName: 'Lê Hoàng Sơn',
+    createdAt: '2024-10-16T11:00:00Z'
+  },
+  {
+    id: 'act-4',
+    customerId: 'cust-1',
+    type: 'deposit_paid',
+    title: 'Nhận cọc 5.000.000đ',
+    description: 'Khách chuyển khoản cọc thành công qua ngân hàng Techcombank. Đã cập nhật trạng thái "Đã cọc".',
+    performedByName: 'Kế toán / Mai Linh',
+    createdAt: '2024-10-22T14:15:00Z'
+  },
+  {
+    id: 'act-5',
+    customerId: 'cust-1',
+    type: 'photographer_assigned',
+    title: 'Phân công Ekip Chụp',
+    description: 'Đã gán: Trần Minh Tuấn (Chụp chính), Nguyễn Hải Đăng (Chụp phụ), Vũ Thành Đạt (Flycam), Hoàng Thu Thảo (Makeup).',
+    performedByName: 'Đặng Mai Linh',
+    createdAt: '2024-10-23T10:00:00Z'
+  }
+];
+
+export const mockNotifications: SystemNotification[] = [
+  {
+    id: 'notif-1',
+    type: 'conflict',
+    title: '⚠️ CẢNH BÁO TRÙNG LỊCH THỢ!',
+    message: 'Photographer Trần Minh Tuấn đang được phân công cho 2 đơn Booking (BK-2024-001 và BK-2024-002) trong cùng ngày 20/11/2024!',
+    bookingId: 'bk-2',
+    severity: 'danger',
+    timestamp: '10 phút trước',
+    read: false
+  },
+  {
+    id: 'notif-2',
+    type: 'unassigned',
+    title: '⚠️ ĐƠN BOOKING CHƯA CÓ THỢ',
+    message: 'Booking BK-2024-004 (12A6 Kim Liên) dự kiến ngày 25/11 nhưng chưa được gán Photographer chính.',
+    bookingId: 'bk-4',
+    severity: 'warning',
+    timestamp: '25 phút trước',
+    read: false
+  },
+  {
+    id: 'notif-3',
+    type: 'new_lead',
+    title: '🎉 LEAD MỚI TỪ WEBSITE',
+    message: 'Lớp Kỹ thuật Cơ khí K64 - Đại học Bách Khoa vừa đăng ký tư vấn gói Kỷ yếu Basic.',
+    customerId: 'cust-4',
+    severity: 'info',
+    timestamp: '1 giờ trước',
+    read: false
+  },
+  {
+    id: 'notif-4',
+    type: 'due_task',
+    title: '⏰ TASK CẦN LÀM HÔM NAY',
+    message: 'Lê Hoàng Sơn có 3 cuộc gọi follow-up cần hoàn thành trước 17:00 chiều nay.',
+    severity: 'info',
+    timestamp: '2 giờ trước',
+    read: true
+  }
+];
+
+export const mockFeedbacks: ClassFeedback[] = [
+  {
+    id: 'fb-1',
+    customerId: 'cust-1',
+    customerName: 'Vũ Thùy Linh',
+    schoolName: 'THPT Chuyên Hà Nội - Amsterdam',
+    className: '12 Anh 1',
+    bookingId: 'bk-1',
+    rating: 5,
+    aspects: {
+      photographerCrew: 5,
+      photoQuality: 5,
+      attitude: 5,
+      deliverySpeed: 5
+    },
+    comment: 'Anh Tuấn và ekip Xoắn Media siêu siêu có tâm luôn ạ! Lớp em ai cũng khen thợ nhiệt tình, tạo dáng cho từng bạn rất tự nhiên. Đoạn đốt lửa trại tối và tiệc bột màu cháy hết mình, ảnh trả về màu vintage 90s đẹp mê ly!',
+    reviewerRole: 'Lớp trưởng 12 Anh 1',
+    photographerMentioned: ['Trần Minh Tuấn', 'Vũ Thành Đạt (Flycam)'],
+    screenshotUrl: 'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=500&auto=format&fit=crop&q=80',
+    channel: 'Zalo',
+    status: 'featured',
+    createdAt: '2024-11-23T10:30:00Z'
+  },
+  {
+    id: 'fb-2',
+    customerId: 'cust-6',
+    customerName: 'Bùi Gia Huy',
+    schoolName: 'Đại học Ngoại Thương (FTU)',
+    className: 'Kinh tế Quốc tế K59',
+    bookingId: 'bk-3',
+    rating: 5,
+    aspects: {
+      photographerCrew: 5,
+      photoQuality: 5,
+      attitude: 5,
+      deliverySpeed: 4
+    },
+    comment: 'Gói VIP Cinematic Memory của Xoắn Media thực sự đẳng cấp. Photobook in bìa cứng ép lụa sang trọng, clip phóng sự 4K chiếu lên tiệc Prom ai cũng xúc động rơi nước mắt. Cảm ơn anh Alex Đức Anh đã kiên nhẫn phục vụ lớp đến tận 9h tối!',
+    reviewerRole: 'Trưởng ban đối ngoại K59 FTU',
+    photographerMentioned: ['Lê Đức Anh (Alex)', 'Vũ Thành Đạt'],
+    screenshotUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500&auto=format&fit=crop&q=80',
+    channel: 'Facebook',
+    status: 'featured',
+    createdAt: '2024-10-22T15:00:00Z'
+  },
+  {
+    id: 'fb-3',
+    customerId: 'cust-2',
+    customerName: 'Trần Hải Nam',
+    schoolName: 'THPT Chu Văn An',
+    className: '12 Toán 1',
+    bookingId: 'bk-2',
+    rating: 4.8,
+    aspects: {
+      photographerCrew: 5,
+      photoQuality: 5,
+      attitude: 5,
+      deliverySpeed: 4
+    },
+    comment: 'Ekip chụp ở Văn Miếu hỗ trợ trang phục áo dài và cử nhân rất chu đáo. Chị Thảo makeup cực kỳ nhẹ nhàng trong trẻo đúng style học sinh. 10 điểm cho sự đúng giờ!',
+    reviewerRole: 'Bí thư 12 Toán 1',
+    photographerMentioned: ['Hoàng Thu Thảo (Makeup)', 'Trần Minh Tuấn'],
+    channel: 'Google Review',
+    status: 'approved',
+    createdAt: '2024-11-21T09:15:00Z'
+  },
+  {
+    id: 'fb-4',
+    customerId: 'cust-5',
+    customerName: 'Hoàng Minh Châu',
+    schoolName: 'THPT Kim Liên',
+    className: '12A6',
+    rating: 5,
+    aspects: {
+      photographerCrew: 5,
+      photoQuality: 5,
+      attitude: 5,
+      deliverySpeed: 5
+    },
+    comment: 'Dù lớp đông và nhiều bạn nam hơi nghịch nhưng anh Hải Đăng vẫn khuấy động tạo trò chơi chụp cực nhộn. Rất hài lòng về dịch vụ của Xoắn Media!',
+    reviewerRole: 'Đại diện lớp 12A6',
+    photographerMentioned: ['Nguyễn Hải Đăng'],
+    channel: 'Form Khảo Sát',
+    status: 'approved',
+    createdAt: '2024-11-26T16:20:00Z'
+  }
+];
+
+export const mockMoments: ClassMoment[] = [
+  {
+    id: 'moment-1',
+    customerId: 'cust-1',
+    schoolName: 'THPT Chuyên Hà Nội - Amsterdam',
+    className: '12 Anh 1',
+    concept: 'Vintage Retro 90s & Dạ Tiệc Bột Màu',
+    title: 'Thanh Xuân Rực Rỡ 12 Anh 1 Ams - Kỷ Niệm Dưới Mái Trường',
+    coverImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&auto=format&fit=crop&q=80',
+    samplePhotos: [
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80'
+    ],
+    totalPhotosCount: 1450,
+    albumDriveLink: 'https://drive.google.com/drive/folders/xoanmedia-12a1-ams-demo',
+    tiktokVideoUrl: 'https://tiktok.com/@xoanmedia/video/kyyeu_ams_12a1',
+    photographerName: 'Trần Minh Tuấn',
+    shootingDate: '20/11/2024',
+    likesCount: 1240,
+    featured: true
+  },
+  {
+    id: 'moment-2',
+    customerId: 'cust-6',
+    schoolName: 'Đại học Ngoại Thương (FTU)',
+    className: 'Kinh tế Quốc tế K59',
+    concept: 'Dạ Tiệc Hoàng Gia (Royal Prom Night)',
+    title: 'Dạ Tiệc Tốt Nghiệp FTU K59 - Đêm Tỏa Sáng Khách Sạn Sheraton',
+    coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80',
+    samplePhotos: [
+      'https://images.unsplash.com/photo-1511578314322-379afb476865?w=600&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&auto=format&fit=crop&q=80'
+    ],
+    totalPhotosCount: 2800,
+    albumDriveLink: 'https://drive.google.com/drive/folders/xoanmedia-ftu-k59-prom',
+    tiktokVideoUrl: 'https://tiktok.com/@xoanmedia/video/ftu_k59_cinematic',
+    photographerName: 'Lê Đức Anh',
+    shootingDate: '10/10/2024',
+    likesCount: 2450,
+    featured: true
+  },
+  {
+    id: 'moment-3',
+    customerId: 'cust-2',
+    schoolName: 'THPT Chu Văn An',
+    className: '12 Toán 1',
+    concept: 'Áo Dài Trắng & Nắng Ba Đình',
+    title: 'Thanh Xuân Vườn Trường - Áo Dài Thơ Mộng Bên Hồ Tây',
+    coverImage: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&auto=format&fit=crop&q=80',
+    samplePhotos: [
+      'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&auto=format&fit=crop&q=80'
+    ],
+    totalPhotosCount: 980,
+    albumDriveLink: 'https://drive.google.com/drive/folders/xoanmedia-chuvanan-12toan',
+    photographerName: 'Trần Minh Tuấn',
+    shootingDate: '20/11/2024',
+    likesCount: 890,
+    featured: false
+  }
+];
+
