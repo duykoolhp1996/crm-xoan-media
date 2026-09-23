@@ -78,6 +78,9 @@ interface AppContextType {
 
   // Photographers
   photographers: Photographer[];
+  addPhotographer: (photographer: Omit<Photographer, 'id' | 'rating' | 'completedShootsCount'>) => void;
+  updatePhotographer: (photographer: Photographer) => void;
+  deletePhotographer: (id: string) => void;
   updatePhotographerStatus: (id: string, status: Photographer['status']) => void;
   getPhotographerAvailability: (photographerId: string, date: string) => { available: boolean; conflictBookingCode?: string; totalShootsOnDay: number };
 
@@ -300,6 +303,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   };
 
+  const addPhotographer = (data: Omit<Photographer, 'id' | 'rating' | 'completedShootsCount'>) => {
+    const newPhotographer: Photographer = {
+      ...data,
+      id: `photo-${Date.now()}`,
+      rating: 5.0,
+      completedShootsCount: 0
+    };
+    setPhotographers(prev => [newPhotographer, ...prev]);
+  };
+
+  const updatePhotographer = (updated: Photographer) => {
+    setPhotographers(prev => prev.map(p => p.id === updated.id ? updated : p));
+  };
+
+  const deletePhotographer = (id: string) => {
+    setPhotographers(prev => prev.filter(p => p.id !== id));
+  };
+
   const updatePhotographerStatus = (id: string, status: Photographer['status']) => {
     setPhotographers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
   };
@@ -406,6 +427,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateBooking,
         assignPhotographerToBooking,
         photographers,
+        addPhotographer,
+        updatePhotographer,
+        deletePhotographer,
         updatePhotographerStatus,
         getPhotographerAvailability,
         schools,

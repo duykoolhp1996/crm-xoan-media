@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Photographer, PhotographerStatus } from '../../types';
+import { PhotographerModal } from './PhotographerModal';
 import {
   Camera,
   Star,
   Phone,
   MapPin,
   Briefcase,
-  Search
+  Search,
+  Plus,
+  Edit2
 } from 'lucide-react';
 
 export const PhotographerList: React.FC = () => {
@@ -16,6 +19,8 @@ export const PhotographerList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedPhoto, setSelectedPhoto] = useState<Photographer | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPhotographer, setEditingPhotographer] = useState<Photographer | null>(null);
 
   const filteredPhotographers = photographers.filter(p => {
     const matchSearch =
@@ -34,6 +39,16 @@ export const PhotographerList: React.FC = () => {
     inactive: { label: 'Ngừng hợp tác', badge: 'bg-rose-50 text-rose-700 border-rose-200' }
   };
 
+  const handleOpenAdd = () => {
+    setEditingPhotographer(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (p: Photographer) => {
+    setEditingPhotographer(p);
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Top Header */}
@@ -48,10 +63,16 @@ export const PhotographerList: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <span className="text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-full">
             {photographers.filter(p => p.status === 'available').length} Thợ đang sẵn sàng
           </span>
+          <button
+            onClick={handleOpenAdd}
+            className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5" /> Thêm Nhân Sự Mới
+          </button>
         </div>
       </div>
 
@@ -180,11 +201,19 @@ export const PhotographerList: React.FC = () => {
                 </div>
 
                 <div className="pt-1 flex gap-2">
+                  <button
+                    onClick={() => handleOpenEdit(photo)}
+                    className="flex-1 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold text-center flex items-center justify-center gap-1 transition-colors shadow-2xs"
+                  >
+                    <Edit2 className="w-3 h-3" /> Sửa
+                  </button>
+
                   <a
                     href={`tel:${photo.phone}`}
-                    className="flex-1 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl font-semibold text-center flex items-center justify-center gap-1 transition-colors"
+                    className="p-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl font-semibold flex items-center justify-center transition-colors"
+                    title="Gọi điện thoại"
                   >
-                    <Phone className="w-3 h-3" /> Gọi
+                    <Phone className="w-3.5 h-3.5" />
                   </a>
 
                   <button
@@ -244,6 +273,13 @@ export const PhotographerList: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal Thêm & Sửa Thợ */}
+      <PhotographerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        photographerToEdit={editingPhotographer}
+      />
     </div>
   );
 };

@@ -10,6 +10,7 @@ import {
   Camera
 } from 'lucide-react';
 import { BookingModal } from './BookingModal';
+import { BookingDetailModal } from './BookingDetailModal';
 
 export const BookingModule: React.FC = () => {
   const { bookings, updateBooking } = useApp();
@@ -18,6 +19,7 @@ export const BookingModule: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBookingForDetail, setSelectedBookingForDetail] = useState<Booking | null>(null);
 
   // Lọc Bookings
   const filteredBookings = useMemo(() => {
@@ -150,7 +152,9 @@ export const BookingModule: React.FC = () => {
                   return (
                     <tr
                       key={bk.id}
-                      className="hover:bg-neutral-50 transition-colors group"
+                      onClick={() => setSelectedBookingForDetail(bk)}
+                      className="hover:bg-neutral-50/90 transition-colors group cursor-pointer"
+                      title="Nhấp vào dòng để xem chi tiết đơn booking & lịch chụp"
                     >
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
@@ -230,7 +234,11 @@ export const BookingModule: React.FC = () => {
                       <td className="py-3.5 px-4 text-right">
                         <select
                           value={bk.bookingStatus}
-                          onChange={(e) => handleStatusChange(bk, e.target.value as BookingStatus)}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(bk, e.target.value as BookingStatus);
+                          }}
                           className="px-2 py-1 bg-neutral-50 border border-black/[0.08] rounded-lg text-[11px] font-semibold text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
                         >
                           <option value="Chờ xác nhận">Chờ xác nhận</option>
@@ -253,15 +261,22 @@ export const BookingModule: React.FC = () => {
         </div>
 
         <div className="p-3.5 bg-neutral-50/50 border-t border-black/[0.06] flex items-center justify-between text-xs text-neutral-500">
-          <span>Tổng cộng <strong className="text-neutral-900">{filteredBookings.length}</strong> đơn booking</span>
+          <span>Tổng cộng <strong className="text-neutral-900">{filteredBookings.length}</strong> đơn booking (Nhấp vào hàng để xem chi tiết)</span>
           <span>Hệ thống tự động phát hiện xung đột lịch và cảnh báo thông minh</span>
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal Tạo Booking Mới */}
       <BookingModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+
+      {/* Modal Xem Chi Tiết Đơn Booking */}
+      <BookingDetailModal
+        booking={selectedBookingForDetail}
+        isOpen={Boolean(selectedBookingForDetail)}
+        onClose={() => setSelectedBookingForDetail(null)}
       />
     </div>
   );
