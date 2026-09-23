@@ -278,7 +278,7 @@ export const GlobalSearchModal: React.FC = () => {
                           <div>
                             <p className="text-xs font-bold text-neutral-900">{sch.name}</p>
                             <p className="text-[11px] text-neutral-500 mt-0.5">
-                              {sch.district}, {sch.city} | Khối: {sch.type} | {sch.totalClassesBooked} lớp chụp
+                              {sch.district}, {sch.city} | Khối: {sch.type} | {bookings.filter(b => b.schoolName === sch.name).length} lớp chụp
                             </p>
                           </div>
                           <ArrowRight className="w-4 h-4 text-neutral-400 group-hover:text-emerald-600 transform group-hover:translate-x-1 transition-all" />

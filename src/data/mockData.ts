@@ -137,7 +137,7 @@ export const mockSchools: School[] = [
     city: 'Hà Nội',
     district: 'Cầu Giấy',
     type: 'THPT',
-    totalClassesBooked: 8,
+    totalClassesBooked: 0,
     status: 'active'
   },
   {
@@ -146,7 +146,7 @@ export const mockSchools: School[] = [
     city: 'Hà Nội',
     district: 'Tây Hồ',
     type: 'THPT',
-    totalClassesBooked: 12,
+    totalClassesBooked: 0,
     status: 'active'
   },
   {
@@ -155,7 +155,7 @@ export const mockSchools: School[] = [
     city: 'Hà Nội',
     district: 'Đống Đa',
     type: 'THPT',
-    totalClassesBooked: 6,
+    totalClassesBooked: 0,
     status: 'active'
   },
   {
@@ -164,7 +164,7 @@ export const mockSchools: School[] = [
     city: 'Hà Nội',
     district: 'Cầu Giấy',
     type: 'THPT',
-    totalClassesBooked: 5,
+    totalClassesBooked: 0,
     status: 'active'
   },
   {
@@ -173,7 +173,7 @@ export const mockSchools: School[] = [
     city: 'Hà Nội',
     district: 'Hai Bà Trưng',
     type: 'Đại học',
-    totalClassesBooked: 14,
+    totalClassesBooked: 0,
     status: 'active'
   },
   {
@@ -182,7 +182,7 @@ export const mockSchools: School[] = [
     city: 'Hà Nội',
     district: 'Hai Bà Trưng',
     type: 'Đại học',
-    totalClassesBooked: 10,
+    totalClassesBooked: 0,
     status: 'active'
   },
   {
@@ -191,7 +191,7 @@ export const mockSchools: School[] = [
     city: 'Hà Nội',
     district: 'Đống Đa',
     type: 'Đại học',
-    totalClassesBooked: 9,
+    totalClassesBooked: 0,
     status: 'active'
   }
 ];

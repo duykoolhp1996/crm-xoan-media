@@ -13,10 +13,10 @@ import {
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 
 export const SchoolClassModule: React.FC = () => {
-  const { schools, classes, addClass, customers, setSelectedCustomerId, selectedCustomerId } = useApp();
+  const { schools, classes, addClass, customers, bookings, setSelectedCustomerId, selectedCustomerId } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
-  const [expandedSchoolId, setExpandedSchoolId] = useState<string | null>('sch-01');
+  const [expandedSchoolId, setExpandedSchoolId] = useState<string | null>(null);
   const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
 
   const [newClassData, setNewClassData] = useState({
@@ -126,6 +126,7 @@ export const SchoolClassModule: React.FC = () => {
       <div className="space-y-3">
         {filteredSchools.map((school) => {
           const schoolClasses = classes.filter(c => c.schoolId === school.id);
+          const bookedClassesCount = bookings.filter(b => b.schoolName === school.name).length;
           const isExpanded = expandedSchoolId === school.id;
 
           return (
@@ -150,7 +151,7 @@ export const SchoolClassModule: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-xs text-neutral-500 mt-1">
-                      Khu vực: {school.district}, {school.city} • Đã chụp thành công: <strong className="text-neutral-800 font-bold">{school.totalClassesBooked} lớp</strong>
+                      Khu vực: {school.district}, {school.city} • Đã chụp thành công: <strong className="text-neutral-800 font-bold">{bookedClassesCount} lớp</strong>
                     </p>
                   </div>
                 </div>
