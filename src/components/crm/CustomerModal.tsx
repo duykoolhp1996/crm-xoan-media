@@ -434,7 +434,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
               <div>
                 <label className="font-semibold text-neutral-700 flex items-center gap-1">
                   <Headphones className="w-3.5 h-3.5 text-neutral-600" />
-                  Ô CSKH Phụ Trách
+                  Chuyên Viên CSKH Phụ Trách
                 </label>
                 <select
                   value={formData.assignedCareStaffName}

@@ -68,7 +68,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
       {/* Center Popup Modal */}
       <div className="relative w-full max-w-3xl sm:max-w-4xl max-h-[90vh] bg-white rounded-3xl border border-black/[0.08] text-neutral-900 shadow-2xl flex flex-col z-10 animate-in zoom-in-95 duration-200 overflow-hidden my-auto">
         {/* Header Modal */}
-        <div className="p-6 bg-neutral-50/70 border-b border-black/[0.06] flex items-start justify-between">
+        <div className="p-6 bg-neutral-50/70 border-b border-black/[0.06] flex items-start justify-between shrink-0">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black text-xl shadow-sm shrink-0">
               {customer.className.slice(0, 3)}
@@ -109,7 +109,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
         </div>
 
         {/* Quick Summary Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-50/50 px-6 py-3.5 border-b border-black/[0.06] text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-50/50 px-6 py-3.5 border-b border-black/[0.06] text-xs shrink-0">
           <div>
             <p className="text-[11px] text-neutral-500 font-medium">Giai đoạn Pipeline</p>
             <p className="font-bold text-neutral-900 mt-0.5">{customer.pipelineStage}</p>
@@ -125,7 +125,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           <div>
             <p className="text-[11px] text-neutral-500 font-medium flex items-center gap-1">
               <Headphones className="w-3 h-3 text-neutral-500" />
-              Ô CSKH Phụ Trách
+              Chuyên viên CSKH phụ trách
             </p>
             <p className="font-bold text-neutral-900 mt-0.5 truncate">
               {customer.assignedCareStaffName || 'Phạm Quỳnh Nga (CSKH)'}
@@ -134,10 +134,10 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-black/[0.06] bg-white px-6 gap-2 text-xs font-semibold overflow-x-auto custom-scrollbar pt-2">
+        <div className="shrink-0 flex items-center border-b border-black/[0.06] bg-white px-6 gap-2 text-xs font-semibold overflow-x-auto custom-scrollbar py-3 z-10">
           <button
             onClick={() => setActiveTabLocal('timeline')}
-            className={`py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
+            className={`py-2 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
               activeTab === 'timeline'
                 ? 'bg-neutral-900 text-[#B8F23D] shadow-sm font-bold'
                 : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
@@ -148,7 +148,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           </button>
           <button
             onClick={() => setActiveTabLocal('bookings')}
-            className={`py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
+            className={`py-2 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
               activeTab === 'bookings'
                 ? 'bg-neutral-900 text-[#B8F23D] shadow-sm font-bold'
                 : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
@@ -159,7 +159,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           </button>
           <button
             onClick={() => setActiveTabLocal('marketing')}
-            className={`py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
+            className={`py-2 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
               activeTab === 'marketing'
                 ? 'bg-neutral-900 text-[#B8F23D] shadow-sm font-bold'
                 : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
@@ -170,7 +170,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           </button>
           <button
             onClick={() => setActiveTabLocal('feedbacks')}
-            className={`py-2.5 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap ${
+            className={`py-2 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
               activeTab === 'feedbacks'
                 ? 'bg-neutral-900 text-[#B8F23D] shadow-sm font-bold'
                 : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
