@@ -34,6 +34,7 @@ export const ExecutiveDashboard: React.FC = () => {
     customers,
     bookings,
     photographers,
+    feedbacks,
     setActiveTab,
     setSelectedBookingId
   } = useApp();
@@ -67,10 +68,17 @@ export const ExecutiveDashboard: React.FC = () => {
   const busyPhotographers = photographers.filter(p => p.status === 'busy').length;
   const readinessRate = totalPhotographers > 0 ? Math.round((availablePhotographers / totalPhotographers) * 100) : 0;
   const avgRating = useMemo(() => {
-    if (totalPhotographers === 0) return '5.0';
-    const sum = photographers.reduce((acc, p) => acc + (p.rating || 5), 0);
-    return (sum / totalPhotographers).toFixed(2);
-  }, [photographers, totalPhotographers]);
+    if (feedbacks.length > 0) {
+      const sum = feedbacks.reduce((acc, f) => acc + (f.aspects?.photographerCrew || f.rating || 5), 0);
+      return (sum / feedbacks.length).toFixed(1);
+    }
+    const ratedPhotos = photographers.filter(p => p.rating && p.rating > 0);
+    if (ratedPhotos.length > 0) {
+      const sum = ratedPhotos.reduce((acc, p) => acc + (p.rating || 0), 0);
+      return (sum / ratedPhotos.length).toFixed(1);
+    }
+    return 'Chưa có review';
+  }, [photographers, feedbacks]);
 
   // 4. KPIs Đội ngũ CTV Sale & Hoa hồng từ CRM_CTV_SALES
   const totalCtvCommission = useMemo(() => {
@@ -270,7 +278,7 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
               <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
                 <span>Đang bấm máy: <strong className="text-amber-600 font-bold">{busyPhotographers}</strong></span>
-                <span>Đánh giá TB: <strong className="text-neutral-900 font-bold">{avgRating} ★</strong></span>
+                <span>Đánh giá TB: <strong className="text-neutral-900 font-bold">{avgRating}{avgRating !== 'Chưa có review' ? ' ★' : ''}</strong></span>
               </div>
             </div>
 

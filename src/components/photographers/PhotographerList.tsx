@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const PhotographerList: React.FC = () => {
-  const { photographers, updatePhotographerStatus, bookings, deletePhotographer } = useApp();
+  const { photographers, updatePhotographerStatus, bookings, feedbacks, deletePhotographer } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -112,8 +112,31 @@ export const PhotographerList: React.FC = () => {
             b =>
               b.assignments.leadPhotographerId === photo.id ||
               b.assignments.assistantPhotographerIds?.includes(photo.id) ||
-              b.assignments.videographerId === photo.id
+              b.assignments.videographerId === photo.id ||
+              b.assignments.leadPhotographerName === photo.fullName
           );
+
+          const completedCount = assignedBookings.filter(b =>
+            ['Hoàn thành', 'Đã chụp', 'Đã bàn giao'].includes(b.bookingStatus)
+          ).length;
+
+          // Tính điểm đánh giá thực tế từ phản hồi
+          const relatedFeedbacks = feedbacks.filter(
+            f =>
+              (f.bookingId && assignedBookings.some(b => b.id === f.bookingId)) ||
+              f.photographerMentioned?.some(m => m.toLowerCase().includes(photo.fullName.toLowerCase()))
+          );
+
+          let displayRating: number | null = null;
+          if (relatedFeedbacks.length > 0) {
+            const sum = relatedFeedbacks.reduce(
+              (s, f) => s + (f.aspects?.photographerCrew || f.rating || 5),
+              0
+            );
+            displayRating = Number((sum / relatedFeedbacks.length).toFixed(1));
+          } else if (photo.rating && photo.rating > 0) {
+            displayRating = photo.rating;
+          }
 
           return (
             <div
@@ -131,10 +154,16 @@ export const PhotographerList: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <h3 className="font-bold text-neutral-900 text-sm truncate">{photo.fullName}</h3>
-                      <span className="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                        <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                        {photo.rating}
-                      </span>
+                      {displayRating ? (
+                        <span className="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                          {displayRating}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+                          Thợ mới
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-[11px] text-neutral-500 mt-0.5 flex items-center gap-1.5">
@@ -198,7 +227,9 @@ export const PhotographerList: React.FC = () => {
 
                 <div className="flex items-center justify-between text-neutral-500">
                   <span>Đã hoàn thành:</span>
-                  <span className="font-bold text-emerald-700">{photo.completedShootsCount} ca</span>
+                  <span className="font-bold text-emerald-700">
+                    {completedCount} ca
+                  </span>
                 </div>
 
                 <div className="pt-1 flex gap-2">
@@ -263,11 +294,23 @@ export const PhotographerList: React.FC = () => {
             </div>
 
             <div className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
-              {bookings.filter(b => b.assignments.leadPhotographerId === selectedPhoto.id).length === 0 ? (
+              {bookings.filter(
+                b =>
+                  b.assignments.leadPhotographerId === selectedPhoto.id ||
+                  b.assignments.assistantPhotographerIds?.includes(selectedPhoto.id) ||
+                  b.assignments.videographerId === selectedPhoto.id ||
+                  b.assignments.leadPhotographerName === selectedPhoto.fullName
+              ).length === 0 ? (
                 <p className="py-8 text-center text-neutral-400">Thợ này hiện chưa có lịch chụp nào sắp tới.</p>
               ) : (
                 bookings
-                  .filter(b => b.assignments.leadPhotographerId === selectedPhoto.id)
+                  .filter(
+                    b =>
+                      b.assignments.leadPhotographerId === selectedPhoto.id ||
+                      b.assignments.assistantPhotographerIds?.includes(selectedPhoto.id) ||
+                      b.assignments.videographerId === selectedPhoto.id ||
+                      b.assignments.leadPhotographerName === selectedPhoto.fullName
+                  )
                   .map(bk => (
                     <div key={bk.id} className="p-3.5 bg-neutral-50 rounded-2xl border border-black/[0.06] space-y-1.5">
                       <div className="flex justify-between items-center">
@@ -278,7 +321,12 @@ export const PhotographerList: React.FC = () => {
                       </div>
                       <p className="text-neutral-600">📅 Ngày: <strong className="text-neutral-900">{bk.shootDate}</strong> ({bk.startTime} - {bk.endTime})</p>
                       <p className="text-neutral-500 truncate">📍 Địa điểm: {bk.location}</p>
-                      <p className="text-neutral-900 font-bold">Thù lao: {selectedPhoto.ratePerShoot.toLocaleString('vi-VN')}đ</p>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded font-semibold">
+                          Trạng thái: {bk.bookingStatus}
+                        </span>
+                        <p className="text-neutral-900 font-bold">Thù lao: {selectedPhoto.ratePerShoot.toLocaleString('vi-VN')}đ</p>
+                      </div>
                     </div>
                   ))
               )}
