@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { LeadSource, PipelineStage } from '../../types';
 import { VIETNAM_LOCATIONS, getDistrictsByCity } from '../../data/vietnamLocations';
-import { SALES_STAFF_LIST } from '../../data/mockData';
 import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones, UserCheck } from 'lucide-react';
 
 interface CustomerModalProps {
@@ -11,7 +10,7 @@ interface CustomerModalProps {
 }
 
 export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
-  const { addCustomer, schools, servicePackages, currentUser } = useApp();
+  const { addCustomer, schools, servicePackages, salesStaff, currentUser } = useApp();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -80,9 +79,9 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
 
     let salesName = formData.assignedSalesName;
     if (formData.pipelineStage !== 'New Lead' && salesName === 'Chưa gán') {
-      salesName = currentUser.role === 'sales' ? currentUser.name : 'Lê Hoàng Sơn (Sales Lead)';
+      salesName = currentUser.role === 'sales' ? currentUser.name : (salesStaff[0]?.name || 'Lê Hoàng Sơn (Sales Lead)');
     }
-    const matchedSales = SALES_STAFF_LIST.find(s => s.name === salesName);
+    const matchedSales = salesStaff.find(s => s.name === salesName);
     const salesId = matchedSales?.id || (salesName === currentUser.name ? currentUser.id : '');
 
     addCustomer({
@@ -452,12 +451,12 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
                   className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none text-xs"
                 >
                   <option value="Chưa gán">Chưa gán (Tự động khi liên hệ)</option>
-                  {SALES_STAFF_LIST.map((staff) => (
+                  {salesStaff.map((staff) => (
                     <option key={staff.id} value={staff.name}>
                       {staff.name}
                     </option>
                   ))}
-                  {currentUser.role === 'sales' && !SALES_STAFF_LIST.some(s => s.name === currentUser.name) && (
+                  {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
                     <option value={currentUser.name}>{currentUser.name}</option>
                   )}
                 </select>

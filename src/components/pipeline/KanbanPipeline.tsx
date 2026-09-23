@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Customer, PipelineStage } from '../../types';
-import { SALES_STAFF_LIST } from '../../data/mockData';
 import {
   Kanban as KanbanIcon,
   Plus,
@@ -17,6 +16,7 @@ import { CustomerModal } from '../crm/CustomerModal';
 export const KanbanPipeline: React.FC = () => {
   const {
     customers,
+    salesStaff,
     updateCustomerStage,
     updateCustomer,
     currentUser,
@@ -194,7 +194,7 @@ export const KanbanPipeline: React.FC = () => {
                             value={cust.assignedSalesName || 'Chưa gán'}
                             onChange={(e) => {
                               const val = e.target.value;
-                              const matched = SALES_STAFF_LIST.find(s => s.name === val);
+                              const matched = salesStaff.find(s => s.name === val);
                               updateCustomer({
                                 ...cust,
                                 assignedSalesName: val,
@@ -206,12 +206,12 @@ export const KanbanPipeline: React.FC = () => {
                             title="Đổi nhân viên Sales tư vấn"
                           >
                             <option value="Chưa gán">Chưa gán Sales</option>
-                            {SALES_STAFF_LIST.map((staff) => (
+                            {salesStaff.map((staff) => (
                               <option key={staff.id} value={staff.name}>
                                 {staff.name}
                               </option>
                             ))}
-                            {currentUser.role === 'sales' && !SALES_STAFF_LIST.some(s => s.name === currentUser.name) && (
+                            {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
                               <option value={currentUser.name}>{currentUser.name}</option>
                             )}
                           </select>

@@ -371,3 +371,15 @@ export interface ClassMoment {
   featured: boolean;
 }
 
+// 11. Đội ngũ Sales tư vấn
+export interface SalesStaff {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  roleTitle: string; // 'Sales Lead' | 'Chuyên viên Sales' | 'CTV Sales'
+  avatar?: string;
+  activeRegions: string[];
+  status: 'active' | 'inactive';
+  createdAt?: string;
+}

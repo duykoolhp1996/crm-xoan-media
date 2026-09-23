@@ -13,7 +13,8 @@ import {
   ActivityLog,
   SystemNotification,
   ClassFeedback,
-  ClassMoment
+  ClassMoment,
+  SalesStaff
 } from '../types';
 
 export const mockUsers: User[] = [
@@ -75,11 +76,50 @@ export const mockUsers: User[] = [
   }
 ];
 
-export const SALES_STAFF_LIST = [
-  { id: 'user-2', name: 'Lê Hoàng Sơn (Sales Lead)' },
-  { id: 'user-sales-1', name: 'Nguyễn Thu Hương (Sales)' },
-  { id: 'user-sales-2', name: 'Trần Hải Đăng (Sales)' }
+export const mockSalesStaff: SalesStaff[] = [
+  {
+    id: 'user-2',
+    name: 'Lê Hoàng Sơn (Sales Lead)',
+    phone: '0984556677',
+    email: 'son.lh@xoanmedia.vn',
+    roleTitle: 'Sales Lead',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hải Phòng', 'Hải Dương', 'Quảng Ninh'],
+    status: 'active'
+  },
+  {
+    id: 'user-sales-1',
+    name: 'Nguyễn Thu Hương (Sales)',
+    phone: '0987654321',
+    email: 'huong.nt@xoanmedia.vn',
+    roleTitle: 'Chuyên viên Sales',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hải Phòng', 'Hà Nội'],
+    status: 'active'
+  },
+  {
+    id: 'user-sales-2',
+    name: 'Trần Hải Đăng (Sales)',
+    phone: '0966554433',
+    email: 'dang.th@xoanmedia.vn',
+    roleTitle: 'Chuyên viên Sales',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hải Phòng', 'Thái Bình', 'Nam Định'],
+    status: 'active'
+  },
+  {
+    id: 'user-sales-3',
+    name: 'Vũ Mai Phương (CTV Sales)',
+    phone: '0911223344',
+    email: 'phuong.vm@xoanmedia.vn',
+    roleTitle: 'CTV Sales',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    activeRegions: ['Hải Phòng'],
+    status: 'active'
+  }
 ];
+
+export const SALES_STAFF_LIST = mockSalesStaff.map(s => ({ id: s.id, name: s.name }));
 
 export const mockServicePackages: ServicePackage[] = [
   {

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Photographer, PhotographerStatus } from '../../types';
+import { Photographer, PhotographerStatus, SalesStaff } from '../../types';
 import { PhotographerModal } from '../photographers/PhotographerModal';
+import { SalesStaffModal } from '../sales/SalesStaffModal';
 import {
   Settings,
   Database,
@@ -20,13 +21,21 @@ import {
   Award,
   Layers,
   CheckCircle2,
-  UserCheck
+  UserCheck,
+  Users
 } from 'lucide-react';
 
 export const SettingsModule: React.FC = () => {
-  const { photographers, deletePhotographer, updatePhotographerStatus } = useApp();
+  const {
+    photographers,
+    deletePhotographer,
+    updatePhotographerStatus,
+    salesStaff,
+    deleteSalesStaff,
+    customers
+  } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'crew' | 'automation' | 'database'>('crew');
+  const [activeSubTab, setActiveSubTab] = useState<'crew' | 'sales' | 'automation' | 'database'>('crew');
 
   // Supabase & Webhooks
   const [supabaseUrl, setSupabaseUrl] = useState('https://crm-xoanmedia.supabase.co');
@@ -37,9 +46,16 @@ export const SettingsModule: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
+  // Sales Staff Filter & Search
+  const [searchSales, setSearchSales] = useState('');
+  const [salesStatusFilter, setSalesStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPhotographer, setEditingPhotographer] = useState<Photographer | null>(null);
+
+  const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
+  const [editingSalesStaff, setEditingSalesStaff] = useState<SalesStaff | null>(null);
 
   // Automation triggers rules
   const [automationRules, setAutomationRules] = useState([
@@ -85,6 +101,20 @@ export const SettingsModule: React.FC = () => {
     return matchSearch && matchRole && matchStatus;
   });
 
+  // Filtered Sales Staff
+  const filteredSalesStaff = salesStaff.filter(s => {
+    const matchSearch =
+      s.name.toLowerCase().includes(searchSales.toLowerCase()) ||
+      s.phone.includes(searchSales) ||
+      s.email.toLowerCase().includes(searchSales.toLowerCase()) ||
+      s.roleTitle.toLowerCase().includes(searchSales.toLowerCase()) ||
+      s.activeRegions.some(r => r.toLowerCase().includes(searchSales.toLowerCase()));
+
+    const matchStatus = salesStatusFilter === 'all' || s.status === salesStatusFilter;
+
+    return matchSearch && matchStatus;
+  });
+
   const statusColors: Record<PhotographerStatus, { label: string; badge: string }> = {
     available: { label: 'Sẵn sàng nhận ca', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
     busy: { label: 'Đang có lịch chụp', badge: 'bg-amber-50 text-amber-800 border-amber-200' },
@@ -99,10 +129,10 @@ export const SettingsModule: React.FC = () => {
         <div>
           <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
             <Settings className="w-5 h-5 text-orange-500" />
-            Cài Đặt Hệ Thống & Quản Lý Đội Ngũ Ekip
+            Cài Đặt Hệ Thống & Quản Lý Nhân Sự
           </h1>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Quản lý nhân sự thợ chụp kỷ yếu, cấu hình động cơ tự động hóa và tích hợp cơ sở dữ liệu
+            Quản lý đội ngũ thợ chụp, đội ngũ nhân viên sales tư vấn, cấu hình tự động hóa và cơ sở dữ liệu
           </p>
         </div>
 
@@ -115,10 +145,23 @@ export const SettingsModule: React.FC = () => {
             Thêm Nhân Sự Ekip Mới
           </button>
         )}
+
+        {activeSubTab === 'sales' && (
+          <button
+            onClick={() => {
+              setEditingSalesStaff(null);
+              setIsSalesModalOpen(true);
+            }}
+            className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            Thêm Nhân Viên Sales Mới
+          </button>
+        )}
       </div>
 
       {/* Sub Tabs Selector */}
-      <div className="flex bg-neutral-100 p-1.5 rounded-2xl border border-black/[0.06] text-xs font-bold w-fit">
+      <div className="flex bg-neutral-100 p-1.5 rounded-2xl border border-black/[0.06] text-xs font-bold w-fit flex-wrap gap-1">
         <button
           onClick={() => setActiveSubTab('crew')}
           className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
@@ -129,6 +172,18 @@ export const SettingsModule: React.FC = () => {
         >
           <Camera className="w-4 h-4" />
           Đội Ngũ Thợ & Ekip ({photographers.length})
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('sales')}
+          className={`px-4 py-2 rounded-xl transition-all flex items-center gap-2 ${
+            activeSubTab === 'sales'
+              ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
+              : 'text-neutral-600 hover:text-neutral-900'
+          }`}
+        >
+          <UserCheck className="w-4 h-4" />
+          Đội Ngũ Sales Tư Vấn ({salesStaff.length})
         </button>
 
         <button
@@ -356,6 +411,168 @@ export const SettingsModule: React.FC = () => {
         </div>
       )}
 
+      {/* SUBTAB: ĐỘI NGŨ SALES TƯ VẤN */}
+      {activeSubTab === 'sales' && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Controls: Search & Status Filter */}
+          <div className="bg-white border border-black/[0.08] p-4 rounded-3xl shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                placeholder="Tìm sales theo tên, SĐT, khu vực..."
+                value={searchSales}
+                onChange={e => setSearchSales(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <span className="text-xs font-bold text-neutral-500 shrink-0">Trạng thái:</span>
+              <select
+                value={salesStatusFilter}
+                onChange={e => setSalesStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+                className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-semibold focus:bg-white focus:outline-none cursor-pointer"
+              >
+                <option value="all">Tất cả ({salesStaff.length})</option>
+                <option value="active">Đang hoạt động ({salesStaff.filter(s => s.status === 'active').length})</option>
+                <option value="inactive">Tạm nghỉ ({salesStaff.filter(s => s.status === 'inactive').length})</option>
+              </select>
+
+              <button
+                onClick={() => {
+                  setEditingSalesStaff(null);
+                  setIsSalesModalOpen(true);
+                }}
+                className="sm:hidden px-3 py-2 bg-neutral-900 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" /> Thêm
+              </button>
+            </div>
+          </div>
+
+          {/* Sales Staff Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredSalesStaff.length === 0 ? (
+              <div className="col-span-full py-12 text-center bg-white border border-black/[0.08] rounded-3xl p-6">
+                <UserCheck className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
+                <p className="text-xs font-semibold text-neutral-600">Không tìm thấy nhân viên Sales phù hợp</p>
+                <button
+                  onClick={() => {
+                    setEditingSalesStaff(null);
+                    setIsSalesModalOpen(true);
+                  }}
+                  className="mt-3 px-4 py-2 bg-neutral-900 text-[#B8F23D] rounded-xl text-xs font-bold inline-flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Thêm Nhân Viên Sales
+                </button>
+              </div>
+            ) : (
+              filteredSalesStaff.map(s => {
+                const assignedCount = customers.filter(
+                  c => c.assignedSalesName === s.name || c.assignedSalesId === s.id
+                ).length;
+
+                return (
+                  <div
+                    key={s.id}
+                    className="bg-white border border-black/[0.08] rounded-3xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group space-y-4"
+                  >
+                    <div className="space-y-3">
+                      {/* Header: Avatar, Name & Status */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={s.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'}
+                            alt={s.name}
+                            className="w-12 h-12 rounded-2xl object-cover border border-black/[0.08] shadow-xs shrink-0"
+                          />
+                          <div>
+                            <h3 className="font-bold text-sm text-neutral-900 group-hover:text-neutral-700 transition-colors">
+                              {s.name}
+                            </h3>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 inline-block mt-0.5">
+                              {s.roleTitle}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
+                          s.status === 'active'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                        }`}>
+                          {s.status === 'active' ? 'Đang hoạt động' : 'Tạm nghỉ'}
+                        </span>
+                      </div>
+
+                      {/* Contact Info */}
+                      <div className="space-y-1 text-xs text-neutral-600 bg-neutral-50 p-2.5 rounded-xl border border-black/[0.05]">
+                        <p className="flex items-center gap-2 truncate">
+                          <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span className="font-semibold text-neutral-900">{s.phone}</span>
+                        </p>
+                        {s.email && (
+                          <p className="flex items-center gap-2 truncate text-[11px] text-neutral-500">
+                            <Mail className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                            <span className="truncate">{s.email}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Active Regions & Leads count */}
+                      <div className="space-y-1 text-[11px]">
+                        <p className="flex items-center gap-1 truncate text-neutral-700 font-medium">
+                          <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
+                          <span>Khu vực: <strong>{s.activeRegions.join(', ')}</strong></span>
+                        </p>
+                        <p className="flex items-center gap-1.5 text-neutral-600 font-medium pt-1">
+                          <Users className="w-3 h-3 text-blue-600 shrink-0" />
+                          <span>Đang phụ trách: <strong className="text-blue-700 font-bold">{assignedCount} khách hàng/lớp</strong></span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="pt-3 border-t border-black/[0.06] flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingSalesStaff(s);
+                          setIsSalesModalOpen(true);
+                        }}
+                        className="flex-1 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" /> Chỉnh Sửa
+                      </button>
+
+                      <a
+                        href={`tel:${s.phone}`}
+                        className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
+                        title="Gọi điện trực tiếp"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                      </a>
+
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Bạn có chắc chắn muốn xóa nhân sự "${s.name}" khỏi danh sách Sales?`)) {
+                            deleteSalesStaff(s.id);
+                          }
+                        }}
+                        className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
+                        title="Xóa nhân sự khỏi danh sách Sales"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+
       {/* SUBTAB 2: AUTOMATION ENGINE RULES */}
       {activeSubTab === 'automation' && (
         <div className="bg-white border border-black/[0.08] p-6 rounded-3xl space-y-4 shadow-xs animate-in fade-in duration-200">
@@ -516,6 +733,13 @@ export const SettingsModule: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         photographerToEdit={editingPhotographer}
+      />
+
+      {/* Modal Thêm & Chỉnh Sửa Nhân Sự Sales */}
+      <SalesStaffModal
+        isOpen={isSalesModalOpen}
+        onClose={() => setIsSalesModalOpen(false)}
+        staffToEdit={editingSalesStaff}
       />
     </div>
   );

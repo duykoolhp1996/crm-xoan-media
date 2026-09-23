@@ -16,13 +16,15 @@ import {
   SystemNotification,
   PipelineStage,
   ClassFeedback,
-  ClassMoment
+  ClassMoment,
+  SalesStaff
 } from '../types';
 import {
   mockUsers,
   mockCustomers,
   mockBookings,
   mockPhotographers,
+  mockSalesStaff,
   mockSchools,
   mockSchoolClasses,
   mockServicePackages,
@@ -84,6 +86,12 @@ interface AppContextType {
   updatePhotographerStatus: (id: string, status: Photographer['status']) => void;
   getPhotographerAvailability: (photographerId: string, date: string) => { available: boolean; conflictBookingCode?: string; totalShootsOnDay: number };
 
+  // Sales Staff Team
+  salesStaff: SalesStaff[];
+  addSalesStaff: (staff: Omit<SalesStaff, 'id'>) => void;
+  updateSalesStaff: (staff: SalesStaff) => void;
+  deleteSalesStaff: (id: string) => void;
+
   // Schools & Classes
   schools: School[];
   classes: SchoolClass[];
@@ -141,6 +149,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   const [photographers, setPhotographers] = useState<Photographer[]>(mockPhotographers);
+  const [salesStaff, setSalesStaff] = useState<SalesStaff[]>(mockSalesStaff);
   const [schools, setSchools] = useState<School[]>(mockSchools);
   const [classes, setClasses] = useState<SchoolClass[]>(mockSchoolClasses);
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>(mockServicePackages);
@@ -216,8 +225,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         newSalesName = currentUser.name;
         newSalesId = currentUser.id;
       } else {
-        newSalesName = (newSalesName && newSalesName !== 'Chưa gán') ? newSalesName : 'Lê Hoàng Sơn (Sales Lead)';
-        newSalesId = newSalesId && newSalesId !== '' ? newSalesId : 'user-2';
+        const defaultSales = salesStaff.find(s => s.status === 'active') || salesStaff[0];
+        newSalesName = (newSalesName && newSalesName !== 'Chưa gán') ? newSalesName : (defaultSales?.name || 'Lê Hoàng Sơn (Sales Lead)');
+        newSalesId = newSalesId && newSalesId !== '' ? newSalesId : (defaultSales?.id || 'user-2');
       }
     }
 
@@ -241,10 +251,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       type: isMovingToContacted ? 'call' : 'quote_sent',
       title: isMovingToContacted
         ? `Tự động gán Sales tư vấn: ${newSalesName}`
-        : `Chuyển giai đoạn: ${newStage}`,
+        : newStage === 'Lost'
+          ? 'Khách hàng từ chối (Lost)'
+          : `Chuyển giai đoạn: ${newStage}`,
       description: isMovingToContacted
         ? `Khách hàng ${targetCustomer.name} (${targetCustomer.className} - ${targetCustomer.schoolName}) được chuyển từ "${prevStage}" sang "Đã liên hệ". Hệ thống tự động gán nhân viên Sales "${newSalesName}" phụ trách tư vấn.`
-        : `Khách hàng ${targetCustomer.name} được chuyển từ "${prevStage}" sang "${newStage}".`,
+        : newStage === 'Lost'
+          ? `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) được chuyển sang trạng thái Lost (Khách từ chối / Dừng tư vấn).`
+          : `Khách hàng ${targetCustomer.name} được chuyển từ "${prevStage}" sang "${newStage}".`,
       performedByName: currentUser.name
     });
 
@@ -259,6 +273,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         read: false
       };
       setNotifications(prev => [newNotif, ...prev]);
+    } else if (newStage === 'Lost') {
+      const lostNotif: SystemNotification = {
+        id: `notif-${Date.now()}`,
+        type: 'unassigned',
+        title: '⚠️ KHÁCH HÀNG TỪ CHỐI (LOST)',
+        message: `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) đã chuyển sang trạng thái Lost.`,
+        severity: 'warning',
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      setNotifications(prev => [lostNotif, ...prev]);
     }
   };
 
@@ -361,6 +386,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updatePhotographerStatus = (id: string, status: Photographer['status']) => {
     setPhotographers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+  };
+
+  // Sales Staff Handlers
+  const addSalesStaff = (data: Omit<SalesStaff, 'id'>) => {
+    const newStaff: SalesStaff = {
+      ...data,
+      id: `sales-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    setSalesStaff(prev => [newStaff, ...prev]);
+
+    addActivityLog({
+      customerId: 'system',
+      type: 'note',
+      title: 'Thêm nhân sự Sales mới',
+      description: `Nhân viên Sales ${data.name} (${data.roleTitle}) đã được thêm vào hệ thống.`,
+      performedByName: currentUser.name
+    });
+  };
+
+  const updateSalesStaff = (updated: SalesStaff) => {
+    setSalesStaff(prev => prev.map(s => s.id === updated.id ? updated : s));
+  };
+
+  const deleteSalesStaff = (id: string) => {
+    setSalesStaff(prev => prev.filter(s => s.id !== id));
   };
 
   const addClass = (newClass: SchoolClass) => {
@@ -470,6 +521,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deletePhotographer,
         updatePhotographerStatus,
         getPhotographerAvailability,
+        salesStaff,
+        addSalesStaff,
+        updateSalesStaff,
+        deleteSalesStaff,
         schools,
         classes,
         addClass,
