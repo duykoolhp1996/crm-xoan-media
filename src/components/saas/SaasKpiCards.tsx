@@ -1,22 +1,22 @@
 import React from 'react';
-import { DollarSign, ShoppingBag, Users, TrendingUp, ArrowUpRight } from 'lucide-react';
-import { KpiMetric } from '../../data/saasData';
+import { DollarSign, GraduationCap, Camera, Handshake, ArrowUpRight } from 'lucide-react';
+import { CrmKpiMetric } from '../../data/crmBusinessData';
 
 interface SaasKpiCardsProps {
-  metrics: KpiMetric[];
+  metrics: CrmKpiMetric[];
 }
 
 export const SaasKpiCards: React.FC<SaasKpiCardsProps> = ({ metrics }) => {
-  const renderIcon = (name: KpiMetric['iconName']) => {
+  const renderIcon = (name: CrmKpiMetric['iconName']) => {
     switch (name) {
       case 'dollar':
         return <DollarSign className="w-4 h-4 text-neutral-800" />;
-      case 'shopping-bag':
-        return <ShoppingBag className="w-4 h-4 text-neutral-800" />;
-      case 'users':
-        return <Users className="w-4 h-4 text-neutral-800" />;
-      case 'trending-up':
-        return <TrendingUp className="w-4 h-4 text-neutral-800" />;
+      case 'school-class':
+        return <GraduationCap className="w-4 h-4 text-neutral-800" />;
+      case 'camera':
+        return <Camera className="w-4 h-4 text-neutral-800" />;
+      case 'users-handshake':
+        return <Handshake className="w-4 h-4 text-neutral-800" />;
     }
   };
 
@@ -88,10 +88,15 @@ export const SaasKpiCards: React.FC<SaasKpiCardsProps> = ({ metrics }) => {
               <h3 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">
                 {kpi.value}
               </h3>
+              {kpi.subLabel && (
+                <p className="text-[11px] text-neutral-400 mt-1">
+                  {kpi.subLabel}
+                </p>
+              )}
             </div>
 
             {/* Bottom: Change Badge & Mini Sparkline */}
-            <div className="flex items-center justify-between pt-1 border-t border-black/[0.04]">
+            <div className="flex items-center justify-between pt-2 border-t border-black/[0.04]">
               <div className="flex items-center gap-1.5">
                 <span
                   className={`inline-flex items-center gap-0.5 text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -103,11 +108,11 @@ export const SaasKpiCards: React.FC<SaasKpiCardsProps> = ({ metrics }) => {
                   <ArrowUpRight className="w-3 h-3 stroke-[2.5]" />
                   {kpi.change}
                 </span>
-                <span className="text-[11px] text-neutral-400 hidden xl:inline">vs last mo</span>
+                <span className="text-[11px] text-neutral-400 font-medium">tăng trưởng</span>
               </div>
 
-              {/* Sparkline chart */}
-              <div className="shrink-0 pl-2">
+              {/* Sparkline Visual */}
+              <div className="shrink-0 group-hover:scale-105 transition-transform">
                 {renderSparkline(kpi.sparkline, hasLimeAccent)}
               </div>
             </div>

@@ -8,8 +8,8 @@ import {
   ResponsiveContainer,
   CartesianGrid
 } from 'recharts';
-import { SAAS_REVENUE_CHART_DATA } from '../../data/saasData';
-import { ArrowUpRight } from 'lucide-react';
+import { CRM_MONTHLY_REVENUE_DATA } from '../../data/crmBusinessData';
+import { ArrowUpRight, TrendingUp } from 'lucide-react';
 
 export const SaasRevenueChart: React.FC = () => {
   const [selectedMetric, setSelectedMetric] = useState<'revenue' | 'target'>('revenue');
@@ -23,30 +23,30 @@ export const SaasRevenueChart: React.FC = () => {
 
       return (
         <div className="bg-neutral-900/95 backdrop-blur-xl text-white p-3.5 rounded-2xl shadow-xl border border-white/10 text-xs">
-          <p className="font-bold text-neutral-400 mb-2">{label} 2024</p>
+          <p className="font-bold text-neutral-400 mb-2">{label} / 2024</p>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between gap-4">
               <span className="flex items-center gap-1.5 text-neutral-300">
                 <span className="w-2 h-2 rounded-full bg-[#B8F23D]" />
-                Current:
+                Doanh thu thực:
               </span>
               <strong className="font-extrabold text-[#B8F23D] text-sm">
-                ${current.toLocaleString()}
+                {current.toLocaleString()} triệu đ
               </strong>
             </div>
             <div className="flex items-center justify-between gap-4">
               <span className="flex items-center gap-1.5 text-neutral-400">
                 <span className="w-2 h-2 rounded-full bg-neutral-500" />
-                Prev Period:
+                Cùng kỳ năm ngoái:
               </span>
               <span className="font-semibold text-neutral-300">
-                ${previous.toLocaleString()}
+                {previous.toLocaleString()} triệu đ
               </span>
             </div>
             {diff > 0 && (
               <div className="pt-1.5 mt-1.5 border-t border-white/10 flex items-center justify-between text-[11px] text-emerald-400 font-semibold">
-                <span>Growth:</span>
-                <span>+${diff.toLocaleString()} ({( (diff / previous) * 100 ).toFixed(1)}%)</span>
+                <span>Tăng trưởng:</span>
+                <span>+{diff.toLocaleString()} tr ({( (diff / previous) * 100 ).toFixed(1)}%)</span>
               </div>
             )}
           </div>
@@ -63,15 +63,15 @@ export const SaasRevenueChart: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-neutral-900 tracking-tight">
-              Revenue Overview
+              Biểu Đồ Doanh Thu Kỷ Yếu Theo Tháng
             </h2>
             <span className="saas-lime-badge text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5">
               <ArrowUpRight className="w-3 h-3" />
               +18.6%
             </span>
           </div>
-          <p className="text-xs text-neutral-400 mt-0.5">
-            Monthly gross revenue comparison vs previous cycle
+          <p className="text-xs text-neutral-500 mt-0.5">
+            So sánh doanh thu thực tế và chỉ tiêu kinh doanh theo tháng (Triệu VNĐ)
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export const SaasRevenueChart: React.FC = () => {
                 : 'text-neutral-500 hover:text-neutral-900'
             }`}
           >
-            Gross Revenue
+            Doanh thu thực
           </button>
           <button
             onClick={() => setSelectedMetric('target')}
@@ -95,31 +95,31 @@ export const SaasRevenueChart: React.FC = () => {
                 : 'text-neutral-500 hover:text-neutral-900'
             }`}
           >
-            Target Plan
+            Mục tiêu chỉ tiêu
           </button>
         </div>
       </div>
 
-      {/* Chart Area */}
-      <div className="h-72 w-full pt-2">
+      {/* Main Chart */}
+      <div className="h-[280px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={SAAS_REVENUE_CHART_DATA}
-            margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+            data={CRM_MONTHLY_REVENUE_DATA}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
             <defs>
-              <linearGradient id="limeRevenueGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#B8F23D" stopOpacity={0.4} />
+              <linearGradient id="crmRevenueGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#B8F23D" stopOpacity={0.65} />
                 <stop offset="95%" stopColor="#B8F23D" stopOpacity={0.0} />
               </linearGradient>
-              <linearGradient id="prevPeriodGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.15} />
+              <linearGradient id="crmPrevGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.25} />
                 <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.0} />
               </linearGradient>
             </defs>
 
             <CartesianGrid
-              strokeDasharray="4 4"
+              strokeDasharray="3 3"
               vertical={false}
               stroke="rgba(0,0,0,0.04)"
             />
@@ -128,62 +128,54 @@ export const SaasRevenueChart: React.FC = () => {
               dataKey="month"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
-              dy={8}
+              tick={{ fill: '#737373', fontSize: 12, fontWeight: 500 }}
+              dy={10}
             />
 
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#94a3b8', fontSize: 11 }}
-              tickFormatter={(v) => `$${v / 1000}k`}
-              dx={-4}
+              tick={{ fill: '#a3a3a3', fontSize: 11 }}
+              tickFormatter={(v) => `${v}tr`}
             />
 
             <Tooltip content={<CustomTooltip />} />
 
-            {/* Previous Period Series (Dashed Line) */}
             <Area
               type="monotone"
               dataKey="previousPeriod"
-              stroke="#94a3b8"
-              strokeWidth={1.5}
+              stroke="#cbd5e1"
+              strokeWidth={2}
               strokeDasharray="4 4"
-              fill="url(#prevPeriodGradient)"
+              fillOpacity={1}
+              fill="url(#crmPrevGrad)"
             />
 
-            {/* Main Series (Lime Accent Line) */}
             <Area
               type="monotone"
               dataKey={selectedMetric === 'revenue' ? 'revenue' : 'target'}
               stroke="#83c906"
-              strokeWidth={2.5}
-              fill="url(#limeRevenueGradient)"
-              activeDot={{
-                r: 6,
-                fill: '#B8F23D',
-                stroke: '#111827',
-                strokeWidth: 2
-              }}
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#crmRevenueGrad)"
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Mini Legend Footer */}
-      <div className="flex items-center justify-between pt-4 mt-2 border-t border-black/[0.04] text-xs">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#83c906]" />
-            <span className="font-medium text-neutral-600">Current Period (Jan - Aug)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-1 rounded bg-neutral-400" />
-            <span className="font-medium text-neutral-400">Previous Period</span>
-          </div>
+      {/* Bottom Summary Bar */}
+      <div className="mt-4 pt-4 border-t border-black/[0.04] grid grid-cols-3 gap-2 text-center text-xs">
+        <div>
+          <span className="text-[11px] text-neutral-400">Cao điểm tháng 8</span>
+          <p className="font-extrabold text-neutral-900 mt-0.5 text-sm">721 triệu đ</p>
         </div>
-        <div className="text-neutral-500 font-semibold text-[11px]">
-          Peak: <strong className="text-neutral-900">$278,860</strong>
+        <div>
+          <span className="text-[11px] text-neutral-400">Doanh thu TB/tháng</span>
+          <p className="font-extrabold text-neutral-900 mt-0.5 text-sm">347.5 triệu đ</p>
+        </div>
+        <div>
+          <span className="text-[11px] text-neutral-400">Tỷ lệ hoàn thành KPI</span>
+          <p className="font-extrabold text-emerald-600 mt-0.5 text-sm">106%</p>
         </div>
       </div>
     </div>

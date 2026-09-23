@@ -23,11 +23,11 @@ export const SaasHeroSection: React.FC<SaasHeroSectionProps> = ({
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
 
   const filterOptions = [
-    'All Time (2024)',
-    'This Month (Aug 2024)',
-    'Last 30 Days',
-    'Quarter 3 (Q3)',
-    'Year to Date'
+    'Toàn bộ mùa kỷ yếu (2024)',
+    'Tháng này (Tháng 8/2024)',
+    '30 ngày gần nhất',
+    'Quý 3 cao điểm',
+    'Từ đầu năm đến nay'
   ];
 
   return (
@@ -35,10 +35,10 @@ export const SaasHeroSection: React.FC<SaasHeroSectionProps> = ({
       {/* Title & Subtitle */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">
-          Business Overview
+          Tổng Quan Doanh Thu & Vận Hành CRM
         </h1>
         <p className="text-xs sm:text-sm text-neutral-500 mt-1">
-          Track your sales, revenue and business performance.
+          Theo dõi doanh số hợp đồng kỷ yếu, tiến độ ekip chụp và hiệu quả đội CTV sale Xoắn Media.
         </p>
       </div>
 
@@ -56,8 +56,8 @@ export const SaasHeroSection: React.FC<SaasHeroSectionProps> = ({
           </button>
 
           {isFilterDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-2xl shadow-xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
-              {filterOptions.map(opt => (
+            <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl border border-black/[0.08] rounded-2xl shadow-xl p-1.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+              {filterOptions.map((opt) => (
                 <button
                   key={opt}
                   onClick={() => {
@@ -66,7 +66,7 @@ export const SaasHeroSection: React.FC<SaasHeroSectionProps> = ({
                   }}
                   className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                     activeFilter === opt
-                      ? 'bg-neutral-900 text-white font-semibold'
+                      ? 'bg-neutral-900 text-[#B8F23D] font-semibold'
                       : 'text-neutral-700 hover:bg-neutral-100'
                   }`}
                 >
@@ -83,7 +83,7 @@ export const SaasHeroSection: React.FC<SaasHeroSectionProps> = ({
           className="flex items-center gap-1.5 bg-white/90 hover:bg-white text-neutral-700 hover:text-neutral-950 px-3.5 py-2 rounded-2xl border border-black/[0.06] text-xs font-semibold shadow-sm transition-all"
         >
           <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-500" />
-          <span>Compare</span>
+          <span>So sánh mùa</span>
         </button>
 
         {/* Add Widget Button */}
@@ -92,7 +92,7 @@ export const SaasHeroSection: React.FC<SaasHeroSectionProps> = ({
           className="flex items-center gap-1.5 bg-neutral-900 hover:bg-neutral-800 text-white px-3.5 py-2 rounded-2xl text-xs font-bold shadow-sm hover:shadow transition-all active:scale-95"
         >
           <Plus className="w-3.5 h-3.5 text-[#B8F23D]" />
-          <span>Add widget</span>
+          <span>Thêm chỉ số</span>
         </button>
       </div>
     </div>

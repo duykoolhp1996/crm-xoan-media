@@ -1,28 +1,25 @@
 import React, { useState } from 'react';
 import {
   LayoutDashboard,
-  BarChart3,
-  Users,
-  CreditCard,
-  Package,
-  Megaphone,
+  TrendingUp,
+  Camera,
+  Award,
   FileText,
+  Calendar,
+  BarChart3,
   Settings,
-  Bell,
-  Sparkles,
-  Sun,
-  Moon
+  Bell
 } from 'lucide-react';
 
 export type SaasTab =
   | 'dashboard'
-  | 'analytics'
-  | 'customers'
-  | 'sales'
-  | 'products'
-  | 'campaigns'
-  | 'reports'
-  | 'settings';
+  | 'doanh-thu'
+  | 'tho-chup'
+  | 'ctv-sale'
+  | 'hop-dong'
+  | 'lich-chup'
+  | 'bao-cao'
+  | 'cai-dat';
 
 interface SaasSidebarProps {
   activeTab: SaasTab;
@@ -37,14 +34,14 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'customers', label: 'Customers', icon: Users },
-  { id: 'sales', label: 'Sales', icon: CreditCard },
-  { id: 'products', label: 'Products', icon: Package },
-  { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
-  { id: 'reports', label: 'Reports', icon: FileText },
-  { id: 'settings', label: 'Settings', icon: Settings }
+  { id: 'dashboard', label: 'Tổng quan', icon: LayoutDashboard },
+  { id: 'doanh-thu', label: 'Doanh thu CRM', icon: TrendingUp },
+  { id: 'tho-chup', label: 'Quản lý Thợ & Ekip', icon: Camera },
+  { id: 'ctv-sale', label: 'CTV Sale & Hoa hồng', icon: Award },
+  { id: 'hop-dong', label: 'Hợp đồng & Lớp', icon: FileText },
+  { id: 'lich-chup', label: 'Lịch chụp Ekip', icon: Calendar },
+  { id: 'bao-cao', label: 'Báo cáo Mùa Kỷ Yếu', icon: BarChart3 },
+  { id: 'cai-dat', label: 'Cài đặt hệ thống', icon: Settings }
 ];
 
 export const SaasSidebar: React.FC<SaasSidebarProps> = ({
@@ -59,7 +56,11 @@ export const SaasSidebar: React.FC<SaasSidebarProps> = ({
       {/* Floating Glass Shell */}
       <div className="w-[66px] h-full flex flex-col items-center justify-between py-4 saas-sidebar-glass rounded-[28px]">
         {/* Brand Logo */}
-        <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => onSelectTab('dashboard')}>
+        <div
+          className="flex flex-col items-center gap-1 group cursor-pointer"
+          onClick={() => onSelectTab('dashboard')}
+          title="Xoắn Media CRM"
+        >
           <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black text-lg shadow-[0_4px_16px_rgba(0,0,0,0.18)] transition-transform duration-200 group-hover:scale-105">
             ✦
           </div>
@@ -67,7 +68,7 @@ export const SaasSidebar: React.FC<SaasSidebarProps> = ({
 
         {/* Navigation Items */}
         <nav className="flex flex-col items-center gap-2.5 my-auto">
-          {NAV_ITEMS.map(item => {
+          {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
 
@@ -113,22 +114,22 @@ export const SaasSidebar: React.FC<SaasSidebarProps> = ({
             <button
               onClick={onOpenNotifications}
               className="w-10 h-10 rounded-2xl flex items-center justify-center text-neutral-400 hover:text-neutral-800 hover:bg-black/[0.04] transition-colors relative"
-              title="Notifications"
+              title="Thông báo vận hành"
             >
               <Bell className="w-4 h-4 stroke-[1.8]" />
               <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-[#B8F23D] ring-2 ring-white" />
             </button>
           </div>
 
-          {/* User Avatar */}
+          {/* User Profile Avatar */}
           <div
-            className="w-10 h-10 rounded-2xl overflow-hidden p-0.5 border border-black/[0.08] hover:border-black/20 transition-all cursor-pointer shadow-sm"
-            title="User Profile"
+            className="w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] cursor-pointer hover:ring-2 hover:ring-[#B8F23D] transition-all"
+            title="Tài khoản Quản lý Xoắn Media"
           >
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-              alt="User"
-              className="w-full h-full object-cover rounded-[14px]"
+              alt="Quản lý Xoắn Media"
+              className="w-full h-full object-cover"
             />
           </div>
         </div>

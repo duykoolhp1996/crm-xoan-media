@@ -10,11 +10,11 @@ export const SaasProModal: React.FC<SaasProModalProps> = ({ isOpen, onClose }) =
   if (!isOpen) return null;
 
   const features = [
-    'Unlimited Real-time Analytics & AI Forecast',
-    'Custom Domain & White-label Reporting',
-    'Automated Cohort Retention & Churn Prediction',
-    'Full Webhook & REST API Integrations',
-    'Dedicated Account Manager & 99.99% SLA'
+    'Tự động đồng bộ hợp đồng lớp & công nợ từ Fanpage/Zalo',
+    'Cảnh báo trùng lịch thợ chụp & flycam thông minh tự động',
+    'Tự động tính hoa hồng & xuất lệnh chi trả cho CTV Sale',
+    'Tích hợp gửi tin nhắn Zalo ZNS nhắc lịch chụp tới ban cán sự lớp',
+    'Báo cáo P&L chi phí thợ, makeup, trang phục và lợi nhuận gộp'
   ];
 
   return (
@@ -25,7 +25,7 @@ export const SaasProModal: React.FC<SaasProModalProps> = ({ isOpen, onClose }) =
         <div className="p-6 border-b border-black/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="saas-lime-badge text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
-              ✦ Pro Plan
+              ✦ Gói CRM Doanh Nghiệp VIP
             </span>
           </div>
           <button
@@ -39,23 +39,23 @@ export const SaasProModal: React.FC<SaasProModalProps> = ({ isOpen, onClose }) =
         <div className="p-6 space-y-5">
           <div>
             <h2 className="text-xl font-black text-neutral-900 tracking-tight">
-              Unlock Advanced Business Intelligence
+              Mở Khóa Toàn Bộ Tính Năng CRM Kỷ Yếu Chuyên Sâu
             </h2>
             <p className="text-xs text-neutral-500 mt-1">
-              Scalable analytics infrastructure engineered for high-growth SaaS teams.
+              Giải pháp quản lý tự động hóa dành riêng cho Xoắn Media mùa cao điểm kỷ yếu.
             </p>
           </div>
 
           <div className="p-4 bg-neutral-900 text-white rounded-2xl flex items-center justify-between">
             <div>
-              <span className="text-[11px] text-neutral-400 font-medium">Billed Annually</span>
+              <span className="text-[11px] text-neutral-400 font-medium">Bản quyền theo mùa</span>
               <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-2xl font-black text-[#B8F23D]">$79</span>
-                <span className="text-xs text-neutral-400">/ workspace / mo</span>
+                <span className="text-2xl font-black text-[#B8F23D]">990.000đ</span>
+                <span className="text-xs text-neutral-400">/ tháng</span>
               </div>
             </div>
             <span className="bg-[#B8F23D]/20 text-[#B8F23D] text-[10px] font-bold px-2 py-1 rounded-lg border border-[#B8F23D]/30">
-              Save 25%
+              Tiết kiệm 30%
             </span>
           </div>
 
@@ -74,7 +74,7 @@ export const SaasProModal: React.FC<SaasProModalProps> = ({ isOpen, onClose }) =
             onClick={onClose}
             className="w-full py-3 bg-[#B8F23D] hover:bg-[#a6e624] text-neutral-950 font-extrabold text-xs rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
           >
-            <span>Upgrade to Pro Plan</span>
+            <span>Kích hoạt tính năng VIP</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

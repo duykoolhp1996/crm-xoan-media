@@ -1,10 +1,10 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { SAAS_SALES_PERFORMANCE } from '../../data/saasData';
+import { CRM_PACKAGE_REVENUE_DATA } from '../../data/crmBusinessData';
 import { ArrowUpRight, TrendingUp } from 'lucide-react';
 
 export const SaasSalesPerformance: React.FC = () => {
-  const { totalFormatted, growth, categories } = SAAS_SALES_PERFORMANCE;
+  const { totalFormatted, growth, categories } = CRM_PACKAGE_REVENUE_DATA;
 
   const CustomPieTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -25,9 +25,9 @@ export const SaasSalesPerformance: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-base font-bold text-neutral-900 tracking-tight">
-            Sales Performance
+            Cơ Cấu Gói Kỷ Yếu
           </h2>
-          <p className="text-xs text-neutral-400 mt-0.5">Segment contribution ratio</p>
+          <p className="text-xs text-neutral-500 mt-0.5">Tỷ trọng doanh số theo từng gói chụp</p>
         </div>
 
         <span className="saas-lime-badge text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
@@ -62,14 +62,14 @@ export const SaasSalesPerformance: React.FC = () => {
         {/* Center Total Metrics */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
-            Total Sales
+            Tổng Doanh Số
           </span>
-          <span className="text-2xl font-black text-neutral-900 tracking-tight mt-0.5">
+          <span className="text-xl font-black text-neutral-900 tracking-tight mt-0.5">
             {totalFormatted}
           </span>
           <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5 mt-0.5">
             <ArrowUpRight className="w-2.5 h-2.5" />
-            {growth} YoY
+            {growth} cùng kỳ
           </span>
         </div>
       </div>

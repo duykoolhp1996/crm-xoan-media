@@ -22,8 +22,8 @@ export const SaasCompareModal: React.FC<SaasCompareModalProps> = ({ isOpen, onCl
               <SlidersHorizontal className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold tracking-tight">Period Comparison</h2>
-              <p className="text-xs text-neutral-400 mt-0.5">Benchmark current revenue against historical metrics</p>
+              <h2 className="text-base font-extrabold tracking-tight">So Sánh Chu Kỳ Doanh Thu</h2>
+              <p className="text-xs text-neutral-500 mt-0.5">Đối chiếu doanh thu thực tế mùa này so với dữ liệu quá khứ</p>
             </div>
           </div>
           <button
@@ -37,9 +37,9 @@ export const SaasCompareModal: React.FC<SaasCompareModalProps> = ({ isOpen, onCl
         <div className="p-6 space-y-4">
           <div className="space-y-2.5">
             {[
-              { id: 'prev-month', title: 'Previous Month (July 2024)', diff: '+18.6% Growth', desc: 'So sánh cùng kỳ chu kỳ 30 ngày trước' },
-              { id: 'prev-year', title: 'Same Period Last Year (2023)', diff: '+42.3% YoY', desc: 'So sánh tốc độ tăng trưởng hàng năm' },
-              { id: 'target', title: 'Q3 Financial Target Plan', diff: '101.4% Target Met', desc: 'Đo lường tiến độ mục tiêu doanh thu đề ra' }
+              { id: 'prev-month', title: 'Tháng trước (Tháng 7/2024)', diff: '+18.6% Tăng trưởng', desc: 'So sánh cùng kỳ chu kỳ 30 ngày trước' },
+              { id: 'prev-year', title: 'Mùa kỷ yếu năm ngoái (2023)', diff: '+42.3% YoY', desc: 'Tốc độ bứt phá doanh số so với mùa trước' },
+              { id: 'target', title: 'Chỉ tiêu Doanh thu Quý 3', diff: '106% Đạt kế hoạch', desc: 'Đo lường tiến độ mục tiêu doanh thu 2.5 tỷ đề ra' }
             ].map((item) => (
               <div
                 key={item.id}
@@ -69,14 +69,14 @@ export const SaasCompareModal: React.FC<SaasCompareModalProps> = ({ isOpen, onCl
           </div>
 
           <div className="p-4 bg-neutral-50 rounded-2xl border border-black/[0.04] space-y-2 text-xs">
-            <span className="font-bold text-neutral-900">Summary Impact:</span>
+            <span className="font-bold text-neutral-900">Chỉ số tác động chính:</span>
             <div className="flex justify-between text-neutral-600">
-              <span>Gross Margin Delta:</span>
-              <strong className="text-emerald-700">+3.8%</strong>
+              <span>Biên lợi nhuận gộp sau chi phí thợ:</span>
+              <strong className="text-emerald-700">+38.5%</strong>
             </div>
             <div className="flex justify-between text-neutral-600">
-              <span>Customer Acquisition Efficiency:</span>
-              <strong className="text-emerald-700">+14.2%</strong>
+              <span>Hiệu suất chuyển đổi từ đội CTV:</span>
+              <strong className="text-emerald-700">+42.0%</strong>
             </div>
           </div>
         </div>
@@ -86,13 +86,13 @@ export const SaasCompareModal: React.FC<SaasCompareModalProps> = ({ isOpen, onCl
             onClick={onClose}
             className="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900"
           >
-            Close
+            Đóng
           </button>
           <button
             onClick={onClose}
             className="px-5 py-2 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs rounded-xl shadow-sm"
           >
-            Apply Benchmark
+            Áp dụng đối chiếu
           </button>
         </div>
       </div>
