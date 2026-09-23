@@ -395,94 +395,391 @@ export const mockRemarketingCampaigns: RemarketingCampaign[] = [];
 export const mockWorkflows: RemarketingWorkflow[] = [
   {
     id: 'wf-1',
-    name: 'Workflow 1: Chăm sóc Lead chưa Booking sau 3 ngày',
-    description: 'Tự động gửi tin nhắn Zalo kèm portfolio sau 3 ngày, nếu không phản hồi thì tạo Task cho Sales gọi điện.',
+    name: 'Chăm Sóc Lead Chưa Booking Sau 3 Ngày',
+    description: 'Tự động gửi tin nhắn Zalo kèm portfolio sau 72h, kiểm tra phản hồi để gửi ưu đãi hoặc tạo task cho Sales gọi điện.',
+    category: 'Lead Nurturing',
     triggerEvent: 'Lead mới không chuyển đổi sau 72h',
     isActive: true,
-    steps: [
+    steps: [],
+    createdAt: '2024-10-15',
+    updatedAt: '2026-09-23',
+    stats: {
+      totalTriggered: 142,
+      convertedCount: 48,
+      revenueSaved: 288000000
+    },
+    nodes: [
       {
-        id: 's1',
-        title: 'Kích hoạt',
+        id: 'wf1-n1',
         type: 'trigger',
-        description: 'Lead ở trạng thái "New Lead" hoặc "Đang tư vấn" > 3 ngày'
+        title: 'Lead Mới > 72h Chưa Chốt',
+        subtitle: 'Sự kiện kích hoạt tự động',
+        description: 'Khách hàng ở giai đoạn New Lead hoặc Đang tư vấn quá 3 ngày chưa đặt lịch',
+        config: {
+          conditionField: 'lead_age_hours',
+          conditionOperator: 'greater_than',
+          conditionValue: 72
+        },
+        position: { x: 50, y: 180 },
+        next: 'wf1-n2',
+        stats: { processedCount: 142, successRate: 100 }
       },
       {
-        id: 's2',
-        title: 'Chờ 2 giờ',
+        id: 'wf1-n2',
         type: 'delay',
-        description: 'Chờ đến khung giờ vàng (11:30 hoặc 19:30)'
+        title: 'Chờ Đến Khung Giờ Vàng',
+        subtitle: 'Đếm ngược 2 giờ',
+        description: 'Tạm dừng gửi để chờ khung giờ học sinh rảnh rỗi (11h30 trưa hoặc 19h30 tối)',
+        config: {
+          delayHours: 2
+        },
+        position: { x: 340, y: 180 },
+        next: 'wf1-n3',
+        stats: { processedCount: 142, successRate: 100 }
       },
       {
-        id: 's3',
-        title: 'Gửi Tin nhắn Zalo Portfolio',
+        id: 'wf1-n3',
         type: 'action',
-        description: 'Tự động gửi bộ ảnh mẫu theo Concept khách quan tâm qua Zalo ZNS'
+        title: 'Gửi Zalo Portfolio Concept Hot',
+        subtitle: 'Zalo ZNS / OA',
+        description: 'Tự động gửi bộ ảnh mẫu kỷ yếu Concept HOT (Retro, Prom, Thanh xuân) kèm link xem ảnh',
+        config: {
+          channel: 'Zalo',
+          templateContent: 'Chào {ten_khach}! Xoắn Media gửi bạn bộ sưu tập Concept Kỷ Yếu 2026 đang được các lớp chọn nhiều nhất: {link_portfolio}. Lớp mình thích phong cách nào bên em tư vấn chi tiết nhé!'
+        },
+        position: { x: 630, y: 180 },
+        next: 'wf1-n4',
+        stats: { processedCount: 142, successRate: 98 }
       },
       {
-        id: 's4',
-        title: 'Kiểm tra phản hồi sau 48h',
+        id: 'wf1-n4',
+        type: 'delay',
+        title: 'Chờ Phản Hồi 24h',
+        subtitle: 'Thời gian theo dõi tương tác',
+        description: 'Chờ phản hồi từ đại diện lớp hoặc xem khách có bấm vào link xem ảnh không',
+        config: {
+          delayHours: 24
+        },
+        position: { x: 920, y: 180 },
+        next: 'wf1-n5',
+        stats: { processedCount: 139, successRate: 100 }
+      },
+      {
+        id: 'wf1-n5',
         type: 'condition',
-        description: 'Khách hàng có đọc tin hoặc trả lời không?'
+        title: 'Khách Có Đọc / Trả Lời Tin?',
+        subtitle: 'Rẽ nhánh điều kiện If/Else',
+        description: 'Kiểm tra trạng thái tin nhắn Zalo đã xem hoặc khách có để lại tin nhắn',
+        config: {
+          conditionField: 'customer_replied',
+          conditionOperator: 'is_true'
+        },
+        position: { x: 1210, y: 180 },
+        yesNext: 'wf1-n6',
+        noNext: 'wf1-n7',
+        stats: { processedCount: 139, successRate: 46 }
       },
       {
-        id: 's5',
-        title: 'Tạo Task cho Sales gọi lại',
+        id: 'wf1-n6',
+        type: 'notification',
+        title: 'Tạo Task Khẩn: Sales Gọi Chốt Lịch',
+        subtitle: 'Nhánh Đúng (YES)',
+        description: 'Tự động giao việc trên CRM cho Sales phụ trách: Khách đã xem mẫu, gọi tư vấn chốt ngày chụp',
+        config: {
+          actionType: 'create_task',
+          assignedRole: 'Sales Tư Vấn',
+          taskTitle: 'Gọi điện chốt lịch chụp cho lớp {lop} {truong} (Đã phản hồi portfolio)'
+        },
+        position: { x: 1530, y: 80 },
+        next: 'wf1-n8',
+        stats: { processedCount: 64, successRate: 75 }
+      },
+      {
+        id: 'wf1-n7',
         type: 'action',
-        description: 'Giao việc trực tiếp cho Sales phụ trách: Gọi tư vấn hỗ trợ giải đáp thắc mắc của lớp'
+        title: 'Gửi Voucher Giảm 10% Flycam (SMS)',
+        subtitle: 'Nhánh Sai (NO)',
+        description: 'Gửi ưu đãi đặc quyền kích hoạt lại sự quan tâm nếu khách chưa xem tin Zalo',
+        config: {
+          channel: 'SMS',
+          templateContent: 'Xoan Media tang lop {lop} Voucher giam 10% goi Flycam 4K khi dang ky lich chup truoc ngay {han_chot}. LH: 0981108601'
+        },
+        position: { x: 1530, y: 300 },
+        next: 'wf1-n9',
+        stats: { processedCount: 75, successRate: 28 }
+      },
+      {
+        id: 'wf1-n8',
+        type: 'end',
+        title: 'Chốt Booking Thành Công',
+        subtitle: 'Mục tiêu hoàn thành',
+        description: 'Khách hàng chuyển cọc thành công và chuyển sang giai đoạn Đã cọc trên Pipeline',
+        position: { x: 1840, y: 80 },
+        stats: { processedCount: 48, successRate: 100 }
+      },
+      {
+        id: 'wf1-n9',
+        type: 'notification',
+        title: 'Task Follow-up Cuối Trước Khi Đóng Lead',
+        subtitle: 'Theo dõi lần cuối',
+        description: 'Nhắc Sales kiểm tra lần cuối sau 48h gửi voucher, nếu không phản hồi thì chuyển Lost',
+        position: { x: 1840, y: 300 },
+        stats: { processedCount: 75, successRate: 60 }
       }
     ]
   },
   {
     id: 'wf-2',
-    name: 'Workflow 2: Bám đuổi Báo giá chưa Cọc (Chốt Sales)',
-    description: 'Gửi bảng so sánh quyền lợi sau 24h, sau 3 ngày gửi Offer Flycam/Photobook.',
-    triggerEvent: 'Khách nhận báo giá nhưng chưa cọc',
+    name: 'Bám Đuổi Báo Giá Chưa Cọc (Chốt Sales Trong 48h)',
+    description: 'Tự động follow-up sau khi gửi báo giá, kiểm tra tình trạng cọc và kích hoạt gói quà tặng nâng cấp Photobook.',
+    category: 'Quote Follow-up',
+    triggerEvent: 'Khách chuyển sang "Đã gửi báo giá"',
     isActive: true,
-    steps: [
+    steps: [],
+    createdAt: '2024-10-20',
+    updatedAt: '2026-09-23',
+    stats: {
+      totalTriggered: 98,
+      convertedCount: 41,
+      revenueSaved: 246000000
+    },
+    nodes: [
       {
-        id: 's2-1',
-        title: 'Kích hoạt',
+        id: 'wf2-n1',
         type: 'trigger',
-        description: 'Khách chuyển sang "Đã gửi báo giá"'
+        title: 'Giai Đoạn "Đã Gửi Báo Giá"',
+        subtitle: 'Sự kiện kích hoạt',
+        description: 'Khi Sales gửi bảng báo giá chi tiết cho đại diện ban cán sự lớp',
+        position: { x: 50, y: 180 },
+        next: 'wf2-n2',
+        stats: { processedCount: 98, successRate: 100 }
       },
       {
-        id: 's2-2',
-        title: 'Chờ 24 Giờ',
+        id: 'wf2-n2',
         type: 'delay',
-        description: 'Để khách có thời gian họp bàn cùng tập thể lớp'
+        title: 'Chờ 24 Giờ Họp Lớp',
+        subtitle: 'Thời gian thảo luận',
+        description: 'Để ban cán sự lớp lấy ý kiến biểu quyết của các thành viên về gói chụp',
+        config: { delayHours: 24 },
+        position: { x: 340, y: 180 },
+        next: 'wf2-n3',
+        stats: { processedCount: 98, successRate: 100 }
       },
       {
-        id: 's2-3',
-        title: 'Follow-up nhẹ nhàng',
+        id: 'wf2-n3',
         type: 'action',
-        description: 'Gửi tin nhắn: "Lớp mình đã chốt được ngày và concept chưa, bên em hỗ trợ giữ lịch cho lớp nhé"'
+        title: 'Gửi Tin Nhắn Hỗ Trợ Giữ Lịch',
+        subtitle: 'Zalo Tư Vấn',
+        description: 'Nhắc nhở nhẹ nhàng lịch cuối tuần đang kín dần để lớp sớm giữ ngày',
+        config: {
+          channel: 'Zalo',
+          templateContent: 'Chào bạn! Lịch chụp cuối tuần tháng 11 của Xoắn Media đang gần kín, lớp mình đã chốt được ngày chưa để bên em ưu tiên giữ thợ chụp chính cho lớp nhé!'
+        },
+        position: { x: 630, y: 180 },
+        next: 'wf2-n4',
+        stats: { processedCount: 98, successRate: 95 }
       },
       {
-        id: 's2-4',
-        title: 'Gửi Offer Đặc Biệt sau 3 ngày',
+        id: 'wf2-n4',
+        type: 'condition',
+        title: 'Lớp Đã Đặt Cọc Chưa?',
+        subtitle: 'Kiểm tra trạng thái cọc',
+        description: 'Kiểm tra trường depositAmount > 0 hoặc trạng thái pipeline = Đã cọc',
+        config: {
+          conditionField: 'deposit_amount',
+          conditionOperator: 'greater_than',
+          conditionValue: 0
+        },
+        position: { x: 920, y: 180 },
+        yesNext: 'wf2-n5',
+        noNext: 'wf2-n6',
+        stats: { processedCount: 93, successRate: 44 }
+      },
+      {
+        id: 'wf2-n5',
         type: 'action',
-        description: 'Tặng thêm 01 thợ chụp phụ hoặc nâng cấp photobook nếu chốt trong 48h'
+        title: 'Tự Động Chuyển Stage "Đã Cọc"',
+        subtitle: 'Nhánh Đúng (YES)',
+        description: 'Tự động tạo mã Booking, thông báo Admin và gửi email xác nhận cho khách',
+        position: { x: 1220, y: 80 },
+        next: 'wf2-n7',
+        stats: { processedCount: 41, successRate: 100 }
+      },
+      {
+        id: 'wf2-n6',
+        type: 'action',
+        title: 'Tặng Quà: Nâng Cấp Photobook 40 Trang',
+        subtitle: 'Nhánh Sai (NO) - Kích hoạt Deal',
+        description: 'Gửi Offer độc quyền: Tặng thêm 01 cuốn photobook cao cấp nếu chuyển cọc trong 48h',
+        config: {
+          offerText: 'Tặng Photobook 40 trang trị giá 1.200.000đ khi cọc trước ngày mai'
+        },
+        position: { x: 1220, y: 300 },
+        next: 'wf2-n8',
+        stats: { processedCount: 52, successRate: 35 }
+      },
+      {
+        id: 'wf2-n7',
+        type: 'end',
+        title: 'Hoàn Thành Chốt Cọc Hợp Đồng',
+        subtitle: 'Doanh thu ghi nhận',
+        description: 'Hợp đồng chính thức được kích hoạt, chuyển sang phân hệ Điều phối thợ chụp',
+        position: { x: 1530, y: 80 },
+        stats: { processedCount: 41, successRate: 100 }
+      },
+      {
+        id: 'wf2-n8',
+        type: 'notification',
+        title: 'Tạo Task Sales Gọi Chốt Deal Quà Tặng',
+        subtitle: 'Đẩy mạnh chốt hợp đồng',
+        description: 'Sales trực tiếp gọi thông báo phần quà đặc biệt từ ban giám đốc dành riêng cho lớp',
+        position: { x: 1530, y: 300 },
+        stats: { processedCount: 52, successRate: 65 }
       }
     ]
   },
   {
     id: 'wf-3',
-    name: 'Workflow 3: Chăm sóc Khách hàng cũ & Bán chéo (Upsell)',
-    description: 'Sau khi hoàn thành 6 tháng, gửi tin chúc mừng tốt nghiệp và ưu đãi cho khóa sau.',
-    triggerEvent: 'Booking hoàn thành đạt 180 ngày',
-    isActive: false,
-    steps: [
+    name: 'Cứu Vãn Khách Từ Chối (Lost Lead Recovery)',
+    description: 'Tự động kích hoạt khi khách bấm Khách từ chối (Lost), chờ 7 ngày rồi gửi khảo sát và voucher tri ân khóa sau.',
+    category: 'Lost Recovery',
+    triggerEvent: 'Khách chuyển sang "Khách từ chối (Lost)"',
+    isActive: true,
+    steps: [],
+    createdAt: '2024-11-01',
+    updatedAt: '2026-09-23',
+    stats: {
+      totalTriggered: 67,
+      convertedCount: 16,
+      revenueSaved: 96000000
+    },
+    nodes: [
       {
-        id: 's3-1',
-        title: 'Kích hoạt',
+        id: 'wf3-n1',
         type: 'trigger',
-        description: 'Khách hàng đã hoàn thành buổi chụp 6 tháng'
+        title: 'Khách Hàng Rơi Vào "Lost"',
+        subtitle: 'Sự kiện kích hoạt',
+        description: 'Khi Sales bấm nút Khách từ chối (Lost) trên Hồ sơ 360° kèm lý do từ chối',
+        position: { x: 50, y: 180 },
+        next: 'wf3-n2',
+        stats: { processedCount: 67, successRate: 100 }
       },
       {
-        id: 's3-2',
-        title: 'Gửi email / Zalo chúc mừng & Tri ân',
+        id: 'wf3-n2',
+        type: 'delay',
+        title: 'Chờ Lắng Xuống 7 Ngày',
+        subtitle: 'Khoảng nghỉ tâm lý',
+        description: 'Tránh làm phiền khách ngay lập tức sau khi từ chối, chờ thời điểm thích hợp',
+        config: { delayDays: 7 },
+        position: { x: 340, y: 180 },
+        next: 'wf3-n3',
+        stats: { processedCount: 67, successRate: 100 }
+      },
+      {
+        id: 'wf3-n3',
         type: 'action',
-        description: 'Kèm mã Voucher 10% cho dịch vụ chụp ảnh gia đình / họp lớp'
+        title: 'Gửi Khảo Sát Đóng Góp & Tặng Voucher',
+        subtitle: 'Zalo / Email',
+        description: 'Gửi form khảo sát ngắn xin ý kiến cải thiện dịch vụ, tặng kèm Voucher 1.000.000đ',
+        position: { x: 630, y: 180 },
+        next: 'wf3-n4',
+        stats: { processedCount: 67, successRate: 85 }
+      },
+      {
+        id: 'wf3-n4',
+        type: 'condition',
+        title: 'Khách Có Bấm Mở Link Khảo Sát?',
+        subtitle: 'Phát hiện tín hiệu quan tâm lại',
+        description: 'Nếu khách mở link hoặc phản hồi lý do vì giá cao / chưa đủ sĩ số',
+        position: { x: 920, y: 180 },
+        yesNext: 'wf3-n5',
+        noNext: 'wf3-n6',
+        stats: { processedCount: 57, successRate: 28 }
+      },
+      {
+        id: 'wf3-n5',
+        type: 'action',
+        title: 'Tái Kích Hoạt Lead Sang "Lead Ấm"',
+        subtitle: 'Nhánh Đúng (YES)',
+        description: 'Tự động mở lại thẻ khách hàng trên Pipeline, gắn nhãn Cứu vãn thành công',
+        position: { x: 1220, y: 80 },
+        next: 'wf3-n7',
+        stats: { processedCount: 16, successRate: 100 }
+      },
+      {
+        id: 'wf3-n6',
+        type: 'end',
+        title: 'Lưu Trữ Khách Hàng Nguội',
+        subtitle: 'Nhánh Sai (NO)',
+        description: 'Đưa vào danh sách lưu trữ hàng năm, không làm phiền khách thêm',
+        position: { x: 1220, y: 300 },
+        stats: { processedCount: 41, successRate: 100 }
+      },
+      {
+        id: 'wf3-n7',
+        type: 'notification',
+        title: 'Gán Quản Lý Trực Tiếp Thương Thuyết',
+        subtitle: 'Cứu vãn đơn hàng',
+        description: 'Quản lý kinh doanh trực tiếp gọi hỗ trợ phương án gói phù hợp với ngân sách lớp',
+        position: { x: 1530, y: 80 },
+        stats: { processedCount: 16, successRate: 100 }
+      }
+    ]
+  },
+  {
+    id: 'wf-4',
+    name: 'Tri Ân Khách Hàng Cũ & Bán Chéo (Upsell Khóa Sau)',
+    description: 'Tự động chăm sóc lớp sau 6 tháng tốt nghiệp, chúc mừng và gửi voucher giảm giá dành cho khóa dưới.',
+    category: 'Upsell / Loyalty',
+    triggerEvent: 'Booking hoàn thành đạt 180 ngày',
+    isActive: true,
+    steps: [],
+    createdAt: '2024-11-10',
+    updatedAt: '2026-09-23',
+    stats: {
+      totalTriggered: 85,
+      convertedCount: 29,
+      revenueSaved: 174000000
+    },
+    nodes: [
+      {
+        id: 'wf4-n1',
+        type: 'trigger',
+        title: 'Booking Hoàn Thành Đạt 180 Ngày',
+        subtitle: 'Sự kiện kỷ niệm',
+        description: 'Khi lớp đã nhận đủ album ảnh và kỷ niệm 6 tháng ngày chụp tốt nghiệp',
+        position: { x: 50, y: 180 },
+        next: 'wf4-n2',
+        stats: { processedCount: 85, successRate: 100 }
+      },
+      {
+        id: 'wf4-n2',
+        type: 'action',
+        title: 'Gửi Clip Kỷ Niệm & Thư Tri Ân',
+        subtitle: 'Zalo Media / Email',
+        description: 'Gửi video recap kỷ yếu và lời chúc mừng bước vào cánh cửa đại học / công việc',
+        position: { x: 340, y: 180 },
+        next: 'wf4-n3',
+        stats: { processedCount: 85, successRate: 98 }
+      },
+      {
+        id: 'wf4-n3',
+        type: 'action',
+        title: 'Tặng Mã Voucher 15% Dành Cho Khóa Sau',
+        subtitle: 'Chương trình đại sứ kỷ yếu',
+        description: 'Tặng mã giới thiệu: Khóa dưới áp mã sẽ được giảm 15%, người giới thiệu nhận hoa hồng 500.000đ',
+        position: { x: 630, y: 180 },
+        next: 'wf4-n4',
+        stats: { processedCount: 85, successRate: 34 }
+      },
+      {
+        id: 'wf4-n4',
+        type: 'end',
+        title: 'Ghi Nhận Khách Hàng Thân Thiết',
+        subtitle: 'Vòng đời khách hàng hoàn tất',
+        description: 'Lưu trữ thông tin đại sứ thương hiệu để liên hệ kết nối các mùa kỷ yếu tiếp theo',
+        position: { x: 920, y: 180 },
+        stats: { processedCount: 29, successRate: 100 }
       }
     ]
   }

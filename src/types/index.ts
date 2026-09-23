@@ -262,6 +262,42 @@ export interface RemarketingCampaign {
   status: CampaignStatus;
 }
 
+export type WorkflowNodeType = 'trigger' | 'delay' | 'condition' | 'action' | 'notification' | 'end';
+
+export interface WorkflowNodeConfig {
+  channel?: 'Zalo' | 'SMS' | 'Facebook' | 'Email' | 'Phone';
+  templateContent?: string;
+  delayHours?: number;
+  delayDays?: number;
+  conditionField?: string;
+  conditionOperator?: 'equals' | 'greater_than' | 'contains' | 'is_true';
+  conditionValue?: string | number | boolean;
+  actionType?: 'send_message' | 'create_task' | 'assign_sales' | 'update_stage' | 'apply_offer';
+  targetStage?: string;
+  assignedRole?: string;
+  offerText?: string;
+  taskTitle?: string;
+  [key: string]: any;
+}
+
+export interface WorkflowNode {
+  id: string;
+  type: WorkflowNodeType;
+  title: string;
+  subtitle?: string;
+  description: string;
+  iconName?: string;
+  config?: WorkflowNodeConfig;
+  position?: { x: number; y: number };
+  next?: string; // id của node tiếp theo (luồng tuần tự)
+  yesNext?: string; // id của node khi condition = TRUE
+  noNext?: string; // id của node khi condition = FALSE
+  stats?: {
+    processedCount: number;
+    successRate: number;
+  };
+}
+
 export interface WorkflowStep {
   id: string;
   title: string;
@@ -274,9 +310,18 @@ export interface RemarketingWorkflow {
   id: string;
   name: string;
   description: string;
+  category?: 'Lead Nurturing' | 'Quote Follow-up' | 'Lost Recovery' | 'Upsell / Loyalty' | 'Pipeline Auto';
   triggerEvent: string;
   isActive: boolean;
   steps: WorkflowStep[];
+  nodes: WorkflowNode[];
+  createdAt?: string;
+  updatedAt?: string;
+  stats?: {
+    totalTriggered: number;
+    convertedCount: number;
+    revenueSaved: number;
+  };
 }
 
 // 7. Tasks & Follow-up
