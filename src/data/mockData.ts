@@ -16,6 +16,7 @@ import {
   ClassMoment,
   SalesStaff
 } from '../types';
+import photographersJson from './photographersData.json';
 
 export const mockUsers: User[] = [
   {
@@ -339,113 +340,8 @@ export const mockSchools: School[] = [
 
 export const mockSchoolClasses: SchoolClass[] = [];
 
-export const mockPhotographers: Photographer[] = [
-  {
-    id: 'photo-1',
-    fullName: 'Trần Minh Tuấn',
-    phone: '0912345678',
-    email: 'tuan.tm@xoanmedia.vn',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hải Phòng', 'Hà Nội', 'Quảng Ninh'],
-    photographerType: 'Full-time',
-    experienceYears: 5,
-    skills: ['Chụp chính', 'Flycam', 'Chỉnh màu (Colorist)'],
-    equipmentList: ['Sony A7IV', 'Lens 24-70 GM II', 'Lens 85 f1.4 GM', 'DJI Mavic Air 3', 'Flash Godox V860III'],
-    status: 'available',
-    ratePerShoot: 1200000,
-    rating: 4.95,
-    completedShootsCount: 142,
-    notes: 'Kỹ năng khuấy động không khí kỷ yếu cực tốt, ảnh màu trong trẻo.',
-    username: 'tuan.tm@xoanmedia.vn',
-    password: 'TuanPhoto@2024',
-    canLogin: true,
-    lastLoginAt: '2024-09-23 07:45'
-  },
-  {
-    id: 'photo-2',
-    fullName: 'Lê Đức Anh (Alex)',
-    phone: '0945678901',
-    email: 'ducanh.photo@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hải Phòng', 'Quảng Ninh', 'Hải Dương'],
-    photographerType: 'Freelancer',
-    experienceYears: 4,
-    skills: ['Chụp chính', 'Quay phim'],
-    equipmentList: ['Canon R6 Mark II', 'RF 28-70 f2', 'Canon 50 1.2', 'Gimbal Ronin RS3'],
-    status: 'available',
-    ratePerShoot: 1000000,
-    rating: 4.88,
-    completedShootsCount: 98,
-    notes: 'Phong cách chụp cảm xúc cinematic, chuyên concept hoàng hôn & dạ tiệc.',
-    username: 'ducanh.photo@gmail.com',
-    password: 'DucAnh@2024',
-    canLogin: true,
-    lastLoginAt: '2024-09-22 18:20'
-  },
-  {
-    id: 'photo-3',
-    fullName: 'Nguyễn Hải Đăng',
-    phone: '0977889900',
-    email: 'dang.nh@xoanmedia.vn',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hải Phòng', 'Hà Nội', 'Thái Nguyên'],
-    photographerType: 'Full-time',
-    experienceYears: 3,
-    skills: ['Chụp chính', 'Chụp phụ'],
-    equipmentList: ['Sony A7III', 'Tamron 28-75 G2', 'Sony 85 f1.8', 'Godox AD200 Pro'],
-    status: 'available',
-    ratePerShoot: 800000,
-    rating: 4.82,
-    completedShootsCount: 76,
-    notes: 'Nhiệt huyết, chiều học sinh sinh viên, hỗ trợ tạo dáng nhiệt tình.',
-    username: 'dang.nh@xoanmedia.vn',
-    password: 'DangPhoto@2024',
-    canLogin: true,
-    lastLoginAt: '2024-09-20 15:10'
-  },
-  {
-    id: 'photo-4',
-    fullName: 'Hoàng Thu Thảo',
-    phone: '0983112244',
-    email: 'thao.makeup@xoanmedia.vn',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hải Phòng', 'Hà Nội'],
-    photographerType: 'Đối tác Studio',
-    experienceYears: 4,
-    skills: ['Makeup'],
-    equipmentList: ['Cốp đồ trang điểm chuyên nghiệp Hàn Quốc & Thái Lan'],
-    status: 'available',
-    ratePerShoot: 600000,
-    rating: 4.92,
-    completedShootsCount: 110,
-    notes: 'Trang điểm phong cách tone trong trẻo Hàn Quốc phù hợp áo dài & kỷ yếu học sinh.',
-    username: 'thao.makeup@xoanmedia.vn',
-    password: 'ThaoMakeup@2024',
-    canLogin: true,
-    lastLoginAt: '2024-09-21 11:30'
-  },
-  {
-    id: 'photo-5',
-    fullName: 'Vũ Thành Đạt',
-    phone: '0966554433',
-    email: 'dat.flycam@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hải Phòng', 'Hưng Yên', 'Hải Dương'],
-    photographerType: 'Freelancer',
-    experienceYears: 3,
-    skills: ['Flycam', 'Quay phim'],
-    equipmentList: ['DJI Inspire 2', 'DJI Mavic 3 Pro', 'Sony FX3 Cinema'],
-    status: 'available',
-    ratePerShoot: 1500000,
-    rating: 4.98,
-    completedShootsCount: 85,
-    notes: 'Chuyên gia góc máy flycam xếp chữ đại tập thể kỷ yếu 100+ bạn.',
-    username: 'dat.flycam@gmail.com',
-    password: 'DatFlycam@2024',
-    canLogin: true,
-    lastLoginAt: '2024-09-22 10:00'
-  }
-];
+// Danh sách 38 thợ chụp chính thức năm 2026 từ Google Sheets của Xoắn Media
+export const mockPhotographers: Photographer[] = photographersJson as Photographer[];
 
 export const mockCustomers: Customer[] = [];
 

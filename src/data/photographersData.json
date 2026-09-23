@@ -1,0 +1,1105 @@
+[
+  {
+    "id": "photo-1",
+    "fullName": "Doanh",
+    "phone": "0866957128",
+    "email": "doanh.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Full-time",
+    "experienceYears": 4,
+    "skills": [
+      "Chụp chính"
+    ],
+    "equipmentList": [
+      "Sony A7IV",
+      "Lens 24-70 GM II",
+      "Flash Godox V860III"
+    ],
+    "status": "available",
+    "ratePerShoot": 1000000,
+    "rating": 4.8,
+    "completedShootsCount": 40,
+    "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HẢI PHÒNG)",
+    "username": "doanh.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-2",
+    "fullName": "Thành To",
+    "phone": "0379552990",
+    "email": "thanhto.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Full-time",
+    "experienceYears": 4,
+    "skills": [
+      "Chụp chính"
+    ],
+    "equipmentList": [
+      "Sony A7IV",
+      "Lens 24-70 GM II",
+      "Flash Godox V860III"
+    ],
+    "status": "available",
+    "ratePerShoot": 1000000,
+    "rating": 4.81,
+    "completedShootsCount": 43,
+    "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)",
+    "username": "thanhto.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-3",
+    "fullName": "Thắng",
+    "phone": "0904487526",
+    "email": "thang.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Full-time",
+    "experienceYears": 4,
+    "skills": [
+      "Chụp chính"
+    ],
+    "equipmentList": [
+      "Sony A7IV",
+      "Lens 24-70 GM II",
+      "Flash Godox V860III"
+    ],
+    "status": "available",
+    "ratePerShoot": 1000000,
+    "rating": 4.82,
+    "completedShootsCount": 46,
+    "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HẢI PHÒNG)",
+    "username": "thang.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-4",
+    "fullName": "Thành Con",
+    "phone": "0358039115",
+    "email": "thanhcon.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Full-time",
+    "experienceYears": 4,
+    "skills": [
+      "Chụp chính"
+    ],
+    "equipmentList": [
+      "Sony A7IV",
+      "Lens 24-70 GM II",
+      "Flash Godox V860III"
+    ],
+    "status": "available",
+    "ratePerShoot": 1000000,
+    "rating": 4.83,
+    "completedShootsCount": 49,
+    "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)",
+    "username": "thanhcon.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-5",
+    "fullName": "Văn",
+    "phone": "0869526853",
+    "email": "van.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Full-time",
+    "experienceYears": 4,
+    "skills": [
+      "Chụp chính"
+    ],
+    "equipmentList": [
+      "Sony A7IV",
+      "Lens 24-70 GM II",
+      "Flash Godox V860III"
+    ],
+    "status": "available",
+    "ratePerShoot": 1000000,
+    "rating": 4.84,
+    "completedShootsCount": 52,
+    "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)",
+    "username": "van.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-6",
+    "fullName": "Thành An",
+    "phone": "0985120016",
+    "email": "thanhan.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Quay phim"
+    ],
+    "equipmentList": [
+      "Sony FX3 / A7SIII",
+      "Gimbal Ronin RS3",
+      "Mic Rode Wireless"
+    ],
+    "status": "available",
+    "ratePerShoot": 1200000,
+    "rating": 4.85,
+    "completedShootsCount": 25,
+    "notes": "Thợ Ekip 2026 Xoắn Media (QUAY PHIM - HÀ NỘI)",
+    "username": "thanhan.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-7",
+    "fullName": "Thắng Quay Phim",
+    "phone": "0367715204",
+    "email": "thangquayphim.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Quay phim"
+    ],
+    "equipmentList": [
+      "Sony FX3 / A7SIII",
+      "Gimbal Ronin RS3",
+      "Mic Rode Wireless"
+    ],
+    "status": "available",
+    "ratePerShoot": 1200000,
+    "rating": 4.86,
+    "completedShootsCount": 27,
+    "notes": "Thợ Ekip 2026 Xoắn Media (QUAY PHIM - HẢI PHÒNG)",
+    "username": "thangquayphim.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-8",
+    "fullName": "Quang Nguyễn",
+    "phone": "0974364661",
+    "email": "quangnguyen.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Quay phim"
+    ],
+    "equipmentList": [
+      "Sony FX3 / A7SIII",
+      "Gimbal Ronin RS3",
+      "Mic Rode Wireless"
+    ],
+    "status": "available",
+    "ratePerShoot": 1200000,
+    "rating": 4.87,
+    "completedShootsCount": 29,
+    "notes": "Thợ Ekip 2026 Xoắn Media (QUAY PHIM - HẢI PHÒNG)",
+    "username": "quangnguyen.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-9",
+    "fullName": "Quách Văn Huyền",
+    "phone": "0988874108",
+    "email": "quachvanhuyen.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Full-time",
+    "experienceYears": 4,
+    "skills": [
+      "Chụp chính"
+    ],
+    "equipmentList": [
+      "Sony A7IV",
+      "Lens 24-70 GM II",
+      "Flash Godox V860III"
+    ],
+    "status": "available",
+    "ratePerShoot": 1000000,
+    "rating": 4.88,
+    "completedShootsCount": 64,
+    "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)",
+    "username": "quachvanhuyen.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-10",
+    "fullName": "Đức Trung",
+    "phone": "0988874109",
+    "email": "ductrung.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Full-time",
+    "experienceYears": 4,
+    "skills": [
+      "Chụp chính"
+    ],
+    "equipmentList": [
+      "Sony A7IV",
+      "Lens 24-70 GM II",
+      "Flash Godox V860III"
+    ],
+    "status": "available",
+    "ratePerShoot": 1000000,
+    "rating": 4.89,
+    "completedShootsCount": 67,
+    "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)",
+    "username": "ductrung.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-11",
+    "fullName": "Tú Voi",
+    "phone": "0328108778",
+    "email": "tuvoi.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.9,
+    "completedShootsCount": 35,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)",
+    "username": "tuvoi.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-12",
+    "fullName": "Thuận Vũ",
+    "phone": "0984458941",
+    "email": "thuanvu.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.91,
+    "completedShootsCount": 37,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)",
+    "username": "thuanvu.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-13",
+    "fullName": "Long",
+    "phone": "0981108601",
+    "email": "long.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.92,
+    "completedShootsCount": 39,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)",
+    "username": "long.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-14",
+    "fullName": "Thái",
+    "phone": "0345785671",
+    "email": "thai.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.93,
+    "completedShootsCount": 41,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)",
+    "username": "thai.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-15",
+    "fullName": "Lê Lâm Tùng",
+    "phone": "0787312607",
+    "email": "lelamtung.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.94,
+    "completedShootsCount": 43,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "lelamtung.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-16",
+    "fullName": "Dũng Đen",
+    "phone": "0988874115",
+    "email": "dungden.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hà Nội"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.95,
+    "completedShootsCount": 45,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)",
+    "username": "dungden.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-17",
+    "fullName": "Hạo Nhiên",
+    "phone": "0988874116",
+    "email": "haonhien.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng",
+      "Hà Nội"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.96,
+    "completedShootsCount": 47,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - KHÁC)",
+    "username": "haonhien.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-18",
+    "fullName": "Bin Hoàng",
+    "phone": "0868710343",
+    "email": "binhoang.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.97,
+    "completedShootsCount": 49,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "binhoang.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-19",
+    "fullName": "Phạm Hồng Quân",
+    "phone": "0944879855",
+    "email": "phamhongquan.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.98,
+    "completedShootsCount": 51,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "phamhongquan.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-20",
+    "fullName": "Doãn Hiểu",
+    "phone": "0328727894",
+    "email": "doanhieu.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.99,
+    "completedShootsCount": 53,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "doanhieu.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-21",
+    "fullName": "Phong Lê",
+    "phone": "0975987565",
+    "email": "phongle.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.8,
+    "completedShootsCount": 55,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "phongle.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-22",
+    "fullName": "Vũ Ngọc Tú",
+    "phone": "0964458168",
+    "email": "vungoctu.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.81,
+    "completedShootsCount": 57,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "vungoctu.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-23",
+    "fullName": "Nguyên Lê",
+    "phone": "0988874122",
+    "email": "nguyenle.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.82,
+    "completedShootsCount": 59,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "nguyenle.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-24",
+    "fullName": "Hổ Phách",
+    "phone": "0989659634",
+    "email": "hophach.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.83,
+    "completedShootsCount": 61,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "hophach.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-25",
+    "fullName": "Hoàng Xuân Nguyễn",
+    "phone": "0345707698",
+    "email": "hoangxuannguyen.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.84,
+    "completedShootsCount": 63,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "hoangxuannguyen.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-26",
+    "fullName": "Hoàng Vũ",
+    "phone": "0975878459",
+    "email": "hoangvu.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.85,
+    "completedShootsCount": 65,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "hoangvu.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-27",
+    "fullName": "Nguyễn Thế Hoàng",
+    "phone": "0849368598",
+    "email": "nguyenthehoang.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.86,
+    "completedShootsCount": 67,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "nguyenthehoang.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-28",
+    "fullName": "Kim Tiền",
+    "phone": "0393866710",
+    "email": "kimtien.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.87,
+    "completedShootsCount": 69,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "kimtien.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-29",
+    "fullName": "Phạm Chung",
+    "phone": "0973458592",
+    "email": "phamchung.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.88,
+    "completedShootsCount": 71,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "phamchung.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-30",
+    "fullName": "Phạm Tùng",
+    "phone": "0775303040",
+    "email": "phamtung.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.89,
+    "completedShootsCount": 73,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "phamtung.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-31",
+    "fullName": "Tuấn Vịt",
+    "phone": "0386028883",
+    "email": "tuanvit.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.9,
+    "completedShootsCount": 75,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "tuanvit.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-32",
+    "fullName": "Phạm Duy Thành",
+    "phone": "0705403697",
+    "email": "phamduythanh.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.91,
+    "completedShootsCount": 77,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "phamduythanh.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-33",
+    "fullName": "Nguyễn Đức Vượng",
+    "phone": "0989413224",
+    "email": "nguyenducvuong.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.92,
+    "completedShootsCount": 79,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "nguyenducvuong.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-34",
+    "fullName": "Minh Tiến",
+    "phone": "0376511051",
+    "email": "minhtien.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.93,
+    "completedShootsCount": 81,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "minhtien.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-35",
+    "fullName": "Hành Tây",
+    "phone": "0988874134",
+    "email": "hanhtay.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.94,
+    "completedShootsCount": 83,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "hanhtay.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-36",
+    "fullName": "Tuấn Thành",
+    "phone": "0333640448",
+    "email": "tuanthanh.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.95,
+    "completedShootsCount": 85,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "tuanthanh.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-37",
+    "fullName": "Trương Đức Mạnh",
+    "phone": "0988874136",
+    "email": "truongducmanh.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.96,
+    "completedShootsCount": 87,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "truongducmanh.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  },
+  {
+    "id": "photo-38",
+    "fullName": "An Conan",
+    "phone": "0777960967",
+    "email": "anconan.photo@xoanmedia.vn",
+    "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80",
+    "activeRegions": [
+      "Hải Phòng"
+    ],
+    "photographerType": "Freelancer",
+    "experienceYears": 2,
+    "skills": [
+      "Chụp phụ"
+    ],
+    "equipmentList": [
+      "Sony A7III",
+      "Lens 24-70mm",
+      "Flash Godox"
+    ],
+    "status": "available",
+    "ratePerShoot": 600000,
+    "rating": 4.97,
+    "completedShootsCount": 89,
+    "notes": "Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)",
+    "username": "anconan.photo@xoanmedia.vn",
+    "password": "XoanPhoto@2026",
+    "canLogin": true,
+    "lastLoginAt": "2026-09-23 08:00"
+  }
+]
