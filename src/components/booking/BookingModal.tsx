@@ -18,9 +18,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
   const initialDistricts = getDistrictsByCity(initialCity);
   const initialDistrict = initialCustomer?.district || initialDistricts[0] || 'Cầu Giấy';
 
+  const todayStr = new Date().toISOString().split('T')[0];
   const [formData, setFormData] = useState({
     customerId: initialCustomer?.id || '',
-    shootDate: initialDate || '2024-11-20',
+    shootDate: initialDate || todayStr,
     startTime: '08:00',
     endTime: '17:00',
     city: initialCity,
@@ -167,17 +168,23 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
           {/* 1. Chọn khách hàng / lớp */}
           <div>
             <label className="font-semibold text-neutral-700">Chọn Lớp / Khách Hàng *</label>
-            <select
-              value={formData.customerId}
-              onChange={e => handleCustomerChange(e.target.value)}
-              className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-            >
-              {customers.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.className} - {c.schoolName} ({c.name} - {c.phone})
-                </option>
-              ))}
-            </select>
+            {customers.length === 0 ? (
+              <div className="mt-1.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                ⚠️ <strong>Chưa có lớp nào trong hệ thống!</strong> Vui lòng vào mục <strong>Khách hàng / Leads</strong> hoặc <strong>Pipeline</strong> để thêm lớp mới trước khi tạo booking.
+              </div>
+            ) : (
+              <select
+                value={formData.customerId}
+                onChange={e => handleCustomerChange(e.target.value)}
+                className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+              >
+                {customers.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.className} - {c.schoolName} ({c.name} - {c.phone})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* 2. Ngày giờ & Địa điểm */}
@@ -383,7 +390,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold shadow-sm transition-all active:scale-95"
+              disabled={customers.length === 0}
+              className={`px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all ${
+                customers.length === 0
+                  ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                  : 'bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] active:scale-95'
+              }`}
             >
               Xác Nhận Tạo Booking
             </button>

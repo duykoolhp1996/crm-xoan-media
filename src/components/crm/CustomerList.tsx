@@ -156,8 +156,9 @@ export const CustomerList: React.FC = () => {
             <tbody className="divide-y divide-black/[0.04] font-medium text-neutral-800">
               {filteredCustomers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-neutral-400">
-                    Không tìm thấy khách hàng nào phù hợp với bộ lọc hiện tại.
+                  <td colSpan={7} className="py-12 text-center text-neutral-500">
+                    <p className="font-semibold text-sm">Chưa có khách hàng hoặc lớp học nào trong hệ thống</p>
+                    <p className="text-xs text-neutral-400 mt-1">Bấm nút "+ Thêm Lớp Mới" ở góc trên bên phải để bắt đầu nhập dữ liệu mới!</p>
                   </td>
                 </tr>
               ) : (

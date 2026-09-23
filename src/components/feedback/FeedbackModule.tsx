@@ -60,67 +60,7 @@ export const FeedbackModule: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Danh sách các bài viết Khoảnh khắc & Feedback chuẩn phong cách Threads
-  const [posts, setPosts] = useState<ThreadsPost[]>([
-    {
-      id: 'post-1',
-      authorName: 'Mike Không Chụp Film',
-      authorHandle: 'mikekhongchupfilm',
-      authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      date: '18/8/25',
-      content: 'Giao diện nàng thơ, hệ điều hành chuyên toán :>>>',
-      images: [
-        'https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80'
-      ],
-      layout: 'double',
-      likes: 8000,
-      comments: 63,
-      reposts: 528,
-      shares: 312,
-      subHandle: '@xoanmedia.kyyeu',
-      subDescription: '8.000 lượt thích · Bộ ảnh thanh xuân 12A1 Chu Văn An vừa ra lò',
-      classTag: '12 Toán 1 - THPT Chu Văn An'
-    },
-    {
-      id: 'post-2',
-      authorName: 'Mike Không Chụp Film',
-      authorHandle: 'mikekhongchupfilm',
-      authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      date: '3/3/26',
-      content: 'Êh hôm nay tôi ngồi sửa hình kỷ yếu, có tấm này ông nào trong stu chụp peak vãi, trông nó cứ anime mà nó cứ “một buổi trưa hè” ấy, +1 hình nền pc :)))',
-      images: [
-        'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1000&auto=format&fit=crop&q=80'
-      ],
-      layout: 'single-wide',
-      likes: 2900,
-      comments: 18,
-      reposts: 126,
-      shares: 28,
-      subHandle: '@xoanmedia.crew',
-      subDescription: '5.300 lượt thích · Hậu trường lăn xả bắt trọn từng khoảnh khắc',
-      classTag: '12 Anh 1 - THPT Chuyên Hà Nội - Amsterdam'
-    },
-    {
-      id: 'post-3',
-      authorName: 'Mike Không Chụp Film',
-      authorHandle: 'mikekhongchupfilm',
-      authorAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-      date: '20/9/25',
-      content: "nắng được 5' và kết quả của buổi chụp hình cho bạn khách lowkey không thích posing nhìu :>",
-      images: [
-        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80'
-      ],
-      layout: 'double',
-      likes: 2800,
-      comments: 11,
-      reposts: 76,
-      shares: 96,
-      subHandle: '@xoanmedia.feedback',
-      subDescription: '2.900 lượt thích · Tin nhắn lớp trưởng xúc động rơi nước mắt',
-      classTag: '12A6 - THPT Kim Liên'
-    }
-  ]);
+  const [posts, setPosts] = useState<ThreadsPost[]>([]);
 
   // Form thêm feedback mới
   const [newFeedbackForm, setNewFeedbackForm] = useState({
@@ -289,8 +229,19 @@ export const FeedbackModule: React.FC = () => {
 
       {/* CHẾ ĐỘ 1: THREADS SOCIAL FEED (CHUẨN 100% GIAO DIỆN BẠN YÊU CẦU) */}
       {activeTab === 'threads_feed' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-          {posts.map((post) => (
+        posts.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-black/[0.08] p-12 text-center max-w-lg mx-auto shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto text-neutral-500 mb-3 font-bold text-lg">
+              @
+            </div>
+            <h3 className="text-sm font-bold text-neutral-900">Chưa có bài viết khoảnh khắc nào</h3>
+            <p className="text-xs text-neutral-500 mt-1">
+              Giao diện Threads feed sẽ hiển thị các câu chuyện hậu trường và khoảnh khắc kỷ yếu khi bạn chia sẻ bài viết đầu tiên.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+            {posts.map((post) => (
             <div key={post.id} className="flex flex-col space-y-3 group">
               {/* Card Nền Trắng Kiểu Threads */}
               <div className="bg-white text-neutral-900 rounded-2xl p-5 shadow-2xl border border-neutral-200/80 flex flex-col justify-between space-y-4 hover:shadow-orange-500/5 transition-all">
@@ -452,68 +403,86 @@ export const FeedbackModule: React.FC = () => {
             </div>
           ))}
         </div>
-      )}
+      ))}
 
       {/* CHẾ ĐỘ 2: QUẢN LÝ REVIEW TRONG HỆ THỐNG CRM */}
       {activeTab === 'crm_reviews' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {feedbacks.map((fb) => (
-              <div
-                key={fb.id}
-                className="bg-white border border-black/[0.08] rounded-3xl p-6 space-y-4 flex flex-col justify-between shadow-xs hover:shadow-md transition-all"
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-extrabold text-neutral-900">{fb.className}</span>
-                        <span className="text-[10px] bg-neutral-100 text-neutral-700 border border-black/[0.06] px-2.5 py-0.5 rounded-full font-semibold">
-                          {fb.channel}
-                        </span>
-                        {fb.status === 'featured' && (
-                          <span className="text-[10px] font-bold bg-[#B8F23D]/30 text-neutral-950 border border-[#B8F23D]/60 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                            ★ Ghim Website
+        feedbacks.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-black/[0.08] p-12 text-center max-w-lg mx-auto shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto text-amber-500 mb-3">
+              <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
+            </div>
+            <h3 className="text-sm font-bold text-neutral-900">Chưa có đánh giá nào từ các lớp</h3>
+            <p className="text-xs text-neutral-500 mt-1">
+              Bấm nút "Thêm Phản Hồi" ở góc trên bên phải để ghi nhận review và lời khen của lớp dành cho ekip chụp!
+            </p>
+            <button
+              onClick={() => setIsFeedbackModalOpen(true)}
+              className="mt-4 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold transition-all shadow-xs inline-flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" /> Thêm Đánh Giá Mới
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {feedbacks.map((fb) => (
+                <div
+                  key={fb.id}
+                  className="bg-white border border-black/[0.08] rounded-3xl p-6 space-y-4 flex flex-col justify-between shadow-xs hover:shadow-md transition-all"
+                >
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-extrabold text-neutral-900">{fb.className}</span>
+                          <span className="text-[10px] bg-neutral-100 text-neutral-700 border border-black/[0.06] px-2.5 py-0.5 rounded-full font-semibold">
+                            {fb.channel}
                           </span>
-                        )}
+                          {fb.status === 'featured' && (
+                            <span className="text-[10px] font-bold bg-[#B8F23D]/30 text-neutral-950 border border-[#B8F23D]/60 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              ★ Ghim Website
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-1 font-medium">{fb.schoolName}</p>
                       </div>
-                      <p className="text-xs text-neutral-500 mt-1 font-medium">{fb.schoolName}</p>
+
+                      <div className="flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-xl text-xs font-bold shrink-0">
+                        <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        {fb.rating}.0
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-xl text-xs font-bold shrink-0">
-                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                      {fb.rating}.0
-                    </div>
+                    <p className="mt-3.5 text-xs text-neutral-700 bg-neutral-50 p-4 rounded-2xl border border-black/[0.05] italic leading-relaxed">
+                      "{fb.comment}"
+                    </p>
+
+                    {fb.photographerMentioned && fb.photographerMentioned.length > 0 && (
+                      <p className="text-[11px] text-neutral-500 mt-2.5 font-medium">
+                        📷 Thợ được khen: <span className="text-neutral-900 font-bold">{fb.photographerMentioned.join(', ')}</span>
+                      </p>
+                    )}
                   </div>
 
-                  <p className="mt-3.5 text-xs text-neutral-700 bg-neutral-50 p-4 rounded-2xl border border-black/[0.05] italic leading-relaxed">
-                    "{fb.comment}"
-                  </p>
-
-                  {fb.photographerMentioned && fb.photographerMentioned.length > 0 && (
-                    <p className="text-[11px] text-neutral-500 mt-2.5 font-medium">
-                      📷 Thợ được khen: <span className="text-neutral-900 font-bold">{fb.photographerMentioned.join(', ')}</span>
-                    </p>
-                  )}
+                  <div className="pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-xs text-neutral-500">
+                    <span>Gửi bởi: <strong className="text-neutral-900">{fb.customerName}</strong> ({fb.reviewerRole})</span>
+                    <button
+                      onClick={() => updateFeedbackStatus(fb.id, fb.status === 'featured' ? 'approved' : 'featured')}
+                      className={`font-bold transition-colors ${
+                        fb.status === 'featured'
+                          ? 'text-rose-600 hover:text-rose-700'
+                          : 'text-neutral-900 hover:text-emerald-700'
+                      }`}
+                    >
+                      {fb.status === 'featured' ? 'Bỏ Ghim' : 'Ghim Lên Showcase'}
+                    </button>
+                  </div>
                 </div>
-
-                <div className="pt-3.5 border-t border-black/[0.06] flex items-center justify-between text-xs text-neutral-500">
-                  <span>Gửi bởi: <strong className="text-neutral-900">{fb.customerName}</strong> ({fb.reviewerRole})</span>
-                  <button
-                    onClick={() => updateFeedbackStatus(fb.id, fb.status === 'featured' ? 'approved' : 'featured')}
-                    className={`font-bold transition-colors ${
-                      fb.status === 'featured'
-                        ? 'text-rose-600 hover:text-rose-700'
-                        : 'text-neutral-900 hover:text-emerald-700'
-                    }`}
-                  >
-                    {fb.status === 'featured' ? 'Bỏ Ghim' : 'Ghim Lên Showcase'}
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* LIGHTBOX MODAL PHÓNG TO ẢNH */}
@@ -626,15 +595,21 @@ export const FeedbackModule: React.FC = () => {
             <form onSubmit={handleCreateFeedbackSubmit} className="space-y-3">
               <div>
                 <label className="font-semibold text-neutral-700">Chọn Khách Hàng / Lớp</label>
-                <select
-                  value={newFeedbackForm.customerId}
-                  onChange={e => setNewFeedbackForm({ ...newFeedbackForm, customerId: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 focus:bg-white focus:outline-none"
-                >
-                  {customers.map(c => (
-                    <option key={c.id} value={c.id}>{c.className} - {c.schoolName} ({c.name})</option>
-                  ))}
-                </select>
+                {customers.length === 0 ? (
+                  <p className="mt-1 p-2.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs">
+                    ⚠️ Chưa có lớp nào trong hệ thống. Vui lòng tạo lớp mới trước khi thêm phản hồi!
+                  </p>
+                ) : (
+                  <select
+                    value={newFeedbackForm.customerId}
+                    onChange={e => setNewFeedbackForm({ ...newFeedbackForm, customerId: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 focus:bg-white focus:outline-none"
+                  >
+                    {customers.map(c => (
+                      <option key={c.id} value={c.id}>{c.className} - {c.schoolName} ({c.name})</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -699,7 +674,12 @@ export const FeedbackModule: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold shadow-sm transition-all active:scale-95"
+                  disabled={customers.length === 0}
+                  className={`px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all ${
+                    customers.length === 0
+                      ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                      : 'bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] active:scale-95'
+                  }`}
                 >
                   Lưu Feedback
                 </button>

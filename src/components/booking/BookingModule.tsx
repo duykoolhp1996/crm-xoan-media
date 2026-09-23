@@ -137,8 +137,9 @@ export const BookingModule: React.FC = () => {
             <tbody className="divide-y divide-white/[0.05] font-medium text-white/80">
               {filteredBookings.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-white/40">
-                    Không có đơn Booking nào phù hợp với bộ lọc.
+                  <td colSpan={7} className="py-12 text-center text-white/50">
+                    <p className="font-semibold text-sm text-white/80">Chưa có đơn booking lịch chụp nào trong hệ thống</p>
+                    <p className="text-xs text-white/40 mt-1">Bấm nút "+ Tạo Booking Mới" ở góc trên bên phải để lên lịch chụp cho lớp!</p>
                   </td>
                 </tr>
               ) : (

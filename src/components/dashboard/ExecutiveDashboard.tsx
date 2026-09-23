@@ -143,12 +143,12 @@ export const ExecutiveDashboard: React.FC = () => {
     });
 
     const timeline = [
-      { month: 'T7', baseRev: 25.5, baseCost: 7.2, baseBks: 2 },
-      { month: 'T8', baseRev: 38.0, baseCost: 10.5, baseBks: 3 },
-      { month: 'T9', baseRev: 52.4, baseCost: 14.0, baseBks: 5 },
-      { month: 'T10', baseRev: 0, baseCost: 8.5, baseBks: 0 },
-      { month: 'T11 (Cao Điểm)', baseRev: 0, baseCost: 21.0, baseBks: 0 },
-      { month: 'T12', baseRev: 0, baseCost: 9.0, baseBks: 0 },
+      { month: 'T7', baseRev: 0, baseCost: 0, baseBks: 0 },
+      { month: 'T8', baseRev: 0, baseCost: 0, baseBks: 0 },
+      { month: 'T9', baseRev: 0, baseCost: 0, baseBks: 0 },
+      { month: 'T10', baseRev: 0, baseCost: 0, baseBks: 0 },
+      { month: 'T11 (Cao Điểm)', baseRev: 0, baseCost: 0, baseBks: 0 },
+      { month: 'T12', baseRev: 0, baseCost: 0, baseBks: 0 },
     ];
 
     return timeline.map(m => {
@@ -352,7 +352,7 @@ export const ExecutiveDashboard: React.FC = () => {
                   <p className="text-xs text-neutral-400 mt-0.5">Thống kê theo dữ liệu hợp đồng và lịch chụp thực tế các tháng</p>
                 </div>
                 <span className="text-xs font-bold text-neutral-900 bg-[#B8F23D] px-3 py-1 rounded-full shadow-xs">
-                  Tháng {peakMonth.month} Đỉnh Điểm: {peakMonth.revenue}tr
+                  {peakMonth.revenue > 0 ? `Tháng ${peakMonth.month} Đỉnh Điểm: ${peakMonth.revenue}tr` : 'Sẵn sàng ghi nhận hợp đồng mới'}
                 </span>
               </div>
 
@@ -399,46 +399,57 @@ export const ExecutiveDashboard: React.FC = () => {
                 <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Phân Bổ Kênh Khách Hàng</h2>
                 <p className="text-xs text-neutral-400 mt-0.5">Tỷ lệ lớp và doanh thu từ CTV, Facebook, TikTok...</p>
 
-                <div className="h-56 mt-2">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={sourceStats}
-                        innerRadius={50}
-                        outerRadius={80}
-                        paddingAngle={4}
-                        dataKey="value"
-                      >
-                        {sourceStats.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#111827',
-                          borderRadius: '12px',
-                          border: 'none',
-                          color: '#fff',
-                          fontSize: '11px'
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="h-56 mt-2 flex items-center justify-center">
+                  {sourceStats.length === 0 ? (
+                    <div className="text-center text-neutral-400 text-xs px-4">
+                      <p className="font-semibold text-neutral-600">Chưa có dữ liệu kênh tiếp cận</p>
+                      <p className="text-[11px] text-neutral-400 mt-1">Dữ liệu sẽ tự động tổng hợp khi bạn thêm khách hàng đầu tiên!</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={sourceStats}
+                          innerRadius={50}
+                          outerRadius={80}
+                          paddingAngle={4}
+                          dataKey="value"
+                        >
+                          {sourceStats.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#111827',
+                            borderRadius: '12px',
+                            border: 'none',
+                            color: '#fff',
+                            fontSize: '11px'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1.5 mt-2 border-t border-black/[0.04] pt-3">
-                {sourceStats.map((s, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-2 text-neutral-600">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></span>
-                      {s.name}
-                    </span>
-                    <span className="font-semibold text-neutral-900">
-                      {s.value} Lớp ({(s.revenue / 1000000).toFixed(1)} Tr)
-                    </span>
-                  </div>
-                ))}
+                {sourceStats.length === 0 ? (
+                  <p className="text-xs text-neutral-400 text-center py-2">Chưa có lớp nào</p>
+                ) : (
+                  sourceStats.map((s, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-2 text-neutral-600">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></span>
+                        {s.name}
+                      </span>
+                      <span className="font-semibold text-neutral-900">
+                        {s.value} Lớp ({(s.revenue / 1000000).toFixed(1)} Tr)
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -499,12 +510,24 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-2.5">
-                {upcomingBookings.map((bk) => {
-                  const hasConflict = bk.assignments.leadPhotographerName?.includes('Trùng Lịch');
-                  const isUnassigned = !bk.assignments.leadPhotographerId;
+                {upcomingBookings.length === 0 ? (
+                  <div className="text-center py-8 bg-neutral-50 rounded-2xl border border-dashed border-neutral-200">
+                    <p className="text-xs font-semibold text-neutral-500">Chưa có lịch chụp nào trong hệ thống</p>
+                    <p className="text-[11px] text-neutral-400 mt-1">Khi bạn tạo booking lịch chụp mới, thông tin điều phối thợ sẽ xuất hiện tại đây.</p>
+                    <button
+                      onClick={() => setActiveTab('bookings')}
+                      className="mt-3 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-all shadow-xs"
+                    >
+                      + Tạo Booking Đầu Tiên
+                    </button>
+                  </div>
+                ) : (
+                  upcomingBookings.map((bk) => {
+                    const hasConflict = bk.assignments.leadPhotographerName?.includes('Trùng Lịch');
+                    const isUnassigned = !bk.assignments.leadPhotographerId;
 
-                  return (
-                    <div
+                    return (
+                      <div
                       key={bk.id}
                       onClick={() => {
                         setSelectedBookingId(bk.id);
@@ -572,7 +595,7 @@ export const ExecutiveDashboard: React.FC = () => {
                       </div>
                     </div>
                   );
-                })}
+                }))}
               </div>
             </div>
           </div>
