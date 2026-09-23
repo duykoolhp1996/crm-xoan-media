@@ -199,12 +199,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateCustomerStage = (customerId: string, newStage: PipelineStage) => {
+    const targetCustomer = customers.find(c => c.id === customerId);
+    if (!targetCustomer) return;
+
+    const prevStage = targetCustomer.pipelineStage;
+    let newSalesName = targetCustomer.assignedSalesName;
+    let newSalesId = targetCustomer.assignedSalesId;
+
+    // Tự động gán nhân viên Sales tư vấn khi chuyển từ "New Lead" sang "Đã liên hệ" (hoặc nếu chuyển vào "Đã liên hệ" mà chưa có Sales)
+    const isMovingToContacted =
+      (prevStage === 'New Lead' || !newSalesName || newSalesName === 'Chưa gán') &&
+      newStage === 'Đã liên hệ';
+
+    if (isMovingToContacted) {
+      if (currentUser.role === 'sales') {
+        newSalesName = currentUser.name;
+        newSalesId = currentUser.id;
+      } else {
+        newSalesName = (newSalesName && newSalesName !== 'Chưa gán') ? newSalesName : 'Lê Hoàng Sơn (Sales Lead)';
+        newSalesId = newSalesId && newSalesId !== '' ? newSalesId : 'user-2';
+      }
+    }
+
     setCustomers(prev =>
       prev.map(c => {
         if (c.id === customerId) {
           return {
             ...c,
             pipelineStage: newStage,
+            assignedSalesName: newSalesName || c.assignedSalesName,
+            assignedSalesId: newSalesId || c.assignedSalesId,
             updatedAt: new Date().toISOString()
           };
         }
@@ -212,15 +236,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
 
-    const targetCustomer = customers.find(c => c.id === customerId);
-    if (targetCustomer) {
-      addActivityLog({
-        customerId,
-        type: 'quote_sent',
-        title: `Chuyển giai đoạn: ${newStage}`,
-        description: `Khách hàng ${targetCustomer.name} được chuyển từ "${targetCustomer.pipelineStage}" sang "${newStage}".`,
-        performedByName: currentUser.name
-      });
+    addActivityLog({
+      customerId,
+      type: isMovingToContacted ? 'call' : 'quote_sent',
+      title: isMovingToContacted
+        ? `Tự động gán Sales tư vấn: ${newSalesName}`
+        : `Chuyển giai đoạn: ${newStage}`,
+      description: isMovingToContacted
+        ? `Khách hàng ${targetCustomer.name} (${targetCustomer.className} - ${targetCustomer.schoolName}) được chuyển từ "${prevStage}" sang "Đã liên hệ". Hệ thống tự động gán nhân viên Sales "${newSalesName}" phụ trách tư vấn.`
+        : `Khách hàng ${targetCustomer.name} được chuyển từ "${prevStage}" sang "${newStage}".`,
+      performedByName: currentUser.name
+    });
+
+    if (isMovingToContacted) {
+      const newNotif: SystemNotification = {
+        id: `notif-${Date.now()}`,
+        type: 'new_lead',
+        title: `🎯 ĐÃ GÁN SALES TƯ VẤN: ${newSalesName}`,
+        message: `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) đã chuyển sang "Đã liên hệ". Phụ trách tư vấn: ${newSalesName}.`,
+        severity: 'info',
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      setNotifications(prev => [newNotif, ...prev]);
     }
   };
 

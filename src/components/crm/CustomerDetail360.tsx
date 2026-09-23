@@ -12,8 +12,10 @@ import {
   Star,
   Heart,
   MapPin,
-  Headphones
+  Headphones,
+  UserCheck
 } from 'lucide-react';
+import { SALES_STAFF_LIST } from '../../data/mockData';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -23,6 +25,7 @@ interface CustomerDetail360Props {
 export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId, onClose }) => {
   const {
     customers,
+    updateCustomer,
     bookings,
     activityLogs,
     addActivityLog,
@@ -109,7 +112,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
         </div>
 
         {/* Quick Summary Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-neutral-50/50 px-6 py-3.5 border-b border-black/[0.06] text-xs shrink-0">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-neutral-50/50 px-6 py-3.5 border-b border-black/[0.06] text-xs shrink-0">
           <div>
             <p className="text-[11px] text-neutral-500 font-medium">Giai đoạn Pipeline</p>
             <p className="font-bold text-neutral-900 mt-0.5">{customer.pipelineStage}</p>
@@ -124,8 +127,40 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           </div>
           <div>
             <p className="text-[11px] text-neutral-500 font-medium flex items-center gap-1">
+              <UserCheck className="w-3 h-3 text-blue-600" />
+              Sales tư vấn phụ trách
+            </p>
+            <div className="mt-0.5">
+              <select
+                value={customer.assignedSalesName || 'Chưa gán'}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const matched = SALES_STAFF_LIST.find(s => s.name === val);
+                  updateCustomer({
+                    ...customer,
+                    assignedSalesName: val,
+                    assignedSalesId: matched?.id || (val === currentUser.name ? currentUser.id : 'user-2'),
+                    updatedAt: new Date().toISOString()
+                  });
+                }}
+                className="font-bold text-blue-700 bg-transparent focus:outline-none cursor-pointer text-xs truncate max-w-full hover:underline"
+              >
+                <option value="Chưa gán">Chưa gán (Tự động khi liên hệ)</option>
+                {SALES_STAFF_LIST.map((staff) => (
+                  <option key={staff.id} value={staff.name}>
+                    {staff.name}
+                  </option>
+                ))}
+                {currentUser.role === 'sales' && !SALES_STAFF_LIST.some(s => s.name === currentUser.name) && (
+                  <option value={currentUser.name}>{currentUser.name}</option>
+                )}
+              </select>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] text-neutral-500 font-medium flex items-center gap-1">
               <Headphones className="w-3 h-3 text-neutral-500" />
-              Chuyên viên CSKH phụ trách
+              CSKH phụ trách
             </p>
             <p className="font-bold text-neutral-900 mt-0.5 truncate">
               {customer.assignedCareStaffName || 'Phạm Quỳnh Nga (CSKH)'}

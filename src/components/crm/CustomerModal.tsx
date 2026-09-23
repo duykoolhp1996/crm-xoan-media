@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { LeadSource, PipelineStage } from '../../types';
 import { VIETNAM_LOCATIONS, getDistrictsByCity } from '../../data/vietnamLocations';
-import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones } from 'lucide-react';
+import { SALES_STAFF_LIST } from '../../data/mockData';
+import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones, UserCheck } from 'lucide-react';
 
 interface CustomerModalProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     utmMedium: 'cpc',
     utmCampaign: 'lead_form_kyyeu',
     pipelineStage: 'New Lead' as PipelineStage,
+    assignedSalesName: 'Chưa gán',
     assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)'
   });
 
@@ -76,6 +78,13 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
 
     const selectedPkg = servicePackages.find(p => p.id === formData.servicePackageId);
 
+    let salesName = formData.assignedSalesName;
+    if (formData.pipelineStage !== 'New Lead' && salesName === 'Chưa gán') {
+      salesName = currentUser.role === 'sales' ? currentUser.name : 'Lê Hoàng Sơn (Sales Lead)';
+    }
+    const matchedSales = SALES_STAFF_LIST.find(s => s.name === salesName);
+    const salesId = matchedSales?.id || (salesName === currentUser.name ? currentUser.id : '');
+
     addCustomer({
       name: formData.name,
       phone: formData.phone,
@@ -108,8 +117,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
         campaign: formData.utmCampaign
       },
       pipelineStage: formData.pipelineStage,
-      assignedSalesId: currentUser.id,
-      assignedSalesName: currentUser.name,
+      assignedSalesId: salesId,
+      assignedSalesName: salesName,
       assignedCareStaffName: formData.assignedCareStaffName
     });
 
@@ -389,9 +398,9 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
           {/* Section 4: Nguồn Tiếp Cận & Nhân Sự CSKH */}
           <div className="space-y-3">
             <h3 className="font-bold text-neutral-900 uppercase tracking-wider flex items-center gap-1.5 border-b border-black/[0.06] pb-2 text-[11px]">
-              <Tag className="w-4 h-4 text-neutral-700" /> 4. Nguồn Tiếp Cận & Phân Bổ CSKH
+              <Tag className="w-4 h-4 text-neutral-700" /> 4. Nguồn Tiếp Cận & Phân Bổ Nhân Sự (Sales & CSKH)
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               <div>
                 <label className="font-semibold text-neutral-700">Kênh nguồn *</label>
                 <select
@@ -426,6 +435,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
                   className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:bg-white focus:outline-none"
                 >
                   <option value="New Lead">1. New Lead (Mới)</option>
+                  <option value="Đã liên hệ">2. Đã liên hệ</option>
                   <option value="Đang tư vấn">3. Đang tư vấn</option>
                   <option value="Đã gửi báo giá">4. Đã gửi báo giá</option>
                   <option value="Đã đặt cọc">6. Đã đặt cọc</option>
@@ -433,13 +443,34 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
               </div>
               <div>
                 <label className="font-semibold text-neutral-700 flex items-center gap-1">
+                  <UserCheck className="w-3.5 h-3.5 text-blue-600" />
+                  Sales Tư Vấn Phụ Trách
+                </label>
+                <select
+                  value={formData.assignedSalesName}
+                  onChange={e => setFormData({ ...formData, assignedSalesName: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none text-xs"
+                >
+                  <option value="Chưa gán">Chưa gán (Tự động khi liên hệ)</option>
+                  {SALES_STAFF_LIST.map((staff) => (
+                    <option key={staff.id} value={staff.name}>
+                      {staff.name}
+                    </option>
+                  ))}
+                  {currentUser.role === 'sales' && !SALES_STAFF_LIST.some(s => s.name === currentUser.name) && (
+                    <option value={currentUser.name}>{currentUser.name}</option>
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="font-semibold text-neutral-700 flex items-center gap-1">
                   <Headphones className="w-3.5 h-3.5 text-neutral-600" />
-                  Chuyên Viên CSKH Phụ Trách
+                  Chuyên Viên CSKH
                 </label>
                 <select
                   value={formData.assignedCareStaffName}
                   onChange={e => setFormData({ ...formData, assignedCareStaffName: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none"
+                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none text-xs"
                 >
                   <option value="Phạm Quỳnh Nga (CSKH)">Phạm Quỳnh Nga (CSKH)</option>
                   <option value="Nguyễn Thu Hương (CSKH)">Nguyễn Thu Hương (CSKH)</option>

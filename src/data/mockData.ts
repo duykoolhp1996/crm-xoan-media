@@ -34,6 +34,22 @@ export const mockUsers: User[] = [
     phone: '0984556677'
   },
   {
+    id: 'user-sales-1',
+    name: 'Nguyễn Thu Hương (Sales)',
+    email: 'huong.nt@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    role: 'sales',
+    phone: '0987654321'
+  },
+  {
+    id: 'user-sales-2',
+    name: 'Trần Hải Đăng (Sales)',
+    email: 'dang.th@xoanmedia.vn',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
+    role: 'sales',
+    phone: '0966554433'
+  },
+  {
     id: 'user-3',
     name: 'Phạm Thị Thảo (Marketing)',
     email: 'thao.pt@xoanmedia.vn',
@@ -57,6 +73,12 @@ export const mockUsers: User[] = [
     role: 'manager',
     phone: '0933221100'
   }
+];
+
+export const SALES_STAFF_LIST = [
+  { id: 'user-2', name: 'Lê Hoàng Sơn (Sales Lead)' },
+  { id: 'user-sales-1', name: 'Nguyễn Thu Hương (Sales)' },
+  { id: 'user-sales-2', name: 'Trần Hải Đăng (Sales)' }
 ];
 
 export const mockServicePackages: ServicePackage[] = [

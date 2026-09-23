@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Customer, PipelineStage } from '../../types';
+import { SALES_STAFF_LIST } from '../../data/mockData';
 import {
   Kanban as KanbanIcon,
   Plus,
   Phone,
   School,
-  Sparkles
+  Sparkles,
+  UserCheck,
+  UserX
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
@@ -15,6 +18,8 @@ export const KanbanPipeline: React.FC = () => {
   const {
     customers,
     updateCustomerStage,
+    updateCustomer,
+    currentUser,
     selectedCustomerId,
     setSelectedCustomerId
   } = useApp();
@@ -169,6 +174,48 @@ export const KanbanPipeline: React.FC = () => {
                         <p className="text-neutral-500 truncate mt-0.5">
                           📦 {cust.servicePackageName || 'Gói tùy chọn'}
                         </p>
+                      </div>
+
+                      {/* Nhân viên Sales phụ trách tư vấn */}
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-2"
+                      >
+                        <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border w-full text-[11px] transition-all ${
+                          cust.assignedSalesName && cust.assignedSalesName !== 'Chưa gán'
+                            ? 'bg-blue-50/90 border-blue-200/80 text-blue-900'
+                            : 'bg-neutral-100/70 border-neutral-200/60 text-neutral-500'
+                        }`}>
+                          <UserCheck className={`w-3.5 h-3.5 shrink-0 ${
+                            cust.assignedSalesName && cust.assignedSalesName !== 'Chưa gán' ? 'text-blue-600' : 'text-neutral-400'
+                          }`} />
+                          <span className="text-[10px] font-bold text-neutral-600 shrink-0">Sales:</span>
+                          <select
+                            value={cust.assignedSalesName || 'Chưa gán'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const matched = SALES_STAFF_LIST.find(s => s.name === val);
+                              updateCustomer({
+                                ...cust,
+                                assignedSalesName: val,
+                                assignedSalesId: matched?.id || (val === currentUser.name ? currentUser.id : 'user-2'),
+                                updatedAt: new Date().toISOString()
+                              });
+                            }}
+                            className="bg-transparent text-[11px] font-bold text-neutral-900 focus:outline-none cursor-pointer truncate w-full"
+                            title="Đổi nhân viên Sales tư vấn"
+                          >
+                            <option value="Chưa gán">Chưa gán Sales</option>
+                            {SALES_STAFF_LIST.map((staff) => (
+                              <option key={staff.id} value={staff.name}>
+                                {staff.name}
+                              </option>
+                            ))}
+                            {currentUser.role === 'sales' && !SALES_STAFF_LIST.some(s => s.name === currentUser.name) && (
+                              <option value={currentUser.name}>{currentUser.name}</option>
+                            )}
+                          </select>
+                        </div>
                       </div>
 
                       {/* Footer: Phone & Budget */}

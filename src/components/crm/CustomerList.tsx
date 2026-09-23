@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Sparkles,
   MapPin,
-  Headphones
+  Headphones,
+  UserCheck
 } from 'lucide-react';
 import { CustomerDetail360 } from './CustomerDetail360';
 import { CustomerModal } from './CustomerModal';
@@ -195,8 +196,14 @@ export const CustomerList: React.FC = () => {
                       <p className="text-[11px] text-neutral-500 flex items-center gap-1">
                         <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone} ({cust.representativeRole})
                       </p>
-                      <p className="text-[10px] text-neutral-500 flex items-center gap-1 mt-0.5">
-                        <Headphones className="w-3 h-3 text-neutral-400" /> CSKH: <span className="text-neutral-700 font-semibold">{cust.assignedCareStaffName || 'Phạm Quỳnh Nga'}</span>
+                      <p className="text-[10px] text-neutral-500 flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span className="flex items-center gap-1 text-blue-700 font-semibold">
+                          <UserCheck className="w-3 h-3 text-blue-500" /> Sales: {cust.assignedSalesName || 'Chưa gán'}
+                        </span>
+                        <span className="text-neutral-300">•</span>
+                        <span className="flex items-center gap-1 text-neutral-600">
+                          <Headphones className="w-3 h-3 text-neutral-400" /> CSKH: {cust.assignedCareStaffName || 'Phạm Quỳnh Nga'}
+                        </span>
                       </p>
                     </td>
 
