@@ -32,7 +32,7 @@ export const SaasProductTable: React.FC = () => {
               className={`px-3 py-1.5 rounded-full transition-all capitalize whitespace-nowrap ${
                 activeCategory === cat
                   ? 'bg-neutral-900 text-white shadow-sm'
-                  : 'bg-black/[0.04] text-neutral-600 hover:text-neutral-900 hover:bg-black/[0.07]'
+                  : 'bg-neutral-100 text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200'
               }`}
             >
               {cat === 'all' ? 'All Products' : cat}
@@ -59,7 +59,7 @@ export const SaasProductTable: React.FC = () => {
             {filteredProducts.map((prod) => (
               <tr
                 key={prod.id}
-                className="hover:bg-black/[0.02] transition-colors group cursor-pointer"
+                className="hover:bg-neutral-50 transition-colors group cursor-pointer"
               >
                 {/* Product Name & Icon */}
                 <td className="py-3.5 pr-4">

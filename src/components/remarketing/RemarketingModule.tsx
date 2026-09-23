@@ -59,20 +59,20 @@ export const RemarketingModule: React.FC = () => {
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-5 sm:p-6 rounded-3xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white border border-black/[0.08] p-5 sm:p-6 rounded-3xl shadow-xs">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-orange-400" />
+          <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-orange-500" />
             Hệ Thống Remarketing & Tự Động Hóa Nuôi Dưỡng (Automation)
           </h1>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Phân khúc Lead chưa chuyển đổi, bám đuổi báo giá chưa cọc và remarketing tri ân khách hàng cũ
           </p>
         </div>
 
         <button
           onClick={() => setIsCreateCampModalOpen(true)}
-          className="px-4 py-2 glass-btn-primary rounded-xl text-xs font-semibold flex items-center gap-1.5 shrink-0"
+          className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all active:scale-95 shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Tạo Chiến Dịch Remarketing
@@ -80,13 +80,13 @@ export const RemarketingModule: React.FC = () => {
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex border-b border-white/[0.08] glass-panel-subtle px-5 rounded-2xl gap-6 text-xs font-bold overflow-x-auto custom-scrollbar">
+      <div className="flex border border-black/[0.08] bg-white px-5 rounded-2xl gap-6 text-xs font-bold overflow-x-auto custom-scrollbar shadow-xs">
         <button
           onClick={() => setActiveTab('workflows')}
           className={`py-3.5 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'workflows'
-              ? 'border-orange-500 text-orange-400'
-              : 'border-transparent text-white/50 hover:text-white'
+              ? 'border-neutral-900 text-neutral-900 font-extrabold'
+              : 'border-transparent text-neutral-500 hover:text-neutral-900'
           }`}
         >
           <GitBranch className="w-4 h-4" />
@@ -97,8 +97,8 @@ export const RemarketingModule: React.FC = () => {
           onClick={() => setActiveTab('campaigns')}
           className={`py-3.5 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'campaigns'
-              ? 'border-orange-500 text-orange-400'
-              : 'border-transparent text-white/50 hover:text-white'
+              ? 'border-neutral-900 text-neutral-900 font-extrabold'
+              : 'border-transparent text-neutral-500 hover:text-neutral-900'
           }`}
         >
           <Megaphone className="w-4 h-4" />
@@ -109,8 +109,8 @@ export const RemarketingModule: React.FC = () => {
           onClick={() => setActiveTab('segments')}
           className={`py-3.5 border-b-2 flex items-center gap-2 transition-colors whitespace-nowrap ${
             activeTab === 'segments'
-              ? 'border-orange-500 text-orange-400'
-              : 'border-transparent text-white/50 hover:text-white'
+              ? 'border-neutral-900 text-neutral-900 font-extrabold'
+              : 'border-transparent text-neutral-500 hover:text-neutral-900'
           }`}
         >
           <Users className="w-4 h-4" />
@@ -124,31 +124,31 @@ export const RemarketingModule: React.FC = () => {
           {workflows.map((wf) => (
             <div
               key={wf.id}
-              className="glass-card rounded-3xl p-5 sm:p-6 space-y-4"
+              className="bg-white border border-black/[0.08] rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs"
             >
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-black/[0.06] pb-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-white text-sm sm:text-base">{wf.name}</h3>
+                    <h3 className="font-extrabold text-neutral-900 text-sm sm:text-base">{wf.name}</h3>
                     <span
                       className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                         wf.isActive
-                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                          : 'bg-white/[0.08] text-white/50 border-white/[0.1]'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-neutral-100 text-neutral-600 border-neutral-200'
                       }`}
                     >
                       {wf.isActive ? '● Đang kích hoạt' : '○ Tạm dừng'}
                     </span>
                   </div>
-                  <p className="text-xs text-white/50 mt-1">{wf.description}</p>
+                  <p className="text-xs text-neutral-500 mt-1">{wf.description}</p>
                 </div>
 
                 <button
                   onClick={() => toggleWorkflow(wf.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border ${
                     wf.isActive
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 hover:bg-amber-500/30'
-                      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30'
+                      ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
                   }`}
                 >
                   {wf.isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
@@ -160,27 +160,27 @@ export const RemarketingModule: React.FC = () => {
               <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 overflow-x-auto py-2 custom-scrollbar">
                 {wf.steps.map((step, idx) => (
                   <React.Fragment key={step.id}>
-                    <div className="flex-1 min-w-[210px] p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] space-y-1 relative group hover:border-orange-500/40 hover:bg-white/[0.07] transition-all">
+                    <div className="flex-1 min-w-[210px] p-4 rounded-2xl bg-neutral-50 border border-black/[0.06] space-y-1 relative group hover:border-black/[0.14] transition-all">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase font-bold text-orange-400 tracking-wider">
+                        <span className="text-[10px] uppercase font-bold text-orange-600 tracking-wider">
                           Bước {idx + 1}: {step.type}
                         </span>
                         {step.type === 'trigger' ? (
-                          <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                          <Sparkles className="w-3.5 h-3.5 text-orange-500" />
                         ) : step.type === 'delay' ? (
-                          <Clock className="w-3.5 h-3.5 text-sky-400" />
+                          <Clock className="w-3.5 h-3.5 text-sky-600" />
                         ) : step.type === 'condition' ? (
-                          <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
                         ) : (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                         )}
                       </div>
-                      <h4 className="font-bold text-white text-xs">{step.title}</h4>
-                      <p className="text-[11px] text-white/50 leading-relaxed">{step.description}</p>
+                      <h4 className="font-bold text-neutral-900 text-xs">{step.title}</h4>
+                      <p className="text-[11px] text-neutral-500 leading-relaxed">{step.description}</p>
                     </div>
 
                     {idx < wf.steps.length - 1 && (
-                      <div className="hidden lg:flex items-center text-white/30">
+                      <div className="hidden lg:flex items-center text-neutral-300">
                         <ArrowRight className="w-5 h-5" />
                       </div>
                     )}
@@ -198,41 +198,41 @@ export const RemarketingModule: React.FC = () => {
           {campaigns.map((camp) => (
             <div
               key={camp.id}
-              className="glass-card rounded-3xl p-5 space-y-3 flex flex-col justify-between"
+              className="bg-white border border-black/[0.08] rounded-3xl p-5 space-y-3 flex flex-col justify-between shadow-xs"
             >
               <div>
                 <div className="flex justify-between items-start">
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-orange-800 border border-orange-200 px-2 py-0.5 rounded-md">
                     {camp.channel}
                   </span>
-                  <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full">
                     {camp.status}
                   </span>
                 </div>
 
-                <h3 className="font-bold text-white text-sm mt-2.5">{camp.name}</h3>
-                <p className="text-xs text-white/50 mt-1 leading-relaxed">
-                  Mục tiêu: <strong className="text-white/80">{camp.segmentName}</strong>
+                <h3 className="font-bold text-neutral-900 text-sm mt-2.5">{camp.name}</h3>
+                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Mục tiêu: <strong className="text-neutral-800">{camp.segmentName}</strong>
                 </p>
 
-                <div className="mt-3 p-3 bg-white/[0.04] rounded-2xl text-xs space-y-1 border border-white/[0.06]">
-                  <p className="text-white/80">🎁 <strong>Ưu đãi:</strong> {camp.offer}</p>
-                  <p className="text-white/50 italic truncate mt-1">"{camp.content}"</p>
+                <div className="mt-3 p-3 bg-neutral-50 rounded-2xl text-xs space-y-1 border border-black/[0.06]">
+                  <p className="text-neutral-800">🎁 <strong>Ưu đãi:</strong> {camp.offer}</p>
+                  <p className="text-neutral-500 italic truncate mt-1">"{camp.content}"</p>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-white/[0.08] text-xs space-y-1.5">
-                <div className="flex justify-between text-white/60">
+              <div className="pt-3 border-t border-black/[0.06] text-xs space-y-1.5">
+                <div className="flex justify-between text-neutral-500">
                   <span>Ngân sách:</span>
-                  <strong className="text-white">{camp.budget.toLocaleString('vi-VN')}đ</strong>
+                  <strong className="text-neutral-900">{camp.budget.toLocaleString('vi-VN')}đ</strong>
                 </div>
-                <div className="flex justify-between text-white/60">
+                <div className="flex justify-between text-neutral-500">
                   <span>Tiếp cận:</span>
-                  <strong className="text-sky-300">{camp.reach.toLocaleString('vi-VN')} khách</strong>
+                  <strong className="text-sky-700">{camp.reach.toLocaleString('vi-VN')} khách</strong>
                 </div>
-                <div className="flex justify-between text-white/60">
+                <div className="flex justify-between text-neutral-500">
                   <span>Leads chuyển đổi:</span>
-                  <strong className="text-emerald-400 font-bold">{camp.leadsGenerated} lớp</strong>
+                  <strong className="text-emerald-700 font-bold">{camp.leadsGenerated} lớp</strong>
                 </div>
               </div>
             </div>
@@ -246,23 +246,23 @@ export const RemarketingModule: React.FC = () => {
           {segments.map((seg) => (
             <div
               key={seg.id}
-              className="glass-card rounded-3xl p-5 space-y-3"
+              className="bg-white border border-black/[0.08] rounded-3xl p-5 space-y-3 shadow-xs"
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-white text-sm">{seg.name}</h3>
-                <span className="font-mono text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full">
+                <h3 className="font-bold text-neutral-900 text-sm">{seg.name}</h3>
+                <span className="font-mono text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full">
                   {seg.customerCount} Khách
                 </span>
               </div>
-              <p className="text-xs text-white/50 leading-relaxed">{seg.description}</p>
-              <div className="p-3 bg-black/40 text-emerald-400 font-mono text-[10px] rounded-xl border border-white/[0.08] overflow-x-auto">
+              <p className="text-xs text-neutral-500 leading-relaxed">{seg.description}</p>
+              <div className="p-3 bg-neutral-50 text-emerald-700 font-mono text-[10px] rounded-xl border border-black/[0.06] overflow-x-auto">
                 <code>{seg.targetCriteria}</code>
               </div>
               <div className="pt-2 flex justify-between items-center text-xs">
-                <span className="text-white/40">Tạo: {seg.createdAt}</span>
+                <span className="text-neutral-400">Tạo: {seg.createdAt}</span>
                 <button
                   onClick={() => alert(`Đã trích xuất ${seg.customerCount} liên hệ để gửi Zalo ZNS / SMS!`)}
-                  className="text-orange-400 font-semibold hover:text-orange-300 transition-colors"
+                  className="text-orange-600 font-bold hover:text-orange-700 transition-colors"
                 >
                   Gửi Tin Loạt →
                 </button>

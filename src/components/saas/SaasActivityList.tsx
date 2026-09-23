@@ -24,7 +24,7 @@ export const SaasActivityList: React.FC = () => {
         {CRM_ACTIVITY_LOGS.map((act) => (
           <div
             key={act.id}
-            className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-black/[0.02] transition-colors group cursor-pointer"
+            className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-neutral-50 transition-colors group cursor-pointer"
           >
             {/* Avatar / Icon */}
             <div

@@ -80,7 +80,7 @@ export const SaasPhotographerTable: React.FC<SaasPhotographerTableProps> = ({ on
               className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                 roleFilter === role
                   ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
-                  : 'bg-black/[0.04] text-neutral-600 hover:text-neutral-900 hover:bg-black/[0.07]'
+                  : 'bg-neutral-100 text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200'
               }`}
             >
               {role === 'all' ? 'Tất cả vai trò' : role}
@@ -125,7 +125,7 @@ export const SaasPhotographerTable: React.FC<SaasPhotographerTableProps> = ({ on
             {filteredPhotographers.map((p) => (
               <tr
                 key={p.id}
-                className="hover:bg-black/[0.02] transition-colors group"
+                className="hover:bg-neutral-50 transition-colors group"
               >
                 {/* Avatar & Name */}
                 <td className="py-3.5 pr-4">

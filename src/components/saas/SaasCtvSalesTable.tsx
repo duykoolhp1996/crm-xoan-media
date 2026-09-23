@@ -76,7 +76,7 @@ export const SaasCtvSalesTable: React.FC<SaasCtvSalesTableProps> = ({ onPayCommi
               className={`px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                 statusFilter === status
                   ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
-                  : 'bg-black/[0.04] text-neutral-600 hover:text-neutral-900 hover:bg-black/[0.07]'
+                  : 'bg-neutral-100 text-neutral-700 hover:text-neutral-950 hover:bg-neutral-200'
               }`}
             >
               {status === 'all' ? 'Tất cả trạng thái' : status}
@@ -122,7 +122,7 @@ export const SaasCtvSalesTable: React.FC<SaasCtvSalesTableProps> = ({ onPayCommi
             {filteredCtv.map((ctv) => (
               <tr
                 key={ctv.id}
-                className="hover:bg-black/[0.02] transition-colors group"
+                className="hover:bg-neutral-50 transition-colors group"
               >
                 {/* Rank */}
                 <td className="py-3.5 pr-2 text-center">

@@ -28,52 +28,52 @@ export const PhotographerList: React.FC = () => {
   });
 
   const statusColors: Record<PhotographerStatus, { label: string; badge: string }> = {
-    available: { label: 'Sẵn sàng nhận ca', badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
-    busy: { label: 'Đang có lịch chụp', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
-    offline: { label: 'Tạm nghỉ', badge: 'bg-white/[0.08] text-white/60 border-white/[0.12]' },
-    inactive: { label: 'Ngừng hợp tác', badge: 'bg-rose-500/20 text-rose-300 border-rose-500/30' }
+    available: { label: 'Sẵn sàng nhận ca', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+    busy: { label: 'Đang có lịch chụp', badge: 'bg-amber-50 text-amber-800 border-amber-200' },
+    offline: { label: 'Tạm nghỉ', badge: 'bg-neutral-100 text-neutral-600 border-neutral-200' },
+    inactive: { label: 'Ngừng hợp tác', badge: 'bg-rose-50 text-rose-700 border-rose-200' }
   };
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-5 sm:p-6 rounded-3xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white border border-black/[0.08] p-5 sm:p-6 rounded-3xl shadow-xs">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-            <Camera className="w-5 h-5 text-orange-400" />
+          <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+            <Camera className="w-5 h-5 text-orange-500" />
             Đội Ngũ Thợ Chụp Kỷ Yếu (Photographer Management)
           </h1>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Quản lý profile, trang thiết bị máy ảnh, kỹ năng (Flycam/Video/Colorist), đơn giá và lịch trình cá nhân
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 px-3 py-1.5 rounded-full">
+          <span className="text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-full">
             {photographers.filter(p => p.status === 'available').length} Thợ đang sẵn sàng
           </span>
         </div>
       </div>
 
       {/* Filter */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 glass-panel-subtle p-3.5 sm:p-4 rounded-2xl">
+      <div className="flex flex-col sm:flex-row items-center gap-3 bg-white border border-black/[0.08] p-3.5 sm:p-4 rounded-2xl shadow-xs">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Tìm theo tên thợ, SĐT, kỹ năng (Flycam, Quay phim, Makeup)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 glass-input rounded-xl text-xs"
+            className="w-full pl-9 pr-4 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs font-medium text-white/50 shrink-0">Trạng thái:</span>
+          <span className="text-xs font-medium text-neutral-500 shrink-0">Trạng thái:</span>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-3 py-2 glass-input rounded-xl text-xs font-medium text-white/80 cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+            className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
           >
             <option value="all">Tất cả ({photographers.length})</option>
             <option value="available">Sẵn sàng (Available)</option>
@@ -96,7 +96,7 @@ export const PhotographerList: React.FC = () => {
           return (
             <div
               key={photo.id}
-              className="glass-card rounded-3xl p-5 space-y-4 flex flex-col justify-between"
+              className="bg-white border border-black/[0.08] rounded-3xl p-5 space-y-4 flex flex-col justify-between shadow-xs hover:border-black/[0.16] transition-all"
             >
               <div>
                 {/* Header Profile Card */}
@@ -104,19 +104,19 @@ export const PhotographerList: React.FC = () => {
                   <img
                     src={photo.avatar}
                     alt={photo.fullName}
-                    className="w-14 h-14 rounded-2xl object-cover ring-2 ring-white/10 shadow-lg shrink-0"
+                    className="w-14 h-14 rounded-2xl object-cover ring-2 ring-black/[0.06] shadow-sm shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
-                      <h3 className="font-bold text-white text-sm truncate">{photo.fullName}</h3>
-                      <span className="flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 rounded-full">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      <h3 className="font-bold text-neutral-900 text-sm truncate">{photo.fullName}</h3>
+                      <span className="flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                        <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
                         {photo.rating}
                       </span>
                     </div>
 
-                    <p className="text-[11px] text-white/50 mt-0.5 flex items-center gap-1.5">
-                      <Briefcase className="w-3 h-3 text-white/40" />
+                    <p className="text-[11px] text-neutral-500 mt-0.5 flex items-center gap-1.5">
+                      <Briefcase className="w-3 h-3 text-neutral-400" />
                       <span>{photo.photographerType}</span>
                       <span>•</span>
                       <span>{photo.experienceYears} năm KN</span>
@@ -126,7 +126,7 @@ export const PhotographerList: React.FC = () => {
                       <select
                         value={photo.status}
                         onChange={(e) => updatePhotographerStatus(photo.id, e.target.value as PhotographerStatus)}
-                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white ${statusColors[photo.status].badge}`}
+                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border cursor-pointer ${statusColors[photo.status].badge}`}
                       >
                         <option value="available">● Sẵn sàng nhận ca</option>
                         <option value="busy">● Đang có lịch chụp</option>
@@ -140,10 +140,10 @@ export const PhotographerList: React.FC = () => {
                 {/* Skills & Devices */}
                 <div className="mt-4 space-y-2.5 text-xs">
                   <div>
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Kỹ Năng:</span>
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Kỹ Năng:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {photo.skills.map((skill, idx) => (
-                        <span key={idx} className="bg-orange-500/15 text-orange-300 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-orange-500/25">
+                        <span key={idx} className="bg-orange-50 text-orange-800 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-orange-200">
                           {skill}
                         </span>
                       ))}
@@ -151,16 +151,16 @@ export const PhotographerList: React.FC = () => {
                   </div>
 
                   <div>
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Thiết Bị:</span>
-                    <p className="text-white/70 text-[11px] mt-0.5 truncate font-medium">
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Thiết Bị:</span>
+                    <p className="text-neutral-700 text-[11px] mt-0.5 truncate font-medium">
                       📷 {photo.equipmentList.join(', ')}
                     </p>
                   </div>
 
                   <div>
-                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Khu Vực:</span>
-                    <p className="text-white/70 text-[11px] mt-0.5 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-white/40" />
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Khu Vực:</span>
+                    <p className="text-neutral-700 text-[11px] mt-0.5 flex items-center gap-1 font-medium">
+                      <MapPin className="w-3 h-3 text-neutral-400" />
                       {photo.activeRegions.join(', ')}
                     </p>
                   </div>
@@ -168,28 +168,28 @@ export const PhotographerList: React.FC = () => {
               </div>
 
               {/* Stats & Actions */}
-              <div className="pt-3 border-t border-white/[0.08] space-y-2 text-xs">
-                <div className="flex items-center justify-between text-white/60">
+              <div className="pt-3 border-t border-black/[0.06] space-y-2 text-xs">
+                <div className="flex items-center justify-between text-neutral-500">
                   <span>Thù lao / buổi:</span>
-                  <strong className="text-white font-bold">{photo.ratePerShoot.toLocaleString('vi-VN')}đ</strong>
+                  <strong className="text-neutral-900 font-bold">{photo.ratePerShoot.toLocaleString('vi-VN')}đ</strong>
                 </div>
 
-                <div className="flex items-center justify-between text-white/60">
+                <div className="flex items-center justify-between text-neutral-500">
                   <span>Đã hoàn thành:</span>
-                  <span className="font-bold text-emerald-400">{photo.completedShootsCount} ca</span>
+                  <span className="font-bold text-emerald-700">{photo.completedShootsCount} ca</span>
                 </div>
 
                 <div className="pt-1 flex gap-2">
                   <a
                     href={`tel:${photo.phone}`}
-                    className="flex-1 py-2 glass-btn-secondary rounded-xl font-semibold text-center flex items-center justify-center gap-1"
+                    className="flex-1 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl font-semibold text-center flex items-center justify-center gap-1 transition-colors"
                   >
                     <Phone className="w-3 h-3" /> Gọi
                   </a>
 
                   <button
                     onClick={() => setSelectedPhoto(photo)}
-                    className="flex-1 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-300 rounded-xl font-semibold text-center transition-colors"
+                    className="flex-1 py-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-800 rounded-xl font-semibold text-center transition-colors"
                   >
                     Lịch Chụp ({assignedBookings.length})
                   </button>

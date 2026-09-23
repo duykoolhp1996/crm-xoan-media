@@ -30,7 +30,7 @@
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(184, 242, 61, 0.18) 0%, rgba(184, 242, 61, 0.04) 60%, transparent 80%);
+  background: radial-gradient(circle, rgba(184, 242, 61, 0.16) 0%, rgba(184, 242, 61, 0.03) 60%, transparent 80%);
   filter: blur(80px);
 }
 
@@ -42,239 +42,116 @@
   width: 700px;
   height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(167, 243, 208, 0.2) 0%, rgba(224, 231, 255, 0.1) 60%, transparent 80%);
+  background: radial-gradient(circle, rgba(167, 243, 208, 0.18) 0%, rgba(224, 231, 255, 0.08) 60%, transparent 80%);
   filter: blur(100px);
 }
 
 /* ==========================================================================
-   SOFT GLASSMORPISM (LIGHT THEME) OVERRIDES FOR LEGACY DARK CLASSES
-   Fixes white-on-white text, transparent inputs, and invisible borders
+   CLEAN LIGHT THEME SAAS ARCHITECTURE
    ========================================================================== */
 
-/* 1. TEXT COLOR REMAPPING */
-.text-white {
-  color: #0f172a !important;
-}
-
-.text-white\/90,
-.text-white\/85,
-.text-white\/80 {
-  color: #1e293b !important;
-}
-
-.text-white\/75,
-.text-white\/70,
-.text-white\/65 {
-  color: #334155 !important;
-}
-
-.text-white\/60,
-.text-white\/50,
-.text-white\/45 {
-  color: #64748b !important;
-}
-
-.text-white\/40,
-.text-white\/35,
-.text-white\/30 {
-  color: #94a3b8 !important;
-}
-
-.text-white\/20,
-.text-white\/15,
-.text-white\/10 {
-  color: #cbd5e1 !important;
-}
-
-/* Sub-tint text fixes on light backgrounds */
-.text-orange-300 {
-  color: #ea580c !important;
-}
-.text-sky-300 {
-  color: #0284c7 !important;
-}
-.text-purple-300 {
-  color: #7c3aed !important;
-}
-.text-rose-300 {
-  color: #e11d48 !important;
-}
-.text-emerald-300 {
-  color: #059669 !important;
-}
-
-/* EXCLUSIONS: When inside dark elements, preserve white or lime text */
-button.bg-neutral-900,
-button.bg-neutral-900 *,
-button.bg-neutral-950,
-button.bg-neutral-950 *,
-button.bg-black,
-button.bg-black *,
-[class*="bg-neutral-900"],
-[class*="bg-neutral-900"] *,
-[class*="bg-neutral-950"],
-[class*="bg-neutral-950"] *,
-[class*="bg-black"],
-[class*="bg-black"] *,
-[class*="bg-neutral-800"],
-[class*="bg-neutral-800"] *,
-.keep-white,
-.keep-white * {
-  color: #ffffff !important;
-}
-
-button.bg-neutral-900 .text-\[\#B8F23D\],
-.glass-btn-primary,
-.glass-btn-primary * {
-  color: #B8F23D !important;
-}
-
-/* 2. BACKGROUND REMAPPING */
-.bg-white\/\[0\.02\],
-.bg-white\/\[0\.03\],
-.bg-white\/\[0\.035\],
-.bg-white\/\[0\.04\],
-.bg-white\/\[0\.05\],
-.bg-white\/\[0\.06\] {
-  background-color: #f8fafc !important;
-}
-
-.bg-white\/\[0\.08\],
-.bg-white\/\[0\.09\],
-.bg-white\/\[0\.1\],
-.bg-white\/\[0\.12\],
-.bg-white\/\[0\.15\] {
-  background-color: #f1f5f9 !important;
-}
-
-.bg-black\/20,
-.bg-black\/30 {
-  background-color: #f8fafc !important;
-}
-
-/* Hover backgrounds */
-.hover\:bg-white\/\[0\.04\]:hover,
-.hover\:bg-white\/\[0\.06\]:hover,
-.hover\:bg-white\/\[0\.07\]:hover,
-.hover\:bg-white\/\[0\.08\]:hover,
-.hover\:bg-white\/\[0\.09\]:hover,
-.hover\:bg-white\/\[0\.12\]:hover,
-.hover\:bg-white\/\[0\.15\]:hover {
-  background-color: #f1f5f9 !important;
-}
-
-/* 3. BORDER REMAPPING */
-.border-white\/\[0\.06\],
-.border-white\/\[0\.07\],
-.border-white\/\[0\.08\],
-.border-white\/\[0\.1\],
-.border-white\/\[0\.12\],
-.border-white\/\[0\.15\],
-.border-white\/\[0\.18\],
-.border-white\/\[0\.2\],
-.border-white\/10,
-.border-white\/15,
-.border-white\/20,
-.border-white\/25,
-.border-white\/30 {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-
-.hover\:border-white\/\[0\.16\]:hover,
-.hover\:border-white\/\[0\.18\]:hover,
-.hover\:border-white\/\[0\.22\]:hover {
-  border-color: rgba(0, 0, 0, 0.16) !important;
-}
-
-.divide-white\/\[0\.05\] > :not([hidden]) ~ :not([hidden]),
-.divide-white\/\[0\.08\] > :not([hidden]) ~ :not([hidden]) {
-  border-color: rgba(0, 0, 0, 0.06) !important;
-}
-
-/* 4. GLASS PANEL & CARD ARCHITECTURE */
+/* 1. GLASS PANELS & CARDS */
 .glass-panel {
-  background-color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03) !important;
-  border-radius: 24px !important;
-  color: #0f172a !important;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+  border-radius: 24px;
+  color: #0f172a;
 }
 
 .glass-panel-subtle {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  border-radius: 20px !important;
-  color: #0f172a !important;
+  background-color: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 20px;
+  color: #0f172a;
 }
 
 .glass-card {
-  background-color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.03) !important;
-  border-radius: 24px !important;
-  color: #0f172a !important;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.03);
+  border-radius: 24px;
+  color: #0f172a;
+  transition: all 0.2s ease;
 }
 
 .glass-card:hover {
-  background-color: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 0, 0, 0.14);
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.06);
 }
 
 .glass-card-interactive {
-  background-color: #ffffff !important;
-  border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.03) !important;
-  border-radius: 20px !important;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.03);
+  border-radius: 20px;
+  color: #0f172a;
+  transition: all 0.2s ease;
 }
 
 .glass-card-interactive:hover {
-  border-color: #B8F23D !important;
-  box-shadow: 0 10px 24px -4px rgba(184, 242, 61, 0.25) !important;
+  border-color: #B8F23D;
+  box-shadow: 0 10px 24px -4px rgba(184, 242, 61, 0.25);
 }
 
-/* 5. INPUT & SELECT FORMS */
+/* 2. FORM INPUTS & CONTROLS */
 .glass-input {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03) !important;
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .glass-input::placeholder {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 .glass-input:focus {
-  outline: none !important;
-  border-color: #83c906 !important;
-  box-shadow: 0 0 0 3px rgba(184, 242, 61, 0.3) !important;
+  outline: none;
+  background-color: #ffffff;
+  border-color: #83c906;
+  box-shadow: 0 0 0 3px rgba(184, 242, 61, 0.35);
 }
 
 select option {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
-/* 6. PRIMARY BUTTON */
+/* 3. BUTTONS */
 .glass-btn-primary {
-  background: #111827 !important;
-  color: #B8F23D !important;
-  border: 1px solid transparent !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
-  font-weight: 700 !important;
-  transition: all 0.2s ease !important;
-  border-radius: 16px !important;
+  background-color: #0f172a;
+  color: #B8F23D;
+  border: 1px solid transparent;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  font-weight: 700;
+  transition: all 0.15s ease;
+  border-radius: 16px;
 }
 
 .glass-btn-primary:hover {
-  background: #1f2937 !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+  background-color: #1e293b;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   transform: scale(1.02);
 }
 
 .glass-btn-primary:active {
   transform: scale(0.98);
+}
+
+.glass-btn-secondary {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+  transition: all 0.15s ease;
+  border-radius: 16px;
+}
+
+.glass-btn-secondary:hover {
+  background-color: #e2e8f0;
+  color: #000000;
 }
 
 .saas-lime-badge {
@@ -283,7 +160,7 @@ select option {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-/* Custom Scrollbar for Light Theme */
+/* 4. CUSTOM SCROLLBAR */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;

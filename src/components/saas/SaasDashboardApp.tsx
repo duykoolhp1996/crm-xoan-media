@@ -311,7 +311,7 @@ export const SaasDashboardApp: React.FC<SaasDashboardAppProps> = ({ onSwitchToCr
                       </thead>
                       <tbody className="divide-y divide-black/[0.04] text-xs">
                         {sampleContracts.map((c) => (
-                          <tr key={c.id} className="hover:bg-black/[0.02] transition-colors">
+                          <tr key={c.id} className="hover:bg-neutral-50 transition-colors">
                             <td className="py-3.5 pr-4 font-bold text-neutral-900">{c.id}</td>
                             <td className="py-3.5 px-4">
                               <p className="font-bold text-neutral-900">{c.class}</p>

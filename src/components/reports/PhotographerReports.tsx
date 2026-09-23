@@ -57,7 +57,7 @@ export const PhotographerReports: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-black/[0.02] text-neutral-500 font-bold border-b border-black/[0.06] uppercase tracking-wider">
+              <tr className="bg-neutral-50/80 text-neutral-500 font-bold border-b border-black/[0.06] uppercase tracking-wider">
                 <th className="py-3.5 px-4">Photographer</th>
                 <th className="py-3.5 px-4">Loại Hợp Tác</th>
                 <th className="py-3.5 px-4">Số Ca Mùa Này</th>
@@ -69,7 +69,7 @@ export const PhotographerReports: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-black/[0.04] font-medium text-neutral-700">
               {performanceData.map((item) => (
-                <tr key={item.id} className="hover:bg-black/[0.02] transition-colors">
+                <tr key={item.id} className="hover:bg-neutral-50 transition-colors">
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
                       <img
@@ -85,7 +85,7 @@ export const PhotographerReports: React.FC = () => {
                   </td>
 
                   <td className="py-3.5 px-4">
-                    <span className="bg-black/[0.04] border border-black/[0.06] text-neutral-700 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
+                    <span className="bg-neutral-100 border border-neutral-200 text-neutral-700 px-2.5 py-0.5 rounded-full text-[11px] font-semibold">
                       {item.photographerType}
                     </span>
                   </td>

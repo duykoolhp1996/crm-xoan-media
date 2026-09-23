@@ -93,7 +93,7 @@ export const SaasHeader: React.FC<SaasHeaderProps> = ({
         {onSwitchWorkspace && (
           <button
             onClick={onSwitchWorkspace}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/[0.04] hover:bg-black/[0.08] text-neutral-700 hover:text-neutral-950 text-xs font-semibold transition-colors border border-black/[0.05]"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-950 text-xs font-semibold transition-colors border border-neutral-200"
             title="Chuyển sang module Bàn Vận Hành Kỷ Yếu"
           >
             <span>🌀 Bàn Vận Hành</span>
