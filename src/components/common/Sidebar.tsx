@@ -56,12 +56,11 @@ export const Sidebar: React.FC = () => {
           label: 'Danh Sách Khách Hàng',
           icon: Users,
           badge: newLeadsCount > 0 ? newLeadsCount : undefined,
-          badgeColor: 'bg-orange-500/30 text-orange-300 border border-orange-500/40',
           roles: ['admin', 'manager', 'sales', 'marketing']
         },
         {
           id: 'pipeline',
-          label: 'Customer Pipeline (13 B)',
+          label: 'Customer Pipeline (13 Bước)',
           icon: Kanban,
           roles: ['admin', 'manager', 'sales']
         },
@@ -78,10 +77,9 @@ export const Sidebar: React.FC = () => {
       items: [
         {
           id: 'bookings',
-          label: 'Quản Lý Booking',
+          label: 'Quản Lý Booking & Cọc',
           icon: CalendarCheck,
           badge: unreadAlerts > 0 ? unreadAlerts : undefined,
-          badgeColor: 'bg-rose-500/30 text-rose-300 border border-rose-500/40',
           roles: ['admin', 'manager', 'sales', 'photographer']
         },
         {
@@ -92,7 +90,7 @@ export const Sidebar: React.FC = () => {
         },
         {
           id: 'photographers',
-          label: 'Đội Ngũ Thợ / Photo',
+          label: 'Đội Ngũ Thợ & Ekip',
           icon: Camera,
           roles: ['admin', 'manager']
         },
@@ -105,14 +103,13 @@ export const Sidebar: React.FC = () => {
       ]
     },
     {
-      groupTitle: 'TĂNG TRƯỞNG & VẬN HÀNH',
+      groupTitle: 'CHĂM SÓC & TĂNG TRƯỞNG',
       items: [
         {
           id: 'feedbacks',
           label: 'Khoảnh Khắc & Feedback',
           icon: Heart,
           badge: feedbacks.length > 0 ? feedbacks.length : undefined,
-          badgeColor: 'bg-rose-500/30 text-rose-300 border border-rose-500/40',
           roles: ['admin', 'manager', 'sales', 'marketing', 'photographer']
         },
         {
@@ -120,7 +117,6 @@ export const Sidebar: React.FC = () => {
           label: 'Remarketing & Automation',
           icon: Sparkles,
           badge: 3,
-          badgeColor: 'bg-purple-500/30 text-purple-300 border border-purple-500/40',
           roles: ['admin', 'manager', 'marketing']
         }
       ]
@@ -130,7 +126,7 @@ export const Sidebar: React.FC = () => {
       items: [
         {
           id: 'reports-marketing',
-          label: 'Báo Cáo Marketing',
+          label: 'Báo Cáo Doanh Thu & CTV',
           icon: TrendingUp,
           roles: ['admin', 'manager', 'marketing']
         },
@@ -142,7 +138,7 @@ export const Sidebar: React.FC = () => {
         },
         {
           id: 'settings',
-          label: 'Cài Đặt & Tích Hợp',
+          label: 'Cài Đặt Hệ Thống',
           icon: Settings,
           roles: ['admin']
         }
@@ -151,32 +147,32 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-64 bg-neutral-950/60 backdrop-blur-2xl text-white/70 flex flex-col h-screen sticky top-0 shrink-0 select-none z-40 border-r border-white/[0.08] shadow-[4px_0_24px_rgba(0,0,0,0.3)]">
+    <aside className="w-64 bg-white/80 backdrop-blur-2xl text-neutral-600 flex flex-col h-screen sticky top-0 shrink-0 select-none z-40 border-r border-black/[0.06] shadow-sm">
       {/* Brand Header */}
-      <div className="h-16 flex items-center gap-3 px-5 border-b border-white/[0.08] bg-white/[0.015]">
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 flex items-center justify-center text-white shadow-[0_0_20px_rgba(249,115,22,0.4)] border border-white/20 font-black text-lg">
-          🌀
+      <div className="h-16 flex items-center gap-3 px-5 border-b border-black/[0.06] bg-white/40">
+        <div className="w-9 h-9 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center shadow-sm font-black text-lg">
+          ✦
         </div>
         <div>
           <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-white text-sm tracking-tight">XOẮN MEDIA</span>
-            <span className="text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 px-1.5 py-0.5 rounded-full">
+            <span className="font-extrabold text-neutral-900 text-sm tracking-tight">XOẮN MEDIA</span>
+            <span className="text-[10px] font-bold bg-[#B8F23D] text-neutral-950 px-1.5 py-0.2 rounded-full shadow-xs">
               CRM
             </span>
           </div>
-          <p className="text-[10px] text-white/40 font-medium tracking-wide">Kỷ Yếu & Hình Ảnh Học Đường</p>
+          <p className="text-[10px] text-neutral-400 font-medium tracking-wide">Kỷ Yếu & Hình Ảnh Học Đường</p>
         </div>
       </div>
 
       {/* Navigation Scroll */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 custom-scrollbar">
         {navigationGroups.map((group, idx) => {
           const accessibleItems = group.items.filter(item => !item.roles || item.roles.includes(currentRole));
           if (accessibleItems.length === 0) return null;
 
           return (
             <div key={idx} className="space-y-1">
-              <h4 className="px-3 text-[10px] font-bold tracking-widest text-white/35 uppercase">
+              <h4 className="px-3 text-[10px] font-bold tracking-widest text-neutral-400 uppercase">
                 {group.groupTitle}
               </h4>
               <div className="space-y-1 mt-1.5">
@@ -188,23 +184,23 @@ export const Sidebar: React.FC = () => {
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-2xl text-xs font-medium transition-all duration-150 ${
                         isActive
-                          ? 'bg-orange-500/20 text-white font-semibold border border-orange-500/40 shadow-[0_0_15px_rgba(249,115,22,0.2),inset_0_1px_1px_rgba(255,255,255,0.15)]'
-                          : 'text-white/60 hover:text-white hover:bg-white/[0.06] border border-transparent'
+                          ? 'bg-neutral-900 text-[#B8F23D] font-bold shadow-sm'
+                          : 'text-neutral-600 hover:text-neutral-950 hover:bg-black/[0.04]'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon className={`w-4 h-4 stroke-[1.8] ${isActive ? 'text-orange-400' : 'text-white/45'}`} />
-                        <span>{item.label}</span>
+                        <Icon className={`w-4 h-4 stroke-[1.8] ${isActive ? 'text-[#B8F23D]' : 'text-neutral-400'}`} />
+                        <span className="tracking-tight">{item.label}</span>
                       </div>
 
                       {item.badge !== undefined && (
                         <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                          className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
                             isActive
-                              ? 'bg-orange-500 text-white shadow-sm'
-                              : item.badgeColor || 'bg-white/10 text-white/80 border border-white/10'
+                              ? 'bg-[#B8F23D] text-neutral-950'
+                              : 'bg-neutral-100 text-neutral-700 border border-neutral-200'
                           }`}
                         >
                           {item.badge}
@@ -220,14 +216,14 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer System Status */}
-      <div className="p-3 border-t border-white/[0.08] bg-white/[0.01]">
-        <div className="flex items-center justify-between px-3 py-2 bg-white/[0.04] backdrop-blur-md rounded-2xl border border-white/[0.06] text-xs">
+      <div className="p-3 border-t border-black/[0.06] bg-white/40">
+        <div className="flex items-center justify-between px-3 py-2 bg-neutral-50 rounded-2xl border border-black/[0.04] text-xs">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse"></span>
-            <span className="text-[11px] font-medium text-white/70">Vận hành kỷ yếu</span>
+            <span className="w-2 h-2 rounded-full bg-[#79ba07] shadow-[0_0_8px_#B8F23D] animate-pulse"></span>
+            <span className="text-[11px] font-medium text-neutral-600">Vận hành kỷ yếu</span>
           </div>
-          <span className="text-[10px] font-semibold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
-            Mùa 2024-2025
+          <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-full">
+            Mùa 2024
           </span>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 
-// Modules
+// Real CRM Modules
 import { ExecutiveDashboard } from './components/dashboard/ExecutiveDashboard';
 import { CustomerList } from './components/crm/CustomerList';
 import { KanbanPipeline } from './components/pipeline/KanbanPipeline';
@@ -18,8 +18,6 @@ import { RemarketingModule } from './components/remarketing/RemarketingModule';
 import { MarketingReports } from './components/reports/MarketingReports';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
-
-import { SaasDashboardApp } from './components/saas/SaasDashboardApp';
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -46,28 +44,18 @@ const MainContent: React.FC = () => {
 };
 
 export const App: React.FC = () => {
-  const [viewMode, setViewMode] = React.useState<'saas' | 'crm'>('saas');
-
-  if (viewMode === 'saas') {
-    return (
-      <AppProvider>
-        <SaasDashboardApp onSwitchToCrm={() => setViewMode('crm')} />
-      </AppProvider>
-    );
-  }
-
   return (
     <AppProvider>
-      <div className="relative flex h-screen bg-[#08090c] text-neutral-100 overflow-hidden font-sans selection:bg-orange-500/30 selection:text-orange-200">
+      <div className="relative flex h-screen bg-[#F6F7F9] text-neutral-900 overflow-hidden font-sans selection:bg-[#B8F23D]/60 selection:text-neutral-900">
         {/* Spatial Ambient Glow Layer */}
         <div className="ambient-glow" aria-hidden="true" />
 
-        {/* Apple-styled Glass Sidebar */}
+        {/* Soft Glassmorphism Sidebar with all CRM Buttons */}
         <Sidebar />
 
         {/* Main Application Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <Header onSwitchToSaas={() => setViewMode('saas')} />
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+          <Header />
           <MainContent />
         </div>
 
