@@ -14,9 +14,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
   const { customers, servicePackages, photographers, addBooking, getPhotographerAvailability } = useApp();
 
   const initialCustomer = customers[0];
-  const initialCity = initialCustomer?.city || 'Hà Nội';
+  const initialCity = initialCustomer?.city || 'Hải Phòng';
   const initialDistricts = getDistrictsByCity(initialCity);
-  const initialDistrict = initialCustomer?.district || initialDistricts[0] || 'Cầu Giấy';
+  const initialDistrict = initialCustomer?.district || initialDistricts[0] || 'Lê Chân';
 
   const todayStr = new Date().toISOString().split('T')[0];
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
     endTime: '17:00',
     city: initialCity,
     district: initialDistrict,
-    location: 'Trường học & Văn Miếu',
+    location: 'Trường học & Nhà Hát Lớn / Bãi biển Đồ Sơn',
     studentCount: 38,
     packageId: servicePackages[1]?.id || '',
     depositAmount: 3000000,

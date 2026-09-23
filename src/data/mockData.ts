@@ -132,6 +132,69 @@ export const mockServicePackages: ServicePackage[] = [
 
 export const mockSchools: School[] = [
   {
+    id: 'sch-hp-1',
+    name: 'THPT Chuyên Trần Phú',
+    city: 'Hải Phòng',
+    district: 'Lê Chân',
+    type: 'THPT',
+    totalClassesBooked: 0,
+    status: 'active'
+  },
+  {
+    id: 'sch-hp-2',
+    name: 'THPT Ngô Quyền',
+    city: 'Hải Phòng',
+    district: 'Lê Chân',
+    type: 'THPT',
+    totalClassesBooked: 0,
+    status: 'active'
+  },
+  {
+    id: 'sch-hp-3',
+    name: 'THPT Thái Phiên',
+    city: 'Hải Phòng',
+    district: 'Ngô Quyền',
+    type: 'THPT',
+    totalClassesBooked: 0,
+    status: 'active'
+  },
+  {
+    id: 'sch-hp-4',
+    name: 'THPT Lê Quý Đôn',
+    city: 'Hải Phòng',
+    district: 'Hải An',
+    type: 'THPT',
+    totalClassesBooked: 0,
+    status: 'active'
+  },
+  {
+    id: 'sch-hp-5',
+    name: 'Đại học Hàng hải Việt Nam (VMU)',
+    city: 'Hải Phòng',
+    district: 'Lê Chân',
+    type: 'Đại học',
+    totalClassesBooked: 0,
+    status: 'active'
+  },
+  {
+    id: 'sch-hp-6',
+    name: 'Đại học Hải Phòng',
+    city: 'Hải Phòng',
+    district: 'Kiến An',
+    type: 'Đại học',
+    totalClassesBooked: 0,
+    status: 'active'
+  },
+  {
+    id: 'sch-hp-7',
+    name: 'Đại học Y Dược Hải Phòng',
+    city: 'Hải Phòng',
+    district: 'Ngô Quyền',
+    type: 'Đại học',
+    totalClassesBooked: 0,
+    status: 'active'
+  },
+  {
     id: 'sch-1',
     name: 'THPT Chuyên Hà Nội - Amsterdam',
     city: 'Hà Nội',
@@ -205,7 +268,7 @@ export const mockPhotographers: Photographer[] = [
     phone: '0912345678',
     email: 'tuan.tm@xoanmedia.vn',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hà Nội', 'Bắc Ninh', 'Hưng Yên'],
+    activeRegions: ['Hải Phòng', 'Hà Nội', 'Quảng Ninh'],
     photographerType: 'Full-time',
     experienceYears: 5,
     skills: ['Chụp chính', 'Flycam', 'Chỉnh màu (Colorist)'],
@@ -222,7 +285,7 @@ export const mockPhotographers: Photographer[] = [
     phone: '0945678901',
     email: 'ducanh.photo@gmail.com',
     avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hà Nội', 'Hải Phòng'],
+    activeRegions: ['Hải Phòng', 'Quảng Ninh', 'Hải Dương'],
     photographerType: 'Freelancer',
     experienceYears: 4,
     skills: ['Chụp chính', 'Quay phim'],
@@ -239,7 +302,7 @@ export const mockPhotographers: Photographer[] = [
     phone: '0977889900',
     email: 'dang.nh@xoanmedia.vn',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hà Nội', 'Vĩnh Phúc', 'Thái Nguyên'],
+    activeRegions: ['Hải Phòng', 'Hà Nội', 'Thái Nguyên'],
     photographerType: 'Full-time',
     experienceYears: 3,
     skills: ['Chụp chính', 'Chụp phụ'],
@@ -256,7 +319,7 @@ export const mockPhotographers: Photographer[] = [
     phone: '0983112244',
     email: 'thao.makeup@xoanmedia.vn',
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hà Nội'],
+    activeRegions: ['Hải Phòng', 'Hà Nội'],
     photographerType: 'Đối tác Studio',
     experienceYears: 4,
     skills: ['Makeup'],
@@ -273,7 +336,7 @@ export const mockPhotographers: Photographer[] = [
     phone: '0966554433',
     email: 'dat.flycam@gmail.com',
     avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
-    activeRegions: ['Hà Nội', 'Hưng Yên', 'Hải Dương'],
+    activeRegions: ['Hải Phòng', 'Hưng Yên', 'Hải Dương'],
     photographerType: 'Freelancer',
     experienceYears: 3,
     skills: ['Flycam', 'Quay phim'],

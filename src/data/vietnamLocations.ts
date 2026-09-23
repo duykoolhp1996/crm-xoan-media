@@ -5,6 +5,25 @@ export interface ProvinceLocation {
 
 export const VIETNAM_LOCATIONS: ProvinceLocation[] = [
   {
+    city: 'Hải Phòng',
+    districts: [
+      'Lê Chân',
+      'Ngô Quyền',
+      'Hồng Bàng',
+      'Hải An',
+      'Kiến An',
+      'Đồ Sơn',
+      'Dương Kinh',
+      'Thủy Nguyên',
+      'An Dương',
+      'An Lão',
+      'Kiến Thụy',
+      'Tiên Lãng',
+      'Vĩnh Bảo',
+      'Cát Hải'
+    ]
+  },
+  {
     city: 'Hà Nội',
     districts: [
       'Ba Đình',
@@ -64,25 +83,6 @@ export const VIETNAM_LOCATIONS: ProvinceLocation[] = [
       'Ân Thi',
       'Tiên Lữ',
       'Phù Cừ'
-    ]
-  },
-  {
-    city: 'Hải Phòng',
-    districts: [
-      'Hồng Bàng',
-      'Ngô Quyền',
-      'Lê Chân',
-      'Hải An',
-      'Kiến An',
-      'Đồ Sơn',
-      'Dương Kinh',
-      'Thủy Nguyên',
-      'An Dương',
-      'An Lão',
-      'Kiến Thụy',
-      'Tiên Lãng',
-      'Vĩnh Bảo',
-      'Cát Hải'
     ]
   },
   {
