@@ -86,7 +86,7 @@ export const Header: React.FC = () => {
     services: 'Gói Dịch Vụ & Combo',
     feedbacks: 'Khoảnh Khắc & Feedback',
     remarketing: 'Remarketing & Automation',
-    'reports-marketing': 'Báo Cáo Doanh Thu & CTV',
+    'reports-marketing': 'Báo Cáo Hiệu Quả Marketing & Kênh Tiếp Cận',
     'reports-photographer': 'Hiệu Suất Thợ Chụp',
     settings: 'Cài Đặt Hệ Thống'
   };
