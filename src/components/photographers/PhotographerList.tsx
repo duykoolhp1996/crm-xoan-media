@@ -10,11 +10,12 @@ import {
   Briefcase,
   Search,
   Plus,
-  Edit2
+  Edit2,
+  Trash2
 } from 'lucide-react';
 
 export const PhotographerList: React.FC = () => {
-  const { photographers, updatePhotographerStatus, bookings } = useApp();
+  const { photographers, updatePhotographerStatus, bookings, deletePhotographer } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -221,6 +222,18 @@ export const PhotographerList: React.FC = () => {
                     className="flex-1 py-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-800 rounded-xl font-semibold text-center transition-colors"
                   >
                     Lịch Chụp ({assignedBookings.length})
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Bạn có chắc chắn muốn xóa nhân sự "${photo.fullName}" khỏi đội ngũ ekip?`)) {
+                        deletePhotographer(photo.id);
+                      }
+                    }}
+                    className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl font-semibold flex items-center justify-center transition-colors"
+                    title="Xóa thợ này"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

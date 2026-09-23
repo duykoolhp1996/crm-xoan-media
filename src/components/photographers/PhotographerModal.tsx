@@ -13,7 +13,8 @@ import {
   Award,
   Layers,
   FileText,
-  Check
+  Check,
+  Trash2
 } from 'lucide-react';
 
 interface PhotographerModalProps {
@@ -46,7 +47,7 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
   onClose,
   photographerToEdit
 }) => {
-  const { addPhotographer, updatePhotographer } = useApp();
+  const { addPhotographer, updatePhotographer, deletePhotographer } = useApp();
 
   const isEditMode = Boolean(photographerToEdit);
 
@@ -456,21 +457,39 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
           </div>
 
           {/* Submit Buttons */}
-          <div className="pt-4 border-t border-black/[0.06] flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl transition-colors"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl shadow-sm transition-all active:scale-95 flex items-center gap-2"
-            >
-              <Check className="w-4 h-4" />
-              {isEditMode ? 'Lưu Thay Đổi' : 'Thêm Nhân Sự Ekip'}
-            </button>
+          <div className="pt-4 border-t border-black/[0.06] flex items-center justify-between gap-3">
+            {isEditMode && photographerToEdit ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(`Bạn có chắc chắn muốn xóa nhân sự "${photographerToEdit.fullName}" khỏi đội ngũ ekip?`)) {
+                    deletePhotographer(photographerToEdit.id);
+                    onClose();
+                  }
+                }}
+                className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl transition-colors flex items-center gap-1.5 active:scale-95"
+              >
+                <Trash2 className="w-4 h-4" />
+                Xóa Thợ Này
+              </button>
+            ) : <div />}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl shadow-sm transition-all active:scale-95 flex items-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                {isEditMode ? 'Lưu Thay Đổi' : 'Thêm Nhân Sự Ekip'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
