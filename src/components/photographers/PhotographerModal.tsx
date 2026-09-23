@@ -14,7 +14,12 @@ import {
   Layers,
   FileText,
   Check,
-  Trash2
+  Trash2,
+  Key,
+  Lock,
+  Eye,
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 
 interface PhotographerModalProps {
@@ -50,6 +55,7 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
   const { addPhotographer, updatePhotographer, deletePhotographer } = useApp();
 
   const isEditMode = Boolean(photographerToEdit);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -63,8 +69,20 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
     skills: ['Chụp chính'] as PhotographerSkill[],
     activeRegions: ['Hải Phòng'] as string[],
     equipmentListText: 'Sony A7IV, Lens 24-70 f2.8 GM',
-    notes: ''
+    notes: '',
+    username: '',
+    password: '',
+    canLogin: true
   });
+
+  const generatePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#$';
+    let result = 'Photo@';
+    for (let i = 0; i < 4; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setFormData(prev => ({ ...prev, password: result }));
+  };
 
   useEffect(() => {
     if (photographerToEdit) {
@@ -80,7 +98,10 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         skills: photographerToEdit.skills || [],
         activeRegions: photographerToEdit.activeRegions || ['Hải Phòng'],
         equipmentListText: photographerToEdit.equipmentList?.join(', ') || '',
-        notes: photographerToEdit.notes || ''
+        notes: photographerToEdit.notes || '',
+        username: photographerToEdit.username || photographerToEdit.email || '',
+        password: photographerToEdit.password || 'PhotoXoan@2024',
+        canLogin: photographerToEdit.canLogin ?? true
       });
     } else {
       setFormData({
@@ -95,7 +116,10 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         skills: ['Chụp chính'],
         activeRegions: ['Hải Phòng'],
         equipmentListText: '',
-        notes: ''
+        notes: '',
+        username: '',
+        password: 'PhotoXoan@2024',
+        canLogin: true
       });
     }
   }, [photographerToEdit, isOpen]);
@@ -138,12 +162,16 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
       .map(item => item.trim())
       .filter(Boolean);
 
+    const finalEmail = formData.email.trim() || `${formData.phone.trim()}@xoanmedia.vn`;
+    const finalUsername = formData.username.trim() || finalEmail;
+    const finalPassword = formData.password.trim() || 'PhotoXoan@2024';
+
     if (isEditMode && photographerToEdit) {
       updatePhotographer({
         ...photographerToEdit,
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim(),
-        email: formData.email.trim(),
+        email: finalEmail,
         avatar: formData.avatar,
         photographerType: formData.photographerType,
         experienceYears: Number(formData.experienceYears) || 1,
@@ -152,13 +180,16 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         skills: formData.skills,
         activeRegions: formData.activeRegions,
         equipmentList,
-        notes: formData.notes.trim()
+        notes: formData.notes.trim(),
+        username: finalUsername,
+        password: finalPassword,
+        canLogin: formData.canLogin
       });
     } else {
       addPhotographer({
         fullName: formData.fullName.trim(),
         phone: formData.phone.trim(),
-        email: formData.email.trim() || `${formData.phone.trim()}@xoanmedia.vn`,
+        email: finalEmail,
         avatar: formData.avatar,
         photographerType: formData.photographerType,
         experienceYears: Number(formData.experienceYears) || 1,
@@ -167,7 +198,10 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         skills: formData.skills,
         activeRegions: formData.activeRegions,
         equipmentList,
-        notes: formData.notes.trim()
+        notes: formData.notes.trim(),
+        username: finalUsername,
+        password: finalPassword,
+        canLogin: formData.canLogin
       });
     }
 
@@ -454,6 +488,82 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
               onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               className="w-full px-3.5 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
             />
+          </div>
+
+          {/* Cấp Tài Khoản Đăng Nhập CRM Cho Thợ (Admin Cấp) */}
+          <div className="space-y-3 pt-2 bg-neutral-50/80 p-4 rounded-2xl border border-black/[0.06]">
+            <div className="flex items-center justify-between border-b border-black/[0.06] pb-2">
+              <h3 className="font-bold text-neutral-900 uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+                <Key className="w-3.5 h-3.5 text-neutral-800" /> Cấp Tài Khoản Đăng Nhập Hệ Thống
+              </h3>
+              <span className="text-[10px] font-bold text-neutral-600 bg-neutral-200/70 px-2 py-0.5 rounded-md">
+                Admin Cấp Cho Thợ
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1">
+                  <User className="w-3 h-3 text-neutral-400" /> Tên đăng nhập (Username / Email)
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={e => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                  placeholder={formData.email || 'ten.photo@xoanmedia.vn'}
+                  className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-neutral-400" /> Mật khẩu đăng nhập
+                  </label>
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="text-[10px] font-bold text-neutral-800 hover:text-black flex items-center gap-1 transition-colors"
+                    title="Tạo mật khẩu ngẫu nhiên"
+                  >
+                    <RefreshCw className="w-3 h-3" /> Tạo ngẫu nhiên
+                  </button>
+                </div>
+                <div className="relative mt-1">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={e => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Nhập mật khẩu cấp cho Thợ"
+                    className="w-full px-3 py-2 pr-10 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(p => !p)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"
+                    title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Toggle Cho phép đăng nhập */}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs font-medium text-neutral-600">
+                Cho phép thợ đăng nhập vào ứng dụng để nhận ca và xem lịch chụp
+              </span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.canLogin}
+                  onChange={e => setFormData(prev => ({ ...prev, canLogin: e.target.checked }))}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
+              </label>
+            </div>
           </div>
 
           {/* Submit Buttons */}

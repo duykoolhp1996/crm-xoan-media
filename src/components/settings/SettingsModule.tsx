@@ -22,7 +22,16 @@ import {
   Layers,
   CheckCircle2,
   UserCheck,
-  Users
+  Users,
+  Key,
+  Lock,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
+  LogIn,
+  ShieldCheck,
+  ExternalLink
 } from 'lucide-react';
 
 export const SettingsModule: React.FC = () => {
@@ -32,10 +41,29 @@ export const SettingsModule: React.FC = () => {
     updatePhotographerStatus,
     salesStaff,
     deleteSalesStaff,
-    customers
+    customers,
+    loginAsStaff
   } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'crew' | 'sales' | 'automation' | 'database'>('crew');
+
+  // Quản lý hiển thị mật khẩu & sao chép tài khoản
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const togglePasswordVisibility = (id: string) => {
+    setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleCopyAccount = (staff: { id: string; name: string; username?: string; email: string; password?: string; roleTitle?: string; photographerType?: string }, type: 'sales' | 'photographer') => {
+    const userStr = staff.username || staff.email;
+    const passStr = staff.password || (type === 'sales' ? 'XoanSales@2024' : 'PhotoXoan@2024');
+    const roleName = type === 'sales' ? (staff.roleTitle || 'Chuyên viên Sales') : `Photographer (${staff.photographerType || 'Ekip Chụp'})`;
+    const text = `🎉 TÀI KHOẢN ĐĂNG NHẬP CRM XOẮN MEDIA\n👤 Họ tên: ${staff.name}\n🛡️ Phân quyền: ${roleName}\n🔑 Tên đăng nhập: ${userStr}\n🔒 Mật khẩu: ${passStr}\n🌐 Đăng nhập tại: https://duykoolhp1996.github.io/crm-xoan-media/`;
+    navigator.clipboard.writeText(text);
+    setCopiedId(staff.id);
+    setTimeout(() => setCopiedId(null), 2500);
+  };
 
   // Supabase & Webhooks
   const [supabaseUrl, setSupabaseUrl] = useState('https://crm-xoanmedia.supabase.co');
@@ -128,11 +156,11 @@ export const SettingsModule: React.FC = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white border border-black/[0.08] p-5 sm:p-6 rounded-3xl shadow-xs">
         <div>
           <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
-            <Settings className="w-5 h-5 text-orange-500" />
-            Cài Đặt Hệ Thống & Quản Lý Nhân Sự
+            <Key className="w-5 h-5 text-neutral-900" />
+            Quản Lý Tài Khoản & Cấp Quyền Đăng Nhập
           </h1>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Quản lý đội ngũ thợ chụp, đội ngũ nhân viên sales tư vấn, cấu hình tự động hóa và cơ sở dữ liệu
+            Admin tạo & cấp tài khoản/mật khẩu riêng biệt cho nhân sự <strong>Sales Tư Vấn</strong> và <strong>Thợ Chụp (Ekip)</strong> đăng nhập CRM
           </p>
         </div>
 
@@ -142,7 +170,7 @@ export const SettingsModule: React.FC = () => {
             className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            Thêm Nhân Sự Ekip Mới
+            Cấp Tài Khoản Thợ Mới
           </button>
         )}
 
@@ -155,7 +183,7 @@ export const SettingsModule: React.FC = () => {
             className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            Thêm Nhân Viên Sales Mới
+            Cấp Tài Khoản Sales Mới
           </button>
         )}
       </div>
@@ -171,7 +199,7 @@ export const SettingsModule: React.FC = () => {
           }`}
         >
           <Camera className="w-4 h-4" />
-          Đội Ngũ Thợ & Ekip ({photographers.length})
+          Tài Khoản Thợ Chụp ({photographers.length})
         </button>
 
         <button
@@ -183,7 +211,7 @@ export const SettingsModule: React.FC = () => {
           }`}
         >
           <UserCheck className="w-4 h-4" />
-          Đội Ngũ Sales Tư Vấn ({salesStaff.length})
+          Tài Khoản Sales ({salesStaff.length})
         </button>
 
         <button
@@ -367,10 +395,63 @@ export const SettingsModule: React.FC = () => {
                         <span>Khu vực: <strong>{p.activeRegions.join(', ')}</strong></span>
                       </p>
                     </div>
+
+                    {/* Khối Cấp Tài Khoản Đăng Nhập CRM */}
+                    <div className="p-3 bg-neutral-50 rounded-2xl border border-black/[0.06] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1">
+                          <Key className="w-3 h-3 text-neutral-700" /> Tài Khoản CRM
+                        </span>
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100/70 text-emerald-800 border border-emerald-200">
+                          {p.canLogin !== false ? '✓ Được đăng nhập' : 'Tạm khóa'}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] space-y-1">
+                        <div className="flex items-center justify-between text-neutral-700">
+                          <span className="text-neutral-500 text-[10px]">Tài khoản:</span>
+                          <span className="font-semibold text-neutral-900 truncate max-w-[150px]">{p.username || p.email}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-neutral-700">
+                          <span className="text-neutral-500 text-[10px]">Mật khẩu:</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-bold text-neutral-900">
+                              {visiblePasswords[p.id] ? (p.password || 'PhotoXoan@2024') : '••••••••'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => togglePasswordVisibility(p.id)}
+                              className="text-neutral-400 hover:text-neutral-700 p-0.5"
+                              title={visiblePasswords[p.id] ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                            >
+                              {visiblePasswords[p.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopyAccount({ id: p.id, name: p.fullName, email: p.email, username: p.username, password: p.password, photographerType: p.photographerType }, 'photographer')}
+                        className="w-full py-1.5 px-2 bg-white hover:bg-neutral-100 text-neutral-800 border border-black/[0.08] rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+                      >
+                        {copiedId === p.id ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span className="text-emerald-700 font-bold">Đã sao chép gửi thợ!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3 text-neutral-500" />
+                            <span>Sao chép tài khoản & mật khẩu</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Footer Card: Pricing & Action Buttons */}
-                  <div className="pt-3 border-t border-black/[0.06] space-y-3">
+                  <div className="pt-3 border-t border-black/[0.06] space-y-2.5">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-neutral-500">Thù lao / buổi:</span>
                       <strong className="text-neutral-900 font-extrabold text-sm">
@@ -378,21 +459,32 @@ export const SettingsModule: React.FC = () => {
                       </strong>
                     </div>
 
+                    {/* Nút Đăng nhập thử với quyền thợ này */}
+                    <button
+                      type="button"
+                      onClick={() => loginAsStaff({ id: p.id, name: p.fullName, role: 'photographer', avatar: p.avatar, email: p.email, phone: p.phone })}
+                      className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs group-hover:border-emerald-300"
+                      title="Đăng nhập thử bằng tài khoản thợ này để xem giao diện"
+                    >
+                      <LogIn className="w-3.5 h-3.5 text-emerald-700" />
+                      Đăng Nhập Thử (Quyền Thợ)
+                    </button>
+
                     {/* Action Buttons: Edit, Delete, Call */}
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleOpenEditModal(p)}
                         className="flex-1 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs"
                       >
-                        <Edit2 className="w-3.5 h-3.5" /> Chỉnh Sửa
+                        <Edit2 className="w-3.5 h-3.5" /> Chỉnh Sửa & Cấp MK
                       </button>
 
                       <a
                         href={`tel:${p.phone}`}
-                        className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
+                        className="px-3 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-black/[0.06] rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
                         title="Gọi điện trực tiếp"
                       >
-                        <Phone className="w-3.5 h-3.5" />
+                        <Phone className="w-3.5 h-3.5 text-neutral-600" />
                       </a>
 
                       <button
@@ -531,39 +623,105 @@ export const SettingsModule: React.FC = () => {
                           <span>Đang phụ trách: <strong className="text-blue-700 font-bold">{assignedCount} khách hàng/lớp</strong></span>
                         </p>
                       </div>
+
+                      {/* Khối Cấp Tài Khoản Đăng Nhập CRM */}
+                      <div className="p-3 bg-neutral-50 rounded-2xl border border-black/[0.06] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1">
+                            <Key className="w-3 h-3 text-neutral-700" /> Tài Khoản CRM
+                          </span>
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100/70 text-emerald-800 border border-emerald-200">
+                            {s.canLogin !== false ? '✓ Được đăng nhập' : 'Tạm khóa'}
+                          </span>
+                        </div>
+
+                        <div className="text-[11px] space-y-1">
+                          <div className="flex items-center justify-between text-neutral-700">
+                            <span className="text-neutral-500 text-[10px]">Tài khoản:</span>
+                            <span className="font-semibold text-neutral-900 truncate max-w-[150px]">{s.username || s.email}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-neutral-700">
+                            <span className="text-neutral-500 text-[10px]">Mật khẩu:</span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono font-bold text-neutral-900">
+                                {visiblePasswords[s.id] ? (s.password || 'XoanSales@2024') : '••••••••'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => togglePasswordVisibility(s.id)}
+                                className="text-neutral-400 hover:text-neutral-700 p-0.5"
+                                title={visiblePasswords[s.id] ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                              >
+                                {visiblePasswords[s.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCopyAccount({ id: s.id, name: s.name, email: s.email, username: s.username, password: s.password, roleTitle: s.roleTitle }, 'sales')}
+                          className="w-full py-1.5 px-2 bg-white hover:bg-neutral-100 text-neutral-800 border border-black/[0.08] rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+                        >
+                          {copiedId === s.id ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-600" />
+                              <span className="text-emerald-700 font-bold">Đã sao chép gửi Sales!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3 text-neutral-500" />
+                              <span>Sao chép tài khoản & mật khẩu</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="pt-3 border-t border-black/[0.06] flex items-center gap-2">
+                    <div className="pt-3 border-t border-black/[0.06] space-y-2.5">
+                      {/* Nút Đăng nhập thử với quyền Sales này */}
                       <button
-                        onClick={() => {
-                          setEditingSalesStaff(s);
-                          setIsSalesModalOpen(true);
-                        }}
-                        className="flex-1 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                        type="button"
+                        onClick={() => loginAsStaff({ id: s.id, name: s.name, role: 'sales', avatar: s.avatar, email: s.email, phone: s.phone })}
+                        className="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs group-hover:border-blue-300"
+                        title="Đăng nhập thử bằng tài khoản Sales này để vào Pipeline nhận lead"
                       >
-                        <Edit2 className="w-3.5 h-3.5" /> Chỉnh Sửa
+                        <LogIn className="w-3.5 h-3.5 text-blue-700" />
+                        Đăng Nhập Thử (Quyền Sales)
                       </button>
 
-                      <a
-                        href={`tel:${s.phone}`}
-                        className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
-                        title="Gọi điện trực tiếp"
-                      >
-                        <Phone className="w-3.5 h-3.5" />
-                      </a>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingSalesStaff(s);
+                            setIsSalesModalOpen(true);
+                          }}
+                          className="flex-1 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" /> Chỉnh Sửa & Cấp MK
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          if (window.confirm(`Bạn có chắc chắn muốn xóa nhân sự "${s.name}" khỏi danh sách Sales?`)) {
-                            deleteSalesStaff(s.id);
-                          }
-                        }}
-                        className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
-                        title="Xóa nhân sự khỏi danh sách Sales"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                        <a
+                          href={`tel:${s.phone}`}
+                          className="px-3 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-black/[0.06] rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
+                          title="Gọi điện trực tiếp"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-neutral-600" />
+                        </a>
+
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa nhân sự "${s.name}" khỏi danh sách Sales?`)) {
+                              deleteSalesStaff(s.id);
+                            }
+                          }}
+                          className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center justify-center transition-colors"
+                          title="Xóa nhân sự khỏi danh sách Sales"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

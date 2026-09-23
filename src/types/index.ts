@@ -147,6 +147,11 @@ export interface Photographer {
   rating: number; // 4.9/5
   completedShootsCount: number;
   notes?: string;
+  // Thông tin tài khoản đăng nhập do Admin cấp
+  username?: string;
+  password?: string;
+  canLogin?: boolean;
+  lastLoginAt?: string;
 }
 
 // 4. Booking & Lịch Chụp
@@ -382,4 +387,9 @@ export interface SalesStaff {
   activeRegions: string[];
   status: 'active' | 'inactive';
   createdAt?: string;
+  // Thông tin tài khoản đăng nhập do Admin cấp
+  username?: string;
+  password?: string;
+  canLogin?: boolean;
+  lastLoginAt?: string;
 }

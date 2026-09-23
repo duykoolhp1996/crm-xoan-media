@@ -12,7 +12,12 @@ import {
   Check,
   Trash2,
   UserCheck,
-  ShieldCheck
+  ShieldCheck,
+  Key,
+  Lock,
+  Eye,
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 
 interface SalesStaffModalProps {
@@ -39,6 +44,7 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
   const { addSalesStaff, updateSalesStaff, deleteSalesStaff } = useApp();
 
   const isEditMode = Boolean(staffToEdit);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -47,8 +53,20 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
     avatar: PRESET_AVATARS[0],
     roleTitle: 'Chuyên viên Sales',
     status: 'active' as 'active' | 'inactive',
-    activeRegions: ['Hải Phòng'] as string[]
+    activeRegions: ['Hải Phòng'] as string[],
+    username: '',
+    password: '',
+    canLogin: true
   });
+
+  const generatePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#$';
+    let result = 'Xoan@';
+    for (let i = 0; i < 4; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setFormData(prev => ({ ...prev, password: result }));
+  };
 
   useEffect(() => {
     if (staffToEdit) {
@@ -59,7 +77,10 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         avatar: staffToEdit.avatar || PRESET_AVATARS[0],
         roleTitle: staffToEdit.roleTitle || 'Chuyên viên Sales',
         status: staffToEdit.status,
-        activeRegions: staffToEdit.activeRegions || ['Hải Phòng']
+        activeRegions: staffToEdit.activeRegions || ['Hải Phòng'],
+        username: staffToEdit.username || staffToEdit.email || '',
+        password: staffToEdit.password || 'XoanSales@2024',
+        canLogin: staffToEdit.canLogin ?? true
       });
     } else {
       setFormData({
@@ -69,7 +90,10 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         avatar: PRESET_AVATARS[0],
         roleTitle: 'Chuyên viên Sales',
         status: 'active',
-        activeRegions: ['Hải Phòng']
+        activeRegions: ['Hải Phòng'],
+        username: '',
+        password: 'XoanSales@2024',
+        canLogin: true
       });
     }
   }, [staffToEdit, isOpen]);
@@ -96,26 +120,36 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
       return;
     }
 
+    const finalEmail = formData.email.trim() || `${formData.name.toLowerCase().replace(/\s+/g, '')}@xoanmedia.vn`;
+    const finalUsername = formData.username.trim() || finalEmail;
+    const finalPassword = formData.password.trim() || 'XoanSales@2024';
+
     if (isEditMode && staffToEdit) {
       updateSalesStaff({
         ...staffToEdit,
         name: formData.name.trim(),
         phone: formData.phone.trim(),
-        email: formData.email.trim() || `${formData.name.toLowerCase().replace(/\s+/g, '')}@xoanmedia.vn`,
+        email: finalEmail,
         avatar: formData.avatar,
         roleTitle: formData.roleTitle,
         status: formData.status,
-        activeRegions: formData.activeRegions
+        activeRegions: formData.activeRegions,
+        username: finalUsername,
+        password: finalPassword,
+        canLogin: formData.canLogin
       });
     } else {
       addSalesStaff({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
-        email: formData.email.trim() || `${formData.name.toLowerCase().replace(/\s+/g, '')}@xoanmedia.vn`,
+        email: finalEmail,
         avatar: formData.avatar,
         roleTitle: formData.roleTitle,
         status: formData.status,
-        activeRegions: formData.activeRegions
+        activeRegions: formData.activeRegions,
+        username: finalUsername,
+        password: finalPassword,
+        canLogin: formData.canLogin
       });
     }
 
@@ -303,6 +337,82 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
                   );
                 })}
               </div>
+            </div>
+          </div>
+
+          {/* Section 3: Cấp Tài Khoản Đăng Nhập CRM (Admin Cấp) */}
+          <div className="space-y-3 pt-2 bg-neutral-50/80 p-4 rounded-2xl border border-black/[0.06]">
+            <div className="flex items-center justify-between border-b border-black/[0.06] pb-2">
+              <h3 className="font-bold text-neutral-900 uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+                <Key className="w-3.5 h-3.5 text-neutral-800" /> 3. Cấp Tài Khoản Đăng Nhập CRM
+              </h3>
+              <span className="text-[10px] font-bold text-neutral-600 bg-neutral-200/70 px-2 py-0.5 rounded-md">
+                Admin Quản Trị
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1">
+                  <User className="w-3 h-3 text-neutral-400" /> Tên đăng nhập (Username / Email)
+                </label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={e => setFormData({ ...formData, username: e.target.value })}
+                  placeholder={formData.email || 'ten.sales@xoanmedia.vn'}
+                  className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-neutral-400" /> Mật khẩu đăng nhập
+                  </label>
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="text-[10px] font-bold text-neutral-800 hover:text-black flex items-center gap-1 transition-colors"
+                    title="Tạo mật khẩu ngẫu nhiên"
+                  >
+                    <RefreshCw className="w-3 h-3" /> Tạo ngẫu nhiên
+                  </button>
+                </div>
+                <div className="relative mt-1">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="Nhập mật khẩu cấp cho Sales"
+                    className="w-full px-3 py-2 pr-10 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(p => !p)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"
+                    title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                  >
+                    {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Toggle Cho phép đăng nhập */}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs font-medium text-neutral-600">
+                Cho phép tài khoản này đăng nhập vào hệ thống CRM
+              </span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.canLogin}
+                  onChange={e => setFormData({ ...formData, canLogin: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
+              </label>
             </div>
           </div>
 

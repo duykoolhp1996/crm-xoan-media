@@ -62,6 +62,11 @@ interface AppContextType {
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
   
+  // Đăng nhập / Chuyển quyền tài khoản
+  isImpersonating: boolean;
+  loginAsStaff: (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string }) => void;
+  returnToAdmin: () => void;
+  
   // Customers & Leads
   customers: Customer[];
   selectedCustomerId: string | null;
@@ -165,11 +170,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [dateFilter, setDateFilter] = useState<string>('this_month');
 
+  const [isImpersonating, setIsImpersonating] = useState<boolean>(false);
+
   // Chuyển đổi role đồng bộ user mẫu tương ứng
   const setCurrentRole = (role: UserRole) => {
     setCurrentRoleState(role);
     const matchedUser = mockUsers.find(u => u.role === role) || mockUsers[0];
     setCurrentUser(matchedUser);
+    setIsImpersonating(false);
+  };
+
+  // Đăng nhập với tư cách nhân sự (Sales hoặc Photographer)
+  const loginAsStaff = (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string }) => {
+    setCurrentRoleState(staff.role);
+    setCurrentUser({
+      id: staff.id,
+      name: staff.name,
+      email: staff.email || `${staff.id}@xoanmedia.vn`,
+      avatar: staff.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+      role: staff.role,
+      phone: staff.phone
+    });
+    setIsImpersonating(true);
+    if (staff.role === 'sales') {
+      setActiveTab('pipeline');
+    } else {
+      setActiveTab('photographers');
+    }
+  };
+
+  // Quay lại tài khoản quản trị Admin
+  const returnToAdmin = () => {
+    setCurrentRoleState('admin');
+    setCurrentUser(mockUsers[0]);
+    setIsImpersonating(false);
+    setActiveTab('settings');
   };
 
   // Keyboard shortcut Cmd+K / Ctrl+K mở Global Search
@@ -503,6 +538,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentRole,
         activeTab,
         setActiveTab,
+        isImpersonating,
+        loginAsStaff,
+        returnToAdmin,
         customers,
         selectedCustomerId,
         setSelectedCustomerId,

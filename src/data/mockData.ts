@@ -85,7 +85,11 @@ export const mockSalesStaff: SalesStaff[] = [
     roleTitle: 'Sales Lead',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     activeRegions: ['Hải Phòng', 'Hải Dương', 'Quảng Ninh'],
-    status: 'active'
+    status: 'active',
+    username: 'son.lh@xoanmedia.vn',
+    password: 'SonLead@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-23 08:30'
   },
   {
     id: 'user-sales-1',
@@ -95,7 +99,11 @@ export const mockSalesStaff: SalesStaff[] = [
     roleTitle: 'Chuyên viên Sales',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     activeRegions: ['Hải Phòng', 'Hà Nội'],
-    status: 'active'
+    status: 'active',
+    username: 'huong.nt@xoanmedia.vn',
+    password: 'HuongSales@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-23 09:15'
   },
   {
     id: 'user-sales-2',
@@ -105,7 +113,11 @@ export const mockSalesStaff: SalesStaff[] = [
     roleTitle: 'Chuyên viên Sales',
     avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
     activeRegions: ['Hải Phòng', 'Thái Bình', 'Nam Định'],
-    status: 'active'
+    status: 'active',
+    username: 'dang.th@xoanmedia.vn',
+    password: 'DangSales@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-22 16:40'
   },
   {
     id: 'user-sales-3',
@@ -115,7 +127,11 @@ export const mockSalesStaff: SalesStaff[] = [
     roleTitle: 'CTV Sales',
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
     activeRegions: ['Hải Phòng'],
-    status: 'active'
+    status: 'active',
+    username: 'phuong.vm@xoanmedia.vn',
+    password: 'PhuongCTV@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-21 14:20'
   }
 ];
 
@@ -339,7 +355,11 @@ export const mockPhotographers: Photographer[] = [
     ratePerShoot: 1200000,
     rating: 4.95,
     completedShootsCount: 142,
-    notes: 'Kỹ năng khuấy động không khí kỷ yếu cực tốt, ảnh màu trong trẻo.'
+    notes: 'Kỹ năng khuấy động không khí kỷ yếu cực tốt, ảnh màu trong trẻo.',
+    username: 'tuan.tm@xoanmedia.vn',
+    password: 'TuanPhoto@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-23 07:45'
   },
   {
     id: 'photo-2',
@@ -356,7 +376,11 @@ export const mockPhotographers: Photographer[] = [
     ratePerShoot: 1000000,
     rating: 4.88,
     completedShootsCount: 98,
-    notes: 'Phong cách chụp cảm xúc cinematic, chuyên concept hoàng hôn & dạ tiệc.'
+    notes: 'Phong cách chụp cảm xúc cinematic, chuyên concept hoàng hôn & dạ tiệc.',
+    username: 'ducanh.photo@gmail.com',
+    password: 'DucAnh@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-22 18:20'
   },
   {
     id: 'photo-3',
@@ -373,7 +397,11 @@ export const mockPhotographers: Photographer[] = [
     ratePerShoot: 800000,
     rating: 4.82,
     completedShootsCount: 76,
-    notes: 'Nhiệt huyết, chiều học sinh sinh viên, hỗ trợ tạo dáng nhiệt tình.'
+    notes: 'Nhiệt huyết, chiều học sinh sinh viên, hỗ trợ tạo dáng nhiệt tình.',
+    username: 'dang.nh@xoanmedia.vn',
+    password: 'DangPhoto@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-20 15:10'
   },
   {
     id: 'photo-4',
@@ -390,7 +418,11 @@ export const mockPhotographers: Photographer[] = [
     ratePerShoot: 600000,
     rating: 4.92,
     completedShootsCount: 110,
-    notes: 'Trang điểm phong cách tone trong trẻo Hàn Quốc phù hợp áo dài & kỷ yếu học sinh.'
+    notes: 'Trang điểm phong cách tone trong trẻo Hàn Quốc phù hợp áo dài & kỷ yếu học sinh.',
+    username: 'thao.makeup@xoanmedia.vn',
+    password: 'ThaoMakeup@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-21 11:30'
   },
   {
     id: 'photo-5',
@@ -407,7 +439,11 @@ export const mockPhotographers: Photographer[] = [
     ratePerShoot: 1500000,
     rating: 4.98,
     completedShootsCount: 85,
-    notes: 'Chuyên gia góc máy flycam xếp chữ đại tập thể kỷ yếu 100+ bạn.'
+    notes: 'Chuyên gia góc máy flycam xếp chữ đại tập thể kỷ yếu 100+ bạn.',
+    username: 'dat.flycam@gmail.com',
+    password: 'DatFlycam@2024',
+    canLogin: true,
+    lastLoginAt: '2024-09-22 10:00'
   }
 ];
 

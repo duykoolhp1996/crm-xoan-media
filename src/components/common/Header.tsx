@@ -21,7 +21,9 @@ export const Header: React.FC = () => {
     setIsSearchOpen,
     dateFilter,
     setDateFilter,
-    activeTab
+    activeTab,
+    isImpersonating,
+    returnToAdmin
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -109,6 +111,23 @@ export const Header: React.FC = () => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
+        {/* Banner Đang đăng nhập với tư cách nhân viên */}
+        {isImpersonating && (
+          <div className="flex items-center gap-2 bg-neutral-900 text-[#B8F23D] px-3 py-1.5 rounded-2xl text-xs shadow-sm animate-in fade-in">
+            <span className="w-2 h-2 rounded-full bg-[#B8F23D] animate-ping" />
+            <span className="font-medium text-white truncate max-w-[180px] hidden sm:inline">
+              Đang xem quyền: <strong className="text-[#B8F23D] font-bold">{currentUser.name}</strong>
+            </span>
+            <button
+              onClick={returnToAdmin}
+              className="bg-white/10 hover:bg-white/20 text-white hover:text-[#B8F23D] px-2 py-0.5 rounded-lg text-[10px] font-extrabold transition-colors flex items-center gap-1 border border-white/10"
+              title="Quay lại quyền quản trị Admin"
+            >
+              Quay lại Admin
+            </button>
+          </div>
+        )}
+
         {/* Bộ lọc thời gian chuẩn kính mờ */}
         <div className="hidden lg:flex items-center bg-white/90 hover:bg-white rounded-2xl px-3 py-1.5 border border-black/[0.06] text-xs font-semibold text-neutral-700 shadow-xs transition-colors">
           <CalendarIcon className="w-3.5 h-3.5 text-neutral-400 mr-2" />
