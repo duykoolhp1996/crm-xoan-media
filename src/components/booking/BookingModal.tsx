@@ -136,20 +136,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
 
   return (
     <div className="fixed inset-0 z-[100] overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
-      <div onClick={onClose} className="fixed inset-0 bg-black/60 backdrop-blur-xl" />
+      <div onClick={onClose} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md" />
 
-      <div className="relative w-full max-w-2xl bg-neutral-900/90 backdrop-blur-3xl rounded-3xl border border-white/20 shadow-[0_32px_80px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.18)] overflow-hidden my-8 z-10 text-xs text-white">
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl border border-black/[0.08] shadow-2xl overflow-hidden my-8 z-10 text-xs text-neutral-900">
         {/* Header */}
-        <div className="px-6 py-4 bg-white/[0.03] border-b border-white/[0.08] flex items-center justify-between">
+        <div className="px-6 py-4 bg-neutral-50/70 border-b border-black/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-orange-400">
+            <div className="w-8 h-8 rounded-xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-bold">
               <Calendar className="w-4 h-4" />
             </div>
-            <h2 className="text-sm font-bold tracking-tight">Tạo Booking Lịch Chụp Kỷ Yếu Mới</h2>
+            <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Tạo Booking Lịch Chụp Kỷ Yếu Mới</h2>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] flex items-center justify-center text-white/60 hover:text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 border border-black/[0.06] flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -159,11 +159,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
         <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
           {/* 1. Chọn khách hàng / lớp */}
           <div>
-            <label className="font-bold text-white/80">Chọn Lớp / Khách Hàng *</label>
+            <label className="font-semibold text-neutral-700">Chọn Lớp / Khách Hàng *</label>
             <select
               value={formData.customerId}
               onChange={e => handleCustomerChange(e.target.value)}
-              className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-medium cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+              className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
             >
               {customers.map(c => (
                 <option key={c.id} value={c.id}>
@@ -176,31 +176,31 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
           {/* 2. Ngày giờ & Địa điểm */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="font-bold text-white/80">Ngày Chụp *</label>
+              <label className="font-semibold text-neutral-700">Ngày Chụp *</label>
               <input
                 type="date"
                 required
                 value={formData.shootDate}
                 onChange={e => setFormData({ ...formData, shootDate: e.target.value })}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-semibold cursor-pointer"
+                className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               />
             </div>
             <div>
-              <label className="font-bold text-white/80">Giờ Bắt Đầu</label>
+              <label className="font-semibold text-neutral-700">Giờ Bắt Đầu</label>
               <input
                 type="time"
                 value={formData.startTime}
                 onChange={e => setFormData({ ...formData, startTime: e.target.value })}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl cursor-pointer"
+                className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               />
             </div>
             <div>
-              <label className="font-bold text-white/80">Giờ Kết Thúc</label>
+              <label className="font-semibold text-neutral-700">Giờ Kết Thúc</label>
               <input
                 type="time"
                 value={formData.endTime}
                 onChange={e => setFormData({ ...formData, endTime: e.target.value })}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl cursor-pointer"
+                className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               />
             </div>
           </div>
@@ -208,14 +208,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
           {/* Khu vực chụp: Thành phố và Quận/Huyện */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="font-bold text-white/80 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-orange-400" />
+              <label className="font-semibold text-neutral-700 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-neutral-500" />
                 <span>Tỉnh / Thành Phố Chụp</span>
               </label>
               <select
                 value={formData.city}
                 onChange={e => handleCityChange(e.target.value)}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-medium text-orange-300 cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               >
                 {VIETNAM_LOCATIONS.map(loc => (
                   <option key={loc.city} value={loc.city}>
@@ -225,14 +225,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
               </select>
             </div>
             <div>
-              <label className="font-bold text-white/80 flex items-center gap-1.5">
+              <label className="font-semibold text-neutral-700 flex items-center gap-1.5">
                 <span>Quận / Huyện</span>
-                <span className="text-[10px] text-white/40">({formData.city})</span>
+                <span className="text-[10px] text-neutral-400">({formData.city})</span>
               </label>
               <select
                 value={formData.district}
                 onChange={e => handleDistrictChange(e.target.value)}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-medium text-sky-300 cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               >
                 {availableDistricts.map(dist => (
                   <option key={dist} value={dist}>
@@ -244,25 +244,25 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
           </div>
 
           <div>
-            <label className="font-bold text-white/80">Địa Điểm Chụp Cụ Thể</label>
+            <label className="font-semibold text-neutral-700">Địa Điểm Chụp Cụ Thể</label>
             <input
               type="text"
               required
               value={formData.location}
               onChange={e => setFormData({ ...formData, location: e.target.value })}
               placeholder="VD: Trường Amsterdam, Văn Miếu, Phim trường Santorini..."
-              className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl"
+              className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
             />
           </div>
 
           {/* 3. Gói Dịch Vụ & Tiền Cọc */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white/[0.04] rounded-2xl border border-white/[0.08]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-neutral-50 rounded-2xl border border-black/[0.06]">
             <div>
-              <label className="font-bold text-white/80">Gói Dịch Vụ Kỷ Yếu</label>
+              <label className="font-semibold text-neutral-700">Gói Dịch Vụ Kỷ Yếu</label>
               <select
                 value={formData.packageId}
                 onChange={e => setFormData({ ...formData, packageId: e.target.value })}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-medium cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                className="w-full mt-1.5 px-3 py-2 bg-white border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               >
                 {servicePackages.map(pkg => (
                   <option key={pkg.id} value={pkg.id}>
@@ -273,35 +273,35 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
             </div>
 
             <div>
-              <label className="font-bold text-white/80">Tiền Cọc Thu Trước (đ)</label>
+              <label className="font-semibold text-neutral-700">Tiền Cọc Thu Trước (đ)</label>
               <input
                 type="number"
                 step={500000}
                 value={formData.depositAmount}
                 onChange={e => setFormData({ ...formData, depositAmount: Number(e.target.value) })}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-bold text-emerald-400"
+                className="w-full mt-1.5 px-3 py-2 bg-white border border-black/[0.08] text-emerald-600 font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               />
             </div>
 
-            <div className="sm:col-span-2 pt-2.5 border-t border-white/[0.08] flex justify-between text-xs">
-              <span className="text-white/60">Tổng giá trị đơn: <strong className="text-white">{totalAmount.toLocaleString('vi-VN')}đ</strong></span>
-              <span className="text-white/60">Công nợ còn lại: <strong className="text-rose-400">{remainingAmount.toLocaleString('vi-VN')}đ</strong></span>
+            <div className="sm:col-span-2 pt-2.5 border-t border-black/[0.06] flex justify-between text-xs">
+              <span className="text-neutral-500">Tổng giá trị đơn: <strong className="text-neutral-900">{totalAmount.toLocaleString('vi-VN')}đ</strong></span>
+              <span className="text-neutral-500">Công nợ còn lại: <strong className="text-rose-600">{remainingAmount.toLocaleString('vi-VN')}đ</strong></span>
             </div>
           </div>
 
           {/* 4. Điều Phối Ekip Photographer & Cảnh Báo Trùng Lịch */}
-          <div className="space-y-3 p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20">
-            <h3 className="font-bold text-white flex items-center gap-1.5">
-              <Camera className="w-4 h-4 text-orange-400" />
+          <div className="space-y-3 p-4 bg-[#B8F23D]/15 rounded-2xl border border-[#B8F23D]/30">
+            <h3 className="font-bold text-neutral-900 flex items-center gap-1.5">
+              <Camera className="w-4 h-4 text-neutral-800" />
               Điều Phối Ekip & Tự Động Kiểm Tra Lịch Thợ
             </h3>
 
             <div>
-              <label className="font-bold text-white/80">Photographer Chính (Lead)</label>
+              <label className="font-semibold text-neutral-700">Photographer Chính (Lead)</label>
               <select
                 value={formData.leadPhotographerId}
                 onChange={e => setFormData({ ...formData, leadPhotographerId: e.target.value })}
-                className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-semibold text-white cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                className="w-full mt-1.5 px-3 py-2 bg-white border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               >
                 <option value="">-- Chưa gán thợ (Sẽ nhận cảnh báo) --</option>
                 {photographers.map(p => (
@@ -313,8 +313,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
 
               {/* Alert nếu thợ bị trùng lịch trong ngày */}
               {!photoAvailability.available && (
-                <div className="mt-2.5 p-3 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-[11px] flex items-center gap-2 font-medium">
-                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                <div className="mt-2.5 p-3 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-[11px] flex items-center gap-2 font-medium">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>
                     ⚠️ CẢNH BÁO: Thợ này đã có lịch chụp đơn <strong>{photoAvailability.conflictBookingCode}</strong> trong ngày {formData.shootDate}!
                   </span>
@@ -324,11 +324,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="font-medium text-white/70">Videographer / Flycam</label>
+                <label className="font-semibold text-neutral-700">Videographer / Flycam</label>
                 <select
                   value={formData.videographerId}
                   onChange={e => setFormData({ ...formData, videographerId: e.target.value })}
-                  className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                  className="w-full mt-1.5 px-3 py-2 bg-white border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 >
                   <option value="">-- Không cần --</option>
                   {photographers.filter(p => p.skills.includes('Flycam') || p.skills.includes('Quay phim')).map(p => (
@@ -338,11 +338,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
               </div>
 
               <div>
-                <label className="font-medium text-white/70">Nhân Viên Makeup</label>
+                <label className="font-semibold text-neutral-700">Nhân Viên Makeup</label>
                 <select
                   value={formData.makeupStaffId}
                   onChange={e => setFormData({ ...formData, makeupStaffId: e.target.value })}
-                  className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                  className="w-full mt-1.5 px-3 py-2 bg-white border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 >
                   <option value="">-- Tự trang điểm --</option>
                   {photographers.filter(p => p.skills.includes('Makeup')).map(p => (
@@ -355,28 +355,28 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose }) =
 
           {/* Ghi chú */}
           <div>
-            <label className="font-medium text-white/70">Ghi chú cho ekip</label>
+            <label className="font-semibold text-neutral-700">Ghi chú cho ekip</label>
             <textarea
               rows={2}
               value={formData.notes}
               onChange={e => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Yêu cầu chuẩn bị trang phục dạ tiệc, bột màu, xe đưa đón..."
-              className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl"
+              className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
             />
           </div>
 
           {/* Buttons */}
-          <div className="pt-3 border-t border-white/[0.08] flex justify-end gap-2">
+          <div className="pt-3 border-t border-black/[0.06] flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 glass-btn-secondary rounded-xl font-semibold"
+              className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl font-semibold transition-colors"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-5 py-2 glass-btn-primary rounded-xl font-semibold"
+              className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold shadow-sm transition-all active:scale-95"
             >
               Xác Nhận Tạo Booking
             </button>

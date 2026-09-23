@@ -203,18 +203,18 @@ export const PhotographerList: React.FC = () => {
       {/* Modal Xem Lịch Cá Nhân Thợ */}
       {selectedPhoto && (
         <div className="fixed inset-0 z-50 overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
-          <div onClick={() => setSelectedPhoto(null)} className="fixed inset-0 bg-black/60 backdrop-blur-xl" />
-          <div className="relative w-full max-w-lg bg-neutral-900/90 backdrop-blur-3xl border border-white/20 rounded-3xl shadow-[0_32px_80px_rgba(0,0,0,0.8)] p-6 space-y-4 z-10 text-xs text-white">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+          <div onClick={() => setSelectedPhoto(null)} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md" />
+          <div className="relative w-full max-w-lg bg-white border border-black/[0.08] rounded-3xl shadow-2xl p-6 space-y-4 z-10 text-xs text-neutral-900">
+            <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
               <div>
-                <h3 className="text-sm font-bold text-white">
+                <h3 className="text-sm font-bold text-neutral-900">
                   Lịch Chụp: {selectedPhoto.fullName}
                 </h3>
-                <p className="text-white/50 text-[11px] mt-0.5">SĐT: {selectedPhoto.phone} • {selectedPhoto.photographerType}</p>
+                <p className="text-neutral-500 text-[11px] mt-0.5">SĐT: {selectedPhoto.phone} • {selectedPhoto.photographerType}</p>
               </div>
               <button
                 onClick={() => setSelectedPhoto(null)}
-                className="w-7 h-7 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] flex items-center justify-center text-white/60 hover:text-white"
+                className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 border border-black/[0.06] flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors font-bold"
               >
                 ✕
               </button>
@@ -222,21 +222,21 @@ export const PhotographerList: React.FC = () => {
 
             <div className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
               {bookings.filter(b => b.assignments.leadPhotographerId === selectedPhoto.id).length === 0 ? (
-                <p className="py-8 text-center text-white/40">Thợ này hiện chưa có lịch chụp nào sắp tới.</p>
+                <p className="py-8 text-center text-neutral-400">Thợ này hiện chưa có lịch chụp nào sắp tới.</p>
               ) : (
                 bookings
                   .filter(b => b.assignments.leadPhotographerId === selectedPhoto.id)
                   .map(bk => (
-                    <div key={bk.id} className="p-3.5 bg-white/[0.04] rounded-2xl border border-white/[0.08] space-y-1.5">
+                    <div key={bk.id} className="p-3.5 bg-neutral-50 rounded-2xl border border-black/[0.06] space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-white">{bk.className} ({bk.schoolName})</span>
-                        <span className="font-mono text-sky-300 font-bold bg-sky-500/20 border border-sky-500/30 px-2 py-0.5 rounded text-[10px]">
+                        <span className="font-bold text-neutral-900">{bk.className} ({bk.schoolName})</span>
+                        <span className="font-mono text-neutral-900 font-bold bg-white border border-black/[0.08] px-2 py-0.5 rounded text-[10px]">
                           {bk.code}
                         </span>
                       </div>
-                      <p className="text-white/60">📅 Ngày: <strong className="text-white">{bk.shootDate}</strong> ({bk.startTime} - {bk.endTime})</p>
-                      <p className="text-white/50 truncate">📍 Địa điểm: {bk.location}</p>
-                      <p className="text-emerald-400 font-semibold">Thù lao: {selectedPhoto.ratePerShoot.toLocaleString('vi-VN')}đ</p>
+                      <p className="text-neutral-600">📅 Ngày: <strong className="text-neutral-900">{bk.shootDate}</strong> ({bk.startTime} - {bk.endTime})</p>
+                      <p className="text-neutral-500 truncate">📍 Địa điểm: {bk.location}</p>
+                      <p className="text-neutral-900 font-bold">Thù lao: {selectedPhoto.ratePerShoot.toLocaleString('vi-VN')}đ</p>
                     </div>
                   ))
               )}

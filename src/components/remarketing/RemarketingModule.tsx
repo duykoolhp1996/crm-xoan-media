@@ -275,29 +275,29 @@ export const RemarketingModule: React.FC = () => {
       {/* Modal Tạo Campaign */}
       {isCreateCampModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
-          <div onClick={() => setIsCreateCampModalOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-xl" />
-          <div className="relative w-full max-w-lg bg-neutral-900/90 backdrop-blur-3xl border border-white/20 rounded-3xl shadow-[0_32px_80px_rgba(0,0,0,0.8)] p-6 space-y-4 z-10 text-xs text-white">
-            <h3 className="text-sm font-bold text-white">Tạo Chiến Dịch Remarketing Mới</h3>
+          <div onClick={() => setIsCreateCampModalOpen(false)} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md" />
+          <div className="relative w-full max-w-lg bg-white border border-black/[0.08] rounded-3xl shadow-2xl p-6 space-y-4 z-10 text-xs text-neutral-900">
+            <h3 className="text-sm font-bold text-neutral-900">Tạo Chiến Dịch Remarketing Mới</h3>
             <form onSubmit={handleCreateCampaign} className="space-y-3">
               <div>
-                <label className="font-bold text-white/80">Tên Chiến Dịch *</label>
+                <label className="font-semibold text-neutral-700">Tên Chiến Dịch *</label>
                 <input
                   type="text"
                   required
                   placeholder="VD: Tặng Flycam cho Lead chưa cọc..."
                   value={newCamp.name}
                   onChange={e => setNewCamp({ ...newCamp, name: e.target.value })}
-                  className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl"
+                  className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-white/80">Phân Khúc Mục Tiêu</label>
+                  <label className="font-semibold text-neutral-700">Phân Khúc Mục Tiêu</label>
                   <select
                     value={newCamp.segmentId}
                     onChange={e => setNewCamp({ ...newCamp, segmentId: e.target.value })}
-                    className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                    className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                   >
                     {segments.map(s => (
                       <option key={s.id} value={s.id}>{s.name} ({s.customerCount})</option>
@@ -306,11 +306,11 @@ export const RemarketingModule: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="font-bold text-white/80">Kênh Gửi (Channel)</label>
+                  <label className="font-semibold text-neutral-700">Kênh Gửi (Channel)</label>
                   <select
                     value={newCamp.channel}
                     onChange={e => setNewCamp({ ...newCamp, channel: e.target.value as any })}
-                    className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl font-semibold cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+                    className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                   >
                     <option value="Zalo">Zalo ZNS / Tin Nhắn</option>
                     <option value="SMS">SMS Brandname</option>
@@ -322,37 +322,37 @@ export const RemarketingModule: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-bold text-white/80">Ưu Đãi / Quà Tặng (Offer)</label>
+                <label className="font-semibold text-neutral-700">Ưu Đãi / Quà Tặng (Offer)</label>
                 <input
                   type="text"
                   value={newCamp.offer}
                   onChange={e => setNewCamp({ ...newCamp, offer: e.target.value })}
-                  className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl"
+                  className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-white/80">Nội Dung Thông Điệp</label>
+                <label className="font-semibold text-neutral-700">Nội Dung Thông Điệp</label>
                 <textarea
                   rows={3}
                   value={newCamp.content}
                   onChange={e => setNewCamp({ ...newCamp, content: e.target.value })}
                   placeholder="Chào bạn, Xoắn Media đang có ưu đãi đặc quyền..."
-                  className="w-full mt-1.5 px-3 py-2 glass-input rounded-xl"
+                  className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 />
               </div>
 
-              <div className="pt-3 border-t border-white/[0.08] flex justify-end gap-2">
+              <div className="pt-3 border-t border-black/[0.06] flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsCreateCampModalOpen(false)}
-                  className="px-4 py-2 glass-btn-secondary rounded-xl font-semibold"
+                  className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl font-semibold transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 glass-btn-primary rounded-xl font-semibold"
+                  className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold shadow-sm transition-all active:scale-95"
                 >
                   Khởi Chạy Chiến Dịch
                 </button>

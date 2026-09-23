@@ -561,26 +561,26 @@ export const FeedbackModule: React.FC = () => {
 
       {/* Cửa sổ tương tác nhanh với 🐱 Xu Xu khi click vào avatar */}
       {isXuXuChatOpen && (
-        <div className="fixed bottom-22 right-6 z-50 w-80 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl p-4 text-xs space-y-3 animate-in fade-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-2.5">
+        <div className="fixed bottom-22 right-6 z-50 w-80 bg-white border border-black/[0.08] rounded-2xl shadow-2xl p-4 text-xs space-y-3 animate-in fade-in zoom-in-95 duration-150 text-neutral-900">
+          <div className="flex items-center justify-between border-b border-black/[0.06] pb-2.5">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold">
+              <div className="w-7 h-7 rounded-full bg-neutral-900 text-[#B8F23D] flex items-center justify-center text-sm font-bold">
                 🐱
               </div>
               <div>
-                <p className="font-bold text-white text-xs">Trợ Lý Ảo Xu Xu</p>
-                <p className="text-[10px] text-emerald-400 flex items-center gap-1">● Sẵn sàng hỗ trợ tư vấn</p>
+                <p className="font-bold text-neutral-900 text-xs">Trợ Lý Ảo Xu Xu</p>
+                <p className="text-[10px] text-emerald-600 flex items-center gap-1 font-semibold">● Sẵn sàng hỗ trợ tư vấn</p>
               </div>
             </div>
             <button
               onClick={() => setIsXuXuChatOpen(false)}
-              className="text-neutral-400 hover:text-white"
+              className="text-neutral-400 hover:text-neutral-900 font-bold"
             >
               ✕
             </button>
           </div>
 
-          <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-neutral-300 text-[11px] leading-relaxed">
+          <div className="bg-neutral-50 p-3 rounded-xl border border-black/[0.06] text-neutral-700 text-[11px] leading-relaxed">
             Dạ em chào anh/chị! 🐱 <strong>Xu Xu</strong> có thể giúp gửi bảng báo giá kỷ yếu Standard/Premium, kiểm tra lịch trống của thợ hoặc trích xuất feedback đẹp nhất từ các trường để gửi lớp tham khảo ngay ạ!
           </div>
 
@@ -590,7 +590,7 @@ export const FeedbackModule: React.FC = () => {
                 alert('🐱 Xu Xu: Đã sao chép kịch bản tư vấn và link bộ ảnh concept để gửi Zalo cho lớp!');
                 setIsXuXuChatOpen(false);
               }}
-              className="w-full py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg font-semibold text-[11px] text-left px-3 transition-colors"
+              className="w-full py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg font-semibold text-[11px] text-left px-3 transition-colors"
             >
               👉 Lấy link bộ ảnh mẫu 12A1 Chu Văn An
             </button>
@@ -599,7 +599,7 @@ export const FeedbackModule: React.FC = () => {
                 alert('🐱 Xu Xu: Đang kiểm tra lịch thợ ảnh Trần Minh Tuấn và Alex Đức Anh trong tuần này.');
                 setIsXuXuChatOpen(false);
               }}
-              className="w-full py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg font-semibold text-[11px] text-left px-3 transition-colors"
+              className="w-full py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg font-semibold text-[11px] text-left px-3 transition-colors"
             >
               👉 Kiểm tra thợ chụp rảnh cuối tuần
             </button>
@@ -609,22 +609,22 @@ export const FeedbackModule: React.FC = () => {
 
       {/* MODAL THÊM FEEDBACK MỚI */}
       {isFeedbackModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-neutral-900 border border-neutral-800 text-white rounded-2xl p-6 w-full max-w-md space-y-4 text-xs shadow-2xl">
-            <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
-              <h3 className="font-bold text-sm text-white">Thêm Feedback & Cảm Xúc Từ Lớp</h3>
-              <button onClick={() => setIsFeedbackModalOpen(false)} className="text-neutral-400 hover:text-white font-bold">
+        <div className="fixed inset-0 z-50 bg-neutral-900/60 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white border border-black/[0.08] text-neutral-900 rounded-3xl p-6 w-full max-w-md space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-black/[0.06] pb-3">
+              <h3 className="font-bold text-sm text-neutral-900">Thêm Feedback & Cảm Xúc Từ Lớp</h3>
+              <button onClick={() => setIsFeedbackModalOpen(false)} className="text-neutral-400 hover:text-neutral-900 font-bold">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCreateFeedbackSubmit} className="space-y-3">
               <div>
-                <label className="font-semibold text-neutral-300">Chọn Khách Hàng / Lớp</label>
+                <label className="font-semibold text-neutral-700">Chọn Khách Hàng / Lớp</label>
                 <select
                   value={newFeedbackForm.customerId}
                   onChange={e => setNewFeedbackForm({ ...newFeedbackForm, customerId: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white"
+                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 focus:bg-white focus:outline-none"
                 >
                   {customers.map(c => (
                     <option key={c.id} value={c.id}>{c.className} - {c.schoolName} ({c.name})</option>
@@ -634,11 +634,11 @@ export const FeedbackModule: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="font-semibold text-neutral-300">Đánh Giá Sao</label>
+                  <label className="font-semibold text-neutral-700">Đánh Giá Sao</label>
                   <select
                     value={newFeedbackForm.rating}
                     onChange={e => setNewFeedbackForm({ ...newFeedbackForm, rating: Number(e.target.value) })}
-                    className="w-full mt-1 px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-amber-400 font-bold"
+                    className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-amber-500 font-bold focus:bg-white focus:outline-none"
                   >
                     <option value={5}>⭐⭐⭐⭐⭐ (5 Sao)</option>
                     <option value={4}>⭐⭐⭐⭐ (4 Sao)</option>
@@ -646,11 +646,11 @@ export const FeedbackModule: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="font-semibold text-neutral-300">Kênh Gửi</label>
+                  <label className="font-semibold text-neutral-700">Kênh Gửi</label>
                   <select
                     value={newFeedbackForm.channel}
                     onChange={e => setNewFeedbackForm({ ...newFeedbackForm, channel: e.target.value as any })}
-                    className="w-full mt-1 px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white"
+                    className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 focus:bg-white focus:outline-none"
                   >
                     <option value="Zalo">Zalo</option>
                     <option value="Facebook">Facebook</option>
@@ -660,11 +660,11 @@ export const FeedbackModule: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-semibold text-neutral-300">Thợ Ảnh Được Lớp Khen</label>
+                <label className="font-semibold text-neutral-700">Thợ Ảnh Được Lớp Khen</label>
                 <select
                   value={newFeedbackForm.photographerMentioned}
                   onChange={e => setNewFeedbackForm({ ...newFeedbackForm, photographerMentioned: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white"
+                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 focus:bg-white focus:outline-none"
                 >
                   {photographers.map(p => (
                     <option key={p.id} value={p.fullName}>{p.fullName} ({p.photographerType})</option>
@@ -673,28 +673,28 @@ export const FeedbackModule: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-semibold text-neutral-300">Nội Dung Chia Sẻ Của Lớp *</label>
+                <label className="font-semibold text-neutral-700">Nội Dung Chia Sẻ Của Lớp *</label>
                 <textarea
                   rows={3}
                   required
                   placeholder="Nhập cảm nhận của lớp trưởng/học sinh..."
                   value={newFeedbackForm.comment}
                   onChange={e => setNewFeedbackForm({ ...newFeedbackForm, comment: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-950 border border-neutral-800 rounded-lg text-white"
+                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 />
               </div>
 
-              <div className="pt-3 border-t border-neutral-800 flex justify-end gap-2">
+              <div className="pt-3 border-t border-black/[0.06] flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsFeedbackModalOpen(false)}
-                  className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl font-bold"
+                  className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl font-semibold transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl font-bold"
+                  className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold shadow-sm transition-all active:scale-95"
                 >
                   Lưu Feedback
                 </button>

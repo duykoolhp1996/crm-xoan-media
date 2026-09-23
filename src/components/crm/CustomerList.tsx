@@ -12,7 +12,8 @@ import {
   ExternalLink,
   ChevronRight,
   Sparkles,
-  MapPin
+  MapPin,
+  Headphones
 } from 'lucide-react';
 import { CustomerDetail360 } from './CustomerDetail360';
 import { CustomerModal } from './CustomerModal';
@@ -192,6 +193,9 @@ export const CustomerList: React.FC = () => {
                       <p className="font-semibold text-neutral-900">{cust.name}</p>
                       <p className="text-[11px] text-neutral-500 flex items-center gap-1">
                         <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone} ({cust.representativeRole})
+                      </p>
+                      <p className="text-[10px] text-neutral-500 flex items-center gap-1 mt-0.5">
+                        <Headphones className="w-3 h-3 text-neutral-400" /> CSKH: <span className="text-neutral-700 font-semibold">{cust.assignedCareStaffName || 'Phạm Quỳnh Nga'}</span>
                       </p>
                     </td>
 

@@ -239,15 +239,15 @@ export const PhotoCalendar: React.FC = () => {
       {/* Modal / Dialog xem chi tiết các ca chụp trong ngày được click */}
       {selectedDayShoots && (
         <div className="fixed inset-0 z-50 overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
-          <div onClick={() => setSelectedDayShoots(null)} className="fixed inset-0 bg-black/60 backdrop-blur-xl" />
-          <div className="relative w-full max-w-xl bg-neutral-900/90 backdrop-blur-3xl border border-white/20 rounded-3xl shadow-[0_32px_80px_rgba(0,0,0,0.8)] p-6 space-y-4 z-10 text-xs text-white">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <h3 className="text-sm font-bold text-white">
+          <div onClick={() => setSelectedDayShoots(null)} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md" />
+          <div className="relative w-full max-w-xl bg-white border border-black/[0.08] rounded-3xl shadow-2xl p-6 space-y-4 z-10 text-xs text-neutral-900">
+            <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
+              <h3 className="text-sm font-bold text-neutral-900">
                 Chi Tiết Lịch Chụp Ngày {selectedDayShoots[0]?.shootDate} ({selectedDayShoots.length} Buổi Chụp)
               </h3>
               <button
                 onClick={() => setSelectedDayShoots(null)}
-                className="w-7 h-7 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] flex items-center justify-center text-white/60 hover:text-white"
+                className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 border border-black/[0.06] flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors font-bold"
               >
                 ✕
               </button>
@@ -255,33 +255,33 @@ export const PhotoCalendar: React.FC = () => {
 
             <div className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
               {selectedDayShoots.map(bk => (
-                <div key={bk.id} className="p-4 bg-white/[0.04] rounded-2xl border border-white/[0.08] space-y-2">
+                <div key={bk.id} className="p-4 bg-neutral-50 rounded-2xl border border-black/[0.06] space-y-2">
                   <div className="flex justify-between items-start">
                     <div>
-                      <span className="font-mono text-sky-300 font-bold bg-sky-500/20 border border-sky-500/30 px-2 py-0.5 rounded-md">
+                      <span className="font-mono text-neutral-900 font-bold bg-white border border-black/[0.08] px-2 py-0.5 rounded-md shadow-2xs">
                         {bk.code}
                       </span>
-                      <h4 className="font-bold text-white text-sm mt-1.5">{bk.className} - {bk.schoolName}</h4>
+                      <h4 className="font-bold text-neutral-900 text-sm mt-1.5">{bk.className} - {bk.schoolName}</h4>
                     </div>
-                    <span className="font-bold text-orange-400">{bk.totalAmount.toLocaleString('vi-VN')}đ</span>
+                    <span className="font-bold text-neutral-900">{bk.totalAmount.toLocaleString('vi-VN')}đ</span>
                   </div>
 
-                  <p className="text-white/60 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-white/40" />
-                    Thời gian: <strong className="text-white">{bk.startTime} - {bk.endTime}</strong>
+                  <p className="text-neutral-600 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                    Thời gian: <strong className="text-neutral-900">{bk.startTime} - {bk.endTime}</strong>
                   </p>
-                  <p className="text-white/60 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-white/40" />
+                  <p className="text-neutral-600 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-neutral-400" />
                     Địa điểm: {bk.location}
                   </p>
-                  <p className="text-white/80 font-semibold flex items-center gap-1.5">
-                    <Camera className="w-3.5 h-3.5 text-orange-400" />
+                  <p className="text-neutral-800 font-semibold flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5 text-neutral-700" />
                     Photographer: {bk.assignments.leadPhotographerName || '⚠️ Chưa gán thợ!'}
                   </p>
 
                   {bk.assignments.leadPhotographerName?.includes('Trùng Lịch') && (
-                    <div className="p-2.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl font-bold flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-rose-400" />
+                    <div className="p-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl font-bold flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-rose-600" />
                       Cảnh báo: Thợ chụp này đã được gán cho 2 lớp chụp cùng thời điểm! Cần điều phối lại gấp.
                     </div>
                   )}
