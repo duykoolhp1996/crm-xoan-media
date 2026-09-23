@@ -27,8 +27,6 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { SaasPhotographerTable } from '../saas/SaasPhotographerTable';
-import { SaasCtvSalesTable } from '../saas/SaasCtvSalesTable';
 import { CRM_CTV_SALES } from '../../data/crmBusinessData';
 
 export const ExecutiveDashboard: React.FC = () => {
@@ -39,8 +37,6 @@ export const ExecutiveDashboard: React.FC = () => {
     setActiveTab,
     setSelectedBookingId
   } = useApp();
-
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'crew' | 'ctv'>('overview');
 
   // 1. Tính toán KPIs Khách hàng & Lớp học
   const totalLeads = customers.length;
@@ -198,49 +194,13 @@ export const ExecutiveDashboard: React.FC = () => {
             Tổng Quan Doanh Thu & Điều Hành Ekip
           </h1>
           <p className="text-neutral-600 text-xs sm:text-sm mt-1.5 leading-relaxed">
-            Kiểm soát hợp đồng thực tế, tiến độ {customers.length} lớp kỷ yếu ({totalStudents.toLocaleString('vi-VN')} học sinh), hiệu suất {totalPhotographers} thợ chụp và mạng lưới {CRM_CTV_SALES.length} CTV sale các trường.
+            Kiểm soát hợp đồng thực tế, tiến độ {customers.length} lớp kỷ yếu ({totalStudents.toLocaleString('vi-VN')} học sinh), điều phối {totalPhotographers} thợ chụp và đội ngũ Sales tư vấn chuyên nghiệp.
           </p>
-        </div>
-
-        <div className="relative z-10 flex items-center gap-2.5 shrink-0 flex-wrap">
-          <button
-            onClick={() => setActiveSubTab('overview')}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all ${
-              activeSubTab === 'overview'
-                ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
-                : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-black/[0.06]'
-            }`}
-          >
-            Tổng Quan
-          </button>
-          <button
-            onClick={() => setActiveSubTab('crew')}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all ${
-              activeSubTab === 'crew'
-                ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
-                : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-black/[0.06]'
-            }`}
-          >
-            Đội Ngũ Thợ ({totalPhotographers})
-          </button>
-          <button
-            onClick={() => setActiveSubTab('ctv')}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all ${
-              activeSubTab === 'ctv'
-                ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
-                : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-black/[0.06]'
-            }`}
-          >
-            CTV Sale ({CRM_CTV_SALES.length})
-          </button>
         </div>
       </div>
 
-      {/* Subtab View 1: Overview */}
-      {activeSubTab === 'overview' && (
-        <>
-          {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Doanh thu hợp đồng & thực tế */}
             <div
               onClick={() => setActiveTab('bookings')}
@@ -293,7 +253,7 @@ export const ExecutiveDashboard: React.FC = () => {
 
             {/* Card 3: Đội ngũ Thợ / Photographer */}
             <div
-              onClick={() => setActiveSubTab('crew')}
+              onClick={() => setActiveTab('photographers')}
               className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
             >
               <div className="flex items-center justify-between">
@@ -316,7 +276,7 @@ export const ExecutiveDashboard: React.FC = () => {
 
             {/* Card 4: CTV Sale & Hoa Hồng */}
             <div
-              onClick={() => setActiveSubTab('ctv')}
+              onClick={() => setActiveTab('pipeline')}
               className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
             >
               <div className="flex items-center justify-between">
@@ -599,22 +559,7 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
             </div>
           </div>
-        </>
-      )}
-
-      {/* Subtab View 2: Quản lý Thợ & Ekip */}
-      {activeSubTab === 'crew' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <SaasPhotographerTable />
-        </div>
-      )}
-
-      {/* Subtab View 3: Quản lý Đội ngũ CTV Sale */}
-      {activeSubTab === 'ctv' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <SaasCtvSalesTable />
-        </div>
-      )}
     </div>
   );
 };
+
