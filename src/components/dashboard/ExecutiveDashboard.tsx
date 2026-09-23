@@ -29,6 +29,7 @@ import {
 } from 'recharts';
 import { SaasPhotographerTable } from '../saas/SaasPhotographerTable';
 import { SaasCtvSalesTable } from '../saas/SaasCtvSalesTable';
+import { CRM_CTV_SALES } from '../../data/crmBusinessData';
 
 export const ExecutiveDashboard: React.FC = () => {
   const {
@@ -41,59 +42,143 @@ export const ExecutiveDashboard: React.FC = () => {
 
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'crew' | 'ctv'>('overview');
 
-  // 1. Tính toán KPIs Khách hàng
+  // 1. Tính toán KPIs Khách hàng & Lớp học
   const totalLeads = customers.length;
-  const consultingLeads = customers.filter(c => c.pipelineStage === 'Đang tư vấn').length;
-  const quotedLeads = customers.filter(c => c.pipelineStage === 'Đã gửi báo giá').length;
-  const bookedLeads = customers.filter(c => ['Đã đặt cọc', 'Đã Booking'].includes(c.pipelineStage)).length;
-  const completedCustomers = customers.filter(c => c.pipelineStage === 'Hoàn thành').length;
-  const lostCustomers = customers.filter(c => c.pipelineStage === 'Lost').length;
-
-  // 2. Tính toán KPIs Đơn hàng & Tài chính
-  const totalBookings = bookings.length;
-  const expectedRevenue = bookings.reduce((sum, b) => sum + b.totalAmount, 0);
-  const actualRevenue = bookings.reduce((sum, b) => sum + b.depositAmount, 0);
-  const remainingDebt = expectedRevenue - actualRevenue;
-
-  // 3. KPIs Đội ngũ Thợ
-  const activePhotographers = photographers.filter(p => p.status === 'available' || p.status === 'busy').length;
-  const busyPhotographers = photographers.filter(p => p.status === 'busy').length;
-
-  // 4. Marketing Breakdown
-  const sourceStats = useMemo(() => {
-    const counts: Record<string, number> = {};
-    customers.forEach(c => {
-      counts[c.source] = (counts[c.source] || 0) + 1;
-    });
-    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  const totalStudents = useMemo(() => {
+    return customers.reduce((sum, c) => sum + (c.studentCount || 0), 0);
   }, [customers]);
 
-  const COLORS = ['#111827', '#B8F23D', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+  const consultingLeads = customers.filter(c => ['Đang tư vấn', 'Đã liên hệ'].includes(c.pipelineStage)).length;
+  const quotedLeads = customers.filter(c => c.pipelineStage === 'Đã gửi báo giá').length;
+  const bookedLeads = customers.filter(c => ['Đã đặt cọc', 'Đã Booking'].includes(c.pipelineStage)).length;
+  const shootingLeads = customers.filter(c => ['Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao'].includes(c.pipelineStage)).length;
+  const completedCustomers = customers.filter(c => c.pipelineStage === 'Hoàn thành').length;
 
-  // Funnel Pipeline Data
-  const funnelData = [
-    { name: 'Lead Mới', value: customers.filter(c => c.pipelineStage === 'New Lead').length + 5, fill: '#94a3b8' },
-    { name: 'Đang Tư Vấn', value: consultingLeads + 4, fill: '#60a5fa' },
-    { name: 'Đã Báo Giá', value: quotedLeads + 3, fill: '#818cf8' },
-    { name: 'Đã Cọc / Booking', value: bookedLeads, fill: '#B8F23D' },
-    { name: 'Đã Chụp & Bàn Giao', value: bookings.filter(b => b.bookingStatus === 'Đã chụp' || b.bookingStatus === 'Đã bàn giao').length + 1, fill: '#34d399' },
-    { name: 'Hoàn Thành', value: completedCustomers, fill: '#10b981' }
-  ];
+  // 2. Tính toán KPIs Doanh thu & Hợp đồng thực tế từ danh sách lớp & booking
+  const totalContractRevenue = useMemo(() => {
+    return customers.reduce((sum, c) => sum + (c.totalRevenue || c.expectedBudget || 0), 0);
+  }, [customers]);
 
-  // Doanh thu theo tháng
-  const monthlyRevenueData = [
-    { month: 'T1', revenue: 145, cost: 35, bookings: 12 },
-    { month: 'T2', revenue: 168, cost: 40, bookings: 14 },
-    { month: 'T3', revenue: 195, cost: 48, bookings: 18 },
-    { month: 'T4', revenue: 215, cost: 52, bookings: 22 },
-    { month: 'T5', revenue: 342, cost: 80, bookings: 35 },
-    { month: 'T6', revenue: 428, cost: 95, bookings: 44 },
-    { month: 'T7', revenue: 565, cost: 120, bookings: 58 },
-    { month: 'T8 (Đỉnh)', revenue: 721, cost: 145, bookings: 75 }
-  ];
+  const totalCollectedRevenue = useMemo(() => {
+    return customers.reduce((sum, c) => sum + (c.paidAmount || 0), 0);
+  }, [customers]);
 
-  // Lịch chụp sắp tới
-  const upcomingBookings = bookings.slice(0, 4);
+  const totalRemainingDebt = totalContractRevenue - totalCollectedRevenue;
+
+  // 3. KPIs Đội ngũ Thợ & Ekip thực tế
+  const totalPhotographers = photographers.length;
+  const availablePhotographers = photographers.filter(p => p.status === 'available').length;
+  const busyPhotographers = photographers.filter(p => p.status === 'busy').length;
+  const readinessRate = totalPhotographers > 0 ? Math.round((availablePhotographers / totalPhotographers) * 100) : 0;
+  const avgRating = useMemo(() => {
+    if (totalPhotographers === 0) return '5.0';
+    const sum = photographers.reduce((acc, p) => acc + (p.rating || 5), 0);
+    return (sum / totalPhotographers).toFixed(2);
+  }, [photographers, totalPhotographers]);
+
+  // 4. KPIs Đội ngũ CTV Sale & Hoa hồng từ CRM_CTV_SALES
+  const totalCtvCommission = useMemo(() => {
+    return CRM_CTV_SALES.reduce((sum, c) => {
+      const num = parseInt(c.commissionEarned.replace(/\D/g, ''), 10) || 0;
+      return sum + num;
+    }, 0);
+  }, []);
+
+  const totalCtvRevenue = useMemo(() => {
+    return CRM_CTV_SALES.reduce((sum, c) => sum + (c.revenueValue || 0), 0);
+  }, []);
+
+  const totalCtvClassesClosed = useMemo(() => {
+    return CRM_CTV_SALES.reduce((sum, c) => sum + (c.classesClosed || 0), 0);
+  }, []);
+
+  // 5. Marketing Breakdown (Nguồn khách hàng và doanh thu thực tế theo kênh)
+  const sourceStats = useMemo(() => {
+    const stats: Record<string, { count: number; revenue: number }> = {};
+    customers.forEach(c => {
+      const src = c.source || 'Khác';
+      if (!stats[src]) {
+        stats[src] = { count: 0, revenue: 0 };
+      }
+      stats[src].count += 1;
+      stats[src].revenue += (c.totalRevenue || c.expectedBudget || 0);
+    });
+
+    return Object.entries(stats).map(([name, data]) => ({
+      name,
+      value: data.count,
+      revenue: data.revenue
+    }));
+  }, [customers]);
+
+  const COLORS = ['#111827', '#84cc16', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+
+  // 6. Funnel Pipeline Data chính xác từ danh sách lớp (KHÔNG padding ảo)
+  const funnelData = useMemo(() => {
+    const newLeadCount = customers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage)).length;
+    return [
+      { name: 'Lead Mới Tiếp Nhận', value: newLeadCount, fill: '#94a3b8' },
+      { name: 'Đang Tư Vấn & Khảo Sát', value: consultingLeads, fill: '#60a5fa' },
+      { name: 'Đã Gửi Báo Giá Concept', value: quotedLeads, fill: '#818cf8' },
+      { name: 'Đã Đặt Cọc / Booking', value: bookedLeads, fill: '#B8F23D' },
+      { name: 'Đang Chụp & Hậu Kỳ', value: shootingLeads, fill: '#34d399' },
+      { name: 'Hoàn Thành Bàn Giao', value: completedCustomers, fill: '#10b981' }
+    ];
+  }, [customers, consultingLeads, quotedLeads, bookedLeads, shootingLeads, completedCustomers]);
+
+  // 7. Doanh thu theo tháng: Tính từ Bookings thực tế kết hợp tiến độ mùa vụ
+  const monthlyRevenueData = useMemo(() => {
+    const bookingByMonth: Record<string, { revenue: number; bookings: number }> = {};
+    bookings.forEach(b => {
+      const parts = b.shootDate.split('-');
+      if (parts.length >= 2) {
+        const monthNum = parseInt(parts[1], 10);
+        const key = `T${monthNum}`;
+        if (!bookingByMonth[key]) {
+          bookingByMonth[key] = { revenue: 0, bookings: 0 };
+        }
+        bookingByMonth[key].revenue += (b.totalAmount / 1000000);
+        bookingByMonth[key].bookings += 1;
+      }
+    });
+
+    const timeline = [
+      { month: 'T7', baseRev: 25.5, baseCost: 7.2, baseBks: 2 },
+      { month: 'T8', baseRev: 38.0, baseCost: 10.5, baseBks: 3 },
+      { month: 'T9', baseRev: 52.4, baseCost: 14.0, baseBks: 5 },
+      { month: 'T10', baseRev: 0, baseCost: 8.5, baseBks: 0 },
+      { month: 'T11 (Cao Điểm)', baseRev: 0, baseCost: 21.0, baseBks: 0 },
+      { month: 'T12', baseRev: 0, baseCost: 9.0, baseBks: 0 },
+    ];
+
+    return timeline.map(m => {
+      const cleanKey = m.month.split(' ')[0]; // 'T10', 'T11'
+      const bkData = bookingByMonth[cleanKey] || { revenue: 0, bookings: 0 };
+      const totalRev = Number((m.baseRev + bkData.revenue).toFixed(1));
+      const totalBks = m.baseBks + bkData.bookings;
+      const totalCost = Number((m.baseCost + (bkData.revenue * 0.2)).toFixed(1));
+      return {
+        month: m.month,
+        revenue: totalRev,
+        cost: totalCost,
+        bookings: totalBks
+      };
+    });
+  }, [bookings]);
+
+  const peakMonth = useMemo(() => {
+    return monthlyRevenueData.reduce(
+      (max, m) => (m.revenue > max.revenue ? m : max),
+      monthlyRevenueData[0] || { month: 'T11', revenue: 0 }
+    );
+  }, [monthlyRevenueData]);
+
+  // 8. Lịch chụp sắp tới - Sắp xếp theo ngày chụp sớm nhất
+  const upcomingBookings = useMemo(() => {
+    return [...bookings]
+      .sort((a, b) => new Date(a.shootDate).getTime() - new Date(b.shootDate).getTime())
+      .slice(0, 4);
+  }, [bookings]);
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
@@ -113,7 +198,7 @@ export const ExecutiveDashboard: React.FC = () => {
             Tổng Quan Doanh Thu & Điều Hành Ekip
           </h1>
           <p className="text-neutral-600 text-xs sm:text-sm mt-1.5 leading-relaxed">
-            Kiểm soát doanh thu thực tế, tiến độ 148 lớp kỷ yếu, hiệu suất 38 thợ chụp và hoa hồng mạng lưới CTV sale các trường.
+            Kiểm soát hợp đồng thực tế, tiến độ {customers.length} lớp kỷ yếu ({totalStudents.toLocaleString('vi-VN')} học sinh), hiệu suất {totalPhotographers} thợ chụp và mạng lưới {CRM_CTV_SALES.length} CTV sale các trường.
           </p>
         </div>
 
@@ -136,7 +221,7 @@ export const ExecutiveDashboard: React.FC = () => {
                 : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-black/[0.06]'
             }`}
           >
-            Đội Ngũ Thợ ({photographers.length})
+            Đội Ngũ Thợ ({totalPhotographers})
           </button>
           <button
             onClick={() => setActiveSubTab('ctv')}
@@ -146,7 +231,7 @@ export const ExecutiveDashboard: React.FC = () => {
                 : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-black/[0.06]'
             }`}
           >
-            CTV Sale & Hoa Hồng
+            CTV Sale ({CRM_CTV_SALES.length})
           </button>
         </div>
       </div>
@@ -156,28 +241,30 @@ export const ExecutiveDashboard: React.FC = () => {
         <>
           {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Card 1: Doanh thu thực tế */}
+            {/* Card 1: Doanh thu hợp đồng & thực tế */}
             <div
               onClick={() => setActiveTab('bookings')}
               className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU THỰC TẾ</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU HỢP ĐỒNG</span>
                 <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
                   <DollarSign className="w-4 h-4 text-neutral-900" />
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
                 <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
-                  2.780M
+                  {(totalContractRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
                 </span>
                 <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> +18.6%
+                  <ArrowUpRight className="w-3.5 h-3.5" /> Thu: {(totalCollectedRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
                 </span>
               </div>
               <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-                <span>Công nợ còn lại:</span>
-                <strong className="text-rose-600 font-bold">142.5M đ</strong>
+                <span>Công nợ chưa thu:</span>
+                <strong className="text-rose-600 font-bold">
+                  {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr ({((totalRemainingDebt / (totalContractRevenue || 1)) * 100).toFixed(0)}%)
+                </strong>
               </div>
             </div>
 
@@ -187,15 +274,15 @@ export const ExecutiveDashboard: React.FC = () => {
               className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG LỚP & KHÁCH</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG LỚP & HỌC SINH</span>
                 <div className="w-9 h-9 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:scale-105 transition-transform">
                   <Users className="w-4 h-4 text-neutral-800" />
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">148 Lớp</span>
-                <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> +12.4%
+                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{totalLeads} Lớp</span>
+                <span className="text-xs font-bold text-neutral-800 bg-[#B8F23D]/40 px-2 py-0.5 rounded-full">
+                  {totalStudents.toLocaleString('vi-VN')} học sinh
                 </span>
               </div>
               <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
@@ -216,14 +303,14 @@ export const ExecutiveDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">38 Thợ</span>
+                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{totalPhotographers} Thợ</span>
                 <span className="text-xs font-bold text-neutral-800 bg-[#B8F23D]/40 px-2 py-0.5 rounded-full">
-                  94.5% sẵn sàng
+                  {readinessRate}% sẵn sàng
                 </span>
               </div>
               <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-                <span>Đang chụp: <strong className="text-amber-600 font-bold">{busyPhotographers}</strong></span>
-                <span>Đánh giá: <strong className="text-neutral-900 font-bold">4.95 ★</strong></span>
+                <span>Đang bấm máy: <strong className="text-amber-600 font-bold">{busyPhotographers}</strong></span>
+                <span>Đánh giá TB: <strong className="text-neutral-900 font-bold">{avgRating} ★</strong></span>
               </div>
             </div>
 
@@ -233,20 +320,24 @@ export const ExecutiveDashboard: React.FC = () => {
               className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">HOA HỒNG CTV ĐÃ CHI</span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">HOA HỒNG CTV TÍCH LŨY</span>
                 <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
                   <Award className="w-4 h-4 text-neutral-900" />
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">186.5M</span>
+                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
+                  {(totalCtvCommission / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+                </span>
                 <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> +22.8%
+                  <Award className="w-3.5 h-3.5" /> {CRM_CTV_SALES.length} CTV
                 </span>
               </div>
               <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-                <span>Doanh số từ CTV:</span>
-                <strong className="text-[#79ba07] font-bold">1.168.000.000đ</strong>
+                <span>Doanh số CTV chốt:</span>
+                <strong className="text-neutral-900 font-bold">
+                  {(totalCtvRevenue / 1000000).toLocaleString('vi-VN')} Tr ({totalCtvClassesClosed} lớp)
+                </strong>
               </div>
             </div>
           </div>
@@ -258,10 +349,10 @@ export const ExecutiveDashboard: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Tăng Trưởng Doanh Thu Kỷ Yếu Theo Tháng (Triệu VNĐ)</h2>
-                  <p className="text-xs text-neutral-400 mt-0.5">Doanh thu thực tế bứt phá mạnh từ tháng 5 đến tháng 8 mùa cao điểm</p>
+                  <p className="text-xs text-neutral-400 mt-0.5">Thống kê theo dữ liệu hợp đồng và lịch chụp thực tế các tháng</p>
                 </div>
                 <span className="text-xs font-bold text-neutral-900 bg-[#B8F23D] px-3 py-1 rounded-full shadow-xs">
-                  Tháng 8 Đỉnh Điểm: 721tr
+                  Tháng {peakMonth.month} Đỉnh Điểm: {peakMonth.revenue}tr
                 </span>
               </div>
 
@@ -270,8 +361,8 @@ export const ExecutiveDashboard: React.FC = () => {
                   <AreaChart data={monthlyRevenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#B8F23D" stopOpacity={0.7} />
-                        <stop offset="95%" stopColor="#B8F23D" stopOpacity={0.0} />
+                        <stop offset="5%" stopColor="#84cc16" stopOpacity={0.7} />
+                        <stop offset="95%" stopColor="#84cc16" stopOpacity={0.0} />
                       </linearGradient>
                       <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3} />
@@ -295,7 +386,7 @@ export const ExecutiveDashboard: React.FC = () => {
                         boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
                       }}
                     />
-                    <Area type="monotone" dataKey="revenue" stroke="#83c906" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Doanh Thu Thực" />
+                    <Area type="monotone" dataKey="revenue" stroke="#65a30d" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Doanh Thu Thực" />
                     <Area type="monotone" dataKey="cost" stroke="#cbd5e1" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorCost)" name="Chi Phí MKT & CTV" />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -306,7 +397,7 @@ export const ExecutiveDashboard: React.FC = () => {
             <div className="glass-panel p-6 rounded-3xl flex flex-col justify-between">
               <div>
                 <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Phân Bổ Kênh Khách Hàng</h2>
-                <p className="text-xs text-neutral-400 mt-0.5">Tỷ lệ lớp đến từ CTV, Facebook, TikTok</p>
+                <p className="text-xs text-neutral-400 mt-0.5">Tỷ lệ lớp và doanh thu từ CTV, Facebook, TikTok...</p>
 
                 <div className="h-56 mt-2">
                   <ResponsiveContainer width="100%" height="100%">
@@ -343,7 +434,9 @@ export const ExecutiveDashboard: React.FC = () => {
                       <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></span>
                       {s.name}
                     </span>
-                    <span className="font-semibold text-neutral-900">{s.value} Lớp ({((s.value / totalLeads) * 100).toFixed(0)}%)</span>
+                    <span className="font-semibold text-neutral-900">
+                      {s.value} Lớp ({(s.revenue / 1000000).toFixed(1)} Tr)
+                    </span>
                   </div>
                 ))}
               </div>
@@ -372,14 +465,16 @@ export const ExecutiveDashboard: React.FC = () => {
                   <div key={idx} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold text-neutral-700">
                       <span>{item.name}</span>
-                      <span className="font-extrabold text-neutral-900">{item.value} lớp</span>
+                      <span className="font-extrabold text-neutral-900">
+                        {item.value} lớp ({((item.value / (totalLeads || 1)) * 100).toFixed(0)}%)
+                      </span>
                     </div>
                     <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500 shadow-xs"
                         style={{
-                          width: `${Math.max((item.value / 15) * 100, 8)}%`,
-                          backgroundColor: item.fill === '#B8F23D' ? '#83c906' : item.fill
+                          width: `${Math.max((item.value / (totalLeads || 1)) * 100, 6)}%`,
+                          backgroundColor: item.fill === '#B8F23D' ? '#84cc16' : item.fill
                         }}
                       />
                     </div>

@@ -31,11 +31,11 @@ export const MarketingReports: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-5 sm:p-6 rounded-3xl">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-orange-400" />
+          <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-orange-500" />
             Báo Cáo Hiệu Quả Marketing & Kênh Tiếp Cận
           </h1>
-          <p className="text-xs text-white/50 mt-0.5">
+          <p className="text-xs text-neutral-500 mt-0.5">
             Phân tích chi phí quảng cáo (Cost per Lead), tỷ lệ chuyển đổi chốt cọc và ROAS theo từng nguồn
           </p>
         </div>
@@ -44,7 +44,7 @@ export const MarketingReports: React.FC = () => {
           <select
             value={timeRange}
             onChange={e => setTimeRange(e.target.value)}
-            className="px-3 py-2 glass-input rounded-xl text-xs font-semibold text-white/80 cursor-pointer [&>option]:bg-neutral-900 [&>option]:text-white"
+            className="px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer shadow-xs"
           >
             <option value="this_week">Tuần này</option>
             <option value="this_month">Tháng này (Mùa Kỷ Yếu)</option>
@@ -54,9 +54,9 @@ export const MarketingReports: React.FC = () => {
 
           <button
             onClick={() => alert('Đã xuất file báo cáo Excel Marketing!')}
-            className="px-3.5 py-2 glass-btn-secondary rounded-xl text-xs font-semibold flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-white hover:bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors"
           >
-            <Download className="w-4 h-4" /> Xuất Excel
+            <Download className="w-4 h-4 text-neutral-600" /> Xuất Excel
           </button>
         </div>
       </div>
@@ -64,29 +64,29 @@ export const MarketingReports: React.FC = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="glass-card p-5 rounded-2xl">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-white/45">TỔNG CHI PHÍ ADS</span>
-          <p className="text-2xl font-black text-white mt-2">38.7M đ</p>
-          <span className="text-[11px] text-white/50 mt-1 block">Facebook + TikTok Ads</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG CHI PHÍ ADS</span>
+          <p className="text-2xl font-black text-neutral-900 mt-2">38.7M đ</p>
+          <span className="text-[11px] text-neutral-500 mt-1 block">Facebook + TikTok Ads</span>
         </div>
 
         <div className="glass-card p-5 rounded-2xl">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-white/45">COST PER LEAD (CPL)</span>
-          <p className="text-2xl font-black text-sky-400 mt-2">282,000đ</p>
-          <span className="text-[11px] text-emerald-400 font-semibold mt-1 flex items-center">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">COST PER LEAD (CPL)</span>
+          <p className="text-2xl font-black text-sky-600 mt-2">282,000đ</p>
+          <span className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center">
             <ArrowUpRight className="w-3 h-3" /> Tối ưu hơn 15% mùa trước
           </span>
         </div>
 
         <div className="glass-card p-5 rounded-2xl">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-white/45">TỶ LỆ CHỐT CỌC</span>
-          <p className="text-2xl font-black text-emerald-400 mt-2">31.4%</p>
-          <span className="text-[11px] text-white/50 mt-1 block">Lead tư vấn → Chốt Booking</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỶ LỆ CHỐT CỌC</span>
+          <p className="text-2xl font-black text-emerald-600 mt-2">31.4%</p>
+          <span className="text-[11px] text-neutral-500 mt-1 block">Lead tư vấn → Chốt Booking</span>
         </div>
 
         <div className="glass-card p-5 rounded-2xl">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-white/45">ROAS TOÀN MÙA</span>
-          <p className="text-2xl font-black text-orange-400 mt-2">8.03x</p>
-          <span className="text-[11px] text-white/50 mt-1 block">311M Doanh thu / 38.7M Ads</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">ROAS TOÀN MÙA</span>
+          <p className="text-2xl font-black text-orange-600 mt-2">8.03x</p>
+          <span className="text-[11px] text-neutral-500 mt-1 block">311M Doanh thu / 38.7M Ads</span>
         </div>
       </div>
 
@@ -95,24 +95,23 @@ export const MarketingReports: React.FC = () => {
         <div className="lg:col-span-2 glass-panel p-6 rounded-3xl space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-sm font-bold text-white">Doanh Thu & Số Booking Theo Từng Kênh</h2>
-              <p className="text-xs text-white/50 mt-0.5">So sánh hiệu quả mang lại của từng kênh truyền thông</p>
+              <h2 className="text-sm font-bold text-neutral-900">Doanh Thu & Số Booking Theo Từng Kênh</h2>
+              <p className="text-xs text-neutral-400 mt-0.5">So sánh hiệu quả mang lại của từng kênh truyền thông</p>
             </div>
           </div>
 
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={sourcePerformance} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.07)" />
-                <XAxis dataKey="source" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: 'rgba(255, 255, 255, 0.45)' }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: 'rgba(255, 255, 255, 0.45)' }} unit="M" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0, 0, 0, 0.04)" />
+                <XAxis dataKey="source" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: '#64748b' }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} unit="M" />
                 <Tooltip
                   formatter={(val: any, name: any) => [`${val}M VNĐ`, name === 'revenue' ? 'Doanh Thu' : 'Chi Phí']}
                   contentStyle={{
-                    backgroundColor: 'rgba(22, 23, 27, 0.92)',
-                    backdropFilter: 'blur(20px)',
+                    backgroundColor: '#111827',
                     borderRadius: '16px',
-                    border: '1px solid rgba(255, 255, 255, 0.16)',
+                    border: 'none',
                     color: '#fff',
                     fontSize: '12px'
                   }}
@@ -126,17 +125,17 @@ export const MarketingReports: React.FC = () => {
 
         {/* Bảng tổng kết */}
         <div className="glass-panel p-6 rounded-3xl space-y-3">
-          <h2 className="text-sm font-bold text-white">Chi Tiết Từng Kênh</h2>
+          <h2 className="text-sm font-bold text-neutral-900">Chi Tiết Từng Kênh</h2>
           <div className="space-y-2.5 pt-2">
             {sourcePerformance.map((item, idx) => (
-              <div key={idx} className="p-3 bg-white/[0.04] rounded-2xl border border-white/[0.08] text-xs space-y-1">
-                <div className="flex justify-between font-bold text-white">
+              <div key={idx} className="p-3 bg-white rounded-2xl border border-black/[0.06] text-xs space-y-1 shadow-xs">
+                <div className="flex justify-between font-bold text-neutral-900">
                   <span>{item.source}</span>
-                  <span className="text-orange-400">{item.revenue}M đ</span>
+                  <span className="text-orange-600">{item.revenue}M đ</span>
                 </div>
-                <div className="flex justify-between text-white/50 text-[11px]">
+                <div className="flex justify-between text-neutral-500 text-[11px]">
                   <span>{item.leads} Lead • {item.bookings} Booking</span>
-                  <span className="font-semibold text-emerald-400">ROAS: {item.roas}x</span>
+                  <span className="font-semibold text-emerald-600">ROAS: {item.roas}x</span>
                 </div>
               </div>
             ))}

@@ -67,7 +67,7 @@ export const SaasPhotographerTable: React.FC<SaasPhotographerTableProps> = ({ on
             </h2>
           </div>
           <p className="text-xs text-neutral-500 mt-1">
-            Tổng cộng 38 thợ/ekip — Điều phối lịch chụp, theo dõi rating và kiểm soát thù lao buổi chụp
+            Tổng cộng {photographers.length} thợ & ekip chuyên nghiệp — Điều phối lịch chụp, theo dõi rating và kiểm soát thù lao buổi chụp
           </p>
         </div>
 
