@@ -70,13 +70,18 @@ export const SaasDashboardApp: React.FC<SaasDashboardAppProps> = ({ onSwitchToCr
   };
 
   // Sample contract data for "Hợp đồng & Lớp" tab
-  const sampleContracts = [
-    { id: 'HD-101', class: '12A1 Chuyên Toán', school: 'THPT Chuyên Hà Nội - Amsterdam', package: 'Gói Premium & Dạ Tiệc', members: 42, date: '26/10/2024', deposit: '5.000.000đ', total: '24.500.000đ', status: 'Đã cọc 50%', ctv: 'Đặng Mai Linh' },
-    { id: 'HD-102', class: 'K62 Kinh Tế Quốc Tế', school: 'ĐH Ngoại Thương Hà Nội', package: 'Gói Standard Bán Chạy', members: 58, date: '27/10/2024', deposit: '6.000.000đ', total: '22.000.000đ', status: 'Đã cọc 50%', ctv: 'Lê Quốc Huy' },
-    { id: 'HD-103', class: '12 Sinh', school: 'THPT Chu Văn An', package: 'Gói Premium & Dạ Tiệc', members: 36, date: '02/11/2024', deposit: '4.500.000đ', total: '20.500.000đ', status: 'Đã chốt lịch', ctv: 'Nguyễn Thu Hương' },
-    { id: 'HD-104', class: '12 D1', school: 'THPT Kim Liên', package: 'Gói Basic Tiết Kiệm', members: 45, date: '03/11/2024', deposit: '3.000.000đ', total: '14.500.000đ', status: 'Đã thanh toán 100%', ctv: 'Phạm Quỳnh Nga' },
-    { id: 'HD-105', class: 'K64 Tự Động Hóa 02', school: 'ĐH Bách Khoa Hà Nội', package: 'Gói Flycam & Clip TikTok', members: 52, date: '09/11/2024', deposit: '5.000.000đ', total: '19.800.000đ', status: 'Đã cọc 50%', ctv: 'Hoàng Nam Khánh' },
-  ];
+  const sampleContracts: Array<{
+    id: string;
+    class: string;
+    school: string;
+    package: string;
+    members: number;
+    date: string;
+    deposit: string;
+    total: string;
+    status: string;
+    ctv: string;
+  }> = [];
 
   return (
     <div className="relative flex h-screen saas-canvas overflow-hidden font-sans selection:bg-[#B8F23D]/60 selection:text-neutral-900">
@@ -310,26 +315,35 @@ export const SaasDashboardApp: React.FC<SaasDashboardAppProps> = ({ onSwitchToCr
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-black/[0.04] text-xs">
-                        {sampleContracts.map((c) => (
-                          <tr key={c.id} className="hover:bg-neutral-50 transition-colors">
-                            <td className="py-3.5 pr-4 font-bold text-neutral-900">{c.id}</td>
-                            <td className="py-3.5 px-4">
-                              <p className="font-bold text-neutral-900">{c.class}</p>
-                              <p className="text-[11px] text-neutral-400">{c.school}</p>
-                            </td>
-                            <td className="py-3.5 px-4 font-semibold text-neutral-700">{c.package}</td>
-                            <td className="py-3.5 px-4 text-center font-bold text-neutral-800">{c.members} bạn</td>
-                            <td className="py-3.5 px-4 text-center font-semibold text-neutral-800">{c.date}</td>
-                            <td className="py-3.5 px-4 text-right font-bold text-[#79ba07]">{c.deposit}</td>
-                            <td className="py-3.5 px-4 text-right font-extrabold text-neutral-900">{c.total}</td>
-                            <td className="py-3.5 px-4 text-center text-neutral-600 font-medium">{c.ctv}</td>
-                            <td className="py-3.5 pl-4 text-center">
-                              <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
-                                {c.status}
-                              </span>
+                        {sampleContracts.length === 0 ? (
+                          <tr>
+                            <td colSpan={9} className="py-12 text-center text-neutral-400">
+                              <p className="font-bold text-neutral-700 text-sm">Chưa có hợp đồng lớp nào</p>
+                              <p className="text-xs text-neutral-400 mt-1">Bấm "+ Tạo Hợp Đồng Lớp Mới" để lên hợp đồng cho lớp!</p>
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          sampleContracts.map((c) => (
+                            <tr key={c.id} className="hover:bg-neutral-50 transition-colors">
+                              <td className="py-3.5 pr-4 font-bold text-neutral-900">{c.id}</td>
+                              <td className="py-3.5 px-4">
+                                <p className="font-bold text-neutral-900">{c.class}</p>
+                                <p className="text-[11px] text-neutral-400">{c.school}</p>
+                              </td>
+                              <td className="py-3.5 px-4 font-semibold text-neutral-700">{c.package}</td>
+                              <td className="py-3.5 px-4 text-center font-bold text-neutral-800">{c.members} bạn</td>
+                              <td className="py-3.5 px-4 text-center font-semibold text-neutral-800">{c.date}</td>
+                              <td className="py-3.5 px-4 text-right font-bold text-[#79ba07]">{c.deposit}</td>
+                              <td className="py-3.5 px-4 text-right font-extrabold text-neutral-900">{c.total}</td>
+                              <td className="py-3.5 px-4 text-center text-neutral-600 font-medium">{c.ctv}</td>
+                              <td className="py-3.5 pl-4 text-center">
+                                <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
+                                  {c.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -347,32 +361,12 @@ export const SaasDashboardApp: React.FC<SaasDashboardAppProps> = ({ onSwitchToCr
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  {[
-                    { date: 'Thứ 7, 26/10/2024', slots: '6 Lớp chụp', crewCount: '14 Thợ chính + 4 Flycam', location: 'Hoàng Thành Thăng Long & Văn Miếu', status: 'Đã kín lịch' },
-                    { date: 'Chủ Nhật, 27/10/2024', slots: '8 Lớp chụp', crewCount: '18 Thợ chính + 6 Flycam', location: 'Phim trường Santorini & Yên Sở', status: 'Đã kín lịch' },
-                    { date: 'Thứ 7, 02/11/2024', slots: '5 Lớp chụp', crewCount: '12 Thợ chính + 3 Flycam', location: 'Trường THPT Chu Văn An & Bờ Hồ', status: 'Còn 2 slot' }
-                  ].map((s) => (
-                    <div key={s.date} className="saas-card p-6 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm text-neutral-900">{s.date}</span>
-                        <span className="saas-lime-badge text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          {s.status}
-                        </span>
-                      </div>
-                      <div className="space-y-1.5 text-xs text-neutral-600">
-                        <p><strong>Khối lượng:</strong> {s.slots}</p>
-                        <p><strong>Ekip điều phối:</strong> {s.crewCount}</p>
-                        <p><strong>Địa điểm:</strong> {s.location}</p>
-                      </div>
-                      <button
-                        onClick={() => showNotification(`Xem chi tiết lịch chụp ngày ${s.date}`)}
-                        className="w-full py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-bold text-xs rounded-xl transition-colors"
-                      >
-                        Xem chi tiết ca chụp
-                      </button>
-                    </div>
-                  ))}
+                <div className="saas-card p-12 text-center text-neutral-400 space-y-3">
+                  <Calendar className="w-10 h-10 mx-auto text-neutral-300" />
+                  <p className="font-bold text-neutral-700 text-sm">Chưa có lịch chụp nào trong hệ thống</p>
+                  <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+                    Khi lớp chốt hợp đồng và lên lịch chụp, thông tin phân bổ ekip và địa điểm sẽ xuất hiện tại đây.
+                  </p>
                 </div>
               </div>
             )}

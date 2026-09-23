@@ -21,10 +21,15 @@ export const PhotoCalendar: React.FC = () => {
   const { bookings } = useApp();
 
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 10, 1)); // Tháng 11/2024 (Mùa kỷ yếu)
-  const [selectedDay, setSelectedDay] = useState<number>(20); // Mặc định ngày 20
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [selectedDay, setSelectedDay] = useState<number>(() => new Date().getDate());
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalDate, setModalDate] = useState<string>('2024-11-20');
+  const [modalDate, setModalDate] = useState<string>(() => {
+    const now = new Date();
+    const m = (now.getMonth() + 1).toString().padStart(2, '0');
+    const d = now.getDate().toString().padStart(2, '0');
+    return `${now.getFullYear()}-${m}-${d}`;
+  });
   const [isDayDetailsOpen, setIsDayDetailsOpen] = useState(false);
 
   const year = currentDate.getFullYear();
@@ -193,7 +198,8 @@ export const PhotoCalendar: React.FC = () => {
             {Array.from({ length: daysInMonth }).map((_, idx) => {
               const day = idx + 1;
               const dayBookings = getBookingsForDate(day);
-              const isToday = day === 20 && month === 10 && year === 2024;
+              const realNow = new Date();
+              const isToday = day === realNow.getDate() && month === realNow.getMonth() && year === realNow.getFullYear();
               const isSelected = day === selectedDay;
 
               return (

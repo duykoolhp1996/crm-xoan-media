@@ -26,11 +26,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
     endTime: '17:00',
     city: initialCity,
     district: initialDistrict,
-    location: 'Trường học & Nhà Hát Lớn / Bãi biển Đồ Sơn',
-    studentCount: 38,
-    packageId: servicePackages[1]?.id || '',
-    depositAmount: 3000000,
-    leadPhotographerId: photographers[0]?.id || '',
+    location: '',
+    studentCount: 0,
+    packageId: servicePackages[0]?.id || '',
+    depositAmount: 0,
+    leadPhotographerId: '',
     videographerId: '',
     makeupStaffId: '',
     notes: ''
@@ -54,7 +54,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
         ...prev,
         customerId,
         city,
-        district
+        district,
+        studentCount: cust.studentCount || prev.studentCount,
+        location: Array.isArray(cust.shootingLocations) ? cust.shootingLocations.join(', ') : (cust.shootingLocations || prev.location)
       }));
     } else {
       setFormData(prev => ({ ...prev, customerId }));
@@ -82,7 +84,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
 
   const selectedCustomer = customers.find(c => c.id === formData.customerId) || customers[0];
   const selectedPackage = servicePackages.find(p => p.id === formData.packageId) || servicePackages[0];
-  const totalAmount = selectedPackage ? selectedPackage.price : 6800000;
+  const totalAmount = selectedPackage ? selectedPackage.price : 0;
   const remainingAmount = Math.max(0, totalAmount - formData.depositAmount);
 
   // Kiểm tra tình trạng sẵn sàng của thợ chính được chọn
@@ -108,8 +110,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, ini
     const bookingStatus: BookingStatus =
       formData.depositAmount > 0 ? 'Đã đặt cọc' : 'Chờ xác nhận';
 
+    const currentYear = new Date().getFullYear();
     addBooking({
-      code: `BK-2024-00${Math.floor(Math.random() * 900) + 100}`,
+      code: `BK-${currentYear}-${Math.floor(1000 + Math.random() * 9000)}`,
       customerId: selectedCustomer.id,
       customerName: `${selectedCustomer.name} (${selectedCustomer.className} - ${selectedCustomer.schoolName})`,
       schoolName: selectedCustomer.schoolName,
