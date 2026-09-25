@@ -120,13 +120,13 @@ export const SettingsModule: React.FC = () => {
 
   const handleCopySchemaSql = async () => {
     try {
-      const res = await fetch('/src/database/schema.sql');
+      const res = await fetch('/init_supabase.sql');
       const text = await res.text();
       await navigator.clipboard.writeText(text);
       setCopiedSql(true);
       setTimeout(() => setCopiedSql(false), 3000);
     } catch {
-      alert('🐱 Xu Xu: Bạn có thể mở trực tiếp file schema.sql tại thư mục src/database/schema.sql!');
+      alert('🐱 Xu Xu: Bạn có thể mở trực tiếp file tại: supabase/migrations/20260925_create_xoan_crm_tables.sql');
     }
   };
 
@@ -980,12 +980,12 @@ export const SettingsModule: React.FC = () => {
                 </button>
 
                 <a
-                  href="/src/database/schema.sql"
+                  href="/init_supabase.sql"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold flex items-center gap-1.5 transition-all text-xs shadow-xs"
                 >
-                  <Download className="w-3.5 h-3.5" /> Xem Schema SQL
+                  <Download className="w-3.5 h-3.5" /> Xem Schema SQL (Full Seed)
                 </a>
               </div>
             </div>
