@@ -71,7 +71,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-white/80 backdrop-blur-2xl border-b border-black/[0.06] px-6 flex items-center justify-between sticky top-0 z-30 transition-all duration-200 shadow-xs">
+    <header className="h-16 bg-white/80 backdrop-blur-2xl border-b border-black/[0.06] px-6 flex items-center justify-between sticky top-0 z-10 transition-all duration-200 shadow-xs">
       {/* Left: Global Search Pill Trigger (Apple Spotlight Style) */}
       <div className="flex items-center gap-4 flex-1 max-w-xl">
         <button

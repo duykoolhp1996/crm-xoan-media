@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   X,
@@ -69,7 +70,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
     setNoteContent('');
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] overflow-y-auto p-4 sm:p-6 flex items-center justify-center animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
@@ -624,7 +625,8 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
       />
-    </div>
+    </div>,
+    document.body
   );
 };
 

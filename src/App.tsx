@@ -66,7 +66,7 @@ const CrmAppShell: React.FC = () => {
       <Sidebar />
 
       {/* Main Application Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-0">
         <Header />
         <MainContent />
       </div>

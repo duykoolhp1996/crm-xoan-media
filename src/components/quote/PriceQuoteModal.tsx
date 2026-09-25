@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import logoXoan from '../../assets/logo-xoan.png';
 import { Customer, QuoteItem } from '../../types';
 import { useApp } from '../../context/AppContext';
@@ -373,31 +374,31 @@ ${itemsText}
     setTimeout(() => setCopiedZalo(false), 2500);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
       <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-black/[0.08] overflow-hidden my-auto max-h-[96vh] flex flex-col">
         
         {/* HEADER MODAL */}
         <div className="p-3 sm:px-6 bg-neutral-900 text-white flex items-center justify-between gap-3 shrink-0 print:hidden">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <img
               src={logoXoan}
               alt="Xoắn Media"
-              className="w-9 h-9 rounded-xl object-cover shadow-sm border border-neutral-700"
+              className="w-9 h-9 rounded-xl object-cover shadow-sm border border-neutral-700 shrink-0"
             />
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm sm:text-base font-bold text-white">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-base font-bold text-white whitespace-nowrap">
                   Quy Trình Tạo Báo Giá Kỷ Yếu
                 </h2>
-                <span className="text-[11px] font-mono text-[#B8F23D] bg-[#B8F23D]/20 px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[11px] font-mono text-[#B8F23D] bg-[#B8F23D]/20 px-2 py-0.5 rounded-full font-bold shrink-0">
                   {quoteCode}
                 </span>
-                <span className="text-xs font-bold text-neutral-300">
+                <span className="text-xs font-bold text-neutral-300 truncate">
                   • Lớp {customer.className} ({studentCount} bạn)
                 </span>
               </div>
-              <p className="text-[11px] text-neutral-400 hidden sm:block">
+              <p className="text-[11px] text-neutral-400 hidden sm:block truncate">
                 Tạo bảng giá chi tiết sản phẩm, số lượng, chiết khấu • Xuất file PDF chuẩn A4 không dính thanh menu
               </p>
             </div>
@@ -967,6 +968,7 @@ ${itemsText}
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
