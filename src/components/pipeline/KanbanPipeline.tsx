@@ -31,7 +31,7 @@ export const KanbanPipeline: React.FC = () => {
   const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
-  const [depositCustomer, setDepositCustomer] = useState<Customer | null>(null);
+  const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
 
   // 13 Giai đoạn chuẩn của Xoắn Media
   const STAGES: PipelineStage[] = [
@@ -235,8 +235,8 @@ export const KanbanPipeline: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Nút Tạo Báo Giá PDF khi khách hàng ở trạng thái Đang tư vấn hoặc Đã gửi báo giá */}
-                      {(cust.pipelineStage === 'Đang tư vấn' || cust.pipelineStage === 'Đã gửi báo giá') && (
+                      {/* 1. Nút Tạo / Chỉnh Sửa Báo Giá: CHỈ hiển thị ở Đang tư vấn, Đã gửi báo giá, Đang thương lượng */}
+                      {(cust.pipelineStage === 'Đang tư vấn' || cust.pipelineStage === 'Đã gửi báo giá' || cust.pipelineStage === 'Đang thương lượng') && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -248,26 +248,42 @@ export const KanbanPipeline: React.FC = () => {
                               ? 'bg-gradient-to-r from-amber-50 to-emerald-50 hover:from-amber-100 hover:to-emerald-100 text-neutral-900 border border-amber-200/90'
                               : 'bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-900 border border-indigo-200/90'
                           }`}
-                          title="Lập và xuất bảng báo giá PDF chi tiết cho lớp"
+                          title={cust.pipelineStage === 'Đang tư vấn' ? 'Lập bảng báo giá PDF chi tiết cho lớp' : 'Chỉnh sửa lại bảng báo giá'}
                         >
                           <FileText className={`w-3.5 h-3.5 ${cust.pipelineStage === 'Đang tư vấn' ? 'text-emerald-600' : 'text-indigo-600'}`} />
-                          <span>{cust.pipelineStage === 'Đang tư vấn' ? 'Tạo Báo Giá PDF' : 'Xem / In Báo Giá PDF'}</span>
+                          <span>{cust.pipelineStage === 'Đang tư vấn' ? 'Tạo Báo Giá PDF' : 'Chỉnh Sửa Báo Giá'}</span>
                         </button>
                       )}
 
-                      {/* Nút Tạo Cọc & Mã QR Chuyển Khoản khi khách hàng ở trạng thái Đang thương lượng */}
+                      {/* 2. Nút Tạo Cọc & Mã QR: CHỈ hiển thị ở Đang thương lượng */}
                       {cust.pipelineStage === 'Đang thương lượng' && (
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDepositCustomer(cust);
+                            setPaymentConfig({ customer: cust, mode: 'deposit' });
                           }}
                           className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-gradient-to-r from-purple-50 to-emerald-50 hover:from-purple-100 hover:to-emerald-100 text-purple-950 border border-purple-200/90"
-                          title="Tạo thông tin cọc & mã VietQR chuyển khoản ngân hàng"
+                          title="Tạo thông tin cọc & mã VietQR chuyển khoản ngân hàng giữ slot chụp"
                         >
                           <QrCode className="w-3.5 h-3.5 text-purple-700" />
                           <span>Tạo Cọc & Mã QR</span>
+                        </button>
+                      )}
+
+                      {/* 3. Nút Tạo QR Thanh Toán Hết (Tất toán): CHỈ hiển thị ở Đã bàn giao */}
+                      {cust.pipelineStage === 'Đang hậu kỳ' ? null : cust.pipelineStage === 'Đã bàn giao' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPaymentConfig({ customer: cust, mode: 'final' });
+                          }}
+                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-950 border border-teal-300"
+                          title="Tất toán: Tạo mã VietQR thanh toán toàn bộ số tiền còn lại (Tổng bill - cọc)"
+                        >
+                          <QrCode className="w-3.5 h-3.5 text-teal-700" />
+                          <span>Tạo QR Thanh Toán Hết</span>
                         </button>
                       )}
 
@@ -314,11 +330,12 @@ export const KanbanPipeline: React.FC = () => {
         onClose={() => setQuoteCustomer(null)}
       />
 
-      {/* Modal Tạo Cọc & Mã VietQR Chuyển Khoản */}
+      {/* Modal Tạo Cọc & Tất Toán QR Chuyển Khoản */}
       <DepositQrModal
-        customer={depositCustomer}
-        isOpen={Boolean(depositCustomer)}
-        onClose={() => setDepositCustomer(null)}
+        customer={paymentConfig?.customer || null}
+        isOpen={Boolean(paymentConfig)}
+        mode={paymentConfig?.mode}
+        onClose={() => setPaymentConfig(null)}
       />
     </div>
   );

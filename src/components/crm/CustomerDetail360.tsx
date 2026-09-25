@@ -49,6 +49,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [showLostModal, setShowLostModal] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<'deposit' | 'final'>('deposit');
   const [lostReason, setLostReason] = useState('Giá cao hơn ngân sách dự kiến của lớp');
   const [customLostNote, setCustomLostNote] = useState('');
 
@@ -145,25 +146,52 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => setShowQuoteModal(true)}
-              className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
-              title="Lập và xuất bảng báo giá PDF chi tiết cho lớp"
-            >
-              <FileText className="w-3.5 h-3.5 text-neutral-700" />
-              <span className="hidden sm:inline">Báo Giá PDF</span>
-            </button>
+            {/* Nút Tạo / Chỉnh Sửa Báo Giá: CHỈ hiển thị ở Đang tư vấn, Đã gửi báo giá, Đang thương lượng */}
+            {['Đang tư vấn', 'Đã gửi báo giá', 'Đang thương lượng'].includes(customer.pipelineStage) && (
+              <button
+                type="button"
+                onClick={() => setShowQuoteModal(true)}
+                className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                title={customer.pipelineStage === 'Đang tư vấn' ? 'Lập và xuất bảng báo giá PDF chi tiết cho lớp' : 'Chỉnh sửa lại bảng báo giá'}
+              >
+                <FileText className="w-3.5 h-3.5 text-neutral-700" />
+                <span className="hidden sm:inline">
+                  {customer.pipelineStage === 'Đang tư vấn' ? 'Tạo Báo Giá PDF' : 'Chỉnh Sửa Báo Giá'}
+                </span>
+              </button>
+            )}
 
-            <button
-              type="button"
-              onClick={() => setShowDepositModal(true)}
-              className="px-3.5 py-1.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
-              title="Tạo khoản cọc giữ lịch và mã VietQR chuyển khoản ngân hàng"
-            >
-              <QrCode className="w-3.5 h-3.5 text-neutral-950" />
-              <span>Tạo Cọc QR</span>
-            </button>
+            {/* Nút Tạo Cọc QR: CHỈ hiển thị ở Đang thương lượng */}
+            {customer.pipelineStage === 'Đang thương lượng' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentMode('deposit');
+                  setShowDepositModal(true);
+                }}
+                className="px-3.5 py-1.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                title="Tạo khoản cọc giữ lịch và mã VietQR chuyển khoản ngân hàng"
+              >
+                <QrCode className="w-3.5 h-3.5 text-neutral-950" />
+                <span>Tạo Cọc QR</span>
+              </button>
+            )}
+
+            {/* Nút Tạo QR Thanh Toán Hết: CHỈ hiển thị ở Đã bàn giao */}
+            {customer.pipelineStage === 'Đã bàn giao' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPaymentMode('final');
+                  setShowDepositModal(true);
+                }}
+                className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white border border-teal-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                title="Tất toán: Tạo mã VietQR thanh toán hết số tiền còn lại (Tổng bill - cọc)"
+              >
+                <QrCode className="w-3.5 h-3.5 text-white" />
+                <span>Tạo QR Thanh Toán Hết</span>
+              </button>
+            )}
 
             <button
               onClick={onClose}
@@ -284,8 +312,8 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           {/* Tab 1: Timeline */}
           {activeTab === 'timeline' && (
             <div className="space-y-6">
-              {/* Banner Giai Đoạn Tư Vấn & Lập Báo Giá Nhanh */}
-              {(customer.pipelineStage === 'Đang tư vấn' || customer.pipelineStage === 'Đã gửi báo giá') && (
+              {/* Banner Giai Đoạn Tư Vấn & Lập / Sửa Báo Giá */}
+              {['Đang tư vấn', 'Đã gửi báo giá', 'Đang thương lượng'].includes(customer.pipelineStage) && (
                 <div className="p-4 bg-gradient-to-r from-amber-50 via-emerald-50/60 to-indigo-50/50 border border-amber-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -298,13 +326,56 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
                       Gói: <strong>{customer.servicePackageName || 'Kỷ Yếu Standard'}</strong> ({customer.studentCount} bạn) • Dự toán: <strong>{customer.expectedBudget.toLocaleString('vi-VN')}đ</strong> (~{Math.round(customer.expectedBudget / (customer.studentCount || 1)).toLocaleString('vi-VN')}đ/bạn)
                     </p>
                   </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setShowQuoteModal(true)}
+                      className="flex-1 sm:flex-initial px-4 py-2 bg-neutral-950 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>{customer.pipelineStage === 'Đang tư vấn' ? 'Lập Báo Giá PDF' : 'Chỉnh Sửa Báo Giá'}</span>
+                    </button>
+                    {customer.pipelineStage === 'Đang thương lượng' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPaymentMode('deposit');
+                          setShowDepositModal(true);
+                        }}
+                        className="flex-1 sm:flex-initial px-4 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                      >
+                        <QrCode className="w-3.5 h-3.5 text-neutral-950" />
+                        <span>Tạo Cọc QR</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Banner Giai Đoạn Đã Bàn Giao: Tất toán hợp đồng */}
+              {customer.pipelineStage === 'Đã bàn giao' && (
+                <div className="p-4 bg-gradient-to-r from-teal-50 via-emerald-50 to-cyan-50 border border-teal-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse shrink-0" />
+                      <span className="text-xs font-bold text-teal-950 uppercase tracking-wide">
+                        Đã Bàn Giao Sản Phẩm (Lớp {customer.className})
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-600">
+                      Tổng bill: <strong>{(customer.totalRevenue || customer.expectedBudget || 0).toLocaleString('vi-VN')}đ</strong> • Đã cọc: <strong>{(customer.paidAmount || 0).toLocaleString('vi-VN')}đ</strong> • Còn lại cần thanh toán: <strong className="text-teal-700 font-extrabold">{Math.max(0, (customer.totalRevenue || customer.expectedBudget || 0) - (customer.paidAmount || 0)).toLocaleString('vi-VN')}đ</strong>
+                    </p>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setShowQuoteModal(true)}
-                    className="w-full sm:w-auto px-4 py-2 bg-neutral-950 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                    onClick={() => {
+                      setPaymentMode('final');
+                      setShowDepositModal(true);
+                    }}
+                    className="w-full sm:w-auto px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
                   >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Lập Báo Giá PDF</span>
+                    <QrCode className="w-3.5 h-3.5" />
+                    <span>Tạo QR Thanh Toán Hết</span>
                   </button>
                 </div>
               )}
@@ -538,15 +609,50 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
             Nhắn Zalo
           </a>
 
-          <button
-            type="button"
-            onClick={() => setShowQuoteModal(true)}
-            className="flex-1 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
-            title="Lập và xuất bảng báo giá PDF chi tiết cho lớp"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Tạo Báo Giá PDF</span>
-          </button>
+          {/* Nút Tạo / Sửa Báo Giá: CHỈ hiển thị ở Đang tư vấn, Đã gửi báo giá, Đang thương lượng */}
+          {['Đang tư vấn', 'Đã gửi báo giá', 'Đang thương lượng'].includes(customer.pipelineStage) && (
+            <button
+              type="button"
+              onClick={() => setShowQuoteModal(true)}
+              className="flex-1 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+              title={customer.pipelineStage === 'Đang tư vấn' ? 'Lập bảng báo giá PDF chi tiết cho lớp' : 'Chỉnh sửa lại bảng báo giá'}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>{customer.pipelineStage === 'Đang tư vấn' ? 'Tạo Báo Giá PDF' : 'Chỉnh Sửa Báo Giá'}</span>
+            </button>
+          )}
+
+          {/* Nút Tạo Cọc QR: CHỈ hiển thị ở Đang thương lượng */}
+          {customer.pipelineStage === 'Đang thương lượng' && (
+            <button
+              type="button"
+              onClick={() => {
+                setPaymentMode('deposit');
+                setShowDepositModal(true);
+              }}
+              className="flex-1 py-2.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+              title="Tạo khoản cọc giữ lịch và mã VietQR chuyển khoản ngân hàng"
+            >
+              <QrCode className="w-3.5 h-3.5 text-neutral-950" />
+              <span>Tạo Cọc QR</span>
+            </button>
+          )}
+
+          {/* Nút Tạo QR Thanh Toán Hết: CHỈ hiển thị ở Đã bàn giao */}
+          {customer.pipelineStage === 'Đã bàn giao' && (
+            <button
+              type="button"
+              onClick={() => {
+                setPaymentMode('final');
+                setShowDepositModal(true);
+              }}
+              className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+              title="Tất toán: Tạo mã VietQR thanh toán toàn bộ số tiền còn lại (Tổng bill - cọc)"
+            >
+              <QrCode className="w-3.5 h-3.5 text-white" />
+              <span>Tạo QR Thanh Toán Hết</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -639,10 +745,11 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
         onClose={() => setShowQuoteModal(false)}
       />
 
-      {/* Modal Tạo Cọc & Mã VietQR Chuyển Khoản */}
+      {/* Modal Tạo Cọc & Tất Toán QR Chuyển Khoản */}
       <DepositQrModal
         customer={customer}
         isOpen={showDepositModal}
+        mode={paymentMode}
         onClose={() => setShowDepositModal(false)}
       />
     </div>,

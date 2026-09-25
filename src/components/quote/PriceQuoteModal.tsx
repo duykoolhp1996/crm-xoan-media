@@ -237,18 +237,21 @@ export const PriceQuoteModal: React.FC<PriceQuoteModalProps> = ({
   // Lưu báo giá vào CRM
   const handleSaveToCrm = () => {
     if (!customer) return;
+    const isConsulting = customer.pipelineStage === 'Đang tư vấn';
     const updatedCust: Customer = {
       ...customer,
       expectedBudget: finalBudget,
-      notes: quoteNote ? `${customer.notes ? customer.notes + '\n' : ''}[Báo giá mới]: ${finalBudget.toLocaleString('vi-VN')} đ (Ghi chú: ${quoteNote})`.trim() : customer.notes,
+      totalRevenue: finalBudget,
+      pipelineStage: isConsulting ? 'Đã gửi báo giá' : customer.pipelineStage,
+      notes: quoteNote ? `${customer.notes ? customer.notes + '\n' : ''}[Báo giá ${isConsulting ? 'mới' : 'điều chỉnh'}]: ${finalBudget.toLocaleString('vi-VN')} đ (Ghi chú: ${quoteNote})`.trim() : customer.notes,
       updatedAt: new Date().toISOString()
     };
     updateCustomer(updatedCust);
 
     addActivityLog({
       type: 'quote_sent',
-      title: 'Tạo & Điều chỉnh Bảng Báo Giá chi tiết',
-      description: `Sales ${currentUser.name} đã cập nhật Bảng Báo Giá chi tiết cho lớp ${customer.className}: Tổng ${finalBudget.toLocaleString('vi-VN')} đ (${items.length} hạng mục) - Mức phí: ~${perStudentCost.toLocaleString('vi-VN')} đ/bạn.`,
+      title: isConsulting ? 'Lập bảng báo giá chi tiết & gửi khách' : 'Điều chỉnh bảng báo giá chi tiết',
+      description: `Sales ${currentUser.name} đã cập nhật Bảng Báo Giá chi tiết cho lớp ${customer.className}: Tổng ${finalBudget.toLocaleString('vi-VN')} đ (${items.length} hạng mục) - Mức phí: ~${perStudentCost.toLocaleString('vi-VN')} đ/bạn.${isConsulting ? ' Tiến trình chuyển sang "Đã gửi báo giá".' : ''}`,
       customerId: customer.id,
       performedByName: currentUser.name
     });
@@ -475,7 +478,7 @@ ${itemsText}
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-sm sm:text-base font-bold text-white whitespace-nowrap">
-                  Quy Trình Tạo Báo Giá Kỷ Yếu
+                  {customer.pipelineStage === 'Đang tư vấn' ? 'Lập Báo Giá Kỷ Yếu & Xuất PDF' : 'Chỉnh Sửa Báo Giá Kỷ Yếu'}
                 </h2>
                 <span className="text-[11px] font-mono text-[#B8F23D] bg-[#B8F23D]/20 px-2 py-0.5 rounded-full font-bold shrink-0">
                   {quoteCode}
