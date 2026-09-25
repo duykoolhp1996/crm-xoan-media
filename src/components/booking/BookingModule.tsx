@@ -13,7 +13,75 @@ import { BookingModal } from './BookingModal';
 import { BookingDetailModal } from './BookingDetailModal';
 
 export const BookingModule: React.FC = () => {
-  const { bookings, updateBooking } = useApp();
+  const { bookings, updateBooking, currentUser, currentRole, photographers } = useApp();
+
+  const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
+  const currentPhotographer = useMemo(() => {
+    if (!isPhotographerUser) return null;
+    return (
+      photographers.find(
+        p =>
+          p.id === currentUser.id ||
+          p.fullName.toLowerCase() === currentUser.name.toLowerCase() ||
+          (currentUser.phone && p.phone === currentUser.phone)
+      ) || photographers[0]
+    );
+  }, [photographers, currentUser, isPhotographerUser]);
+
+  const isPhotoLead = useMemo(() => {
+    if (!isPhotographerUser || !currentPhotographer) return false;
+    return Boolean(
+      currentPhotographer.notes?.toUpperCase().includes('LEAD') ||
+      currentPhotographer.fullName.toLowerCase().includes('lead')
+    );
+  }, [isPhotographerUser, currentPhotographer]);
+
+  const myTeam = useMemo(() => {
+    if (!currentPhotographer) return 'Toàn Studio';
+    if (
+      currentPhotographer.activeRegions?.includes('Hà Nội') ||
+      currentPhotographer.notes?.toUpperCase().includes('HÀ NỘI')
+    ) {
+      return 'Hà Nội';
+    }
+    return 'Hải Phòng';
+  }, [currentPhotographer]);
+
+  const myTeamPhotographerIds = useMemo(() => {
+    if (!isPhotoLead) return new Set<string>();
+    const teamPhotos = photographers.filter(
+      p =>
+        p.activeRegions?.includes(myTeam) ||
+        p.notes?.toUpperCase().includes(myTeam.toUpperCase())
+    );
+    return new Set(teamPhotos.map(p => p.id));
+  }, [photographers, isPhotoLead, myTeam]);
+
+  // Lọc Bookings:
+  // - Lead xem các booking của Team mình
+  // - Thành viên chỉ xem ca chụp mình tham gia
+  const accessibleBookings = useMemo(() => {
+    if (!isPhotographerUser) return bookings;
+    if (isPhotoLead) {
+      return bookings.filter(b => {
+        const hasTeamStaff =
+          (b.assignments.leadPhotographerId && myTeamPhotographerIds.has(b.assignments.leadPhotographerId)) ||
+          (b.assignments.videographerId && myTeamPhotographerIds.has(b.assignments.videographerId)) ||
+          b.assignments.assistantPhotographerIds?.some(id => myTeamPhotographerIds.has(id));
+        const matchesCity = b.city?.toLowerCase().includes(myTeam.toLowerCase()) || b.location?.toLowerCase().includes(myTeam.toLowerCase());
+        return hasTeamStaff || matchesCity;
+      });
+    }
+    const myId = currentPhotographer?.id || currentUser.id;
+    const myName = currentPhotographer?.fullName || currentUser.name;
+    return bookings.filter(
+      b =>
+        b.assignments.leadPhotographerId === myId ||
+        b.assignments.videographerId === myId ||
+        b.assignments.assistantPhotographerIds?.includes(myId) ||
+        b.assignments.leadPhotographerName === myName
+    );
+  }, [bookings, isPhotographerUser, isPhotoLead, myTeam, myTeamPhotographerIds, currentPhotographer, currentUser]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -23,7 +91,7 @@ export const BookingModule: React.FC = () => {
 
   // Lọc Bookings
   const filteredBookings = useMemo(() => {
-    return bookings.filter(b => {
+    return accessibleBookings.filter(b => {
       const matchSearch =
         b.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         b.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,7 +106,7 @@ export const BookingModule: React.FC = () => {
 
       return matchSearch && matchStatus && matchPayment;
     });
-  }, [bookings, searchTerm, statusFilter, paymentFilter]);
+  }, [accessibleBookings, searchTerm, statusFilter, paymentFilter]);
 
   const bookingStatusBadges: Record<BookingStatus, string> = {
     'Chờ xác nhận': 'bg-neutral-100 text-neutral-700 border-neutral-200',

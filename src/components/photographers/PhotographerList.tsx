@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Photographer, PhotographerStatus } from '../../types';
 import { PhotographerModal } from './PhotographerModal';
@@ -15,7 +15,52 @@ import {
 } from 'lucide-react';
 
 export const PhotographerList: React.FC = () => {
-  const { photographers, updatePhotographerStatus, bookings, feedbacks, deletePhotographer } = useApp();
+  const { photographers, updatePhotographerStatus, bookings, feedbacks, deletePhotographer, currentUser, currentRole } = useApp();
+
+  const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
+  const currentPhotographer = useMemo(() => {
+    if (!isPhotographerUser) return null;
+    return (
+      photographers.find(
+        p =>
+          p.id === currentUser.id ||
+          p.fullName.toLowerCase() === currentUser.name.toLowerCase() ||
+          (currentUser.phone && p.phone === currentUser.phone)
+      ) || photographers[0]
+    );
+  }, [photographers, currentUser, isPhotographerUser]);
+
+  const isPhotoLead = useMemo(() => {
+    if (!isPhotographerUser || !currentPhotographer) return false;
+    return Boolean(
+      currentPhotographer.notes?.toUpperCase().includes('LEAD') ||
+      currentPhotographer.fullName.toLowerCase().includes('lead')
+    );
+  }, [isPhotographerUser, currentPhotographer]);
+
+  const myTeam = useMemo(() => {
+    if (!currentPhotographer) return 'Toàn Studio';
+    if (
+      currentPhotographer.activeRegions?.includes('Hà Nội') ||
+      currentPhotographer.notes?.toUpperCase().includes('HÀ NỘI')
+    ) {
+      return 'Hà Nội';
+    }
+    return 'Hải Phòng';
+  }, [currentPhotographer]);
+
+  // Lead xem được thành viên trong Team mình; Thành viên thường chỉ xem mình
+  const accessiblePhotographers = useMemo(() => {
+    if (!isPhotographerUser) return photographers;
+    if (isPhotoLead) {
+      return photographers.filter(
+        p =>
+          p.activeRegions?.includes(myTeam) ||
+          p.notes?.toUpperCase().includes(myTeam.toUpperCase())
+      );
+    }
+    return currentPhotographer ? [currentPhotographer] : [];
+  }, [photographers, isPhotographerUser, isPhotoLead, myTeam, currentPhotographer]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -23,7 +68,7 @@ export const PhotographerList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPhotographer, setEditingPhotographer] = useState<Photographer | null>(null);
 
-  const filteredPhotographers = photographers.filter(p => {
+  const filteredPhotographers = accessiblePhotographers.filter(p => {
     const matchSearch =
       p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.phone.includes(searchQuery) ||

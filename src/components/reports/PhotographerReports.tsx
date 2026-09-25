@@ -16,7 +16,67 @@ import {
 } from 'lucide-react';
 
 export const PhotographerReports: React.FC = () => {
-  const { photographers, bookings, feedbacks } = useApp();
+  const { photographers, bookings, feedbacks, currentUser, currentRole } = useApp();
+
+  const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
+
+  // Xác định thợ đang đăng nhập
+  const currentPhotographer = useMemo(() => {
+    if (!isPhotographerUser) return null;
+    return (
+      photographers.find(
+        p =>
+          p.id === currentUser.id ||
+          p.fullName.toLowerCase() === currentUser.name.toLowerCase() ||
+          (currentUser.email && p.email?.toLowerCase() === currentUser.email.toLowerCase()) ||
+          (currentUser.phone && p.phone === currentUser.phone)
+      ) || photographers[0]
+    );
+  }, [photographers, currentUser, isPhotographerUser]);
+
+  // Kiểm tra xem thợ này có phải Lead không (LEAD - HẢI PHÒNG, LEAD - HÀ NỘI...)
+  const isPhotoLead = useMemo(() => {
+    if (!isPhotographerUser || !currentPhotographer) return false;
+    return Boolean(
+      currentPhotographer.notes?.toUpperCase().includes('LEAD') ||
+      currentPhotographer.fullName.toLowerCase().includes('lead')
+    );
+  }, [isPhotographerUser, currentPhotographer]);
+
+  // Xác định Team của thợ Lead (Hải Phòng hoặc Hà Nội)
+  const myTeam = useMemo(() => {
+    if (!currentPhotographer) return 'Toàn Studio';
+    if (
+      currentPhotographer.activeRegions?.includes('Hà Nội') ||
+      currentPhotographer.notes?.toUpperCase().includes('HÀ NỘI')
+    ) {
+      return 'Hà Nội';
+    }
+    if (
+      currentPhotographer.activeRegions?.includes('Hải Phòng') ||
+      currentPhotographer.notes?.toUpperCase().includes('HẢI PHÒNG')
+    ) {
+      return 'Hải Phòng';
+    }
+    return currentPhotographer.activeRegions?.[0] || 'Studio';
+  }, [currentPhotographer]);
+
+  // Phân quyền dữ liệu theo nghiệp vụ:
+  // - Admin / Manager: Xem toàn bộ studio
+  // - Lead Thợ: Xem doanh thu của team và từng thành viên trong team mình
+  // - Thành viên thợ thường: CHỈ xem được cá nhân của chính mình
+  const accessiblePhotographers = useMemo(() => {
+    if (!isPhotographerUser) return photographers;
+    if (isPhotoLead) {
+      return photographers.filter(
+        p =>
+          p.activeRegions?.includes(myTeam) ||
+          p.notes?.toUpperCase().includes(myTeam.toUpperCase())
+      );
+    }
+    // Thành viên thường: chỉ xem chính mình
+    return currentPhotographer ? [currentPhotographer] : [];
+  }, [photographers, isPhotographerUser, isPhotoLead, myTeam, currentPhotographer]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -25,7 +85,7 @@ export const PhotographerReports: React.FC = () => {
 
   // Thống kê hiệu suất theo thợ từ dữ liệu thực tế 100%
   const performanceData = useMemo(() => {
-    return photographers.map(p => {
+    return accessiblePhotographers.map(p => {
       // Tìm các booking thực tế được gán cho thợ này
       const pBookings = bookings.filter(
         b =>
@@ -89,7 +149,7 @@ export const PhotographerReports: React.FC = () => {
         feedbackCount: relatedFeedbacks.length
       };
     });
-  }, [photographers, bookings, feedbacks]);
+  }, [accessiblePhotographers, bookings, feedbacks]);
 
   // Bộ lọc danh sách
   const filteredData = useMemo(() => {
@@ -123,9 +183,9 @@ export const PhotographerReports: React.FC = () => {
     });
   }, [performanceData, searchTerm, roleFilter, regionFilter, hasShootsFilter]);
 
-  // Tổng hợp KPI toàn đội ngũ thực tế
+  // Tổng hợp KPI thực tế theo quyền truy cập
   const totalSummary = useMemo(() => {
-    const totalCrew = photographers.length;
+    const totalCrew = accessiblePhotographers.length;
     const totalCompletedShoots = performanceData.reduce((acc, p) => acc + p.completedCount, 0);
     const totalAssignedShoots = performanceData.reduce((acc, p) => acc + p.currentBookingsCount, 0);
     const totalPayout = performanceData.reduce((acc, p) => acc + p.totalEarnings, 0);
@@ -140,7 +200,7 @@ export const PhotographerReports: React.FC = () => {
       totalRevenue,
       totalHours
     };
-  }, [photographers, performanceData]);
+  }, [accessiblePhotographers, performanceData]);
 
   // Xuất file CSV dữ liệu thực tế
   const handleExportCsv = () => {
@@ -176,11 +236,17 @@ export const PhotographerReports: React.FC = () => {
       p.pendingEarnings
     ]);
 
+    const fileNamePrefix = !isPhotographerUser
+      ? 'bao_cao_toan_studio'
+      : isPhotoLead
+      ? `bao_cao_team_${myTeam.toLowerCase().replace(/\s+/g, '_')}`
+      : `bao_cao_ca_nhan_${(currentPhotographer?.fullName || currentUser.name).toLowerCase().replace(/\s+/g, '_')}`;
+
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `bao_cao_hieu_suat_tho_chup_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `${fileNamePrefix}_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -191,18 +257,33 @@ export const PhotographerReports: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-5 sm:p-6 rounded-3xl">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-orange-500" />
-            Báo Cáo Hiệu Suất & Thù Lao Đội Ngũ Thợ Chụp
-          </h1>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Dữ liệu thực tế 100% được liên kết tự động từ danh sách Ekip chính thức và tiến độ Booking
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-orange-500" />
+              {isPhotographerUser
+                ? isPhotoLead
+                  ? `Báo Cáo Hiệu Suất & Doanh Thu - Team ${myTeam}`
+                  : 'Báo Cáo Hiệu Suất & Thù Lao Cá Nhân'
+                : 'Báo Cáo Hiệu Suất & Thù Lao Đội Ngũ Thợ Chụp'}
+            </h1>
+            {isPhotographerUser && (
+              <span className="text-[11px] font-bold bg-[#B8F23D] text-neutral-950 px-2.5 py-0.5 rounded-full shadow-2xs">
+                {isPhotoLead ? `🎖️ Đội Trưởng Team ${myTeam}` : `📸 Thợ Chụp: ${currentPhotographer?.fullName || currentUser.name}`}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-neutral-500 mt-1">
+            {isPhotographerUser
+              ? isPhotoLead
+                ? `Quyền Đội Trưởng Ekip: Xem tổng hợp doanh thu team và chi tiết thù lao, ca chụp của từng thành viên Team ${myTeam}`
+                : 'Tài khoản Thợ Chụp cá nhân: Theo dõi lịch tác nghiệp, số ca hoàn thành và tổng thù lao thực nhận của bạn'
+              : 'Dữ liệu thực tế 100% được liên kết tự động từ danh sách Ekip chính thức và tiến độ Booking'}
           </p>
         </div>
 
         <button
           onClick={handleExportCsv}
-          className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-colors"
+          className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-colors shrink-0"
         >
           <Download className="w-4 h-4" /> Xuất Bảng Thù Lao (CSV)
         </button>
@@ -210,22 +291,48 @@ export const PhotographerReports: React.FC = () => {
 
       {/* KPI Cards từ Data Thực */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Card 1: Tổng Ekip */}
+        {/* Card 1: Tổng Ekip / Hồ sơ */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
           <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-xs font-semibold">Quy Mô Ekip</span>
+            <span className="text-xs font-semibold">
+              {!isPhotographerUser
+                ? 'Quy Mô Ekip'
+                : isPhotoLead
+                ? `Thành Viên Team ${myTeam}`
+                : 'Hồ Sơ Của Bạn'}
+            </span>
             <Users className="w-4 h-4 text-blue-600" />
           </div>
           <div className="text-2xl font-black text-neutral-900 tracking-tight">
-            {totalSummary.totalCrew} <span className="text-sm font-semibold text-neutral-500">nhân sự</span>
+            {!isPhotographerUser || isPhotoLead ? (
+              <>
+                {totalSummary.totalCrew} <span className="text-sm font-semibold text-neutral-500">nhân sự</span>
+              </>
+            ) : (
+              <span className="truncate block text-lg font-bold">
+                {currentPhotographer?.fullName || currentUser.name}
+              </span>
+            )}
           </div>
-          <p className="text-[11px] text-neutral-400 mt-1">Đã cấp tài khoản CRM</p>
+          <p className="text-[11px] text-neutral-400 mt-1">
+            {!isPhotographerUser
+              ? 'Đã cấp tài khoản CRM'
+              : isPhotoLead
+              ? `Tất cả thợ thuộc Team ${myTeam}`
+              : `Đơn giá: ${(currentPhotographer?.ratePerShoot || 1000000).toLocaleString('vi-VN')}đ / ca`}
+          </p>
         </div>
 
         {/* Card 2: Ca chụp thực tế */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
           <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-xs font-semibold">Ca Chụp Đã Bàn Giao</span>
+            <span className="text-xs font-semibold">
+              {!isPhotographerUser
+                ? 'Ca Chụp Đã Bàn Giao'
+                : isPhotoLead
+                ? `Ca Chụp Team ${myTeam}`
+                : 'Ca Chụp Của Bạn'}
+            </span>
             <CalendarCheck className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-700 tracking-tight">
@@ -242,80 +349,116 @@ export const PhotographerReports: React.FC = () => {
         {/* Card 3: Thù Lao Thực Tế */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
           <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-xs font-semibold">Tổng Thù Lao Nghiệm Thu</span>
+            <span className="text-xs font-semibold">
+              {!isPhotographerUser
+                ? 'Tổng Thù Lao Nghiệm Thu'
+                : isPhotoLead
+                ? `Tổng Thù Lao Team ${myTeam}`
+                : 'Thù Lao Thực Nhận'}
+            </span>
             <DollarSign className="w-4 h-4 text-amber-600" />
           </div>
           <div className="text-2xl font-black text-neutral-900 tracking-tight">
             {totalSummary.totalPayout.toLocaleString('vi-VN')}đ
           </div>
-          <p className="text-[11px] text-neutral-400 mt-1">Tính theo ca hoàn thành thực tế</p>
+          <p className="text-[11px] text-neutral-400 mt-1">
+            {!isPhotographerUser || isPhotoLead
+              ? 'Chi trả cho các thợ trong team'
+              : `Tạm tính đang làm: ${(performanceData[0]?.pendingEarnings || 0).toLocaleString('vi-VN')}đ`}
+          </p>
         </div>
 
         {/* Card 4: Doanh Thu Mang Về */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
           <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-xs font-semibold">Doanh Thu Các Ca Chụp</span>
+            <span className="text-xs font-semibold">
+              {!isPhotographerUser
+                ? 'Doanh Thu Các Ca Chụp'
+                : isPhotoLead
+                ? `Doanh Thu Team Mang Về`
+                : 'Doanh Thu Các Ca Bạn Chụp'}
+            </span>
             <Camera className="w-4 h-4 text-purple-600" />
           </div>
           <div className="text-2xl font-black text-neutral-900 tracking-tight">
             {totalSummary.totalRevenue.toLocaleString('vi-VN')}đ
           </div>
-          <p className="text-[11px] text-neutral-400 mt-1">Từ các booking thợ được gán</p>
+          <p className="text-[11px] text-neutral-400 mt-1">
+            {!isPhotographerUser || isPhotoLead
+              ? `Từ hợp đồng các lớp Team ${myTeam} thực hiện`
+              : 'Tổng giá trị hợp đồng các lớp bạn tác nghiệp'}
+          </p>
         </div>
       </div>
 
       {/* Filter Bar */}
       <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-            <input
-              type="text"
-              placeholder="Tìm theo tên thợ, SĐT..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium focus:outline-none focus:bg-white focus:border-black/[0.2]"
-            />
-          </div>
+          {/* Search (Ẩn với thành viên thường vì chỉ có 1 dòng cá nhân) */}
+          {(!isPhotographerUser || isPhotoLead) && (
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <input
+                type="text"
+                placeholder={isPhotoLead ? `Tìm thành viên trong Team ${myTeam}...` : 'Tìm theo tên thợ, SĐT...'}
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium focus:outline-none focus:bg-white focus:border-black/[0.2]"
+              />
+            </div>
+          )}
 
           {/* Vai trò */}
-          <select
-            value={roleFilter}
-            onChange={e => setRoleFilter(e.target.value)}
-            className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
-          >
-            <option value="all">Tất cả vai trò</option>
-            <option value="Chụp chính">Chụp chính (LEAD)</option>
-            <option value="Chụp phụ">Chụp phụ (SP)</option>
-            <option value="Quay phim">Quay phim</option>
-          </select>
+          {(!isPhotographerUser || isPhotoLead) && (
+            <select
+              value={roleFilter}
+              onChange={e => setRoleFilter(e.target.value)}
+              className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
+            >
+              <option value="all">Tất cả vai trò</option>
+              <option value="Chụp chính">Chụp chính (LEAD)</option>
+              <option value="Chụp phụ">Chụp phụ (SP)</option>
+              <option value="Quay phim">Quay phim</option>
+            </select>
+          )}
 
-          {/* Khu vực */}
-          <select
-            value={regionFilter}
-            onChange={e => setRegionFilter(e.target.value)}
-            className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
-          >
-            <option value="all">Tất cả khu vực</option>
-            <option value="Hải Phòng">Hải Phòng</option>
-            <option value="Hà Nội">Hà Nội</option>
-          </select>
+          {/* Khu vực (Chỉ Admin mới được đổi; Lead và Member bị khóa cứng) */}
+          {!isPhotographerUser ? (
+            <select
+              value={regionFilter}
+              onChange={e => setRegionFilter(e.target.value)}
+              className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
+            >
+              <option value="all">Tất cả khu vực</option>
+              <option value="Hải Phòng">Hải Phòng</option>
+              <option value="Hà Nội">Hà Nội</option>
+            </select>
+          ) : isPhotoLead ? (
+            <span className="px-3 py-2 bg-[#B8F23D]/25 border border-[#B8F23D]/60 rounded-xl text-xs font-bold text-neutral-900 inline-flex items-center gap-1.5">
+              📍 Khu vực: Team {myTeam}
+            </span>
+          ) : (
+            <span className="px-3 py-2 bg-neutral-100 border border-black/[0.06] rounded-xl text-xs font-bold text-neutral-700">
+              📍 {currentPhotographer?.activeRegions?.join(', ') || 'Hải Phòng'}
+            </span>
+          )}
 
           {/* Lọc tình trạng ca chụp */}
-          <select
-            value={hasShootsFilter}
-            onChange={e => setHasShootsFilter(e.target.value as any)}
-            className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
-          >
-            <option value="all">Tất cả tình trạng booking</option>
-            <option value="has_shoots">Đã có ca chụp gán</option>
-            <option value="no_shoots">Chưa có ca chụp</option>
-          </select>
+          {(!isPhotographerUser || isPhotoLead) && (
+            <select
+              value={hasShootsFilter}
+              onChange={e => setHasShootsFilter(e.target.value as any)}
+              className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-medium text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
+            >
+              <option value="all">Tất cả tình trạng booking</option>
+              <option value="has_shoots">Đã có ca chụp gán</option>
+              <option value="no_shoots">Chưa có ca chụp</option>
+            </select>
+          )}
         </div>
 
         <div className="text-xs font-semibold text-neutral-500">
-          Hiển thị: <strong className="text-neutral-900">{filteredData.length}</strong> / {photographers.length} nhân sự
+          Hiển thị: <strong className="text-neutral-900">{filteredData.length}</strong> / {accessiblePhotographers.length} nhân sự
         </div>
       </div>
 

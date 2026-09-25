@@ -19,10 +19,23 @@ import {
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, currentRole, notifications, customers, feedbacks, currentUser, logout } = useApp();
+  const { activeTab, setActiveTab, currentRole, notifications, customers, feedbacks, currentUser, logout, photographers } = useApp();
 
   const newLeadsCount = customers.filter(c => c.pipelineStage === 'New Lead').length;
   const unreadAlerts = notifications.filter(n => !n.read && n.severity === 'danger').length;
+
+  const isPhotoRole = currentRole === 'photographer' || currentUser?.role === 'photographer';
+  const myPhoto = isPhotoRole
+    ? photographers.find(
+        p =>
+          p.id === currentUser.id ||
+          p.fullName.toLowerCase() === currentUser.name.toLowerCase() ||
+          (currentUser.phone && p.phone === currentUser.phone)
+      )
+    : null;
+  const isPhotoLead = Boolean(
+    myPhoto?.notes?.toUpperCase().includes('LEAD') || myPhoto?.fullName?.toLowerCase().includes('lead')
+  );
 
   interface NavItem {
     id: NavigationTab;
@@ -92,9 +105,9 @@ export const Sidebar: React.FC = () => {
         },
         {
           id: 'photographers',
-          label: 'Đội Ngũ Thợ & Ekip',
+          label: isPhotoRole ? (isPhotoLead ? 'Thành Viên Trong Team' : 'Hồ Sơ Của Tôi') : 'Đội Ngũ Thợ & Ekip',
           icon: Camera,
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'photographer']
         },
         {
           id: 'services',
@@ -134,9 +147,9 @@ export const Sidebar: React.FC = () => {
         },
         {
           id: 'reports-photographer',
-          label: 'Hiệu Suất Thợ Chụp',
+          label: isPhotoRole ? (isPhotoLead ? 'Hiệu Suất & DS Team' : 'Thù Lao & Ca Chụp') : 'Hiệu Suất Thợ Chụp',
           icon: BarChart3,
-          roles: ['admin', 'manager']
+          roles: ['admin', 'manager', 'photographer']
         },
         {
           id: 'settings',
