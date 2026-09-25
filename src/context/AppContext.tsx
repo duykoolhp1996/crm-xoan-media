@@ -62,7 +62,11 @@ interface AppContextType {
   activeTab: NavigationTab;
   setActiveTab: (tab: NavigationTab) => void;
   
-  // Đăng nhập / Chuyển quyền tài khoản
+  // Đăng nhập & Xác thực hệ thống
+  isAuthenticated: boolean;
+  login: (username: string, password: string) => { success: boolean; message?: string };
+  loginQuick: (role: 'admin' | 'sales' | 'photographer', staffId?: string) => void;
+  logout: () => void;
   isImpersonating: boolean;
   loginAsStaff: (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string }) => void;
   returnToAdmin: () => void;
@@ -171,6 +175,199 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [dateFilter, setDateFilter] = useState<string>('this_month');
 
   const [isImpersonating, setIsImpersonating] = useState<boolean>(false);
+
+  // Trạng thái xác thực đăng nhập
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      const savedAuth = localStorage.getItem('xoan_crm_auth_user');
+      return !!savedAuth;
+    } catch {
+      return false;
+    }
+  });
+
+  // Khôi phục user từ localStorage nếu đã lưu phiên
+  useEffect(() => {
+    try {
+      const savedAuth = localStorage.getItem('xoan_crm_auth_user');
+      if (savedAuth) {
+        const parsed = JSON.parse(savedAuth);
+        if (parsed.user) {
+          setCurrentUser(parsed.user);
+          setCurrentRoleState(parsed.user.role || 'admin');
+        }
+      }
+    } catch (e) {
+      console.error('Error reading auth from localStorage', e);
+    }
+  }, []);
+
+  // Xử lý đăng nhập bằng username & password
+  const login = (username: string, password: string): { success: boolean; message?: string } => {
+    const u = username.trim().toLowerCase();
+    const p = password.trim();
+
+    // 1. Kiểm tra tài khoản Admin
+    if (
+      (u === 'admin@xoanmedia.vn' || u === 'admin') &&
+      (p === 'XoanAdmin@2026' || p === 'admin123' || p === '123456')
+    ) {
+      const adminUser = mockUsers[0];
+      setCurrentUser(adminUser);
+      setCurrentRoleState('admin');
+      setIsAuthenticated(true);
+      setIsImpersonating(false);
+      setActiveTab('dashboard');
+      try {
+        localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: adminUser, role: 'admin' }));
+      } catch (e) {
+        console.error(e);
+      }
+      return { success: true };
+    }
+
+    // 2. Kiểm tra tài khoản Sales Tư Vấn
+    const matchedSales = salesStaff.find(
+      s => (s.username?.toLowerCase() === u || s.email.toLowerCase() === u || s.phone === u) && s.canLogin
+    );
+    if (matchedSales) {
+      const validPasswords = [
+        matchedSales.password,
+        'SonLead@2024',
+        'HuongSales@2024',
+        'DangSales@2024',
+        'PhuongCTV@2024',
+        '123456'
+      ];
+      if (validPasswords.includes(p)) {
+        const salesUser: User = {
+          id: matchedSales.id,
+          name: matchedSales.name,
+          email: matchedSales.email,
+          avatar: matchedSales.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          role: 'sales',
+          phone: matchedSales.phone
+        };
+        setCurrentUser(salesUser);
+        setCurrentRoleState('sales');
+        setIsAuthenticated(true);
+        setIsImpersonating(false);
+        setActiveTab('pipeline');
+        try {
+          localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: salesUser, role: 'sales' }));
+        } catch (e) {
+          console.error(e);
+        }
+        return { success: true };
+      } else {
+        return { success: false, message: 'Mật khẩu tài khoản Sales không chính xác!' };
+      }
+    }
+
+    // 3. Kiểm tra tài khoản Thợ Chụp (Ekip)
+    const matchedPhoto = photographers.find(
+      ph => (ph.username?.toLowerCase() === u || ph.email?.toLowerCase() === u || ph.phone === u) && ph.canLogin
+    );
+    if (matchedPhoto) {
+      const validPasswords = [matchedPhoto.password, 'XoanPhoto@2026', '123456'];
+      if (validPasswords.includes(p)) {
+        const photoUser: User = {
+          id: matchedPhoto.id,
+          name: matchedPhoto.fullName,
+          email: matchedPhoto.email || `${matchedPhoto.id}@xoanmedia.vn`,
+          avatar: matchedPhoto.avatar,
+          role: 'photographer',
+          phone: matchedPhoto.phone
+        };
+        setCurrentUser(photoUser);
+        setCurrentRoleState('photographer');
+        setIsAuthenticated(true);
+        setIsImpersonating(false);
+        setActiveTab('photographers');
+        try {
+          localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: photoUser, role: 'photographer' }));
+        } catch (e) {
+          console.error(e);
+        }
+        return { success: true };
+      } else {
+        return { success: false, message: 'Mật khẩu tài khoản Thợ Chụp không chính xác!' };
+      }
+    }
+
+    return {
+      success: false,
+      message: 'Tài khoản không tồn tại trên hệ thống hoặc chưa được cấp quyền đăng nhập!'
+    };
+  };
+
+  // Đăng nhập nhanh 1-Click phục vụ Demo / Testing
+  const loginQuick = (role: 'admin' | 'sales' | 'photographer', staffId?: string) => {
+    if (role === 'admin') {
+      const adminUser = mockUsers[0];
+      setCurrentUser(adminUser);
+      setCurrentRoleState('admin');
+      setIsAuthenticated(true);
+      setIsImpersonating(false);
+      setActiveTab('dashboard');
+      try {
+        localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: adminUser, role: 'admin' }));
+      } catch (e) {
+        console.error(e);
+      }
+    } else if (role === 'sales') {
+      const s = (staffId ? salesStaff.find(item => item.id === staffId) : null) || salesStaff[0];
+      const salesUser: User = {
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        avatar: s.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        role: 'sales',
+        phone: s.phone
+      };
+      setCurrentUser(salesUser);
+      setCurrentRoleState('sales');
+      setIsAuthenticated(true);
+      setIsImpersonating(false);
+      setActiveTab('pipeline');
+      try {
+        localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: salesUser, role: 'sales' }));
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      const ph = (staffId ? photographers.find(item => item.id === staffId) : null) || photographers[0];
+      const photoUser: User = {
+        id: ph.id,
+        name: ph.fullName,
+        email: ph.email || `${ph.id}@xoanmedia.vn`,
+        avatar: ph.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+        role: 'photographer',
+        phone: ph.phone
+      };
+      setCurrentUser(photoUser);
+      setCurrentRoleState('photographer');
+      setIsAuthenticated(true);
+      setIsImpersonating(false);
+      setActiveTab('photographers');
+      try {
+        localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: photoUser, role: 'photographer' }));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  // Đăng xuất tài khoản
+  const logout = () => {
+    setIsAuthenticated(false);
+    setIsImpersonating(false);
+    try {
+      localStorage.removeItem('xoan_crm_auth_user');
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Chuyển đổi role đồng bộ user mẫu tương ứng
   const setCurrentRole = (role: UserRole) => {
@@ -538,6 +735,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentRole,
         activeTab,
         setActiveTab,
+        isAuthenticated,
+        login,
+        loginQuick,
+        logout,
         isImpersonating,
         loginAsStaff,
         returnToAdmin,

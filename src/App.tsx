@@ -3,6 +3,7 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
+import { LoginPage } from './components/auth/LoginPage';
 
 // Real CRM Modules
 import { ExecutiveDashboard } from './components/dashboard/ExecutiveDashboard';
@@ -43,25 +44,38 @@ const MainContent: React.FC = () => {
   );
 };
 
+const CrmAppShell: React.FC = () => {
+  const { isAuthenticated } = useApp();
+
+  // Nếu chưa đăng nhập -> hiển thị màn hình Login
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return (
+    <div className="relative flex h-screen bg-[#F6F7F9] text-neutral-900 overflow-hidden font-sans selection:bg-[#B8F23D]/60 selection:text-neutral-900">
+      {/* Spatial Ambient Glow Layer */}
+      <div className="ambient-glow" aria-hidden="true" />
+
+      {/* Soft Glassmorphism Sidebar with all CRM Buttons */}
+      <Sidebar />
+
+      {/* Main Application Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+        <Header />
+        <MainContent />
+      </div>
+
+      {/* Global Search Modal (Cmd+K) */}
+      <GlobalSearchModal />
+    </div>
+  );
+};
+
 export const App: React.FC = () => {
   return (
     <AppProvider>
-      <div className="relative flex h-screen bg-[#F6F7F9] text-neutral-900 overflow-hidden font-sans selection:bg-[#B8F23D]/60 selection:text-neutral-900">
-        {/* Spatial Ambient Glow Layer */}
-        <div className="ambient-glow" aria-hidden="true" />
-
-        {/* Soft Glassmorphism Sidebar with all CRM Buttons */}
-        <Sidebar />
-
-        {/* Main Application Area */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
-          <Header />
-          <MainContent />
-        </div>
-
-        {/* Global Search Modal (Cmd+K) */}
-        <GlobalSearchModal />
-      </div>
+      <CrmAppShell />
     </AppProvider>
   );
 };

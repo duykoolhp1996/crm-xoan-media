@@ -8,7 +8,8 @@ import {
   Shield,
   Sparkles,
   ChevronDown,
-  Check
+  Check,
+  LogOut
 } from 'lucide-react';
 import { NotificationDrawer } from './NotificationDrawer';
 
@@ -23,7 +24,8 @@ export const Header: React.FC = () => {
     setDateFilter,
     activeTab,
     isImpersonating,
-    returnToAdmin
+    returnToAdmin,
+    logout
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -210,13 +212,23 @@ export const Header: React.FC = () => {
         </button>
 
         {/* User Profile Avatar */}
-        <div className="w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] shadow-xs cursor-pointer">
+        <div className="w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] shadow-xs cursor-pointer" title={currentUser.name}>
           <img
             src={currentUser.avatar}
             alt={currentUser.name}
             className="w-full h-full object-cover"
           />
         </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={logout}
+          className="p-2 bg-white/90 hover:bg-rose-50 text-neutral-500 hover:text-rose-600 border border-black/[0.06] rounded-2xl flex items-center gap-1.5 text-xs font-bold transition-colors shadow-xs"
+          title="Đăng xuất khỏi hệ thống"
+        >
+          <LogOut className="w-4 h-4 text-rose-500" />
+          <span className="hidden md:inline">Đăng Xuất</span>
+        </button>
       </div>
 
       {/* Notification Drawer Modal */}

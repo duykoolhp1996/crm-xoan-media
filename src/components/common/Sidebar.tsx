@@ -13,11 +13,12 @@ import {
   TrendingUp,
   Settings,
   CalendarCheck,
-  Heart
+  Heart,
+  LogOut
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, currentRole, notifications, customers, feedbacks } = useApp();
+  const { activeTab, setActiveTab, currentRole, notifications, customers, feedbacks, currentUser, logout } = useApp();
 
   const newLeadsCount = customers.filter(c => c.pipelineStage === 'New Lead').length;
   const unreadAlerts = notifications.filter(n => !n.read && n.severity === 'danger').length;
@@ -215,15 +216,36 @@ export const Sidebar: React.FC = () => {
         })}
       </div>
 
-      {/* Footer System Status */}
-      <div className="p-3 border-t border-black/[0.06] bg-white/40">
-        <div className="flex items-center justify-between px-3 py-2 bg-neutral-50 rounded-2xl border border-black/[0.04] text-xs">
+      {/* Footer System Status & User Logout */}
+      <div className="p-3 border-t border-black/[0.06] bg-white/40 space-y-2">
+        <div className="flex items-center justify-between p-2 rounded-2xl bg-neutral-50 border border-black/[0.04]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img
+              src={currentUser.avatar}
+              alt={currentUser.name}
+              className="w-8 h-8 rounded-xl object-cover ring-1 ring-black/[0.06] shrink-0"
+            />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-neutral-900 truncate">{currentUser.name}</p>
+              <p className="text-[10px] text-neutral-400 capitalize">{currentRole}</p>
+            </div>
+          </div>
+          <button
+            onClick={logout}
+            className="p-2 hover:bg-rose-50 text-neutral-400 hover:text-rose-600 rounded-xl transition-colors shrink-0"
+            title="Đăng xuất"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between px-3 py-1.5 bg-neutral-50/50 rounded-xl border border-black/[0.03] text-[11px]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#79ba07] shadow-[0_0_8px_#B8F23D] animate-pulse"></span>
-            <span className="text-[11px] font-medium text-neutral-600">Vận hành kỷ yếu</span>
+            <span className="text-[10px] font-medium text-neutral-500">Vận hành CRM</span>
           </div>
           <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-full">
-            Mùa 2024
+            Mùa 2026
           </span>
         </div>
       </div>
