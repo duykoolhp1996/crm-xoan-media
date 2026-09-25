@@ -444,3 +444,29 @@ export interface SalesStaff {
   canLogin?: boolean;
   lastLoginAt?: string;
 }
+
+// 12. Bảng Báo Giá Chi Tiết (Sản phẩm / Dịch vụ, Số lượng, Đơn giá, Chiết khấu)
+export interface QuoteItem {
+  id: string;
+  name: string; // Tên sản phẩm / dịch vụ
+  category?: 'package' | 'costume' | 'media' | 'party' | 'logistics' | 'print' | 'other';
+  unit: string; // Học sinh, Gói, Bộ, Buổi, Clip, Chiếc, Chuyến...
+  quantity: number; // Số lượng
+  unitPrice: number; // Đơn giá VNĐ
+  discount: number; // Chiết khấu (VNĐ hoặc %)
+  discountType: 'fixed' | 'percentage';
+  note?: string; // Ghi chú (VD: Tặng kèm, Độc quyền...)
+}
+
+export interface QuoteData {
+  quoteCode: string;
+  createdAt: string;
+  validDays: number;
+  items: QuoteItem[];
+  subtotal: number; // Tổng trước chiết khấu
+  totalDiscount: number; // Tổng tiền chiết khấu
+  finalTotal: number; // Tổng thanh toán sau chiết khấu
+  perStudentCost: number; // Chi phí / học sinh
+  note?: string; // Ghi chú ưu đãi toàn đơn
+}
+
