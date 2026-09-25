@@ -19,9 +19,14 @@ import { RemarketingModule } from './components/remarketing/RemarketingModule';
 import { MarketingReports } from './components/reports/MarketingReports';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
+import { initGA4, trackPageView } from './lib/analytics';
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
+
+  React.useEffect(() => {
+    trackPageView(`/#${activeTab}`, `CRM Xoắn - ${activeTab}`);
+  }, [activeTab]);
 
   return (
     <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
@@ -73,6 +78,10 @@ const CrmAppShell: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  React.useEffect(() => {
+    initGA4();
+  }, []);
+
   return (
     <AppProvider>
       <CrmAppShell />

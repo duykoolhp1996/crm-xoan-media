@@ -32,8 +32,10 @@ import {
   LogIn,
   ShieldCheck,
   ExternalLink,
-  Coins
+  Coins,
+  BarChart3
 } from 'lucide-react';
+import { getGA4Id, setGA4Id } from '../../lib/analytics';
 
 export const SettingsModule: React.FC = () => {
   const {
@@ -76,6 +78,17 @@ export const SettingsModule: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connectionMessage, setConnectionMessage] = useState('');
   const [copiedSql, setCopiedSql] = useState(false);
+
+  // Google Analytics 4
+  const [ga4Id, setGa4IdState] = useState(() => getGA4Id());
+  const [ga4Saved, setGa4Saved] = useState(false);
+
+  const handleSaveGA4 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setGA4Id(ga4Id.trim());
+    setGa4Saved(true);
+    setTimeout(() => setGa4Saved(false), 2500);
+  };
 
   const handleTestConnection = async () => {
     if (!supabaseUrl.trim()) {
@@ -1038,6 +1051,63 @@ export const SettingsModule: React.FC = () => {
                 <p className="text-[11px] text-neutral-500">Endpoint bắn dữ liệu sự kiện khi có khách hàng hoàn thành.</p>
               </div>
             </div>
+          </div>
+
+          {/* Section: Google Analytics 4 (GA4) */}
+          <div className="bg-white border border-black/[0.08] p-6 rounded-3xl space-y-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center shrink-0">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-neutral-900">Đo Lường & Phân Tích Google Analytics 4 (GA4)</h2>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Tự động theo dõi Pageviews từng tab CRM, hành vi tạo Lead, chốt cọc và hiệu quả đội ngũ Sales.
+                  </p>
+                </div>
+              </div>
+
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
+                ga4Id.trim()
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-neutral-100 text-neutral-600 border-neutral-200'
+              }`}>
+                {ga4Id.trim() ? `🟢 Đang theo dõi: ${ga4Id.trim()}` : 'Chưa cấu hình'}
+              </span>
+            </div>
+
+            <form onSubmit={handleSaveGA4} className="space-y-3 text-xs">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+                <div className="flex-1">
+                  <label className="font-semibold text-neutral-700">GA4 Measurement ID (Mã đo lường)</label>
+                  <input
+                    type="text"
+                    value={ga4Id}
+                    onChange={e => setGa4IdState(e.target.value)}
+                    placeholder="VD: G-XXXXXXXXXX"
+                    className="w-full mt-1.5 px-3 py-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-xs text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer shrink-0"
+                >
+                  {ga4Saved ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" /> Đã Lưu GA4!
+                    </>
+                  ) : (
+                    'Lưu Cấu Hình GA4'
+                  )}
+                </button>
+              </div>
+
+              <p className="text-[11px] text-neutral-500">
+                💡 <strong>Cách lấy mã:</strong> Đăng nhập <strong>Google Analytics</strong> &gt; vào <strong>Quản trị (Admin)</strong> &gt; <strong>Luồng dữ liệu (Data Streams)</strong> &gt; chọn luồng Web &gt; copy <strong>Mã đo lường (Measurement ID)</strong> có định dạng <code>G-XXXXXXXXXX</code>.
+              </p>
+            </form>
           </div>
         </div>
       )}
