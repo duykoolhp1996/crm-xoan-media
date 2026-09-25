@@ -13,13 +13,17 @@
   }
 }
 
-/* Ambient Spatial Glow Layers (Light Modern SaaS Style) */
+/* Ambient Spatial Glow Layers (Hardware-accelerated) */
 .ambient-glow {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: strict;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .ambient-glow::before {
@@ -30,8 +34,9 @@
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(184, 242, 61, 0.16) 0%, rgba(184, 242, 61, 0.03) 60%, transparent 80%);
-  filter: blur(80px);
+  background: radial-gradient(circle, rgba(184, 242, 61, 0.14) 0%, rgba(184, 242, 61, 0.02) 60%, transparent 80%);
+  filter: blur(50px);
+  transform: translate3d(0, 0, 0);
 }
 
 .ambient-glow::after {
@@ -42,8 +47,9 @@
   width: 700px;
   height: 700px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(167, 243, 208, 0.18) 0%, rgba(224, 231, 255, 0.08) 60%, transparent 80%);
-  filter: blur(100px);
+  background: radial-gradient(circle, rgba(167, 243, 208, 0.15) 0%, rgba(224, 231, 255, 0.06) 60%, transparent 80%);
+  filter: blur(50px);
+  transform: translate3d(0, 0, 0);
 }
 
 /* ==========================================================================
@@ -72,7 +78,7 @@
   box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.03);
   border-radius: 24px;
   color: #0f172a;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .glass-card:hover {
@@ -86,7 +92,7 @@
   box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.03);
   border-radius: 20px;
   color: #0f172a;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .glass-card-interactive:hover {
@@ -160,7 +166,13 @@ select option {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-/* 4. CUSTOM SCROLLBAR */
+/* 4. CUSTOM SCROLLBAR & SMOOTH PERFORMANCE */
+.custom-scrollbar {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -177,6 +189,18 @@ select option {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.25);
+}
+
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+.overscroll-x-contain {
+  overscroll-behavior-x: contain;
+}
+
+.overscroll-y-contain {
+  overscroll-behavior-y: contain;
 }
 
 /* ==========================================================================

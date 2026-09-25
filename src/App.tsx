@@ -28,9 +28,11 @@ const MainContent: React.FC = () => {
     trackPageView(`/#${activeTab}`, `CRM Xoắn - ${activeTab}`);
   }, [activeTab]);
 
+  const isPipeline = activeTab === 'pipeline';
+
   return (
-    <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <main className={`flex-1 ${isPipeline ? 'overflow-hidden flex flex-col min-h-0 p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain'}`}>
+      <div className={`${isPipeline ? 'w-full h-full flex flex-col min-h-0' : 'max-w-7xl mx-auto space-y-6'}`}>
         {activeTab === 'dashboard' && <ExecutiveDashboard />}
         {(activeTab === 'customers' || activeTab === 'leads') && <CustomerList />}
         {activeTab === 'pipeline' && <KanbanPipeline />}

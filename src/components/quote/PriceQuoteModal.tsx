@@ -464,8 +464,8 @@ ${itemsText}
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-black/[0.08] overflow-hidden my-auto max-h-[96vh] flex flex-col">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm overflow-hidden animate-in fade-in duration-150">
+      <div className="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl border border-black/[0.08] overflow-hidden max-h-[94vh] h-[94vh] flex flex-col">
         
         {/* HEADER MODAL */}
         <div className="p-3 sm:px-6 bg-neutral-900 text-white flex items-center justify-between gap-3 shrink-0 print:hidden">
@@ -586,7 +586,7 @@ ${itemsText}
 
         {/* TAB 1: BẢNG SOẠN THẢO SẢN PHẨM, SỐ LƯỢNG & CHIẾT KHẤU */}
         {activeTab === 'editor' && (
-          <div className="overflow-y-auto flex-1 p-4 sm:p-6 bg-neutral-50 custom-scrollbar space-y-4">
+          <div className="overflow-y-auto flex-1 p-4 sm:p-6 bg-neutral-50 custom-scrollbar overscroll-contain space-y-4">
             
             {/* Thanh tác vụ trên cùng */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-black/[0.06] shadow-2xs">
@@ -840,7 +840,7 @@ ${itemsText}
 
         {/* TAB 2: XEM & XUẤT TỜ BÁO GIÁ PDF A4 (CHUẨN CHỈNH TỪNG MILIMET, IN QUA IFRAME) */}
         {activeTab === 'preview' && (
-          <div className="overflow-y-auto flex-1 p-4 sm:p-8 bg-neutral-100/70 custom-scrollbar">
+          <div className="overflow-y-auto flex-1 p-4 sm:p-8 bg-neutral-100/70 custom-scrollbar overscroll-contain">
             
             {/* Quick Actions Bar for Preview */}
             <div className="max-w-[210mm] mx-auto mb-4 p-3.5 bg-white rounded-2xl border border-black/[0.06] shadow-xs flex flex-wrap items-center justify-between gap-3 print:hidden">

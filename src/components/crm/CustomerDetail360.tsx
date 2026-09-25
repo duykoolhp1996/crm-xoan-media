@@ -75,15 +75,15 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] overflow-y-auto p-4 sm:p-6 flex items-center justify-center animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] overflow-hidden p-3 sm:p-6 flex items-center justify-center animate-in fade-in duration-150">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md transition-opacity"
+        className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm transition-opacity"
       />
 
       {/* Center Popup Modal */}
-      <div className="relative w-full max-w-3xl sm:max-w-4xl max-h-[90vh] bg-white rounded-3xl border border-black/[0.08] text-neutral-900 shadow-2xl flex flex-col z-10 animate-in zoom-in-95 duration-200 overflow-hidden my-auto">
+      <div className="relative w-full max-w-3xl sm:max-w-4xl h-[92vh] max-h-[92vh] bg-white rounded-3xl border border-black/[0.08] text-neutral-900 shadow-2xl flex flex-col z-10 overflow-hidden">
         {/* Header Modal */}
         <div className="p-6 bg-neutral-50/70 border-b border-black/[0.06] flex items-start justify-between shrink-0">
           <div className="flex items-start gap-4">
@@ -308,7 +308,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar text-neutral-900">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar overscroll-contain text-neutral-900">
           {/* Tab 1: Timeline */}
           {activeTab === 'timeline' && (
             <div className="space-y-6">

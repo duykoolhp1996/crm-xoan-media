@@ -32,6 +32,26 @@ export const KanbanPipeline: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
+  const boardRef = React.useRef<HTMLDivElement>(null);
+
+  // Cuộn ngang siêu mượt khi dùng chuột cuộn dọc hoặc trackpad
+  const handleBoardWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!boardRef.current) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      const target = e.target as HTMLElement;
+      const scrollableCol = target.closest('.column-cards-scroll');
+      if (scrollableCol) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollableCol;
+        const isAtTop = scrollTop <= 0;
+        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 2;
+        if ((e.deltaY < 0 && isAtTop) || (e.deltaY > 0 && isAtBottom)) {
+          boardRef.current.scrollLeft += e.deltaY;
+        }
+      } else {
+        boardRef.current.scrollLeft += e.deltaY;
+      }
+    }
+  };
 
   // 13 Giai đoạn chuẩn của Xoắn Media
   const STAGES: PipelineStage[] = [
@@ -87,9 +107,9 @@ export const KanbanPipeline: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-3 animate-in fade-in duration-150 flex-1 flex flex-col min-h-0 h-full">
       {/* Top Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-5 rounded-3xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-4 sm:p-5 rounded-3xl shrink-0">
         <div>
           <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
             <KanbanIcon className="w-5 h-5 text-neutral-900" />
@@ -110,7 +130,11 @@ export const KanbanPipeline: React.FC = () => {
       </div>
 
       {/* Kanban Board Container (Horizontal Scrollable 13 Columns) */}
-      <div className="flex gap-4 overflow-x-auto pb-6 pt-1 items-start custom-scrollbar">
+      <div
+        ref={boardRef}
+        onWheel={handleBoardWheel}
+        className="flex gap-3.5 overflow-x-auto pb-3 pt-1 items-stretch custom-scrollbar flex-1 min-h-0 overscroll-x-contain"
+      >
         {STAGES.map((stage) => {
           const stageCustomers = customers.filter(c => c.pipelineStage === stage);
           const stageTotalMoney = stageCustomers.reduce((acc, curr) => acc + curr.expectedBudget, 0);
@@ -120,10 +144,10 @@ export const KanbanPipeline: React.FC = () => {
               key={stage}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, stage)}
-              className={`w-72 shrink-0 bg-white rounded-2xl border border-black/[0.08] shadow-xs flex flex-col max-h-[75vh] border-t-4 ${stageHeaderAccents[stage]}`}
+              className={`w-72 shrink-0 bg-white rounded-2xl border border-black/[0.08] shadow-xs flex flex-col h-full max-h-full min-h-0 border-t-4 ${stageHeaderAccents[stage]}`}
             >
               {/* Column Header */}
-              <div className="p-3.5 border-b border-black/[0.05] bg-neutral-50/60">
+              <div className="p-3 border-b border-black/[0.05] bg-neutral-50/60 shrink-0">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-neutral-900 tracking-tight truncate" title={stage}>
                     {stage}
@@ -138,7 +162,7 @@ export const KanbanPipeline: React.FC = () => {
               </div>
 
               {/* Cards List */}
-              <div className="p-2 space-y-2 overflow-y-auto flex-1 custom-scrollbar min-h-[160px] bg-neutral-50/30">
+              <div className="column-cards-scroll p-2 space-y-2 overflow-y-auto flex-1 custom-scrollbar min-h-0 bg-neutral-50/30 overscroll-y-contain">
                 {stageCustomers.length === 0 ? (
                   <div className="py-8 text-center text-neutral-400 text-[11px] italic border border-dashed border-neutral-300 rounded-2xl m-1">
                     Kéo thả lead vào đây
@@ -150,7 +174,7 @@ export const KanbanPipeline: React.FC = () => {
                       draggable
                       onDragStart={(e) => handleDragStart(e, cust.id)}
                       onClick={() => setSelectedCustomerId(cust.id)}
-                      className="bg-white hover:bg-neutral-50/80 p-3.5 rounded-2xl border border-black/[0.06] hover:border-black/[0.14] shadow-xs hover:shadow-sm transition-all cursor-grab active:cursor-grabbing group"
+                      className="bg-white hover:bg-neutral-50 p-3.5 rounded-2xl border border-black/[0.06] hover:border-black/[0.14] shadow-xs hover:shadow-sm transition-colors duration-150 cursor-grab active:cursor-grabbing group"
                     >
                       {/* Class & School */}
                       <div className="flex items-start justify-between gap-1">

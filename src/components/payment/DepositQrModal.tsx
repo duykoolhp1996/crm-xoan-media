@@ -214,8 +214,8 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-black/[0.08] overflow-hidden my-auto max-h-[94vh] flex flex-col">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-sm overflow-hidden animate-in fade-in duration-150">
+      <div className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-black/[0.08] overflow-hidden max-h-[92vh] h-[92vh] flex flex-col">
         
         {/* HEADER MODAL */}
         <div className={`p-4 sm:px-6 text-white flex items-center justify-between gap-3 shrink-0 ${
@@ -271,7 +271,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
         )}
 
         {/* BODY 2 CỘT: CẤU HÌNH & MÃ VIETQR */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-[#fafafa]">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-[#fafafa] custom-scrollbar overscroll-contain">
           
           {/* CỘT TRÁI: THIẾT LẬP KHOẢN THANH TOÁN (7 CỘT) */}
           <div className="lg:col-span-7 space-y-4">
