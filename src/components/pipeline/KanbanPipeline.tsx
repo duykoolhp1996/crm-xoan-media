@@ -24,6 +24,7 @@ export const KanbanPipeline: React.FC = () => {
     updateCustomerStage,
     updateCustomer,
     currentUser,
+    currentRole,
     selectedCustomerId,
     setSelectedCustomerId
   } = useApp();
@@ -34,7 +35,7 @@ export const KanbanPipeline: React.FC = () => {
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
 
-  const isSalesUser = currentUser?.role === 'sales';
+  const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
   const mySalesStaff = React.useMemo(() => {
     if (!isSalesUser) return null;
     return salesStaff.find(s => 

@@ -50,7 +50,7 @@ export const ExecutiveDashboard: React.FC = () => {
     setSelectedBookingId
   } = useApp();
 
-  const isSalesUser = currentUser?.role === 'sales';
+  const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
 
   // Nhận diện nhân sự Sales tương ứng với tài khoản đang đăng nhập
   const mySalesStaff = useMemo(() => {
@@ -882,7 +882,13 @@ export const ExecutiveDashboard: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-black/[0.03] text-xs font-medium">
                   {staffPerformanceList
-                    .filter(item => isSalesUser ? item.staff.id === effectiveStaffId : true)
+                    .filter(item => {
+                      if (!isSalesUser) return true;
+                      return item.staff.id === effectiveStaffId || 
+                             (mySalesStaff && item.staff.id === mySalesStaff.id) ||
+                             item.staff.name.toLowerCase().includes(currentUser.name.toLowerCase()) ||
+                             currentUser.name.toLowerCase().includes(item.staff.name.toLowerCase());
+                    })
                     .sort((a, b) => b.totalRev - a.totalRev)
                     .map((item, index) => {
                       const isCurrentFiltered = selectedStaffId === item.staff.id;

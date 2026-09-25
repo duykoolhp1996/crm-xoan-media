@@ -26,6 +26,7 @@ export const CustomerList: React.FC = () => {
     setSelectedCustomerId,
     updateCustomerStage,
     currentUser,
+    currentRole,
     salesStaff
   } = useApp();
 
@@ -34,7 +35,7 @@ export const CustomerList: React.FC = () => {
   const [selectedStage, setSelectedStage] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const isSalesUser = currentUser?.role === 'sales';
+  const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
   const mySalesStaff = useMemo(() => {
     if (!isSalesUser) return null;
     return salesStaff.find(s => 
