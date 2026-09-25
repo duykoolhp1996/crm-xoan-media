@@ -37,6 +37,7 @@ import {
   mockFeedbacks,
   mockMoments
 } from '../data/mockData';
+import { crmSupabaseService } from '../services/crmSupabaseService';
 
 export type NavigationTab = 
   | 'dashboard'
@@ -200,6 +201,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.error('Error reading auth from localStorage', e);
     }
+  }, []);
+
+  // Tự động kết nối và nạp dữ liệu từ Supabase Database khi khởi chạy
+  useEffect(() => {
+    crmSupabaseService.getCustomers().then(remoteCustomers => {
+      if (remoteCustomers && remoteCustomers.length > 0) {
+        setCustomers(remoteCustomers);
+        console.log(`[Supabase] Đã nạp thành công ${remoteCustomers.length} khách hàng từ cơ sở dữ liệu.`);
+      }
+    });
   }, []);
 
   // Xử lý đăng nhập bằng username & password
@@ -428,6 +439,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updatedAt: new Date().toISOString()
     };
     setCustomers(prev => [newCustomer, ...prev]);
+    crmSupabaseService.saveCustomer(newCustomer).catch(() => {});
 
     // Thêm activity log
     addActivityLog({
@@ -463,20 +475,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
+    let updatedCustObj: Customer | null = null;
     setCustomers(prev =>
       prev.map(c => {
         if (c.id === customerId) {
-          return {
+          updatedCustObj = {
             ...c,
             pipelineStage: newStage,
             assignedSalesName: newSalesName || c.assignedSalesName,
             assignedSalesId: newSalesId || c.assignedSalesId,
             updatedAt: new Date().toISOString()
           };
+          return updatedCustObj;
         }
         return c;
       })
     );
+    if (updatedCustObj) {
+      crmSupabaseService.saveCustomer(updatedCustObj).catch(() => {});
+    }
 
     addActivityLog({
       customerId,
@@ -521,6 +538,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateCustomer = (updated: Customer) => {
     setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+    crmSupabaseService.saveCustomer(updated).catch(() => {});
   };
 
   // Booking handlers

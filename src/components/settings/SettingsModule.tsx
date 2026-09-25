@@ -67,8 +67,68 @@ export const SettingsModule: React.FC = () => {
   };
 
   // Supabase & Webhooks
-  const [supabaseUrl, setSupabaseUrl] = useState('https://crm-xoanmedia.supabase.co');
-  const [supabaseKey, setSupabaseKey] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xoanmedia_demo_key');
+  const [supabaseUrl, setSupabaseUrl] = useState(() => 
+    localStorage.getItem('xoan_supabase_url') || import.meta.env.VITE_SUPABASE_URL || 'https://etvbrbdysphrfzvnwvbk.supabase.co'
+  );
+  const [supabaseKey, setSupabaseKey] = useState(() => 
+    localStorage.getItem('xoan_supabase_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+  );
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [connectionMessage, setConnectionMessage] = useState('');
+  const [copiedSql, setCopiedSql] = useState(false);
+
+  const handleTestConnection = async () => {
+    if (!supabaseUrl.trim()) {
+      setConnectionStatus('error');
+      setConnectionMessage('Vui lòng nhập Supabase Project URL!');
+      return;
+    }
+    if (!supabaseKey.trim()) {
+      setConnectionStatus('error');
+      setConnectionMessage('Vui lòng nhập Supabase Anon Public API Key!');
+      return;
+    }
+
+    setConnectionStatus('testing');
+    setConnectionMessage('Đang kết nối tới Supabase Cloud...');
+
+    try {
+      // Lưu lại vào localStorage
+      localStorage.setItem('xoan_supabase_url', supabaseUrl.trim());
+      localStorage.setItem('xoan_supabase_key', supabaseKey.trim());
+
+      const res = await fetch(`${supabaseUrl.trim().replace(/\/$/, '')}/rest/v1/`, {
+        headers: {
+          apikey: supabaseKey.trim(),
+          Authorization: `Bearer ${supabaseKey.trim()}`
+        }
+      });
+
+      if (res.ok || res.status === 200 || res.status === 404) {
+        setConnectionStatus('success');
+        setConnectionMessage('Kết nối thành công tới Supabase Project! API đã sẵn sàng.');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        setConnectionStatus('error');
+        setConnectionMessage(`Lỗi xác thực (${res.status}): ${errorData.message || 'API Key không hợp lệ hoặc chưa cấp quyền'}`);
+      }
+    } catch (err: any) {
+      setConnectionStatus('error');
+      setConnectionMessage(`Không thể kết nối tới Supabase URL: ${err.message || 'Kiểm tra lại đường dẫn mạng'}`);
+    }
+  };
+
+  const handleCopySchemaSql = async () => {
+    try {
+      const res = await fetch('/src/database/schema.sql');
+      const text = await res.text();
+      await navigator.clipboard.writeText(text);
+      setCopiedSql(true);
+      setTimeout(() => setCopiedSql(false), 3000);
+    } catch {
+      alert('🐱 Xu Xu: Bạn có thể mở trực tiếp file schema.sql tại thư mục src/database/schema.sql!');
+    }
+  };
 
   // Crew Filter & Search
   const [searchCrew, setSearchCrew] = useState('');
@@ -835,8 +895,10 @@ export const SettingsModule: React.FC = () => {
                   type="text"
                   value={supabaseUrl}
                   onChange={e => setSupabaseUrl(e.target.value)}
+                  placeholder="https://etvbrbdysphrfzvnwvbk.supabase.co"
                   className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 />
+                <p className="text-[10px] text-neutral-400 mt-1">Project Ref: <code>etvbrbdysphrfzvnwvbk</code></p>
               </div>
               <div>
                 <label className="font-semibold text-neutral-700">Supabase Anon Public API Key</label>
@@ -844,30 +906,88 @@ export const SettingsModule: React.FC = () => {
                   type="password"
                   value={supabaseKey}
                   onChange={e => setSupabaseKey(e.target.value)}
+                  placeholder="Dán anon key (eyJhbGciOi...)"
                   className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 />
+                <p className="text-[10px] text-neutral-400 mt-1">Lấy tại: Supabase Dashboard &gt; Settings &gt; API &gt; anon public</p>
               </div>
+            </div>
+
+            {/* Trạng thái kết nối & Nút Test */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleTestConnection}
+                disabled={connectionStatus === 'testing'}
+                className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                {connectionStatus === 'testing' ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-[#B8F23D] border-t-transparent rounded-full animate-spin" />
+                    Đang Kiểm Tra Kết Nối...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 fill-current" />
+                    Lưu & Kiểm Tra Kết Nối Supabase
+                  </>
+                )}
+              </button>
+
+              {connectionStatus === 'success' && (
+                <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-semibold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{connectionMessage}</span>
+                </div>
+              )}
+
+              {connectionStatus === 'error' && (
+                <div className="flex items-center gap-2 text-rose-800 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                  <span>{connectionMessage}</span>
+                </div>
+              )}
             </div>
 
             <div className="p-4 bg-neutral-50 border border-black/[0.06] rounded-2xl text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="space-y-1">
                 <p className="text-neutral-900 font-bold flex items-center gap-2">
                   <Server className="w-4 h-4 text-emerald-600" />
-                  File SQL Migration: <code>src/database/schema.sql</code>
+                  Khởi Tạo Cơ Sở Dữ Liệu: <code>src/database/schema.sql</code>
                 </p>
                 <p className="text-neutral-500 text-[11px]">
-                  Bao gồm đầy đủ bảng Users, Roles, Customers, Bookings, Photographers, Assignments, Segments, Tasks...
+                  Bao gồm đầy đủ 22+ bảng: Users, Roles, Customers, Bookings, Photographers, Assignments, Services, RLS...
                 </p>
               </div>
 
-              <a
-                href="/src/database/schema.sql"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold flex items-center gap-1.5 transition-all shrink-0 shadow-xs"
-              >
-                <Download className="w-3.5 h-3.5" /> Xem File Schema SQL
-              </a>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopySchemaSql}
+                  className="px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-800 border border-black/[0.1] rounded-xl font-semibold flex items-center gap-1.5 transition-all text-xs shadow-2xs cursor-pointer"
+                >
+                  {copiedSql ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700 font-bold">Đã Sao Chép SQL!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-neutral-600" />
+                      <span>Sao Chép Mã SQL</span>
+                    </>
+                  )}
+                </button>
+
+                <a
+                  href="/src/database/schema.sql"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold flex items-center gap-1.5 transition-all text-xs shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" /> Xem Schema SQL
+                </a>
+              </div>
             </div>
           </div>
 
