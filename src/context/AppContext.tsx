@@ -207,7 +207,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     crmSupabaseService.getCustomers().then(remoteCustomers => {
       if (remoteCustomers && remoteCustomers.length > 0) {
-        setCustomers(remoteCustomers);
+        const hasConsulting = remoteCustomers.some(c => c.pipelineStage === 'Đang tư vấn');
+        if (!hasConsulting) {
+          setCustomers([...remoteCustomers, ...mockCustomers]);
+        } else {
+          setCustomers(remoteCustomers);
+        }
         console.log(`[Supabase] Đã nạp thành công ${remoteCustomers.length} khách hàng từ cơ sở dữ liệu.`);
       }
     });

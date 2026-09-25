@@ -144,11 +144,11 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
             <button
               type="button"
               onClick={() => setShowQuoteModal(true)}
-              className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
-              title="Xuất bảng báo giá PDF chi tiết cho lớp"
+              className="px-3.5 py-1.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+              title="Lập và xuất bảng báo giá PDF chi tiết cho lớp"
             >
-              <FileText className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Báo Giá PDF</span>
+              <FileText className="w-3.5 h-3.5 text-neutral-950" />
+              <span>Tạo Báo Giá PDF</span>
             </button>
 
             <button
@@ -270,6 +270,31 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           {/* Tab 1: Timeline */}
           {activeTab === 'timeline' && (
             <div className="space-y-6">
+              {/* Banner Giai Đoạn Tư Vấn & Lập Báo Giá Nhanh */}
+              {(customer.pipelineStage === 'Đang tư vấn' || customer.pipelineStage === 'Đã gửi báo giá') && (
+                <div className="p-4 bg-gradient-to-r from-amber-50 via-emerald-50/60 to-indigo-50/50 border border-amber-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                      <span className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
+                        Giai Đoạn: {customer.pipelineStage} (Lớp {customer.className})
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-600">
+                      Gói: <strong>{customer.servicePackageName || 'Kỷ Yếu Standard'}</strong> ({customer.studentCount} bạn) • Dự toán: <strong>{customer.expectedBudget.toLocaleString('vi-VN')}đ</strong> (~{Math.round(customer.expectedBudget / (customer.studentCount || 1)).toLocaleString('vi-VN')}đ/bạn)
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuoteModal(true)}
+                    className="w-full sm:w-auto px-4 py-2 bg-neutral-950 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Lập Báo Giá PDF</span>
+                  </button>
+                </div>
+              )}
+
               {/* Form Thêm Ghi Chú Nhanh */}
               <form onSubmit={handleAddNote} className="bg-neutral-50 p-4 rounded-2xl border border-black/[0.06]">
                 <label className="text-xs font-bold text-neutral-700 flex items-center gap-1.5 mb-2.5">
@@ -498,6 +523,16 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
             <MessageSquare className="w-3.5 h-3.5" />
             Nhắn Zalo
           </a>
+
+          <button
+            type="button"
+            onClick={() => setShowQuoteModal(true)}
+            className="flex-1 py-2.5 bg-neutral-950 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+            title="Lập và xuất bảng báo giá PDF chi tiết cho lớp"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Tạo Báo Giá PDF</span>
+          </button>
         </div>
       </div>
 
