@@ -421,7 +421,9 @@ export interface ClassMoment {
   featured: boolean;
 }
 
-// 11. Đội ngũ Sales tư vấn
+// 11. Đội ngũ Sales tư vấn & Cơ chế Hoa hồng
+export type SalesCommissionType = 'percentage' | 'fixed';
+
 export interface SalesStaff {
   id: string;
   name: string;
@@ -432,6 +434,10 @@ export interface SalesStaff {
   activeRegions: string[];
   status: 'active' | 'inactive';
   createdAt?: string;
+  // Chính sách hoa hồng: theo % doanh thu hoặc số tiền cố định/hợp đồng
+  commissionType?: SalesCommissionType; // 'percentage' | 'fixed'
+  commissionRate?: number; // % hoa hồng (VD: 8 = 8% doanh thu)
+  commissionFixedAmount?: number; // Số tiền cố định/hợp đồng (VD: 500,000đ)
   // Thông tin tài khoản đăng nhập do Admin cấp
   username?: string;
   password?: string;

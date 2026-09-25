@@ -31,7 +31,8 @@ import {
   Check,
   LogIn,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  Coins
 } from 'lucide-react';
 
 export const SettingsModule: React.FC = () => {
@@ -565,6 +566,15 @@ export const SettingsModule: React.FC = () => {
                   c => c.assignedSalesName === s.name || c.assignedSalesId === s.id
                 ).length;
 
+                const closedCustomers = customers.filter(
+                  c => (c.assignedSalesName === s.name || c.assignedSalesId === s.id) &&
+                       ['Đã đặt cọc', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao', 'Hoàn thành'].includes(c.pipelineStage)
+                );
+                const closedRevenue = closedCustomers.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
+                const commissionEarned = s.commissionType === 'fixed'
+                  ? closedCustomers.length * (s.commissionFixedAmount ?? 500000)
+                  : (closedRevenue * (s.commissionRate ?? 8)) / 100;
+
                 return (
                   <div
                     key={s.id}
@@ -622,6 +632,32 @@ export const SettingsModule: React.FC = () => {
                           <Users className="w-3 h-3 text-blue-600 shrink-0" />
                           <span>Đang phụ trách: <strong className="text-blue-700 font-bold">{assignedCount} khách hàng/lớp</strong></span>
                         </p>
+                      </div>
+
+                      {/* Chính sách Hoa hồng Sales */}
+                      <div className="p-2.5 bg-gradient-to-r from-amber-50/80 to-orange-50/50 rounded-2xl border border-amber-200/80 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1">
+                            <Coins className="w-3.5 h-3.5 text-amber-600" /> Chính Sách Hoa Hồng
+                          </span>
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                            {s.commissionType === 'fixed' ? 'Cố định / HĐ' : '% Doanh thu'}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline justify-between text-xs pt-0.5">
+                          <span className="text-neutral-600">Định mức hưởng:</span>
+                          <span className="font-bold text-neutral-900">
+                            {s.commissionType === 'fixed'
+                              ? `${(s.commissionFixedAmount ?? 500000).toLocaleString('vi-VN')} đ/hợp đồng`
+                              : `${s.commissionRate ?? 8}% doanh thu`}
+                          </span>
+                        </div>
+                        <div className="pt-1.5 border-t border-amber-200/60 flex items-center justify-between text-[11px]">
+                          <span className="text-neutral-500">Ước tính đã tích lũy ({closedCustomers.length} chốt):</span>
+                          <span className="font-bold text-emerald-700">
+                            {commissionEarned.toLocaleString('vi-VN')} đ
+                          </span>
+                        </div>
                       </div>
 
                       {/* Khối Cấp Tài Khoản Đăng Nhập CRM */}

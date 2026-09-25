@@ -17,7 +17,9 @@ import {
   Lock,
   Eye,
   EyeOff,
-  RefreshCw
+  RefreshCw,
+  Percent,
+  DollarSign
 } from 'lucide-react';
 
 interface SalesStaffModalProps {
@@ -54,6 +56,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
     roleTitle: 'Chuyên viên Sales',
     status: 'active' as 'active' | 'inactive',
     activeRegions: ['Hải Phòng'] as string[],
+    commissionType: 'percentage' as 'percentage' | 'fixed',
+    commissionRate: 8,
+    commissionFixedAmount: 500000,
     username: '',
     password: '',
     canLogin: true
@@ -78,6 +83,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         roleTitle: staffToEdit.roleTitle || 'Chuyên viên Sales',
         status: staffToEdit.status,
         activeRegions: staffToEdit.activeRegions || ['Hải Phòng'],
+        commissionType: staffToEdit.commissionType || 'percentage',
+        commissionRate: staffToEdit.commissionRate ?? 8,
+        commissionFixedAmount: staffToEdit.commissionFixedAmount ?? 500000,
         username: staffToEdit.username || staffToEdit.email || '',
         password: staffToEdit.password || 'XoanSales@2024',
         canLogin: staffToEdit.canLogin ?? true
@@ -91,6 +99,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         roleTitle: 'Chuyên viên Sales',
         status: 'active',
         activeRegions: ['Hải Phòng'],
+        commissionType: 'percentage',
+        commissionRate: 8,
+        commissionFixedAmount: 500000,
         username: '',
         password: 'XoanSales@2024',
         canLogin: true
@@ -134,6 +145,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         roleTitle: formData.roleTitle,
         status: formData.status,
         activeRegions: formData.activeRegions,
+        commissionType: formData.commissionType,
+        commissionRate: formData.commissionType === 'percentage' ? Number(formData.commissionRate) : undefined,
+        commissionFixedAmount: formData.commissionType === 'fixed' ? Number(formData.commissionFixedAmount) : undefined,
         username: finalUsername,
         password: finalPassword,
         canLogin: formData.canLogin
@@ -147,6 +161,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         roleTitle: formData.roleTitle,
         status: formData.status,
         activeRegions: formData.activeRegions,
+        commissionType: formData.commissionType,
+        commissionRate: formData.commissionType === 'percentage' ? Number(formData.commissionRate) : undefined,
+        commissionFixedAmount: formData.commissionType === 'fixed' ? Number(formData.commissionFixedAmount) : undefined,
         username: finalUsername,
         password: finalPassword,
         canLogin: formData.canLogin
@@ -340,11 +357,145 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
             </div>
           </div>
 
-          {/* Section 3: Cấp Tài Khoản Đăng Nhập CRM (Admin Cấp) */}
+          {/* Section 3: Chính Sách Hoa Hồng Sales (Chọn % Doanh Thu hoặc Cố Định) */}
+          <div className="space-y-3 pt-2">
+            <h3 className="font-bold text-neutral-900 uppercase tracking-wider flex items-center gap-1.5 border-b border-black/[0.06] pb-1 text-[11px]">
+              <Percent className="w-3.5 h-3.5 text-neutral-700" /> 3. Chính Sách Hoa Hồng Sales
+            </h3>
+
+            {/* Switch 2 Dạng: % Doanh Thu vs Cố Định */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, commissionType: 'percentage' })}
+                className={`p-3 rounded-2xl text-left border transition-all ${
+                  formData.commissionType === 'percentage'
+                    ? 'bg-purple-50/80 text-purple-900 border-purple-300 ring-2 ring-purple-400/30 shadow-2xs'
+                    : 'bg-neutral-50 text-neutral-600 border-black/[0.06] hover:bg-neutral-100'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-xs flex items-center gap-1.5">
+                    <Percent className="w-3.5 h-3.5 text-purple-600" /> % Doanh Thu
+                  </span>
+                  {formData.commissionType === 'percentage' && (
+                    <span className="w-2 h-2 rounded-full bg-purple-600" />
+                  )}
+                </div>
+                <p className="text-[11px] text-neutral-500 leading-snug">
+                  Tính theo % trên tổng giá trị hợp đồng lớp chốt thành công
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, commissionType: 'fixed' })}
+                className={`p-3 rounded-2xl text-left border transition-all ${
+                  formData.commissionType === 'fixed'
+                    ? 'bg-emerald-50/80 text-emerald-900 border-emerald-300 ring-2 ring-emerald-400/30 shadow-2xs'
+                    : 'bg-neutral-50 text-neutral-600 border-black/[0.06] hover:bg-neutral-100'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-bold text-xs flex items-center gap-1.5">
+                    <DollarSign className="w-3.5 h-3.5 text-emerald-600" /> Chia Cố Định
+                  </span>
+                  {formData.commissionType === 'fixed' && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                  )}
+                </div>
+                <p className="text-[11px] text-neutral-500 leading-snug">
+                  Nhận mức thù lao cố định trên mỗi hợp đồng/lớp chốt được
+                </p>
+              </button>
+            </div>
+
+            {/* Chi tiết theo dạng đã chọn */}
+            {formData.commissionType === 'percentage' ? (
+              <div className="p-3.5 bg-purple-50/50 border border-purple-200/80 rounded-2xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-purple-900 flex items-center gap-1">
+                    Tỷ Lệ Hoa Hồng (% Doanh Thu Hợp Đồng)
+                  </label>
+                  <span className="text-xs font-extrabold text-purple-700 bg-white px-2.5 py-0.5 rounded-lg border border-purple-200">
+                    {formData.commissionRate}%
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={1}
+                    max={25}
+                    step={0.5}
+                    value={formData.commissionRate}
+                    onChange={e => setFormData({ ...formData, commissionRate: Number(e.target.value) })}
+                    className="flex-1 accent-purple-600 cursor-pointer"
+                  />
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step={0.5}
+                      value={formData.commissionRate}
+                      onChange={e => setFormData({ ...formData, commissionRate: Number(e.target.value) })}
+                      className="w-16 px-2 py-1 bg-white border border-purple-300 rounded-lg text-xs font-bold text-neutral-900 text-center focus:outline-none"
+                    />
+                    <span className="font-bold text-purple-900 text-xs">%</span>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-purple-700/80 italic">
+                  💡 Ví dụ: Hợp đồng kỷ yếu 15.000.000đ → Hoa hồng Sales nhận: {Math.round(15000000 * (formData.commissionRate || 8) / 100).toLocaleString('vi-VN')}đ.
+                </p>
+              </div>
+            ) : (
+              <div className="p-3.5 bg-emerald-50/50 border border-emerald-200/80 rounded-2xl space-y-2">
+                <label className="block text-xs font-bold text-emerald-900">
+                  Mức Hoa Hồng Cố Định (VNĐ / Hợp Đồng Chốt)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step={50000}
+                    min={0}
+                    value={formData.commissionFixedAmount}
+                    onChange={e => setFormData({ ...formData, commissionFixedAmount: Number(e.target.value) })}
+                    placeholder="VD: 500000"
+                    className="w-full px-3 py-2 bg-white border border-emerald-300 rounded-xl text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-800">
+                    đ / hợp đồng
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <span className="text-[10px] text-neutral-500 mr-1">Mức gợi ý:</span>
+                  {[300000, 500000, 800000, 1000000].map(amt => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, commissionFixedAmount: amt })}
+                      className="px-2 py-0.5 bg-white hover:bg-emerald-100 border border-emerald-300 rounded-lg text-[10px] font-bold text-emerald-800 transition-colors"
+                    >
+                      {amt.toLocaleString('vi-VN')}đ
+                    </button>
+                  ))}
+                </div>
+
+                <p className="text-[11px] text-emerald-700/80 italic">
+                  💡 Nhân sự sẽ nhận cố định {(formData.commissionFixedAmount || 500000).toLocaleString('vi-VN')}đ mỗi khi khách chuyển cọc thành công.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Section 4: Cấp Tài Khoản Đăng Nhập CRM (Admin Cấp) */}
           <div className="space-y-3 pt-2 bg-neutral-50/80 p-4 rounded-2xl border border-black/[0.06]">
             <div className="flex items-center justify-between border-b border-black/[0.06] pb-2">
               <h3 className="font-bold text-neutral-900 uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
-                <Key className="w-3.5 h-3.5 text-neutral-800" /> 3. Cấp Tài Khoản Đăng Nhập CRM
+                <Key className="w-3.5 h-3.5 text-neutral-800" /> 4. Cấp Tài Khoản Đăng Nhập CRM
               </h3>
               <span className="text-[10px] font-bold text-neutral-600 bg-neutral-200/70 px-2 py-0.5 rounded-md">
                 Admin Quản Trị
