@@ -8,10 +8,12 @@ import {
   School,
   Sparkles,
   UserCheck,
-  UserX
+  UserX,
+  FileText
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
+import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 
 export const KanbanPipeline: React.FC = () => {
   const {
@@ -26,6 +28,7 @@ export const KanbanPipeline: React.FC = () => {
 
   const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
 
   // 13 Giai đoạn chuẩn của Xoắn Media
   const STAGES: PipelineStage[] = [
@@ -229,6 +232,22 @@ export const KanbanPipeline: React.FC = () => {
                         </span>
                       </div>
 
+                      {/* Nút Tạo Báo Giá PDF khi khách hàng ở trạng thái Đã gửi báo giá */}
+                      {cust.pipelineStage === 'Đã gửi báo giá' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuoteCustomer(cust);
+                          }}
+                          className="w-full mt-2 py-1.5 px-2 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-900 border border-indigo-200/90 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
+                          title="Tạo báo giá file PDF chuyên nghiệp gửi cho lớp"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Tạo Báo Giá PDF</span>
+                        </button>
+                      )}
+
                       {/* Nhanh: chuyển stage */}
                       <div className="mt-2 pt-1.5 border-t border-black/[0.04] flex items-center justify-between text-[10px] text-neutral-400">
                         <span>Nguồn: {cust.source}</span>
@@ -237,7 +256,7 @@ export const KanbanPipeline: React.FC = () => {
                             e.stopPropagation();
                             setSelectedCustomerId(cust.id);
                           }}
-                          className="text-[#79ba07] hover:text-neutral-900 font-bold"
+                          className="text-[#79ba07] hover:text-neutral-900 font-bold cursor-pointer"
                         >
                           Chi tiết →
                         </button>
@@ -263,6 +282,13 @@ export const KanbanPipeline: React.FC = () => {
       <CustomerModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+      />
+
+      {/* Modal Xuất Báo Giá PDF Kỷ Yếu */}
+      <PriceQuoteModal
+        customer={quoteCustomer}
+        isOpen={Boolean(quoteCustomer)}
+        onClose={() => setQuoteCustomer(null)}
       />
     </div>
   );

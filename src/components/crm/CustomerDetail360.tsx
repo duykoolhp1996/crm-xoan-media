@@ -15,8 +15,10 @@ import {
   Headphones,
   UserCheck,
   UserX,
-  RotateCcw
+  RotateCcw,
+  FileText
 } from 'lucide-react';
+import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -42,6 +44,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [activeTab, setActiveTabLocal] = useState<'timeline' | 'bookings' | 'marketing' | 'feedbacks'>('timeline');
   const [noteContent, setNoteContent] = useState('');
   const [showLostModal, setShowLostModal] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [lostReason, setLostReason] = useState('Giá cao hơn ngân sách dự kiến của lớp');
   const [customLostNote, setCustomLostNote] = useState('');
 
@@ -137,6 +140,16 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
                 </button>
               </div>
             )}
+
+            <button
+              type="button"
+              onClick={() => setShowQuoteModal(true)}
+              className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+              title="Xuất bảng báo giá PDF chi tiết cho lớp"
+            >
+              <FileText className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Báo Giá PDF</span>
+            </button>
 
             <button
               onClick={onClose}
@@ -569,6 +582,14 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           </div>
         </div>
       )}
+
+      {/* Modal Xuất Báo Giá PDF Kỷ Yếu */}
+      <PriceQuoteModal
+        customer={customer}
+        isOpen={showQuoteModal}
+        onClose={() => setShowQuoteModal(false)}
+      />
     </div>
   );
 };
+
