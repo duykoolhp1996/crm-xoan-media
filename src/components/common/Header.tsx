@@ -1,14 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
 import {
   Search,
   Bell,
   Calendar as CalendarIcon,
-  Shield,
-  Sparkles,
-  ChevronDown,
-  Check,
   LogOut
 } from 'lucide-react';
 import { NotificationDrawer } from './NotificationDrawer';
@@ -17,37 +13,18 @@ export const Header: React.FC = () => {
   const {
     currentUser,
     currentRole,
-    setCurrentRole,
     notifications,
     setIsSearchOpen,
     dateFilter,
     setDateFilter,
-    activeTab,
     isImpersonating,
     returnToAdmin,
     logout
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
-  const roleDropdownRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter(n => !n.read).length;
-
-  // Đóng dropdown vai trò khi click bên ngoài
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (roleDropdownRef.current && !roleDropdownRef.current.contains(e.target as Node)) {
-        setIsRoleDropdownOpen(false);
-      }
-    };
-    if (isRoleDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isRoleDropdownOpen]);
 
   const roleLabels: Record<UserRole, { label: string; badgeClass: string; desc: string }> = {
     admin: {
@@ -145,56 +122,12 @@ export const Header: React.FC = () => {
           </select>
         </div>
 
-        {/* User Role Switcher Dropdown */}
-        <div className="relative" ref={roleDropdownRef}>
-          <button
-            onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
-            className="flex items-center gap-2 bg-white/90 hover:bg-white border border-black/[0.06] rounded-2xl px-3 py-1.5 text-xs shadow-xs transition-all duration-150"
-          >
-            <div className="w-2 h-2 rounded-full bg-[#79ba07]"></div>
-            <span className="font-bold text-neutral-800 hidden sm:inline">
-              {roleLabels[currentRole].label.split(' ')[0]}
-            </span>
-            <ChevronDown className="w-3.5 h-3.5 text-neutral-400" />
-          </button>
-
-          {isRoleDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white/95 backdrop-blur-2xl rounded-2xl border border-black/[0.08] shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-3 py-2 border-b border-black/[0.06] mb-1">
-                <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
-                  Chuyển Phân Quyền
-                </p>
-                <p className="text-xs text-neutral-700 font-semibold mt-0.5">
-                  {currentUser.name}
-                </p>
-              </div>
-
-              {(Object.keys(roleLabels) as UserRole[]).map((role) => (
-                <button
-                  key={role}
-                  onClick={() => {
-                    setCurrentRole(role);
-                    setIsRoleDropdownOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-colors ${
-                    currentRole === role
-                      ? 'bg-neutral-900 text-white font-semibold'
-                      : 'text-neutral-700 hover:bg-neutral-100'
-                  }`}
-                >
-                  <div>
-                    <p className="font-bold">{roleLabels[role].label}</p>
-                    <p className={`text-[10px] ${currentRole === role ? 'text-neutral-300' : 'text-neutral-400'}`}>
-                      {roleLabels[role].desc}
-                    </p>
-                  </div>
-                  {currentRole === role && (
-                    <Check className="w-4 h-4 text-[#B8F23D] shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+        {/* User Role Badge (Cố định theo tài khoản đăng nhập) */}
+        <div className="flex items-center gap-2 bg-neutral-100/90 border border-black/[0.06] rounded-2xl px-3 py-1.5 text-xs shadow-2xs">
+          <div className="w-2 h-2 rounded-full bg-[#79ba07]"></div>
+          <span className="font-bold text-neutral-800 hidden sm:inline">
+            {roleLabels[currentRole]?.label.split(' ')[0] || 'User'}
+          </span>
         </div>
 
         {/* Notifications Icon Button */}
