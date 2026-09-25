@@ -17,9 +17,11 @@ import {
   UserCheck,
   UserX,
   RotateCcw,
-  FileText
+  FileText,
+  QrCode
 } from 'lucide-react';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
+import { DepositQrModal } from '../payment/DepositQrModal';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -46,6 +48,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [noteContent, setNoteContent] = useState('');
   const [showLostModal, setShowLostModal] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
   const [lostReason, setLostReason] = useState('Giá cao hơn ngân sách dự kiến của lớp');
   const [customLostNote, setCustomLostNote] = useState('');
 
@@ -145,11 +148,21 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
             <button
               type="button"
               onClick={() => setShowQuoteModal(true)}
-              className="px-3.5 py-1.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+              className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
               title="Lập và xuất bảng báo giá PDF chi tiết cho lớp"
             >
-              <FileText className="w-3.5 h-3.5 text-neutral-950" />
-              <span>Tạo Báo Giá PDF</span>
+              <FileText className="w-3.5 h-3.5 text-neutral-700" />
+              <span className="hidden sm:inline">Báo Giá PDF</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowDepositModal(true)}
+              className="px-3.5 py-1.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+              title="Tạo khoản cọc giữ lịch và mã VietQR chuyển khoản ngân hàng"
+            >
+              <QrCode className="w-3.5 h-3.5 text-neutral-950" />
+              <span>Tạo Cọc QR</span>
             </button>
 
             <button
@@ -624,6 +637,13 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
         customer={customer}
         isOpen={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
+      />
+
+      {/* Modal Tạo Cọc & Mã VietQR Chuyển Khoản */}
+      <DepositQrModal
+        customer={customer}
+        isOpen={showDepositModal}
+        onClose={() => setShowDepositModal(false)}
       />
     </div>,
     document.body

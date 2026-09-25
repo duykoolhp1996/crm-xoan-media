@@ -9,11 +9,13 @@ import {
   Sparkles,
   UserCheck,
   UserX,
-  FileText
+  FileText,
+  QrCode
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
+import { DepositQrModal } from '../payment/DepositQrModal';
 
 export const KanbanPipeline: React.FC = () => {
   const {
@@ -29,6 +31,7 @@ export const KanbanPipeline: React.FC = () => {
   const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
+  const [depositCustomer, setDepositCustomer] = useState<Customer | null>(null);
 
   // 13 Giai đoạn chuẩn của Xoắn Media
   const STAGES: PipelineStage[] = [
@@ -252,6 +255,22 @@ export const KanbanPipeline: React.FC = () => {
                         </button>
                       )}
 
+                      {/* Nút Tạo Cọc & Mã QR Chuyển Khoản khi khách hàng ở trạng thái Đang thương lượng */}
+                      {cust.pipelineStage === 'Đang thương lượng' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDepositCustomer(cust);
+                          }}
+                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-gradient-to-r from-purple-50 to-emerald-50 hover:from-purple-100 hover:to-emerald-100 text-purple-950 border border-purple-200/90"
+                          title="Tạo thông tin cọc & mã VietQR chuyển khoản ngân hàng"
+                        >
+                          <QrCode className="w-3.5 h-3.5 text-purple-700" />
+                          <span>Tạo Cọc & Mã QR</span>
+                        </button>
+                      )}
+
                       {/* Nhanh: chuyển stage */}
                       <div className="mt-2 pt-1.5 border-t border-black/[0.04] flex items-center justify-between text-[10px] text-neutral-400">
                         <span>Nguồn: {cust.source}</span>
@@ -293,6 +312,13 @@ export const KanbanPipeline: React.FC = () => {
         customer={quoteCustomer}
         isOpen={Boolean(quoteCustomer)}
         onClose={() => setQuoteCustomer(null)}
+      />
+
+      {/* Modal Tạo Cọc & Mã VietQR Chuyển Khoản */}
+      <DepositQrModal
+        customer={depositCustomer}
+        isOpen={Boolean(depositCustomer)}
+        onClose={() => setDepositCustomer(null)}
       />
     </div>
   );
