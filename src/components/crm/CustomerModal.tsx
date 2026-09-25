@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { LeadSource, PipelineStage } from '../../types';
 import { VIETNAM_LOCATIONS, getDistrictsByCity } from '../../data/vietnamLocations';
-import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones, UserCheck } from 'lucide-react';
+import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones, UserCheck, Globe, Layers } from 'lucide-react';
 
 interface CustomerModalProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     schoolName: schools[0]?.name || 'THPT Chuyên Trần Phú (Hải Phòng)',
     grade: 'Khối 12',
     className: '',
-    academicYear: '2024-2025',
+    academicYear: '2025-2026',
     city: 'Hải Phòng',
     district: 'Lê Chân',
     region: 'Lê Chân, Hải Phòng',
@@ -36,7 +36,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     specialRequests: '',
     notes: '',
     source: 'Facebook Ads' as LeadSource,
-    campaignName: 'Mùa_Kỷ_Yếu_2024',
+    campaignName: 'Mùa_Kỷ_Yếu_2026',
     utmSource: 'facebook',
     utmMedium: 'cpc',
     utmCampaign: 'lead_form_kyyeu',
@@ -394,88 +394,123 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
             </div>
           </div>
 
-          {/* Section 4: Nguồn Tiếp Cận & Nhân Sự CSKH */}
+          {/* Section 4: Nguồn Tiếp Cận & Phân Bổ Nhân Sự */}
           <div className="space-y-3">
-            <h3 className="font-bold text-neutral-900 uppercase tracking-wider flex items-center gap-1.5 border-b border-black/[0.06] pb-2 text-[11px]">
-              <Tag className="w-4 h-4 text-neutral-700" /> 4. Nguồn Tiếp Cận & Phân Bổ Nhân Sự (Sales & CSKH)
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-              <div>
-                <label className="font-semibold text-neutral-700">Kênh nguồn *</label>
-                <select
-                  value={formData.source}
-                  onChange={e => setFormData({ ...formData, source: e.target.value as LeadSource })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none"
-                >
-                  <option value="Facebook Ads">Facebook Ads</option>
-                  <option value="Facebook Organic">Facebook Organic</option>
-                  <option value="TikTok Ads">TikTok Ads</option>
-                  <option value="TikTok">TikTok Tự Nhiên</option>
-                  <option value="Website">Website Form</option>
-                  <option value="Google">Google Search</option>
-                  <option value="Referral">Học sinh / Thợ giới thiệu</option>
-                  <option value="Khách hàng cũ">Khách hàng cũ quay lại</option>
-                </select>
+            <div className="flex items-center justify-between border-b border-black/[0.06] pb-2">
+              <h3 className="font-bold text-neutral-900 uppercase tracking-wider flex items-center gap-2 text-xs">
+                <Tag className="w-4 h-4 text-emerald-600" /> 
+                4. Nguồn Tiếp Cận & Phân Bổ Nhân Sự (Sales & CSKH)
+              </h3>
+              <span className="text-[10px] text-neutral-500 font-medium">Mùa Kỷ Yếu 2026</span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Card 1: Kênh Nguồn & Chiến Dịch */}
+              <div className="p-4 bg-neutral-50/80 rounded-2xl border border-black/[0.06] space-y-3 shadow-2xs">
+                <div className="flex items-center gap-2 text-xs font-bold text-neutral-800 pb-1.5 border-b border-black/[0.04]">
+                  <Globe className="w-3.5 h-3.5 text-sky-600" /> Kênh Tiếp Cận & Marketing
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <label className="font-semibold text-neutral-700 block mb-1">Kênh nguồn *</label>
+                    <select
+                      value={formData.source}
+                      onChange={e => setFormData({ ...formData, source: e.target.value as LeadSource })}
+                      className="w-full px-3 py-2.5 bg-white border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all shadow-2xs"
+                    >
+                      <option value="Facebook Ads">Facebook Ads</option>
+                      <option value="Facebook Organic">Facebook Organic</option>
+                      <option value="TikTok Ads">TikTok Ads</option>
+                      <option value="TikTok">TikTok Tự Nhiên</option>
+                      <option value="Zalo">Zalo OA / Chatbot</option>
+                      <option value="Website">Website Form</option>
+                      <option value="Google">Google Search</option>
+                      <option value="Referral">Học sinh / Thợ giới thiệu</option>
+                      <option value="Khách hàng cũ">Khách hàng cũ quay lại</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-neutral-700 block mb-1">Tên chiến dịch</label>
+                    <input
+                      type="text"
+                      value={formData.campaignName}
+                      onChange={e => setFormData({ ...formData, campaignName: e.target.value })}
+                      placeholder="Mùa_Kỷ_Yếu_2026"
+                      className="w-full px-3 py-2.5 bg-white border border-black/[0.08] text-neutral-900 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="text-xs">
+                  <label className="font-semibold text-neutral-700 block mb-1 flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-amber-500" /> Trạng thái ban đầu trên Pipeline
+                  </label>
+                  <select
+                    value={formData.pipelineStage}
+                    onChange={e => setFormData({ ...formData, pipelineStage: e.target.value as PipelineStage })}
+                    className="w-full px-3 py-2.5 bg-white border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all shadow-2xs"
+                  >
+                    <option value="New Lead">1. New Lead (Mới tiếp nhận)</option>
+                    <option value="Đã liên hệ">2. Đã liên hệ</option>
+                    <option value="Đang tư vấn">3. Đang tư vấn concept</option>
+                    <option value="Đã gửi báo giá">4. Đã gửi báo giá</option>
+                    <option value="Đã đặt cọc">6. Đã đặt cọc</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="font-semibold text-neutral-700">Tên chiến dịch</label>
-                <input
-                  type="text"
-                  value={formData.campaignName}
-                  onChange={e => setFormData({ ...formData, campaignName: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl focus:bg-white focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="font-semibold text-neutral-700">Trạng thái ban đầu</label>
-                <select
-                  value={formData.pipelineStage}
-                  onChange={e => setFormData({ ...formData, pipelineStage: e.target.value as PipelineStage })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:bg-white focus:outline-none"
-                >
-                  <option value="New Lead">1. New Lead (Mới)</option>
-                  <option value="Đã liên hệ">2. Đã liên hệ</option>
-                  <option value="Đang tư vấn">3. Đang tư vấn</option>
-                  <option value="Đã gửi báo giá">4. Đã gửi báo giá</option>
-                  <option value="Đã đặt cọc">6. Đã đặt cọc</option>
-                </select>
-              </div>
-              <div>
-                <label className="font-semibold text-neutral-700 flex items-center gap-1">
-                  <UserCheck className="w-3.5 h-3.5 text-blue-600" />
-                  Sales Tư Vấn Phụ Trách
-                </label>
-                <select
-                  value={formData.assignedSalesName}
-                  onChange={e => setFormData({ ...formData, assignedSalesName: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none text-xs"
-                >
-                  <option value="Chưa gán">Chưa gán (Tự động khi liên hệ)</option>
-                  {salesStaff.map((staff) => (
-                    <option key={staff.id} value={staff.name}>
-                      {staff.name}
-                    </option>
-                  ))}
-                  {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
-                    <option value={currentUser.name}>{currentUser.name}</option>
-                  )}
-                </select>
-              </div>
-              <div>
-                <label className="font-semibold text-neutral-700 flex items-center gap-1">
-                  <Headphones className="w-3.5 h-3.5 text-neutral-600" />
-                  Chuyên Viên CSKH
-                </label>
-                <select
-                  value={formData.assignedCareStaffName}
-                  onChange={e => setFormData({ ...formData, assignedCareStaffName: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:bg-white focus:outline-none text-xs"
-                >
-                  <option value="Phạm Quỳnh Nga (CSKH)">Phạm Quỳnh Nga (CSKH)</option>
-                  <option value="Nguyễn Thu Hương (CSKH)">Nguyễn Thu Hương (CSKH)</option>
-                  <option value="Đặng Mai Linh (Tư vấn & CSKH)">Đặng Mai Linh (Tư vấn & CSKH)</option>
-                  <option value="Admin Xoắn Media">Admin Xoắn Media</option>
-                </select>
+
+              {/* Card 2: Phân Bổ Nhân Sự Sales & CSKH */}
+              <div className="p-4 bg-neutral-50/80 rounded-2xl border border-black/[0.06] space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between pb-1.5 border-b border-black/[0.04]">
+                  <div className="flex items-center gap-2 text-xs font-bold text-neutral-800">
+                    <UserCheck className="w-3.5 h-3.5 text-blue-600" /> Phân Bổ Nhân Sự Phụ Trách
+                  </div>
+                  <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                    Auto Round-Robin
+                  </span>
+                </div>
+
+                <div className="text-xs space-y-1">
+                  <label className="font-semibold text-neutral-700 block mb-1">
+                    Sales Tư Vấn Phụ Trách
+                  </label>
+                  <select
+                    value={formData.assignedSalesName}
+                    onChange={e => setFormData({ ...formData, assignedSalesName: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all shadow-2xs"
+                  >
+                    <option value="Chưa gán">Chưa gán (Tự động chia vòng tròn khi liên hệ)</option>
+                    {salesStaff.map((staff) => (
+                      <option key={staff.id} value={staff.name}>
+                        {staff.name} — {staff.roleTitle}
+                      </option>
+                    ))}
+                    {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
+                      <option value={currentUser.name}>{currentUser.name}</option>
+                    )}
+                  </select>
+                  <p className="text-[10px] text-neutral-400 pt-0.5">
+                    💡 Khi chuyển sang <em>"Đã liên hệ"</em>, hệ thống sẽ tự động chỉ định Sales trực theo ca.
+                  </p>
+                </div>
+
+                <div className="text-xs space-y-1">
+                  <label className="font-semibold text-neutral-700 flex items-center gap-1.5 mb-1">
+                    <Headphones className="w-3.5 h-3.5 text-purple-600" /> Chuyên Viên CSKH & Hợp Đồng
+                  </label>
+                  <select
+                    value={formData.assignedCareStaffName}
+                    onChange={e => setFormData({ ...formData, assignedCareStaffName: e.target.value })}
+                    className="w-full px-3 py-2.5 bg-white border border-black/[0.08] text-neutral-900 rounded-xl font-medium cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all shadow-2xs"
+                  >
+                    <option value="Phạm Quỳnh Nga (CSKH)">Phạm Quỳnh Nga (CSKH & Hợp đồng)</option>
+                    <option value="Nguyễn Thu Hương (CSKH)">Nguyễn Thu Hương (CSKH)</option>
+                    <option value="Đặng Mai Linh (Tư vấn & CSKH)">Đặng Mai Linh (Tư vấn & CSKH)</option>
+                    <option value="Admin Xoắn Media">Admin Xoắn Media</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
