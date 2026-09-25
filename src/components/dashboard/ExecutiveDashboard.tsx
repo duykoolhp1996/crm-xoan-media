@@ -14,7 +14,13 @@ import {
   MapPin,
   Clock,
   Award,
-  Layers
+  Layers,
+  Filter,
+  UserCheck,
+  CheckCircle2,
+  LogIn,
+  Percent,
+  Briefcase
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -36,34 +42,114 @@ export const ExecutiveDashboard: React.FC = () => {
     bookings,
     photographers,
     feedbacks,
+    salesStaff,
+    currentUser,
+    currentRole,
+    loginAsStaff,
     setActiveTab,
     setSelectedBookingId
   } = useApp();
 
+  // State lọc doanh số theo tài khoản nhân sự (Mặc định nếu là Sales thì lọc theo tài khoản đó, nếu là Admin/Manager thì mặc định xem toàn Studio)
+  const [selectedStaffId, setSelectedStaffId] = useState<string>(() => {
+    if (currentUser?.role === 'sales') {
+      return currentUser.id;
+    }
+    return 'all';
+  });
+
+  // Tìm thông tin nhân sự đang được chọn
+  const activeStaff = useMemo(() => {
+    if (selectedStaffId === 'all') return null;
+    return salesStaff.find(s => s.id === selectedStaffId) || null;
+  }, [selectedStaffId, salesStaff]);
+
+  // Lọc danh sách khách hàng / lớp học theo nhân sự được chọn
+  const filteredCustomers = useMemo(() => {
+    if (selectedStaffId === 'all') return customers;
+    return customers.filter(c => c.assignedSalesId === selectedStaffId);
+  }, [customers, selectedStaffId]);
+
   // 1. Tính toán KPIs Khách hàng & Lớp học
-  const totalLeads = customers.length;
+  const totalLeads = filteredCustomers.length;
   const totalStudents = useMemo(() => {
-    return customers.reduce((sum, c) => sum + (c.studentCount || 0), 0);
-  }, [customers]);
+    return filteredCustomers.reduce((sum, c) => sum + (c.studentCount || 0), 0);
+  }, [filteredCustomers]);
 
-  const consultingLeads = customers.filter(c => ['Đang tư vấn', 'Đã liên hệ'].includes(c.pipelineStage)).length;
-  const quotedLeads = customers.filter(c => c.pipelineStage === 'Đã gửi báo giá').length;
-  const bookedLeads = customers.filter(c => ['Đã đặt cọc', 'Đã Booking'].includes(c.pipelineStage)).length;
-  const shootingLeads = customers.filter(c => ['Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao'].includes(c.pipelineStage)).length;
-  const completedCustomers = customers.filter(c => c.pipelineStage === 'Hoàn thành').length;
+  const consultingLeads = filteredCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ', 'Mới tiếp nhận', 'New Lead'].includes(c.pipelineStage)).length;
+  const quotedLeads = filteredCustomers.filter(c => c.pipelineStage === 'Đã gửi báo giá').length;
+  const bookedLeads = filteredCustomers.filter(c => ['Đã đặt cọc', 'Đã Booking'].includes(c.pipelineStage) || (c.paidAmount && c.paidAmount > 0)).length;
+  const shootingLeads = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao'].includes(c.pipelineStage)).length;
+  const completedCustomers = filteredCustomers.filter(c => c.pipelineStage === 'Hoàn thành').length;
 
-  // 2. Tính toán KPIs Doanh thu & Hợp đồng thực tế từ danh sách lớp & booking
+  // 2. Tính toán KPIs Doanh thu & Hợp đồng thực tế
   const totalContractRevenue = useMemo(() => {
-    return customers.reduce((sum, c) => sum + (c.totalRevenue || c.expectedBudget || 0), 0);
-  }, [customers]);
+    return filteredCustomers.reduce((sum, c) => sum + (c.totalRevenue || c.expectedBudget || 0), 0);
+  }, [filteredCustomers]);
 
   const totalCollectedRevenue = useMemo(() => {
-    return customers.reduce((sum, c) => sum + (c.paidAmount || 0), 0);
-  }, [customers]);
+    return filteredCustomers.reduce((sum, c) => sum + (c.paidAmount || 0), 0);
+  }, [filteredCustomers]);
 
   const totalRemainingDebt = totalContractRevenue - totalCollectedRevenue;
 
-  // 3. KPIs Đội ngũ Thợ & Ekip thực tế
+  // 3. Tính toán hoa hồng chi tiết cho từng nhân viên Sales
+  const staffPerformanceList = useMemo(() => {
+    return salesStaff.map(staff => {
+      const staffCustomers = customers.filter(c => c.assignedSalesId === staff.id);
+      const totalRev = staffCustomers.reduce((sum, c) => sum + (c.totalRevenue || c.expectedBudget || 0), 0);
+      const collectedRev = staffCustomers.reduce((sum, c) => sum + (c.paidAmount || 0), 0);
+      const closedList = staffCustomers.filter(c => 
+        ['Đã đặt cọc', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao', 'Hoàn thành'].includes(c.pipelineStage) || 
+        (c.paidAmount && c.paidAmount > 0)
+      );
+      const closedCount = closedList.length;
+      const closedRev = closedList.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
+      
+      // Tính hoa hồng theo cơ chế chính sách từng tài khoản
+      let commission = 0;
+      if (staff.commissionType === 'percentage') {
+        const rate = staff.commissionRate || 8;
+        commission = Math.round(closedRev * (rate / 100));
+      } else if (staff.commissionType === 'fixed') {
+        const fixedAmt = staff.commissionFixedAmount || 500000;
+        commission = closedCount * fixedAmt;
+      } else {
+        commission = Math.round(closedRev * 0.08);
+      }
+
+      const conversionRate = staffCustomers.length > 0 
+        ? Math.round((closedCount / staffCustomers.length) * 100) 
+        : 0;
+
+      return {
+        staff,
+        totalCustomers: staffCustomers.length,
+        consultingCount: staffCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ', 'Mới tiếp nhận'].includes(c.pipelineStage)).length,
+        closedCount,
+        totalRev,
+        collectedRev,
+        debtRev: totalRev - collectedRev,
+        closedRev,
+        commission,
+        conversionRate
+      };
+    });
+  }, [salesStaff, customers]);
+
+  // Hoa hồng hiển thị trên Card 4:
+  const activeStaffCommission = useMemo(() => {
+    if (selectedStaffId === 'all') {
+      return staffPerformanceList.reduce((sum, s) => sum + s.commission, 0);
+    }
+    const found = staffPerformanceList.find(s => s.staff.id === selectedStaffId);
+    return found ? found.commission : 0;
+  }, [selectedStaffId, staffPerformanceList]);
+
+  // Tỷ lệ chốt chung hoặc theo cá nhân
+  const winRate = totalLeads > 0 ? Math.round((bookedLeads / totalLeads) * 100) : 0;
+
+  // 4. KPIs Đội ngũ Thợ & Ekip thực tế
   const totalPhotographers = photographers.length;
   const availablePhotographers = photographers.filter(p => p.status === 'available').length;
   const busyPhotographers = photographers.filter(p => p.status === 'busy').length;
@@ -81,26 +167,10 @@ export const ExecutiveDashboard: React.FC = () => {
     return 'Chưa có review';
   }, [photographers, feedbacks]);
 
-  // 4. KPIs Đội ngũ CTV Sale & Hoa hồng từ CRM_CTV_SALES
-  const totalCtvCommission = useMemo(() => {
-    return CRM_CTV_SALES.reduce((sum, c) => {
-      const num = parseInt(c.commissionEarned.replace(/\D/g, ''), 10) || 0;
-      return sum + num;
-    }, 0);
-  }, []);
-
-  const totalCtvRevenue = useMemo(() => {
-    return CRM_CTV_SALES.reduce((sum, c) => sum + (c.revenueValue || 0), 0);
-  }, []);
-
-  const totalCtvClassesClosed = useMemo(() => {
-    return CRM_CTV_SALES.reduce((sum, c) => sum + (c.classesClosed || 0), 0);
-  }, []);
-
-  // 5. Marketing Breakdown (Nguồn khách hàng và doanh thu thực tế theo kênh)
+  // 5. Marketing Breakdown (Nguồn khách hàng theo dữ liệu đang lọc)
   const sourceStats = useMemo(() => {
     const stats: Record<string, { count: number; revenue: number }> = {};
-    customers.forEach(c => {
+    filteredCustomers.forEach(c => {
       const src = c.source || 'Khác';
       if (!stats[src]) {
         stats[src] = { count: 0, revenue: 0 };
@@ -114,13 +184,13 @@ export const ExecutiveDashboard: React.FC = () => {
       value: data.count,
       revenue: data.revenue
     }));
-  }, [customers]);
+  }, [filteredCustomers]);
 
   const COLORS = ['#111827', '#84cc16', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
   // 6. Funnel Pipeline Data chính xác từ danh sách lớp (KHÔNG padding ảo)
   const funnelData = useMemo(() => {
-    const newLeadCount = customers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage)).length;
+    const newLeadCount = filteredCustomers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage)).length;
     return [
       { name: 'Lead Mới Tiếp Nhận', value: newLeadCount, fill: '#94a3b8' },
       { name: 'Đang Tư Vấn & Khảo Sát', value: consultingLeads, fill: '#60a5fa' },
@@ -129,7 +199,7 @@ export const ExecutiveDashboard: React.FC = () => {
       { name: 'Đang Chụp & Hậu Kỳ', value: shootingLeads, fill: '#34d399' },
       { name: 'Hoàn Thành Bàn Giao', value: completedCustomers, fill: '#10b981' }
     ];
-  }, [customers, consultingLeads, quotedLeads, bookedLeads, shootingLeads, completedCustomers]);
+  }, [filteredCustomers, consultingLeads, quotedLeads, bookedLeads, shootingLeads, completedCustomers]);
 
   // 7. Doanh thu theo tháng: Tính từ Bookings thực tế kết hợp tiến độ mùa vụ
   const monthlyRevenueData = useMemo(() => {
@@ -224,108 +294,233 @@ export const ExecutiveDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Bộ Lọc Xem Doanh Số Theo Tài Khoản Sales */}
+      <div className="bg-white/80 backdrop-blur-xl border border-black/[0.06] rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black shadow-xs shrink-0">
+            <Filter className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-black text-neutral-900">Xem Báo Cáo Doanh Số Theo Tài Khoản</h3>
+              {activeStaff ? (
+                <span className="text-[11px] font-bold bg-[#B8F23D] text-neutral-950 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <UserCheck className="w-3 h-3" /> Đang lọc: {activeStaff.name}
+                </span>
+              ) : (
+                <span className="text-[11px] font-bold bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded-full">
+                  🏢 Toàn bộ Studio ({salesStaff.length} Sales)
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              {activeStaff 
+                ? `Chính sách hoa hồng: ${activeStaff.commissionType === 'percentage' ? `${activeStaff.commissionRate}% Doanh thu` : `${(activeStaff.commissionFixedAmount || 0).toLocaleString('vi-VN')}đ / HĐ chốt thành công`}`
+                : `Tổng hợp doanh số và hoa hồng phân bổ cho ${salesStaff.length} tài khoản Sales & CTV trong hệ thống Xoắn Media`
+              }
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+          <button
+            onClick={() => setSelectedStaffId('all')}
+            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
+              selectedStaffId === 'all'
+                ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
+                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+            }`}
+          >
+            <span>🏢 Toàn Studio</span>
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+              selectedStaffId === 'all' ? 'bg-[#B8F23D] text-neutral-900' : 'bg-neutral-200 text-neutral-700'
+            }`}>
+              {customers.length} lớp
+            </span>
+          </button>
+
+          {salesStaff.map(s => {
+            const isSelected = selectedStaffId === s.id;
+            const staffPerf = staffPerformanceList.find(p => p.staff.id === s.id);
+            return (
+              <button
+                key={s.id}
+                onClick={() => setSelectedStaffId(s.id)}
+                className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border ${
+                  isSelected
+                    ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm'
+                    : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/[0.08]'
+                }`}
+              >
+                <img
+                  src={s.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                  alt={s.name}
+                  className="w-5 h-5 rounded-full object-cover border border-neutral-300"
+                />
+                <span className="truncate max-w-[110px]">{s.name.split('(')[0].trim()}</span>
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  isSelected ? 'bg-[#B8F23D] text-neutral-900' : 'bg-emerald-50 text-emerald-700'
+                }`}>
+                  {((staffPerf?.totalRev || 0) / 1000000).toFixed(1)} Tr
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Card 1: Doanh thu hợp đồng & thực tế */}
-            <div
-              onClick={() => setActiveTab('bookings')}
-              className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU HỢP ĐỒNG</span>
-                <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
-                  <DollarSign className="w-4 h-4 text-neutral-900" />
-                </div>
-              </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
-                  {(totalContractRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
-                </span>
-                <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> Thu: {(totalCollectedRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
-                </span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-                <span>Công nợ chưa thu:</span>
-                <strong className="text-rose-600 font-bold">
-                  {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr ({((totalRemainingDebt / (totalContractRevenue || 1)) * 100).toFixed(0)}%)
-                </strong>
-              </div>
+        {/* Card 1: Doanh thu hợp đồng & thực tế */}
+        <div
+          onClick={() => setActiveTab('bookings')}
+          className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU HỢP ĐỒNG</span>
+              <p className="text-[10px] text-neutral-500 font-medium truncate max-w-[130px]">
+                {activeStaff ? activeStaff.name.split('(')[0] : 'Toàn Studio'}
+              </p>
             </div>
-
-            {/* Card 2: Khách hàng / Leads */}
-            <div
-              onClick={() => setActiveTab('customers')}
-              className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG LỚP & HỌC SINH</span>
-                <div className="w-9 h-9 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:scale-105 transition-transform">
-                  <Users className="w-4 h-4 text-neutral-800" />
-                </div>
-              </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{totalLeads} Lớp</span>
-                <span className="text-xs font-bold text-neutral-800 bg-[#B8F23D]/40 px-2 py-0.5 rounded-full">
-                  {totalStudents.toLocaleString('vi-VN')} học sinh
-                </span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-                <span>Đang tư vấn: <strong className="text-neutral-800">{consultingLeads}</strong></span>
-                <span>Đã cọc: <strong className="text-emerald-700 font-bold">{bookedLeads}</strong></span>
-              </div>
-            </div>
-
-            {/* Card 3: Đội ngũ Thợ / Photographer */}
-            <div
-              onClick={() => setActiveTab('photographers')}
-              className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">ĐỘI NGŨ THỢ & EKIP</span>
-                <div className="w-9 h-9 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:scale-105 transition-transform">
-                  <Camera className="w-4 h-4 text-neutral-800" />
-                </div>
-              </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{totalPhotographers} Thợ</span>
-                <span className="text-xs font-bold text-neutral-800 bg-[#B8F23D]/40 px-2 py-0.5 rounded-full">
-                  {readinessRate}% sẵn sàng
-                </span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-                <span>Đang bấm máy: <strong className="text-amber-600 font-bold">{busyPhotographers}</strong></span>
-                <span>Đánh giá TB: <strong className="text-neutral-900 font-bold">{avgRating}{avgRating !== 'Chưa có review' ? ' ★' : ''}</strong></span>
-              </div>
-            </div>
-
-            {/* Card 4: CTV Sale & Hoa Hồng */}
-            <div
-              onClick={() => setActiveTab('pipeline')}
-              className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">HOA HỒNG CTV TÍCH LŨY</span>
-                <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
-                  <Award className="w-4 h-4 text-neutral-900" />
-                </div>
-              </div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
-                  {(totalCtvCommission / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
-                </span>
-                <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
-                  <Award className="w-3.5 h-3.5" /> {CRM_CTV_SALES.length} CTV
-                </span>
-              </div>
-              <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-                <span>Doanh số CTV chốt:</span>
-                <strong className="text-neutral-900 font-bold">
-                  {(totalCtvRevenue / 1000000).toLocaleString('vi-VN')} Tr ({totalCtvClassesClosed} lớp)
-                </strong>
-              </div>
+            <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
+              <DollarSign className="w-4 h-4 text-neutral-900" />
             </div>
           </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
+              {(totalContractRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+            </span>
+            <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
+              <ArrowUpRight className="w-3.5 h-3.5" /> Thu: {(totalCollectedRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+            </span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+            <span>Công nợ chưa thu:</span>
+            <strong className="text-rose-600 font-bold">
+              {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr ({((totalRemainingDebt / (totalContractRevenue || 1)) * 100).toFixed(0)}%)
+            </strong>
+          </div>
+        </div>
+
+        {/* Card 2: Khách hàng / Leads */}
+        <div
+          onClick={() => setActiveTab('customers')}
+          className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG LỚP & HỌC SINH</span>
+              <p className="text-[10px] text-neutral-500 font-medium">
+                {activeStaff ? 'Lớp được giao phụ trách' : 'Toàn hệ thống'}
+              </p>
+            </div>
+            <div className="w-9 h-9 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:scale-105 transition-transform">
+              <Users className="w-4 h-4 text-neutral-800" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{totalLeads} Lớp</span>
+            <span className="text-xs font-bold text-neutral-800 bg-[#B8F23D]/40 px-2 py-0.5 rounded-full">
+              {totalStudents.toLocaleString('vi-VN')} học sinh
+            </span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+            <span>Đang tư vấn: <strong className="text-neutral-800">{consultingLeads}</strong></span>
+            <span>Đã cọc: <strong className="text-emerald-700 font-bold">{bookedLeads}</strong></span>
+          </div>
+        </div>
+
+        {/* Card 3: Hiệu suất chốt Sale (khi lọc theo tài khoản) hoặc Đội ngũ thợ (khi toàn studio) */}
+        {activeStaff ? (
+          <div
+            onClick={() => setActiveTab('pipeline')}
+            className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-blue-500"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">HIỆU SUẤT CHỐT SALE</span>
+                <p className="text-[10px] text-neutral-500 font-medium">Tỷ lệ chuyển đổi lead</p>
+              </div>
+              <div className="w-9 h-9 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-105 transition-transform">
+                <Percent className="w-4 h-4 text-blue-600" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{winRate}%</span>
+              <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
+                {bookedLeads}/{totalLeads} HĐ chốt
+              </span>
+            </div>
+            <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+              <span>Đã gửi báo giá: <strong className="text-indigo-600 font-bold">{quotedLeads}</strong></span>
+              <span>Hoàn thành: <strong className="text-emerald-700 font-bold">{completedCustomers}</strong></span>
+            </div>
+          </div>
+        ) : (
+          <div
+            onClick={() => setActiveTab('photographers')}
+            className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">ĐỘI NGŨ THỢ & EKIP</span>
+                <p className="text-[10px] text-neutral-500 font-medium">Năng lực sản xuất</p>
+              </div>
+              <div className="w-9 h-9 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:scale-105 transition-transform">
+                <Camera className="w-4 h-4 text-neutral-800" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{totalPhotographers} Thợ</span>
+              <span className="text-xs font-bold text-neutral-800 bg-[#B8F23D]/40 px-2 py-0.5 rounded-full">
+                {readinessRate}% sẵn sàng
+              </span>
+            </div>
+            <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+              <span>Đang bấm máy: <strong className="text-amber-600 font-bold">{busyPhotographers}</strong></span>
+              <span>Đánh giá TB: <strong className="text-neutral-900 font-bold">{avgRating}{avgRating !== 'Chưa có review' ? ' ★' : ''}</strong></span>
+            </div>
+          </div>
+        )}
+
+        {/* Card 4: Hoa Hồng Thực Nhận / Tích Lũy */}
+        <div
+          onClick={() => setActiveTab('pipeline')}
+          className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                {activeStaff ? 'HOA HỒNG THỰC NHẬN' : 'TỔNG HOA HỒNG SALES'}
+              </span>
+              <p className="text-[10px] text-neutral-500 font-medium truncate max-w-[130px]">
+                {activeStaff ? activeStaff.roleTitle : `${salesStaff.length} tài khoản`}
+              </p>
+            </div>
+            <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
+              <Award className="w-4 h-4 text-neutral-900" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
+              {(activeStaffCommission / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+            </span>
+            <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
+              <Award className="w-3.5 h-3.5" /> {activeStaff ? (activeStaff.commissionType === 'percentage' ? `${activeStaff.commissionRate}%` : 'Cố định') : `${salesStaff.length} Sales`}
+            </span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+            <span>{activeStaff ? 'Doanh số tính thưởng:' : 'Tổng DS chốt có hoa hồng:'}</span>
+            <strong className="text-neutral-900 font-bold">
+              {activeStaff 
+                ? `${((staffPerformanceList.find(p => p.staff.id === activeStaff.id)?.closedRev || 0) / 1000000).toFixed(1)} Tr (${bookedLeads} lớp)`
+                : `${(staffPerformanceList.reduce((sum, p) => sum + p.closedRev, 0) / 1000000).toFixed(1)} Tr`
+              }
+            </strong>
+          </div>
+        </div>
+      </div>
 
           {/* Row 2: Biểu Đồ Doanh Thu & Nguồn Lead Marketing */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -582,6 +777,185 @@ export const ExecutiveDashboard: React.FC = () => {
                   );
                 }))}
               </div>
+            </div>
+          </div>
+
+          {/* Row 4: Bảng Theo Dõi & Xếp Hạng Doanh Số Từng Tài Khoản Sales */}
+          <div className="glass-panel p-6 rounded-3xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.05]">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 text-neutral-900 flex items-center justify-center font-black">
+                  <Award className="w-5 h-5 text-neutral-900" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-neutral-900 tracking-tight">
+                    Bảng Xếp Hạng & Doanh Số Từng Tài Khoản Sales
+                  </h2>
+                  <p className="text-xs text-neutral-400 mt-0.5">
+                    Thống kê chi tiết doanh thu ký hợp đồng, thực thu, công nợ và hoa hồng từng nhân sự
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab('pipeline')}
+                  className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-semibold rounded-xl inline-flex items-center gap-1.5 transition-colors"
+                >
+                  Mở Pipeline Chăm Sóc <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-black/[0.05] text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
+                    <th className="py-3 px-3">Tài Khoản & Nhân Sự</th>
+                    <th className="py-3 px-3">Số Lớp Phụ Trách</th>
+                    <th className="py-3 px-3 text-right">Doanh Thu HĐ</th>
+                    <th className="py-3 px-3 text-right">Thực Thu</th>
+                    <th className="py-3 px-3 text-right">Công Nợ</th>
+                    <th className="py-3 px-3 text-center">Tỷ Lệ Chốt</th>
+                    <th className="py-3 px-3 text-right">Hoa Hồng</th>
+                    <th className="py-3 px-3 text-center">Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-black/[0.03] text-xs font-medium">
+                  {staffPerformanceList
+                    .sort((a, b) => b.totalRev - a.totalRev)
+                    .map((item, index) => {
+                      const isCurrentFiltered = selectedStaffId === item.staff.id;
+                      return (
+                        <tr
+                          key={item.staff.id}
+                          className={`transition-colors hover:bg-neutral-50/80 ${
+                            isCurrentFiltered ? 'bg-[#B8F23D]/10' : ''
+                          }`}
+                        >
+                          {/* Cột 1: Thông tin nhân sự */}
+                          <td className="py-3.5 px-3">
+                            <div className="flex items-center gap-3">
+                              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 ${
+                                index === 0 ? 'bg-amber-400 text-neutral-900 shadow-xs' :
+                                index === 1 ? 'bg-neutral-300 text-neutral-800' :
+                                index === 2 ? 'bg-amber-700/20 text-amber-900' :
+                                'bg-neutral-100 text-neutral-500'
+                              }`}>
+                                {index + 1}
+                              </span>
+                              <img
+                                src={item.staff.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                                alt={item.staff.name}
+                                className="w-9 h-9 rounded-full object-cover border border-neutral-200 shrink-0"
+                              />
+                              <div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-neutral-900">{item.staff.name}</span>
+                                  {isCurrentFiltered && (
+                                    <span className="text-[9px] font-bold bg-[#B8F23D] text-neutral-950 px-1.5 py-0.2 rounded-full">
+                                      Đang chọn
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-neutral-500">{item.staff.roleTitle} • {item.staff.phone}</p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Cột 2: Số lớp phụ trách */}
+                          <td className="py-3.5 px-3">
+                            <div className="space-y-0.5">
+                              <span className="font-bold text-neutral-900">{item.totalCustomers} lớp</span>
+                              <div className="flex items-center gap-2 text-[10px] text-neutral-500">
+                                <span>Tư vấn: <strong className="text-neutral-700">{item.consultingCount}</strong></span>
+                                <span>•</span>
+                                <span>Đã cọc: <strong className="text-emerald-700 font-bold">{item.closedCount}</strong></span>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Cột 3: Doanh thu HĐ */}
+                          <td className="py-3.5 px-3 text-right">
+                            <span className="font-extrabold text-neutral-900 text-sm">
+                              {(item.totalRev / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+                            </span>
+                          </td>
+
+                          {/* Cột 4: Thực thu */}
+                          <td className="py-3.5 px-3 text-right">
+                            <span className="font-bold text-emerald-700">
+                              {(item.collectedRev / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+                            </span>
+                          </td>
+
+                          {/* Cột 5: Công nợ */}
+                          <td className="py-3.5 px-3 text-right">
+                            <span className="font-semibold text-rose-600">
+                              {(item.debtRev / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+                            </span>
+                          </td>
+
+                          {/* Cột 6: Tỷ lệ chốt */}
+                          <td className="py-3.5 px-3 text-center">
+                            <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                              {item.conversionRate}%
+                            </span>
+                          </td>
+
+                          {/* Cột 7: Hoa hồng */}
+                          <td className="py-3.5 px-3 text-right">
+                            <div>
+                              <span className="font-extrabold text-neutral-900 text-sm">
+                                {(item.commission / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 2 })} Tr
+                              </span>
+                              <p className="text-[10px] text-neutral-500">
+                                {item.staff.commissionType === 'percentage'
+                                  ? `${item.staff.commissionRate}% doanh số`
+                                  : `${(item.staff.commissionFixedAmount || 0).toLocaleString('vi-VN')}đ/HĐ`
+                                }
+                              </p>
+                            </div>
+                          </td>
+
+                          {/* Cột 8: Thao tác */}
+                          <td className="py-3.5 px-3 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => setSelectedStaffId(item.staff.id)}
+                                title="Xem thống kê tài khoản này trên Dashboard"
+                                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all ${
+                                  isCurrentFiltered
+                                    ? 'bg-neutral-900 text-[#B8F23D]'
+                                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                                }`}
+                              >
+                                {isCurrentFiltered ? '✓ Đang xem' : 'Lọc số liệu'}
+                              </button>
+
+                              {currentRole === 'admin' && (
+                                <button
+                                  onClick={() => loginAsStaff({
+                                    id: item.staff.id,
+                                    name: item.staff.name,
+                                    role: 'sales',
+                                    avatar: item.staff.avatar,
+                                    email: item.staff.email,
+                                    phone: item.staff.phone
+                                  })}
+                                  title="Đăng nhập thử vai bằng tài khoản Sales này"
+                                  className="p-1 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors"
+                                >
+                                  <LogIn className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
             </div>
           </div>
     </div>
