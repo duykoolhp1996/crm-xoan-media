@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import logoXoan from '../../assets/logo-xoan.png';
 import { Customer, QuoteItem } from '../../types';
 import { useApp } from '../../context/AppContext';
@@ -29,7 +31,9 @@ import {
   Edit3,
   Percent,
   Eye,
-  Settings2
+  Settings2,
+  Download,
+  Loader2
 } from 'lucide-react';
 
 interface PriceQuoteModalProps {
@@ -61,6 +65,7 @@ export const PriceQuoteModal: React.FC<PriceQuoteModalProps> = ({
   const [overallDiscount, setOverallDiscount] = useState<number>(0);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
   const [copiedZalo, setCopiedZalo] = useState<boolean>(false);
+  const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
 
   // Tạo danh sách sản phẩm mặc định khi mở cho khách hàng
   useEffect(() => {
@@ -252,8 +257,81 @@ export const PriceQuoteModal: React.FC<PriceQuoteModalProps> = ({
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
-  // Xử lý IN & XUẤT PDF qua IFRAME ĐỘC LẬP (Tuyệt đối không dính Sidebar hay giao diện web)
+  // 1. Tải trực tiếp file PDF (A4) bằng html2canvas & jsPDF (Không phụ thuộc print dialog trình duyệt, không bao giờ bị trắng)
+  const handleDownloadPdf = async () => {
+    // Nếu đang ở tab soạn thảo, tự chuyển sang tab xem trước A4 để element hiển thị
+    if (activeTab !== 'preview') {
+      setActiveTab('preview');
+      await new Promise(r => setTimeout(r, 200));
+    }
+
+    const printEl = document.getElementById('printable-quote-paper');
+    if (!printEl) return;
+
+    try {
+      setIsExportingPdf(true);
+
+      const canvas = await html2canvas(printEl, {
+        scale: 2, // Tăng gấp đôi độ phân giải để chữ và bảng nét căng
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const margin = 6; // lề 6mm
+      const contentWidth = pdfWidth - (margin * 2);
+      const contentHeight = (canvas.height * contentWidth) / canvas.width;
+
+      if (contentHeight <= (pdfHeight - (margin * 2))) {
+        pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, contentHeight);
+      } else {
+        let heightLeft = contentHeight;
+        let position = margin;
+
+        pdf.addImage(imgData, 'JPEG', margin, position, contentWidth, contentHeight);
+        heightLeft -= (pdfHeight - (margin * 2));
+
+        while (heightLeft > 0) {
+          position = margin - (contentHeight - heightLeft);
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', margin, position, contentWidth, contentHeight);
+          heightLeft -= (pdfHeight - (margin * 2));
+        }
+      }
+
+      pdf.save(`Bao_Gia_${customer.className.replace(/\s+/g, '_')}_${quoteCode}.pdf`);
+    } catch (err) {
+      console.error('Lỗi khi xuất PDF:', err);
+      // Fallback in thông thường nếu có lỗi
+      handlePrintPdf();
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  // 2. In / Lưu PDF qua hộp thoại in của máy tính (Đã khắc phục 100% lỗi trang trắng)
   const handlePrintPdf = () => {
+    if (activeTab !== 'preview') {
+      setActiveTab('preview');
+      setTimeout(() => {
+        executePrint();
+      }, 250);
+    } else {
+      executePrint();
+    }
+  };
+
+  const executePrint = () => {
     const printEl = document.getElementById('printable-quote-paper');
     if (!printEl) return;
 
@@ -263,15 +341,17 @@ export const PriceQuoteModal: React.FC<PriceQuoteModalProps> = ({
       oldIframe.remove();
     }
 
-    // Tạo iframe ẩn độc lập hoàn toàn với trang web
+    // Tạo iframe ẩn trong luồng để trình duyệt không bỏ qua
     const iframe = document.createElement('iframe');
     iframe.id = 'quote-print-iframe';
     iframe.style.position = 'fixed';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '210mm';
-    iframe.style.height = '297mm';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
     iframe.style.border = 'none';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
     document.body.appendChild(iframe);
 
     const doc = iframe.contentWindow?.document;
@@ -306,18 +386,24 @@ export const PriceQuoteModal: React.FC<PriceQuoteModalProps> = ({
               background: #ffffff !important;
               color: #111827 !important;
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+              visibility: visible !important;
             }
-            #print-container {
-              width: 195mm;
-              max-width: 195mm;
-              margin: 0 auto;
-              padding: 4mm 6mm;
-              background: #ffffff;
+            body, body * {
+              visibility: visible !important;
+            }
+            #printable-quote-paper, #print-container {
+              width: 195mm !important;
+              max-width: 195mm !important;
+              margin: 0 auto !important;
+              padding: 4mm 6mm !important;
+              background: #ffffff !important;
+              visibility: visible !important;
+              display: block !important;
             }
           </style>
         </head>
         <body>
-          <div id="print-container">
+          <div id="printable-quote-paper">
             ${printEl.innerHTML}
           </div>
         </body>
@@ -453,14 +539,36 @@ ${itemsText}
               )}
             </button>
 
+            {/* Nút 1: Tải trực tiếp file PDF (.pdf) - Không lo bị trắng */}
+            <button
+              type="button"
+              disabled={isExportingPdf}
+              onClick={handleDownloadPdf}
+              className="px-3.5 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-75"
+              title="Tải trực tiếp file PDF A4 về máy tính (không bị dính menu hay lỗi trang trắng)"
+            >
+              {isExportingPdf ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-neutral-900" />
+                  <span>Đang tạo PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 text-neutral-900" />
+                  <span>Tải File PDF</span>
+                </>
+              )}
+            </button>
+
+            {/* Nút 2: In trực tiếp ra giấy A4 */}
             <button
               type="button"
               onClick={handlePrintPdf}
-              className="px-4 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
-              title="Xuất file PDF qua giao diện in sạch sẽ (không dính Sidebar)"
+              className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-neutral-700"
+              title="Mở hộp thoại in / lưu PDF của máy tính"
             >
               <Printer className="w-4 h-4" />
-              <span>In / Xuất PDF (A4)</span>
+              <span className="hidden sm:inline">In (A4)</span>
             </button>
 
             <button
@@ -731,6 +839,51 @@ ${itemsText}
         {activeTab === 'preview' && (
           <div className="overflow-y-auto flex-1 p-4 sm:p-8 bg-neutral-100/70 custom-scrollbar">
             
+            {/* Quick Actions Bar for Preview */}
+            <div className="max-w-[210mm] mx-auto mb-4 p-3.5 bg-white rounded-2xl border border-black/[0.06] shadow-xs flex flex-wrap items-center justify-between gap-3 print:hidden">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <div>
+                  <p className="text-xs font-bold text-neutral-900">
+                    Bản Xem Trước Khổ A4 Sẵn Sàng Xuất PDF
+                  </p>
+                  <p className="text-[10px] text-neutral-500">
+                    Kích thước chuẩn 210 x 297mm • Không dính thanh điều hướng hay menu
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={isExportingPdf}
+                  onClick={handleDownloadPdf}
+                  className="px-3.5 py-1.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-75"
+                >
+                  {isExportingPdf ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-900" />
+                      <span>Đang tạo PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Tải PDF Trực Tiếp (.pdf)</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePrintPdf}
+                  className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>In Máy In</span>
+                </button>
+              </div>
+            </div>
+
             {/* TỜ GIẤY IN A4 CHUẨN */}
             <div
               id="printable-quote-paper"
