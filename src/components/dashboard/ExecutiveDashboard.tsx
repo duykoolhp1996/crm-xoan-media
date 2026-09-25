@@ -50,25 +50,52 @@ export const ExecutiveDashboard: React.FC = () => {
     setSelectedBookingId
   } = useApp();
 
-  // State lọc doanh số theo tài khoản nhân sự (Mặc định nếu là Sales thì lọc theo tài khoản đó, nếu là Admin/Manager thì mặc định xem toàn Studio)
+  const isSalesUser = currentUser?.role === 'sales';
+
+  // Nhận diện nhân sự Sales tương ứng với tài khoản đang đăng nhập
+  const mySalesStaff = useMemo(() => {
+    if (!isSalesUser) return null;
+    return salesStaff.find(s => 
+      s.id === currentUser.id || 
+      s.name.toLowerCase() === currentUser.name.toLowerCase() ||
+      (currentUser.email && s.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (currentUser.phone && s.phone === currentUser.phone)
+    ) || salesStaff[0];
+  }, [salesStaff, currentUser, isSalesUser]);
+
+  // State lọc doanh số theo tài khoản nhân sự (Chỉ Admin / Manager mới được đổi selectedStaffId; Sales luôn khóa chặt vào tài khoản cá nhân)
   const [selectedStaffId, setSelectedStaffId] = useState<string>(() => {
     if (currentUser?.role === 'sales') {
-      return currentUser.id;
+      const match = salesStaff.find(s => 
+        s.id === currentUser.id || 
+        s.name.toLowerCase() === currentUser.name.toLowerCase()
+      );
+      return match?.id || currentUser.id;
     }
     return 'all';
   });
 
+  // ID nhân sự có hiệu lực thực tế: Nếu là Sales thì BẮT BUỘC luôn là ID của chính mình, KHÔNG thể là 'all' hay ID của người khác
+  const effectiveStaffId = isSalesUser
+    ? (mySalesStaff?.id || currentUser.id)
+    : selectedStaffId;
+
   // Tìm thông tin nhân sự đang được chọn
   const activeStaff = useMemo(() => {
-    if (selectedStaffId === 'all') return null;
-    return salesStaff.find(s => s.id === selectedStaffId) || null;
-  }, [selectedStaffId, salesStaff]);
+    if (effectiveStaffId === 'all') return null;
+    return salesStaff.find(s => s.id === effectiveStaffId) || mySalesStaff || null;
+  }, [effectiveStaffId, salesStaff, mySalesStaff]);
 
   // Lọc danh sách khách hàng / lớp học theo nhân sự được chọn
   const filteredCustomers = useMemo(() => {
-    if (selectedStaffId === 'all') return customers;
-    return customers.filter(c => c.assignedSalesId === selectedStaffId);
-  }, [customers, selectedStaffId]);
+    if (isSalesUser) {
+      const myId = mySalesStaff?.id || currentUser.id;
+      const myName = mySalesStaff?.name || currentUser.name;
+      return customers.filter(c => c.assignedSalesId === myId || c.assignedSalesName === myName);
+    }
+    if (effectiveStaffId === 'all') return customers;
+    return customers.filter(c => c.assignedSalesId === effectiveStaffId);
+  }, [customers, effectiveStaffId, isSalesUser, mySalesStaff, currentUser]);
 
   // 1. Tính toán KPIs Khách hàng & Lớp học
   const totalLeads = filteredCustomers.length;
@@ -139,12 +166,16 @@ export const ExecutiveDashboard: React.FC = () => {
 
   // Hoa hồng hiển thị trên Card 4:
   const activeStaffCommission = useMemo(() => {
+    if (isSalesUser) {
+      const found = staffPerformanceList.find(s => s.staff.id === effectiveStaffId);
+      return found ? found.commission : 0;
+    }
     if (selectedStaffId === 'all') {
       return staffPerformanceList.reduce((sum, s) => sum + s.commission, 0);
     }
     const found = staffPerformanceList.find(s => s.staff.id === selectedStaffId);
     return found ? found.commission : 0;
-  }, [selectedStaffId, staffPerformanceList]);
+  }, [selectedStaffId, staffPerformanceList, isSalesUser, effectiveStaffId]);
 
   // Tỷ lệ chốt chung hoặc theo cá nhân
   const winRate = totalLeads > 0 ? Math.round((bookedLeads / totalLeads) * 100) : 0;
@@ -250,10 +281,12 @@ export const ExecutiveDashboard: React.FC = () => {
 
   // 8. Lịch chụp sắp tới - Sắp xếp theo ngày chụp sớm nhất
   const upcomingBookings = useMemo(() => {
+    const myCustomerIds = new Set(filteredCustomers.map(c => c.id));
     return [...bookings]
+      .filter(b => !isSalesUser || myCustomerIds.has(b.customerId))
       .sort((a, b) => new Date(a.shootDate).getTime() - new Date(b.shootDate).getTime())
       .slice(0, 4);
-  }, [bookings]);
+  }, [bookings, isSalesUser, filteredCustomers]);
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
@@ -302,8 +335,14 @@ export const ExecutiveDashboard: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-black text-neutral-900">Xem Báo Cáo Doanh Số Theo Tài Khoản</h3>
-              {activeStaff ? (
+              <h3 className="text-sm font-black text-neutral-900">
+                {isSalesUser ? 'Báo Cáo Doanh Số & Hoa Hồng Cá Nhân' : 'Xem Báo Cáo Doanh Số Theo Tài Khoản'}
+              </h3>
+              {isSalesUser ? (
+                <span className="text-[11px] font-bold bg-[#B8F23D] text-neutral-950 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <UserCheck className="w-3 h-3" /> Tài khoản: {mySalesStaff?.name || currentUser.name}
+                </span>
+              ) : activeStaff ? (
                 <span className="text-[11px] font-bold bg-[#B8F23D] text-neutral-950 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <UserCheck className="w-3 h-3" /> Đang lọc: {activeStaff.name}
                 </span>
@@ -314,59 +353,76 @@ export const ExecutiveDashboard: React.FC = () => {
               )}
             </div>
             <p className="text-xs text-neutral-500 mt-0.5">
-              {activeStaff 
-                ? `Chính sách hoa hồng: ${activeStaff.commissionType === 'percentage' ? `${activeStaff.commissionRate}% Doanh thu` : `${(activeStaff.commissionFixedAmount || 0).toLocaleString('vi-VN')}đ / HĐ chốt thành công`}`
-                : `Tổng hợp doanh số và hoa hồng phân bổ cho ${salesStaff.length} tài khoản Sales & CTV trong hệ thống Xoắn Media`
-              }
+              {isSalesUser ? (
+                `Dữ liệu hợp đồng cá nhân & chính sách hoa hồng: ${mySalesStaff?.commissionType === 'percentage' ? `${mySalesStaff.commissionRate}% Doanh thu` : `${(mySalesStaff?.commissionFixedAmount || 500000).toLocaleString('vi-VN')}đ / HĐ chốt thành công`}`
+              ) : activeStaff ? (
+                `Chính sách hoa hồng: ${activeStaff.commissionType === 'percentage' ? `${activeStaff.commissionRate}% Doanh thu` : `${(activeStaff.commissionFixedAmount || 0).toLocaleString('vi-VN')}đ / HĐ chốt thành công`}`
+              ) : (
+                `Tổng hợp doanh số và hoa hồng phân bổ cho ${salesStaff.length} tài khoản Sales & CTV trong hệ thống Xoắn Media`
+              )}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
-          <button
-            onClick={() => setSelectedStaffId('all')}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
-              selectedStaffId === 'all'
-                ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
-                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
-            }`}
-          >
-            <span>🏢 Toàn Studio</span>
-            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-              selectedStaffId === 'all' ? 'bg-[#B8F23D] text-neutral-900' : 'bg-neutral-200 text-neutral-700'
-            }`}>
-              {customers.length} lớp
-            </span>
-          </button>
+        {isSalesUser ? (
+          <div className="flex items-center gap-2.5 bg-neutral-50 border border-black/[0.08] px-3.5 py-2 rounded-2xl shadow-xs">
+            <img
+              src={mySalesStaff?.avatar || currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+              alt={mySalesStaff?.name || currentUser.name}
+              className="w-7 h-7 rounded-full object-cover border border-neutral-300"
+            />
+            <div className="text-left">
+              <p className="text-xs font-bold text-neutral-900 leading-tight">{mySalesStaff?.name || currentUser.name}</p>
+              <p className="text-[10px] text-neutral-500 font-medium">{filteredCustomers.length} lớp được phân công</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+            <button
+              onClick={() => setSelectedStaffId('all')}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 ${
+                selectedStaffId === 'all'
+                  ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
+                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+              }`}
+            >
+              <span>🏢 Toàn Studio</span>
+              <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                selectedStaffId === 'all' ? 'bg-[#B8F23D] text-neutral-900' : 'bg-neutral-200 text-neutral-700'
+              }`}>
+                {customers.length} lớp
+              </span>
+            </button>
 
-          {salesStaff.map(s => {
-            const isSelected = selectedStaffId === s.id;
-            const staffPerf = staffPerformanceList.find(p => p.staff.id === s.id);
-            return (
-              <button
-                key={s.id}
-                onClick={() => setSelectedStaffId(s.id)}
-                className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border ${
-                  isSelected
-                    ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm'
-                    : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/[0.08]'
-                }`}
-              >
-                <img
-                  src={s.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
-                  alt={s.name}
-                  className="w-5 h-5 rounded-full object-cover border border-neutral-300"
-                />
-                <span className="truncate max-w-[110px]">{s.name.split('(')[0].trim()}</span>
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
-                  isSelected ? 'bg-[#B8F23D] text-neutral-900' : 'bg-emerald-50 text-emerald-700'
-                }`}>
-                  {((staffPerf?.totalRev || 0) / 1000000).toFixed(1)} Tr
-                </span>
-              </button>
-            );
-          })}
-        </div>
+            {salesStaff.map(s => {
+              const isSelected = selectedStaffId === s.id;
+              const staffPerf = staffPerformanceList.find(p => p.staff.id === s.id);
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedStaffId(s.id)}
+                  className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border ${
+                    isSelected
+                      ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm'
+                      : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/[0.08]'
+                  }`}
+                >
+                  <img
+                    src={s.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                    alt={s.name}
+                    className="w-5 h-5 rounded-full object-cover border border-neutral-300"
+                  />
+                  <span className="truncate max-w-[110px]">{s.name.split('(')[0].trim()}</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    isSelected ? 'bg-[#B8F23D] text-neutral-900' : 'bg-emerald-50 text-emerald-700'
+                  }`}>
+                    {((staffPerf?.totalRev || 0) / 1000000).toFixed(1)} Tr
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
@@ -789,10 +845,13 @@ export const ExecutiveDashboard: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-neutral-900 tracking-tight">
-                    Bảng Xếp Hạng & Doanh Số Từng Tài Khoản Sales
+                    {isSalesUser ? 'Báo Cáo Hiệu Suất & Hoa Hồng Của Bạn' : 'Bảng Xếp Hạng & Doanh Số Từng Tài Khoản Sales'}
                   </h2>
                   <p className="text-xs text-neutral-400 mt-0.5">
-                    Thống kê chi tiết doanh thu ký hợp đồng, thực thu, công nợ và hoa hồng từng nhân sự
+                    {isSalesUser 
+                      ? 'Thống kê chi tiết doanh thu ký hợp đồng, thực thu, công nợ và hoa hồng cá nhân'
+                      : 'Thống kê chi tiết doanh thu ký hợp đồng, thực thu, công nợ và hoa hồng từng nhân sự'
+                    }
                   </p>
                 </div>
               </div>
@@ -818,11 +877,12 @@ export const ExecutiveDashboard: React.FC = () => {
                     <th className="py-3 px-3 text-right">Công Nợ</th>
                     <th className="py-3 px-3 text-center">Tỷ Lệ Chốt</th>
                     <th className="py-3 px-3 text-right">Hoa Hồng</th>
-                    <th className="py-3 px-3 text-center">Thao Tác</th>
+                    {!isSalesUser && <th className="py-3 px-3 text-center">Thao Tác</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-black/[0.03] text-xs font-medium">
                   {staffPerformanceList
+                    .filter(item => isSalesUser ? item.staff.id === effectiveStaffId : true)
                     .sort((a, b) => b.totalRev - a.totalRev)
                     .map((item, index) => {
                       const isCurrentFiltered = selectedStaffId === item.staff.id;
@@ -918,39 +978,41 @@ export const ExecutiveDashboard: React.FC = () => {
                             </div>
                           </td>
 
-                          {/* Cột 8: Thao tác */}
-                          <td className="py-3.5 px-3 text-center">
-                            <div className="flex items-center justify-center gap-1.5">
-                              <button
-                                onClick={() => setSelectedStaffId(item.staff.id)}
-                                title="Xem thống kê tài khoản này trên Dashboard"
-                                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all ${
-                                  isCurrentFiltered
-                                    ? 'bg-neutral-900 text-[#B8F23D]'
-                                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
-                                }`}
-                              >
-                                {isCurrentFiltered ? '✓ Đang xem' : 'Lọc số liệu'}
-                              </button>
-
-                              {currentRole === 'admin' && (
+                          {/* Cột 8: Thao tác (Chỉ Admin / Manager) */}
+                          {!isSalesUser && (
+                            <td className="py-3.5 px-3 text-center">
+                              <div className="flex items-center justify-center gap-1.5">
                                 <button
-                                  onClick={() => loginAsStaff({
-                                    id: item.staff.id,
-                                    name: item.staff.name,
-                                    role: 'sales',
-                                    avatar: item.staff.avatar,
-                                    email: item.staff.email,
-                                    phone: item.staff.phone
-                                  })}
-                                  title="Đăng nhập thử vai bằng tài khoản Sales này"
-                                  className="p-1 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors"
+                                  onClick={() => setSelectedStaffId(item.staff.id)}
+                                  title="Xem thống kê tài khoản này trên Dashboard"
+                                  className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all ${
+                                    isCurrentFiltered
+                                      ? 'bg-neutral-900 text-[#B8F23D]'
+                                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                                  }`}
                                 >
-                                  <LogIn className="w-3.5 h-3.5" />
+                                  {isCurrentFiltered ? '✓ Đang xem' : 'Lọc số liệu'}
                                 </button>
-                              )}
-                            </div>
-                          </td>
+
+                                {currentRole === 'admin' && (
+                                  <button
+                                    onClick={() => loginAsStaff({
+                                      id: item.staff.id,
+                                      name: item.staff.name,
+                                      role: 'sales',
+                                      avatar: item.staff.avatar,
+                                      email: item.staff.email,
+                                      phone: item.staff.phone
+                                    })}
+                                    title="Đăng nhập thử vai bằng tài khoản Sales này"
+                                    className="p-1 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors"
+                                  >
+                                    <LogIn className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       );
                     })}

@@ -34,6 +34,32 @@ export const KanbanPipeline: React.FC = () => {
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
 
+  const isSalesUser = currentUser?.role === 'sales';
+  const mySalesStaff = React.useMemo(() => {
+    if (!isSalesUser) return null;
+    return salesStaff.find(s => 
+      s.id === currentUser.id || 
+      s.name.toLowerCase() === currentUser.name.toLowerCase() ||
+      (currentUser.email && s.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (currentUser.phone && s.phone === currentUser.phone)
+    ) || salesStaff[0];
+  }, [salesStaff, currentUser, isSalesUser]);
+
+  // Chỉ hiển thị các khách hàng được gán cho Sales này hoặc khách chưa được gán ai
+  const accessibleCustomers = React.useMemo(() => {
+    if (!isSalesUser) return customers;
+    const myId = mySalesStaff?.id || currentUser.id;
+    const myName = mySalesStaff?.name || currentUser.name;
+    return customers.filter(c => {
+      const isMine = 
+        c.assignedSalesId === myId ||
+        c.assignedSalesName === myName ||
+        (mySalesStaff && c.assignedSalesName?.toLowerCase() === mySalesStaff.name.toLowerCase());
+      const isUnassigned = !c.assignedSalesId || !c.assignedSalesName || c.assignedSalesName === 'Chưa gán';
+      return isMine || isUnassigned;
+    });
+  }, [customers, isSalesUser, mySalesStaff, currentUser]);
+
   // Cuộn ngang siêu mượt khi dùng chuột cuộn dọc hoặc trackpad
   const handleBoardWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     if (!boardRef.current) return;
@@ -136,7 +162,7 @@ export const KanbanPipeline: React.FC = () => {
         className="flex gap-3.5 overflow-x-auto pb-3 pt-1 items-stretch custom-scrollbar flex-1 min-h-0 overscroll-x-contain"
       >
         {STAGES.map((stage) => {
-          const stageCustomers = customers.filter(c => c.pipelineStage === stage);
+          const stageCustomers = accessibleCustomers.filter(c => c.pipelineStage === stage);
           const stageTotalMoney = stageCustomers.reduce((acc, curr) => acc + curr.expectedBudget, 0);
 
           return (

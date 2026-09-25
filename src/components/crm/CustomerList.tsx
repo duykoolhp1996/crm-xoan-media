@@ -24,7 +24,9 @@ export const CustomerList: React.FC = () => {
     customers,
     selectedCustomerId,
     setSelectedCustomerId,
-    updateCustomerStage
+    updateCustomerStage,
+    currentUser,
+    salesStaff
   } = useApp();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,9 +34,35 @@ export const CustomerList: React.FC = () => {
   const [selectedStage, setSelectedStage] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const isSalesUser = currentUser?.role === 'sales';
+  const mySalesStaff = useMemo(() => {
+    if (!isSalesUser) return null;
+    return salesStaff.find(s => 
+      s.id === currentUser.id || 
+      s.name.toLowerCase() === currentUser.name.toLowerCase() ||
+      (currentUser.email && s.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+      (currentUser.phone && s.phone === currentUser.phone)
+    ) || salesStaff[0];
+  }, [salesStaff, currentUser, isSalesUser]);
+
+  // Lọc quyền truy cập: Sales chỉ được xem khách hàng được gán cho mình hoặc chưa gán
+  const accessibleCustomers = useMemo(() => {
+    if (!isSalesUser) return customers;
+    const myId = mySalesStaff?.id || currentUser.id;
+    const myName = mySalesStaff?.name || currentUser.name;
+    return customers.filter(c => {
+      const isMine = 
+        c.assignedSalesId === myId ||
+        c.assignedSalesName === myName ||
+        (mySalesStaff && c.assignedSalesName?.toLowerCase() === mySalesStaff.name.toLowerCase());
+      const isUnassigned = !c.assignedSalesId || !c.assignedSalesName || c.assignedSalesName === 'Chưa gán';
+      return isMine || isUnassigned;
+    });
+  }, [customers, isSalesUser, mySalesStaff, currentUser]);
+
   // Lọc dữ liệu
   const filteredCustomers = useMemo(() => {
-    return customers.filter(c => {
+    return accessibleCustomers.filter(c => {
       const matchSearch =
         c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.phone.includes(searchTerm) ||
@@ -50,7 +78,7 @@ export const CustomerList: React.FC = () => {
 
       return matchSearch && matchSource && matchStage;
     });
-  }, [customers, searchTerm, selectedSource, selectedStage]);
+  }, [accessibleCustomers, searchTerm, selectedSource, selectedStage]);
 
   // Stage badges colors on light glass
   const stageBadges: Record<string, string> = {
@@ -110,7 +138,7 @@ export const CustomerList: React.FC = () => {
             onChange={(e) => setSelectedSource(e.target.value)}
             className="px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
           >
-            <option value="all">Tất cả nguồn ({customers.length})</option>
+            <option value="all">Tất cả nguồn ({accessibleCustomers.length})</option>
             <option value="Facebook Ads">Facebook Ads</option>
             <option value="TikTok Ads">TikTok Ads</option>
             <option value="Website">Website</option>
