@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import logoXoan from '../../assets/logo-xoan.png';
 import { Customer, QuoteItem } from '../../types';
 import { useApp } from '../../context/AppContext';
 import {
@@ -379,9 +380,11 @@ ${itemsText}
         {/* HEADER MODAL */}
         <div className="p-3 sm:px-6 bg-neutral-900 text-white flex items-center justify-between gap-3 shrink-0 print:hidden">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#B8F23D]/20 text-[#B8F23D] flex items-center justify-center font-bold">
-              <FileText className="w-5 h-5" />
-            </div>
+            <img
+              src={logoXoan}
+              alt="Xoắn Media"
+              className="w-9 h-9 rounded-xl object-cover shadow-sm border border-neutral-700"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-bold text-white">
@@ -735,9 +738,11 @@ ${itemsText}
               {/* Header Thương Hiệu Studio */}
               <div className="flex flex-row items-center justify-between gap-4 border-b-2 border-neutral-900 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-neutral-950 text-[#B8F23D] flex items-center justify-center font-black text-xl shadow-md shrink-0">
-                    <Camera className="w-7 h-7 text-[#B8F23D]" />
-                  </div>
+                  <img
+                    src={logoXoan}
+                    alt="Xoắn Media Studio"
+                    className="w-14 h-14 rounded-2xl object-cover shadow-sm border border-neutral-200 shrink-0"
+                  />
                   <div>
                     <h1 className="text-lg sm:text-xl font-black tracking-tight text-neutral-950 uppercase leading-none">
                       XOẮN MEDIA STUDIO

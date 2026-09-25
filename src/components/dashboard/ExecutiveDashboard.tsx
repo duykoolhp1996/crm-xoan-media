@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import logoXoan from '../../assets/logo-xoan.png';
 import { useApp } from '../../context/AppContext';
 import {
   Users,
@@ -204,6 +205,22 @@ export const ExecutiveDashboard: React.FC = () => {
           <p className="text-neutral-600 text-xs sm:text-sm mt-1.5 leading-relaxed">
             Kiểm soát hợp đồng thực tế, tiến độ {customers.length} lớp kỷ yếu ({totalStudents.toLocaleString('vi-VN')} học sinh), điều phối {totalPhotographers} thợ chụp và đội ngũ Sales tư vấn chuyên nghiệp.
           </p>
+        </div>
+
+        {/* Studio Brand Badge */}
+        <div className="relative z-10 shrink-0 hidden md:flex items-center gap-3.5 bg-white/80 backdrop-blur-md p-3 pr-5 rounded-2xl border border-black/[0.06] shadow-xs">
+          <img
+            src={logoXoan}
+            alt="Xoắn Media Studio"
+            className="w-12 h-12 rounded-xl object-cover shadow-sm border border-neutral-200"
+          />
+          <div>
+            <p className="text-xs font-black text-neutral-900 leading-tight">XOẮN MEDIA STUDIO</p>
+            <p className="text-[10px] text-neutral-500 font-medium">Kỷ yếu & Nghệ thuật học đường</p>
+            <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full inline-block mt-0.5">
+              Hệ thống vận hành 2026
+            </span>
+          </div>
         </div>
       </div>
 

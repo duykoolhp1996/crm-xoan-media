@@ -1,4 +1,5 @@
 import React from 'react';
+import logoXoan from '../../assets/logo-xoan.png';
 import { useApp, NavigationTab } from '../../context/AppContext';
 import {
   LayoutDashboard,
@@ -151,9 +152,11 @@ export const Sidebar: React.FC = () => {
     <aside className="w-64 bg-white/80 backdrop-blur-2xl text-neutral-600 flex flex-col h-screen sticky top-0 shrink-0 select-none z-40 border-r border-black/[0.06] shadow-sm">
       {/* Brand Header */}
       <div className="h-16 flex items-center gap-3 px-5 border-b border-black/[0.06] bg-white/40">
-        <div className="w-9 h-9 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center shadow-sm font-black text-lg">
-          ✦
-        </div>
+        <img
+          src={logoXoan}
+          alt="Xoắn Media"
+          className="w-10 h-10 rounded-2xl object-cover shadow-sm border border-black/[0.08]"
+        />
         <div>
           <div className="flex items-center gap-1.5">
             <span className="font-extrabold text-neutral-900 text-sm tracking-tight">XOẮN MEDIA</span>

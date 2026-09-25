@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logoXoan from '../../assets/logo-xoan.png';
 import { useApp } from '../../context/AppContext';
 import {
   Camera,
@@ -56,8 +57,12 @@ export const LoginPage: React.FC = () => {
           
           {/* Brand Header */}
           <div className="text-center space-y-3">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-neutral-900 to-neutral-800 border border-neutral-700/80 shadow-lg shadow-orange-500/10">
-              <Camera className="w-7 h-7 text-[#B8F23D]" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden shadow-xl border border-neutral-700/80 ring-2 ring-[#B8F23D]/20">
+              <img
+                src={logoXoan}
+                alt="Xoắn Media Studio"
+                className="w-full h-full object-cover"
+              />
             </div>
 
             <div>
