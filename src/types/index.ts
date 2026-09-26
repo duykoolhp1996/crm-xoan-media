@@ -373,12 +373,12 @@ export interface ActivityLog {
 // 9. Alert & Notification System
 export interface SystemNotification {
   id: string;
-  type: 'conflict' | 'overload' | 'unassigned' | 'new_lead' | 'upcoming_booking' | 'due_task' | 'unpaid';
+  type: 'conflict' | 'overload' | 'unassigned' | 'new_lead' | 'upcoming_booking' | 'due_task' | 'unpaid' | 'deposit';
   title: string;
   message: string;
   bookingId?: string;
   customerId?: string;
-  severity: 'info' | 'warning' | 'danger';
+  severity: 'info' | 'warning' | 'danger' | 'success';
   timestamp: string;
   read: boolean;
 }

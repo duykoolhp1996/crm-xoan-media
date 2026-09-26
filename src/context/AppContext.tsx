@@ -38,7 +38,7 @@ import {
   mockMoments
 } from '../data/mockData';
 import { crmSupabaseService } from '../services/crmSupabaseService';
-import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup } from '../lib/zaloBotService';
+import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup, notifyCustomerDepositToZaloGroup } from '../lib/zaloBotService';
 
 export type NavigationTab = 
   | 'dashboard'
@@ -596,6 +596,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       (prevStage === 'New Lead' || !newSalesName || newSalesName === 'Chưa gán') &&
       newStage === 'Đã liên hệ';
 
+    // Tự động hóa: Chốt cọc thành công (từ Đang thương lượng hoặc các bước trước sang Đã đặt cọc)
+    const isDepositWon = prevStage !== 'Đã đặt cọc' && newStage === 'Đã đặt cọc';
+    const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (newSalesName || targetCustomer.assignedSalesName || 'Lê Hoàng Sơn (Sales Lead)');
+
     if (isMovingToContacted) {
       if (currentUser.role === 'sales') {
         newSalesName = currentUser.name;
@@ -629,21 +633,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     addActivityLog({
       customerId,
-      type: isMovingToContacted ? 'call' : 'quote_sent',
+      type: isMovingToContacted ? 'call' : isDepositWon ? 'deposit_paid' : 'quote_sent',
       title: isMovingToContacted
         ? `Tự động gán Sales tư vấn: ${newSalesName}`
-        : newStage === 'Lost'
-          ? 'Khách hàng từ chối (Lost)'
-          : `Chuyển giai đoạn: ${newStage}`,
+        : isDepositWon
+          ? `🎉 Chốt cọc thành công: ${closerSalesName}`
+          : newStage === 'Lost'
+            ? 'Khách hàng từ chối (Lost)'
+            : `Chuyển giai đoạn: ${newStage}`,
       description: isMovingToContacted
         ? `Khách hàng ${targetCustomer.name} (${targetCustomer.className} - ${targetCustomer.schoolName}) được chuyển từ "${prevStage}" sang "Đã liên hệ". Hệ thống tự động gán nhân viên Sales "${newSalesName}" phụ trách tư vấn.`
-        : newStage === 'Lost'
-          ? `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) được chuyển sang trạng thái Lost (Khách từ chối / Dừng tư vấn).`
-          : `Khách hàng ${targetCustomer.name} được chuyển từ "${prevStage}" sang "${newStage}".`,
+        : isDepositWon
+          ? `Nhân sự Sales "${closerSalesName}" đã chốt cọc thành công cho lớp ${targetCustomer.className} (${targetCustomer.schoolName}). Tiến trình chuyển từ "${prevStage}" sang "Đã đặt cọc".`
+          : newStage === 'Lost'
+            ? `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) được chuyển sang trạng thái Lost (Khách từ chối / Dừng tư vấn).`
+            : `Khách hàng ${targetCustomer.name} được chuyển từ "${prevStage}" sang "${newStage}".`,
       performedByName: currentUser.name
     });
 
-    if (isMovingToContacted) {
+    if (isDepositWon) {
+      // 1. Tự động bắn thông báo Zalo Bot vào nhóm
+      notifyCustomerDepositToZaloGroup({
+        customer: {
+          ...targetCustomer,
+          pipelineStage: 'Đã đặt cọc',
+          assignedSalesName: closerSalesName
+        },
+        depositAmount: targetCustomer.paidAmount || 2000000,
+        closedByName: closerSalesName
+      }).catch(err => {
+        console.warn('[Zalo Bot] Lỗi gửi thông báo chốt cọc:', err);
+      });
+
+      // 2. Thêm thông báo chuông hệ thống
+      const depositNotif: SystemNotification = {
+        id: `notif-${Date.now()}`,
+        type: 'deposit',
+        title: `🎉 CHỐT CỌC THÀNH CÔNG: ${targetCustomer.className}`,
+        message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${targetCustomer.className} (${targetCustomer.schoolName}).`,
+        severity: 'success',
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      setNotifications(prev => [depositNotif, ...prev]);
+    } else if (isMovingToContacted) {
       const newNotif: SystemNotification = {
         id: `notif-${Date.now()}`,
         type: 'new_lead',
@@ -669,8 +702,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateCustomer = (updated: Customer) => {
+    const prevCust = customers.find(c => c.id === updated.id);
+    const isNewDeposit = prevCust && prevCust.pipelineStage !== 'Đã đặt cọc' && updated.pipelineStage === 'Đã đặt cọc';
+    const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (updated.assignedSalesName || currentUser.name);
+
     setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
     crmSupabaseService.saveCustomer(updated).catch(() => {});
+
+    if (isNewDeposit) {
+      notifyCustomerDepositToZaloGroup({
+        customer: updated,
+        depositAmount: updated.paidAmount || 2000000,
+        closedByName: closerSalesName
+      }).catch(err => {
+        console.warn('[Zalo Bot] Lỗi gửi thông báo chốt cọc:', err);
+      });
+
+      const depositNotif: SystemNotification = {
+        id: `notif-${Date.now()}`,
+        type: 'deposit',
+        title: `🎉 CHỐT CỌC THÀNH CÔNG: ${updated.className}`,
+        message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${updated.className} (${updated.schoolName}).`,
+        severity: 'success',
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      setNotifications(prev => [depositNotif, ...prev]);
+    }
   };
 
   // Booking handlers

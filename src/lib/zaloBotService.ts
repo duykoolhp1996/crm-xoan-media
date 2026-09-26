@@ -320,4 +320,62 @@ export const notifyNewCustomerLeadToZaloGroup = async (customer: {
   });
 };
 
+/**
+ * Tự động gửi thông báo chốt cọc thành công vào nhóm Zalo khi chuyển sang "Đã đặt cọc"
+ */
+export const notifyCustomerDepositToZaloGroup = async (params: {
+  customer: {
+    name: string;
+    phone: string;
+    className: string;
+    schoolName: string;
+    city?: string;
+    servicePackageName?: string;
+    totalRevenue?: number;
+    expectedBudget?: number;
+    paidAmount?: number;
+    assignedSalesName?: string;
+    notes?: string;
+    pipelineStage?: string;
+    [key: string]: any;
+  };
+  depositAmount?: number;
+  closedByName?: string;
+}): Promise<{ success: boolean; message: string }> => {
+  const { customer, depositAmount, closedByName } = params;
+  const config = getZaloBotConfig();
+
+  const salesName = closedByName || customer.assignedSalesName || 'Lê Hoàng Sơn (Sales Lead)';
+  const amount = depositAmount || customer.paidAmount || 2000000;
+  const totalContract = customer.totalRevenue || customer.expectedBudget || 0;
+
+  const depositStr = amount > 0 ? `${amount.toLocaleString('vi-VN')} VNĐ` : '2.000.000 VNĐ';
+  const contractStr = totalContract > 0 ? `${totalContract.toLocaleString('vi-VN')} VNĐ` : 'Chưa xác định';
+
+  const text = `🎉 <b>[CRM XOĂN MEDIA - THÔNG BÁO CHỐT CỌC THÀNH CÔNG]</b>
+━━━━━━━━━━━━━━━━━━━━
+💰 <b>Trạng thái:</b> <b>ĐÃ ĐẶT CỌC GIỮ LỊCH CHỤP</b>
+👨‍💼 <b>Sales chốt cọc:</b> <b>${salesName}</b>
+
+👤 <b>Khách hàng:</b> ${customer.name}
+📞 <b>SĐT / Zalo:</b> ${customer.phone}
+🎓 <b>Lớp & Trường:</b> ${customer.className} - ${customer.schoolName}${customer.city ? ` (${customer.city})` : ''}
+📦 <b>Gói dịch vụ:</b> ${customer.servicePackageName || 'Gói Kỷ Yếu Concept'}
+💵 <b>Số tiền cọc:</b> <b>${depositStr}</b>
+📊 <b>Tổng giá trị HĐ:</b> ${contractStr}${customer.notes ? `\n📝 <b>Ghi chú:</b> ${customer.notes}` : ''}
+━━━━━━━━━━━━━━━━━━━━
+⏰ <i>${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${new Date().toLocaleDateString('vi-VN')}</i>
+👏 <b>Chúc mừng @${salesName} đã chốt cọc thành công! 🌟</b>
+👉 <b>Ban Điều Phối</b> vui lòng kiểm tra lịch để sắp xếp ekip thợ chụp cho lớp nhé! 🚀`;
+
+  return sendZaloBotNotification({
+    type: 'deposit',
+    title: `🎉 Chốt cọc: ${customer.name} (${customer.className}) - ${depositStr}`,
+    content: text,
+    recipient: config.targetChatId,
+    parseMode: 'HTML',
+  });
+};
+
+
 
