@@ -33,11 +33,22 @@ import {
   LogIn,
   ShieldCheck,
   ExternalLink,
-  Coins,
   BarChart3,
-  User
+  User,
+  Coins,
+  Bot,
+  Send,
+  MessageSquare,
+  Sparkles
 } from 'lucide-react';
 import { getGA4Id, setGA4Id } from '../../lib/analytics';
+import {
+  getZaloBotConfig,
+  saveZaloBotConfig,
+  sendZaloBotNotification,
+  getZaloBotLogs,
+  ZaloBotLog
+} from '../../lib/zaloBotService';
 
 export const SettingsModule: React.FC = () => {
   const {
@@ -94,6 +105,43 @@ export const SettingsModule: React.FC = () => {
     setGA4Id(ga4Id.trim());
     setGa4Saved(true);
     setTimeout(() => setGa4Saved(false), 2500);
+  };
+
+  // Zalo Bot AI Task Man
+  const [zaloBotConfig, setZaloBotConfigState] = useState(() => getZaloBotConfig());
+  const [zaloBotLogs, setZaloBotLogsState] = useState<ZaloBotLog[]>(() => getZaloBotLogs());
+  const [isTestingBot, setIsTestingBot] = useState(false);
+  const [botTestMessage, setBotTestMessage] = useState<string | null>(null);
+  const [showBotToken, setShowBotToken] = useState(false);
+  const [copiedBotToken, setCopiedBotToken] = useState(false);
+  const [zaloBotSaved, setZaloBotSaved] = useState(false);
+
+  const handleSaveZaloBot = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveZaloBotConfig(zaloBotConfig);
+    setZaloBotSaved(true);
+    setTimeout(() => setZaloBotSaved(false), 2500);
+  };
+
+  const handleTestZaloBot = async () => {
+    setIsTestingBot(true);
+    setBotTestMessage(null);
+    const result = await sendZaloBotNotification({
+      type: 'test',
+      title: '🔔 Test Kết Nối Zalo Bot CRM Xoắn Media',
+      content: `Xin chào! Bot "${zaloBotConfig.botName}" (ID: ${zaloBotConfig.botId}) đã kết nối thành công với CRM Xoắn Media vào lúc ${new Date().toLocaleTimeString('vi-VN')}. Hệ thống sẵn sàng tự động bắn lịch chụp và thông báo chốt cọc! 🚀`,
+      recipient: zaloBotConfig.targetChatId || 'Kênh điều hành Xoắn Media'
+    });
+    setIsTestingBot(false);
+    setBotTestMessage(result.message);
+    setZaloBotLogsState(getZaloBotLogs());
+    setTimeout(() => setBotTestMessage(null), 5000);
+  };
+
+  const handleCopyBotToken = () => {
+    navigator.clipboard.writeText(zaloBotConfig.botToken);
+    setCopiedBotToken(true);
+    setTimeout(() => setCopiedBotToken(false), 2000);
   };
 
   const handleTestConnection = async () => {
@@ -1069,6 +1117,204 @@ export const SettingsModule: React.FC = () => {
                 <p className="text-[11px] text-neutral-500">Endpoint bắn dữ liệu sự kiện khi có khách hàng hoàn thành.</p>
               </div>
             </div>
+          </div>
+
+          {/* Section: Zalo Bot AI Task Man */}
+          <div className="bg-white border border-blue-100 p-6 rounded-3xl space-y-5 shadow-xs relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-50/80 via-transparent to-transparent pointer-events-none rounded-full blur-2xl -mr-16 -mt-16" />
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Bot className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-neutral-900">Zalo Bot Tự Động Hóa (AI Task Man)</h2>
+                    <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" /> Bot ID: {zaloBotConfig.botId}
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    Tự động gửi tin nhắn báo lịch chụp cho Thợ, cập nhật chốt cọc VietQR và nhận thông báo công việc
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold px-3 py-1 rounded-full border bg-emerald-50 text-emerald-800 border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Đã kết nối Bot: <strong>{zaloBotConfig.botName}</strong>
+                </span>
+              </div>
+            </div>
+
+            {botTestMessage && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 flex items-center gap-2 animate-in fade-in duration-200">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{botTestMessage}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveZaloBot} className="space-y-4 text-xs relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Bot Token Input */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="font-semibold text-neutral-700 flex items-center gap-1.5">
+                      <Key className="w-3.5 h-3.5 text-neutral-400" /> Mã Khóa Bot Token (Secret Key)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowBotToken(!showBotToken)}
+                        className="text-[11px] text-neutral-500 hover:text-neutral-800 flex items-center gap-1 cursor-pointer"
+                      >
+                        {showBotToken ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        {showBotToken ? 'Ẩn' : 'Hiện'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopyBotToken}
+                        className="text-[11px] text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedBotToken ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                        {copiedBotToken ? 'Đã Copy!' : 'Sao chép'}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showBotToken ? 'text' : 'password'}
+                      value={zaloBotConfig.botToken}
+                      onChange={e => setZaloBotConfigState({ ...zaloBotConfig, botToken: e.target.value })}
+                      placeholder="Dán token Zalo Bot vào đây..."
+                      className="w-full px-3 py-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-xs text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                      <Lock className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Target Chat/Group */}
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-neutral-700 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-neutral-400" /> Nhóm / ID Zalo Nhận Thông Báo
+                  </label>
+                  <input
+                    type="text"
+                    value={zaloBotConfig.targetChatId}
+                    onChange={e => setZaloBotConfigState({ ...zaloBotConfig, targetChatId: e.target.value })}
+                    placeholder="VD: group_dieu_hanh_xoan hoặc SĐT/User ID"
+                    className="w-full px-3 py-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Event Triggers Checkboxes */}
+              <div className="p-3.5 bg-neutral-50 rounded-2xl border border-black/[0.05] space-y-2">
+                <p className="font-bold text-[11px] text-neutral-700 uppercase tracking-wider">
+                  Cấu hình sự kiện tự động bắn tin nhắn qua Zalo Bot:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs text-neutral-800">
+                  <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-xl border border-black/[0.05] shadow-2xs hover:border-blue-300 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={zaloBotConfig.notifyPhotographerSchedule}
+                      onChange={e => setZaloBotConfigState({ ...zaloBotConfig, notifyPhotographerSchedule: e.target.checked })}
+                      className="rounded text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="font-medium text-[11px]">📸 Bắn lịch ca chụp cho Thợ</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-xl border border-black/[0.05] shadow-2xs hover:border-blue-300 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={zaloBotConfig.notifyDepositSuccess}
+                      onChange={e => setZaloBotConfigState({ ...zaloBotConfig, notifyDepositSuccess: e.target.checked })}
+                      className="rounded text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="font-medium text-[11px]">💰 Báo cọc thành công VietQR</span>
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-xl border border-black/[0.05] shadow-2xs hover:border-blue-300 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={zaloBotConfig.notifyNewLead}
+                      onChange={e => setZaloBotConfigState({ ...zaloBotConfig, notifyNewLead: e.target.checked })}
+                      className="rounded text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="font-medium text-[11px]">📥 Báo Lead mới cho Sales</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
+                  >
+                    {zaloBotSaved ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" /> Đã Lưu Cấu Hình Bot!
+                      </>
+                    ) : (
+                      'Lưu Cấu Hình Bot'
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleTestZaloBot}
+                    disabled={isTestingBot}
+                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    {isTestingBot ? 'Đang gửi test...' : 'Gửi Tin Nhắn Thử Nghiệm (Test Ping)'}
+                  </button>
+                </div>
+
+                <span className="text-[11px] text-neutral-400">
+                  Bot Name: <strong className="text-neutral-700">{zaloBotConfig.botName}</strong> | Token đã mã hóa an toàn
+                </span>
+              </div>
+            </form>
+
+            {/* Nhật ký tin nhắn gần đây của Bot */}
+            {zaloBotLogs.length > 0 && (
+              <div className="pt-3 border-t border-black/[0.06] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-neutral-600 uppercase tracking-wider flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
+                    Lịch sử tin nhắn gần đây từ Bot ({zaloBotLogs.length})
+                  </span>
+                </div>
+                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                  {zaloBotLogs.slice(0, 4).map(log => (
+                    <div
+                      key={log.id}
+                      className="p-2.5 bg-neutral-50 rounded-xl border border-black/[0.04] text-xs flex items-start justify-between gap-3"
+                    >
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-neutral-900 text-[11px]">{log.title}</span>
+                          <span className="text-[10px] text-neutral-400">
+                            {new Date(log.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {new Date(log.timestamp).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-600 line-clamp-1">{log.content}</p>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
+                        Đã gửi
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Section: Google Analytics 4 (GA4) */}

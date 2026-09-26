@@ -38,6 +38,7 @@ import {
   mockMoments
 } from '../data/mockData';
 import { crmSupabaseService } from '../services/crmSupabaseService';
+import { sendZaloBotNotification } from '../lib/zaloBotService';
 
 export type NavigationTab = 
   | 'dashboard'
@@ -633,6 +634,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       setNotifications(prev => [notif, ...prev]);
     }
+
+    // Tự động bắn thông báo qua Zalo Bot AI Task Man
+    sendZaloBotNotification({
+      type: 'booking',
+      title: `🎉 Booking Mới: ${bookingData.className} (${bookingData.schoolName})`,
+      content: `Mã booking: ${bookingData.code} | Ngày chụp: ${bookingData.shootDate} | Đặt cọc: ${(bookingData.depositAmount || 0).toLocaleString('vi-VN')} VNĐ.`,
+      recipient: 'Nhóm Quản Lý Booking & Sales'
+    }).catch(() => {});
   };
 
   const updateBooking = (updated: Booking) => {
@@ -658,6 +667,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const assignPhotographerToBooking = (bookingId: string, photographerId: string, roleType: 'lead' | 'assistant' | 'videographer' | 'makeup') => {
     const targetPhotographer = photographers.find(p => p.id === photographerId);
     if (!targetPhotographer) return;
+
+    const currentBooking = bookings.find(b => b.id === bookingId);
+    if (currentBooking) {
+      sendZaloBotNotification({
+        type: 'booking',
+        title: `📸 Lịch chụp: ${currentBooking.className} (${currentBooking.schoolName})`,
+        content: `Đã xếp ${targetPhotographer.fullName} (${roleType === 'lead' ? 'Trưởng nháy' : 'Thợ phụ/hỗ trợ'}) | Ngày: ${currentBooking.shootDate} | Giờ: ${currentBooking.startTime || '07:30'} - ${currentBooking.endTime || '17:00'}.`,
+        recipient: targetPhotographer.phone || targetPhotographer.fullName || 'Nhóm Điều Phối Thợ Chụp'
+      }).catch(() => {});
+    }
 
     setBookings(prev =>
       prev.map(b => {
