@@ -16,9 +16,10 @@ import {
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
+  embedded?: boolean; // Khi true: hiển thị như trang, không có overlay hay nút đóng
 }
 
-export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
+export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, embedded = false }) => {
   const { currentUser, currentRole, updateProfile } = useApp();
 
   // Avatar
@@ -125,32 +126,33 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   };
   const strength = passwordStrength(newPassword);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div onClick={onClose} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md" />
-
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-black/[0.08] overflow-hidden z-10">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-black/[0.06] bg-neutral-50/80">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-neutral-900 flex items-center justify-center">
-              <User className="w-4 h-4 text-[#B8F23D]" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-neutral-900">Hồ Sơ Cá Nhân</h2>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleBadgeClass}`}>
-                {roleLabel}
-              </span>
-            </div>
+  // ── Nội dung chính (dùng chung cho cả popup và embedded) ──────────────────
+  const content = (
+    <div className={embedded ? 'w-full max-w-lg' : 'relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-black/[0.08] overflow-hidden z-10'}>
+      {/* Header */}
+      <div className={`flex items-center justify-between px-6 py-4 border-b border-black/[0.06] ${embedded ? 'bg-white rounded-3xl border border-black/[0.08] shadow-xs mb-4' : 'bg-neutral-50/80'}`}>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-2xl bg-neutral-900 flex items-center justify-center">
+            <User className="w-4 h-4 text-[#B8F23D]" />
           </div>
+          <div>
+            <h2 className="text-sm font-bold text-neutral-900">Hồ Sơ Cá Nhân</h2>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${roleBadgeClass}`}>
+              {roleLabel}
+            </span>
+          </div>
+        </div>
+        {!embedded && (
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
-        </div>
+        )}
+      </div>
 
+      <div className={embedded ? 'bg-white rounded-3xl border border-black/[0.08] shadow-xs overflow-hidden' : ''}>
         {/* User Info Strip */}
         <div className="flex items-center gap-3 px-6 py-3 bg-white border-b border-black/[0.04]">
           <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-black/[0.08] shrink-0">
@@ -400,6 +402,21 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
           Thay đổi sẽ có hiệu lực ngay khi bạn đăng nhập lại lần sau
         </div>
       </div>
+    </div>
+  );
+
+  if (embedded) {
+    return (
+      <div className="animate-in fade-in duration-200 max-w-lg">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div onClick={onClose} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md" />
+      {content}
     </div>
   );
 };

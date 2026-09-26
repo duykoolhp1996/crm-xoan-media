@@ -153,9 +153,9 @@ export const Sidebar: React.FC = () => {
         },
         {
           id: 'settings',
-          label: 'Cài Đặt Hệ Thống',
+          label: isPhotoRole || currentRole === 'sales' ? 'Tài Khoản Của Tôi' : 'Cài Đặt Hệ Thống',
           icon: Settings,
-          roles: ['admin']
+          roles: ['admin', 'sales', 'photographer']
         }
       ]
     }

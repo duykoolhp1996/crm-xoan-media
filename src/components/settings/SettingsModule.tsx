@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { Photographer, PhotographerStatus, SalesStaff } from '../../types';
 import { PhotographerModal } from '../photographers/PhotographerModal';
 import { SalesStaffModal } from '../sales/SalesStaffModal';
+import { ProfileModal } from '../common/ProfileModal';
 import {
   Settings,
   Database,
@@ -33,7 +34,8 @@ import {
   ShieldCheck,
   ExternalLink,
   Coins,
-  BarChart3
+  BarChart3,
+  User
 } from 'lucide-react';
 import { getGA4Id, setGA4Id } from '../../lib/analytics';
 
@@ -45,8 +47,12 @@ export const SettingsModule: React.FC = () => {
     salesStaff,
     deleteSalesStaff,
     customers,
-    loginAsStaff
+    loginAsStaff,
+    currentUser,
+    currentRole
   } = useApp();
+
+  const isSalesOrPhoto = currentRole === 'sales' || currentRole === 'photographer';
 
   const [activeSubTab, setActiveSubTab] = useState<'crew' | 'sales' | 'automation' | 'database'>('crew');
 
@@ -223,6 +229,11 @@ export const SettingsModule: React.FC = () => {
     offline: { label: 'Tạm nghỉ', badge: 'bg-neutral-100 text-neutral-600 border-neutral-200' },
     inactive: { label: 'Ngừng hợp tác', badge: 'bg-rose-50 text-rose-700 border-rose-200' }
   };
+
+  // ─── Nếu là Sales hoặc Photographer: hiển thị trang Hồ Sơ Cá Nhân ─────────────
+  if (isSalesOrPhoto) {
+    return <ProfileModal isOpen={true} onClose={() => {}} embedded />;
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200 max-w-6xl">
