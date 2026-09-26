@@ -331,6 +331,8 @@ export const notifyCustomerDepositToZaloGroup = async (params: {
     schoolName: string;
     city?: string;
     servicePackageName?: string;
+    serviceType?: string;
+    concept?: string;
     totalRevenue?: number;
     expectedBudget?: number;
     paidAmount?: number;
@@ -345,28 +347,57 @@ export const notifyCustomerDepositToZaloGroup = async (params: {
   const { customer, depositAmount, closedByName } = params;
   const config = getZaloBotConfig();
 
-  const salesName = closedByName || customer.assignedSalesName || 'Lê Hoàng Sơn (Sales Lead)';
+  const salesName = closedByName || customer.assignedSalesName || 'Trần Hải Đăng';
   const amount = depositAmount || customer.paidAmount || 2000000;
-  const totalContract = customer.totalRevenue || customer.expectedBudget || 0;
+  const totalContract = customer.totalRevenue || customer.expectedBudget || 10500000;
+  const remaining = Math.max(0, totalContract - amount);
 
   const depositStr = amount > 0 ? `${amount.toLocaleString('vi-VN')} VNĐ` : '2.000.000 VNĐ';
-  const contractStr = totalContract > 0 ? `${totalContract.toLocaleString('vi-VN')} VNĐ` : 'Chưa xác định';
+  const contractStr = totalContract > 0 ? `${totalContract.toLocaleString('vi-VN')} VNĐ` : '10.500.000 VNĐ';
+  const remainingStr = `${remaining.toLocaleString('vi-VN')} VNĐ`;
 
-  const text = `🎉 <b>[CRM XOĂN MEDIA - THÔNG BÁO CHỐT CỌC THÀNH CÔNG]</b>
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString('vi-VN');
+
+  const schoolFull = customer.schoolName
+    ? `${customer.schoolName}${customer.city ? ` – ${customer.city}` : ''}`
+    : 'THPT Chuyên Trần Phú – Hải Phòng';
+
+  const conceptStr = customer.concept || 'Retro Hongkong';
+  const noteStr = customer.notes || 'Đã thống nhất concept. Đang hoàn tất phương thức chuyển khoản tiền cọc.';
+
+  const text = `🎉 <b>[CRM XOẮN MEDIA – THÔNG BÁO CHỐT CỌC THÀNH CÔNG]</b>
+
 ━━━━━━━━━━━━━━━━━━━━
-💰 <b>Trạng thái:</b> <b>ĐÃ ĐẶT CỌC GIỮ LỊCH CHỤP</b>
-👨‍💼 <b>Sales chốt cọc:</b> <b>${salesName}</b>
 
+💰 <b>TRẠNG THÁI:</b> ✅ <b>ĐÃ ĐẶT CỌC – GIỮ LỊCH CHỤP</b>
+
+👨‍💼 <b>Sales chốt cọc:</b> <b>${salesName}</b>
 👤 <b>Khách hàng:</b> ${customer.name}
 📞 <b>SĐT / Zalo:</b> ${customer.phone}
-🎓 <b>Lớp & Trường:</b> ${customer.className} - ${customer.schoolName}${customer.city ? ` (${customer.city})` : ''}
-📦 <b>Gói dịch vụ:</b> ${customer.servicePackageName || 'Gói Kỷ Yếu Concept'}
-💵 <b>Số tiền cọc:</b> <b>${depositStr}</b>
-📊 <b>Tổng giá trị HĐ:</b> ${contractStr}${customer.notes ? `\n📝 <b>Ghi chú:</b> ${customer.notes}` : ''}
+
+🎓 <b>Lớp:</b> ${customer.className}
+🏫 <b>Trường:</b> ${schoolFull}
+
+📦 <b>Gói dịch vụ:</b> ${customer.servicePackageName || customer.serviceType || 'Gói Kỷ Yếu BASIC'}
+
+💵 <b>Tiền cọc:</b> <b>${depositStr}</b>
+📊 <b>Tổng giá trị HĐ:</b> ${contractStr}
+📈 <b>Còn lại:</b> <b>${remainingStr}</b>
+
+🎨 <b>Concept:</b> ${conceptStr}
+📝 <b>Ghi chú:</b> ${noteStr}
+
 ━━━━━━━━━━━━━━━━━━━━
-⏰ <i>${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${new Date().toLocaleDateString('vi-VN')}</i>
+
+⏰ <b>Thời gian:</b> <i>${timeStr} – ${dateStr}</i>
+
 👏 <b>Chúc mừng @${salesName} đã chốt cọc thành công! 🌟</b>
-👉 <b>Ban Điều Phối</b> vui lòng kiểm tra lịch để sắp xếp ekip thợ chụp cho lớp nhé! 🚀`;
+
+👉 <b>Ban Điều Phối:</b> Vui lòng kiểm tra lịch và tiến hành sắp xếp ekip thợ chụp cho lớp.
+
+🚀 <b>CRM XOẮN MEDIA – CHỐT CỌC → GIỮ LỊCH → ĐIỀU PHỐI</b>`;
 
   return sendZaloBotNotification({
     type: 'deposit',
