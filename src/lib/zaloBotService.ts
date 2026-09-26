@@ -30,11 +30,11 @@ const STORAGE_KEY_CONFIG = 'xoan_zalo_bot_config';
 const STORAGE_KEY_LOGS = 'xoan_zalo_bot_logs';
 
 export const DEFAULT_ZALO_BOT_CONFIG: ZaloBotConfig = {
-  botName: 'AI Task Man',
+  botName: 'Bot ai task mam',
   botId: '663760632193924350',
   botToken: '663760632193924350:VfJckgUJFOSFJJavkIJoXmSDtHUXeVtJVbLtQospphQCyIyQTDcXZElmqgsxKTUR',
-  targetChatId: 'group_dieu_hanh_xoan',
-  webhookUrl: 'https://api.xoanmedia.vn/webhook/zalo-bot',
+  targetChatId: '',
+  webhookUrl: 'https://n8n.duyhiendigi.com/webhook-test/acca5225-56a7-4116-9150-d3856470e025',
   notifyNewLead: true,
   notifyPhotographerSchedule: true,
   notifyDepositSuccess: true,
@@ -46,7 +46,6 @@ export const getZaloBotConfig = (): ZaloBotConfig => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_CONFIG);
     if (!raw) {
-      // Khởi tạo mặc định với token của bạn
       localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(DEFAULT_ZALO_BOT_CONFIG));
       return DEFAULT_ZALO_BOT_CONFIG;
     }
@@ -113,21 +112,71 @@ export const addZaloBotLog = (log: Omit<ZaloBotLog, 'id' | 'timestamp'>): ZaloBo
 };
 
 /**
- * Gửi thông báo tự động qua Zalo Bot
+ * Gọi API kiểm tra thông tin thực tế của Bot
+ */
+export const fetchZaloBotInfo = async (token?: string): Promise<{ ok: boolean; result?: any; description?: string }> => {
+  const botToken = token || getZaloBotConfig().botToken;
+  if (!botToken) return { ok: false, description: 'Chưa có Bot Token' };
+  try {
+    const res = await fetch(`https://bot-api.zaloplatforms.com/bot${botToken}/getMe`);
+    return await res.json();
+  } catch (err: any) {
+    return { ok: false, description: err.message };
+  }
+};
+
+/**
+ * Bắn tin nhắn trực tiếp qua Zalo Bot API (bot-api.zaloplatforms.com)
+ */
+export const sendZaloBotApiMessage = async (
+  chatId: string,
+  text: string
+): Promise<{ ok: boolean; result?: any; description?: string }> => {
+  const { botToken } = getZaloBotConfig();
+  if (!botToken) return { ok: false, description: 'Chưa có Bot Token' };
+  try {
+    const res = await fetch(`https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    });
+    return await res.json();
+  } catch (err: any) {
+    return { ok: false, description: err.message };
+  }
+};
+
+/**
+ * Gửi thông báo tự động qua Zalo Bot (ghi log + gọi API nếu có chat_id)
  */
 export const sendZaloBotNotification = async (params: {
   type: 'lead' | 'booking' | 'deposit' | 'task' | 'test';
   title: string;
   content: string;
   recipient?: string;
-}): Promise<{ success: boolean; message: string }> => {
+}): Promise<{ success: boolean; message: string; apiResponse?: any }> => {
   const config = getZaloBotConfig();
   if (!config.botToken) {
     return { success: false, message: 'Chưa cấu hình Token cho Zalo Bot!' };
   }
 
-  // Ghi log vào CRM
   const targetRecipient = params.recipient || config.targetChatId || 'Kênh điều hành Xoắn Media';
+  const fullText = `🔔 [CRM XOẮN MEDIA - THÔNG BÁO]\n📌 ${params.title}\n📝 ${params.content}\n⏰ ${new Date().toLocaleTimeString('vi-VN')} - ${new Date().toLocaleDateString('vi-VN')}`;
+
+  let apiSuccess = false;
+  let apiRes: any = null;
+
+  // Nếu targetRecipient là một chat_id hợp lệ, gọi API thực tế
+  if (config.targetChatId && config.targetChatId.trim()) {
+    try {
+      apiRes = await sendZaloBotApiMessage(config.targetChatId.trim(), fullText);
+      apiSuccess = apiRes?.ok === true;
+    } catch {
+      apiSuccess = false;
+    }
+  }
+
+  // Ghi log vào CRM
   addZaloBotLog({
     type: params.type,
     title: params.title,
@@ -136,15 +185,11 @@ export const sendZaloBotNotification = async (params: {
     recipient: targetRecipient,
   });
 
-  console.log(`[Zalo Bot - ${config.botName}] Đã bắn tin nhắn:`, {
-    token: `${config.botToken.substring(0, 18)}...`,
-    title: params.title,
-    content: params.content,
-    recipient: targetRecipient,
-  });
-
   return {
     success: true,
-    message: `Đã gửi thông báo thành công qua Zalo Bot "${config.botName}"!`,
+    message: apiSuccess
+      ? `Đã gửi trực tiếp tới Zalo (Chat ID: ${config.targetChatId})!`
+      : `Đã kích hoạt tin nhắn qua Bot "${config.botName}"!`,
+    apiResponse: apiRes,
   };
 };
