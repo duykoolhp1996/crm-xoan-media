@@ -252,10 +252,10 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                   setShowDepositModal(true);
                 }}
                 className="px-3.5 py-1.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
-                title="Tạo khoản cọc giữ lịch và mã VietQR chuyển khoản ngân hàng"
+                title="Bắt buộc nhập số tiền cọc & xác nhận chuyển sang Đã đặt cọc"
               >
                 <QrCode className="w-3.5 h-3.5 text-neutral-950" />
-                <span>Tạo Cọc QR</span>
+                <span>💰 Xác Nhận Cọc</span>
               </button>
             )}
 
@@ -659,9 +659,10 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                           setShowDepositModal(true);
                         }}
                         className="flex-1 sm:flex-initial px-4 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                        title="Bắt buộc nhập số tiền cọc & xác nhận chuyển sang Đã đặt cọc"
                       >
                         <QrCode className="w-3.5 h-3.5 text-neutral-950" />
-                        <span>Tạo Cọc QR</span>
+                        <span>💰 Xác Nhận Đặt Cọc & Giữ Lịch</span>
                       </button>
                     )}
                   </div>
@@ -1192,10 +1193,10 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                 setShowDepositModal(true);
               }}
               className="flex-1 py-2.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
-              title="Tạo khoản cọc giữ lịch và mã VietQR chuyển khoản ngân hàng"
+              title="Bắt buộc nhập số tiền cọc & xác nhận chuyển sang Đã đặt cọc"
             >
               <QrCode className="w-3.5 h-3.5 text-neutral-950" />
-              <span>Tạo Cọc QR</span>
+              <span>💰 Nhập Cọc & Chuyển Đã Cọc</span>
             </button>
           )}
 

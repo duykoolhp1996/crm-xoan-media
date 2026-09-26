@@ -128,6 +128,30 @@ export const KanbanPipeline: React.FC = () => {
     e.preventDefault();
     const customerId = e.dataTransfer.getData('text/plain') || draggedCustomerId;
     if (customerId) {
+      // BẮT BUỘC: Muốn chuyển sang "Đã đặt cọc" (từ Đang thương lượng hoặc các bước trước) PHẢI có số tiền cọc!
+      if (targetStage === 'Đã đặt cọc') {
+        const cust = customers.find(c => c.id === customerId);
+        if (cust) {
+          // Tự động mở modal cọc để nhập/chọn số tiền cọc và xác nhận thanh toán
+          setPaymentConfig({ customer: cust, mode: 'deposit' });
+          setDraggedCustomerId(null);
+          return;
+        }
+      }
+
+      // Nếu kéo thả sang "Hoàn thành" từ "Đã bàn giao" mà còn tiền chưa tất toán
+      if (targetStage === 'Hoàn thành') {
+        const cust = customers.find(c => c.id === customerId);
+        if (cust && cust.pipelineStage === 'Đã bàn giao') {
+          const remaining = (cust.totalRevenue || cust.expectedBudget || 0) - (cust.paidAmount || 0);
+          if (remaining > 0) {
+            setPaymentConfig({ customer: cust, mode: 'final' });
+            setDraggedCustomerId(null);
+            return;
+          }
+        }
+      }
+
       updateCustomerStage(customerId, targetStage);
     }
     setDraggedCustomerId(null);
@@ -286,6 +310,21 @@ export const KanbanPipeline: React.FC = () => {
                         </span>
                       </div>
 
+                      {/* Badge Số Tiền Đã Cọc (Nếu đang ở Đã đặt cọc) */}
+                      {cust.pipelineStage === 'Đã đặt cọc' && (
+                        <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-lime-50 border border-emerald-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                          <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            Đã nhận cọc:
+                          </span>
+                          <span className="font-extrabold text-emerald-950 text-xs">
+                            {cust.paidAmount && cust.paidAmount > 0
+                              ? `${cust.paidAmount.toLocaleString('vi-VN')} đ`
+                              : '2.000.000 đ'}
+                          </span>
+                        </div>
+                      )}
+
                       {/* 1. Nút Tạo / Chỉnh Sửa Báo Giá: CHỈ hiển thị ở Đang tư vấn, Đã gửi báo giá, Đang thương lượng */}
                       {(cust.pipelineStage === 'Đang tư vấn' || cust.pipelineStage === 'Đã gửi báo giá' || cust.pipelineStage === 'Đang thương lượng') && (
                         <button
@@ -314,11 +353,11 @@ export const KanbanPipeline: React.FC = () => {
                             e.stopPropagation();
                             setPaymentConfig({ customer: cust, mode: 'deposit' });
                           }}
-                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-gradient-to-r from-purple-50 to-emerald-50 hover:from-purple-100 hover:to-emerald-100 text-purple-950 border border-purple-200/90"
-                          title="Tạo thông tin cọc & mã VietQR chuyển khoản ngân hàng giữ slot chụp"
+                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08]"
+                          title="Bắt buộc nhập số tiền cọc & xác nhận chuyển sang Đã đặt cọc"
                         >
-                          <QrCode className="w-3.5 h-3.5 text-purple-700" />
-                          <span>Tạo Cọc & Mã QR</span>
+                          <QrCode className="w-3.5 h-3.5 text-neutral-950" />
+                          <span>💰 Xác Nhận Cọc & Chuyển Đã Cọc</span>
                         </button>
                       )}
 

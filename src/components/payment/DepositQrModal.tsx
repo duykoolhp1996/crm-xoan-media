@@ -186,6 +186,11 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
 
   // Xác nhận đã nhận tiền & cập nhật tiến trình
   const handleConfirmPayment = () => {
+    if (paymentAmount <= 0) {
+      alert('Vui lòng nhập số tiền cọc lớn hơn 0đ để chuyển sang Đã đặt cọc!');
+      return;
+    }
+
     const newPaidAmount = (customer.paidAmount || 0) + paymentAmount;
     const targetStage: PipelineStage = isFinalPayment ? 'Hoàn thành' : 'Đã đặt cọc';
 
@@ -193,7 +198,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
       ...customer,
       paidAmount: newPaidAmount,
       pipelineStage: targetStage,
-      notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] ${isFinalPayment ? 'Đã tất toán toàn bộ' : 'Đã cọc'} ${paymentAmount.toLocaleString('vi-VN')}đ qua QR MB Bank. ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
+      notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] ${isFinalPayment ? 'Đã tất toán toàn bộ' : 'Đã đặt cọc'} ${paymentAmount.toLocaleString('vi-VN')}đ qua QR MB Bank. ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
       updatedAt: new Date().toISOString()
     });
 
@@ -559,17 +564,22 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
               <button
                 type="button"
                 onClick={handleConfirmPayment}
+                disabled={paymentAmount <= 0}
                 className={`w-full py-3 font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all cursor-pointer ${
-                  isFinalPayment
+                  paymentAmount <= 0
+                    ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed border border-neutral-300'
+                    : isFinalPayment
                     ? 'bg-teal-600 hover:bg-teal-700 text-white'
                     : 'bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950'
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>
-                  {isFinalPayment
+                  {paymentAmount <= 0
+                    ? '⚠️ Vui lòng nhập số tiền cọc > 0đ'
+                    : isFinalPayment
                     ? `Xác Nhận Đã Thanh Toán Đủ ${paymentAmount.toLocaleString('vi-VN')}đ`
-                    : `Xác Nhận Đã Nhận Cọc ${paymentAmount.toLocaleString('vi-VN')}đ`}
+                    : `Xác Nhận Đã Nhận Cọc ${paymentAmount.toLocaleString('vi-VN')}đ & Chuyển Sang "Đã Đặt Cọc"`}
                 </span>
               </button>
             </div>
