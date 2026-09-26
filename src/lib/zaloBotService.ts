@@ -149,27 +149,25 @@ export const sendZaloBotApiMessage = async (
   console.log(`[ZaloBot] Đang bắn tin nhắn tới Chat ID: ${chatId}...`);
   const getUrl = `https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage?chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(text)}`;
 
-  // 1. Kỹ thuật Image Tracking Beacon (Không bao giờ bị CORS chặn trong mọi trình duyệt / Web / PWA)
-  if (typeof window !== 'undefined') {
+  // Sử dụng một phương thức duy nhất (fetch no-cors hoặc beacon fallback) để tránh gửi lặp tin nhắn
+  if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
     try {
-      const beacon = new Image();
-      beacon.src = getUrl;
-      console.log('[ZaloBot] Beacon Image sent');
-    } catch (e) {
-      console.warn('[ZaloBot] Beacon error:', e);
+      await fetch(getUrl, { mode: 'no-cors' });
+      console.log(`[ZaloBot] Đã gửi thành công qua GET (no-cors) tới ${chatId}`);
+      return { ok: true, result: { message_id: 'sent_browser_get' } };
+    } catch (errGet: any) {
+      console.warn('[ZaloBot] GET request thất bại, dùng fallback Image Beacon:', errGet);
+      try {
+        const beacon = new Image();
+        beacon.src = getUrl;
+        return { ok: true, result: { message_id: 'sent_beacon' } };
+      } catch (e: any) {
+        return { ok: false, description: e.message };
+      }
     }
   }
 
-  // 2. Phương thức HTTP GET với mode no-cors
-  try {
-    await fetch(getUrl, { mode: 'no-cors' });
-    console.log(`[ZaloBot] Đã gửi thành công qua GET (no-cors) tới ${chatId}`);
-    return { ok: true, result: { message_id: 'sent_browser_get' } };
-  } catch (errGet: any) {
-    console.warn('[ZaloBot] GET request thất bại, thử POST fallback:', errGet);
-  }
-
-  // 3. Fallback POST (cho Node.js / Server-side)
+  // Fallback POST (cho Node.js / Server-side)
   try {
     const res = await fetch(`https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage`, {
       method: 'POST',

@@ -208,12 +208,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     crmSupabaseService.getCustomers().then(remoteCustomers => {
       if (remoteCustomers && remoteCustomers.length > 0) {
-        const hasConsulting = remoteCustomers.some(c => c.pipelineStage === 'Đang tư vấn');
-        if (!hasConsulting) {
-          setCustomers([...remoteCustomers, ...mockCustomers]);
-        } else {
-          setCustomers(remoteCustomers);
-        }
+        setCustomers(prev => {
+          const map = new Map<string, Customer>();
+          // 1. Thêm khách từ Supabase
+          remoteCustomers.forEach(c => map.set(c.id, c));
+          // 2. Thêm khách từ mockData / state hiện tại nếu ID và SĐT chưa tồn tại
+          prev.forEach(c => {
+            if (!map.has(c.id)) {
+              const cleanP = (c.phone || '').replace(/\D/g, '');
+              const cleanZalo = (c.zalo || '').replace(/\D/g, '');
+              const isDupe = Array.from(map.values()).some(existing => {
+                const exP = (existing.phone || '').replace(/\D/g, '');
+                const exZ = (existing.zalo || '').replace(/\D/g, '');
+                return (cleanP && (cleanP === exP || cleanP === exZ)) || (cleanZalo && (cleanZalo === exP || cleanZalo === exZ));
+              });
+              if (!isDupe) {
+                map.set(c.id, c);
+              }
+            }
+          });
+          return Array.from(map.values());
+        });
         console.log(`[Supabase] Đã nạp thành công ${remoteCustomers.length} khách hàng từ cơ sở dữ liệu.`);
       }
     });
