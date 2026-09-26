@@ -299,7 +299,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentRoleState('photographer');
         setIsAuthenticated(true);
         setIsImpersonating(false);
-        setActiveTab('photographers');
+        setActiveTab('calendar');
         try {
           localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: photoUser, role: 'photographer' }));
         } catch (e) {
@@ -408,7 +408,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (staff.role === 'sales') {
       setActiveTab('pipeline');
     } else {
-      setActiveTab('photographers');
+      setActiveTab('calendar');
     }
   };
 

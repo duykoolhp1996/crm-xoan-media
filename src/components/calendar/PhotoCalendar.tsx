@@ -195,13 +195,15 @@ export const PhotoCalendar: React.FC = () => {
             </button>
           </div>
 
-          <button
-            onClick={() => handleCreateBookingForSelectedDay()}
-            className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            Thêm Lịch
-          </button>
+          {!isPhotographerUser && (
+            <button
+              onClick={() => handleCreateBookingForSelectedDay()}
+              className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+            >
+              <Plus className="w-4 h-4" />
+              Thêm Lịch
+            </button>
+          )}
         </div>
       </div>
 
@@ -400,30 +402,38 @@ export const PhotoCalendar: React.FC = () => {
                 <h3 className="text-sm font-bold text-neutral-900">
                   Lịch Chụp Ngày {selectedDay}/{month + 1}/{year} ({selectedDateBookings.length} ca chụp)
                 </h3>
-                <p className="text-xs text-neutral-500">
-                  Bấm "+ Thêm Lịch" để xếp lịch chụp kỷ yếu mới vào ngày này
-                </p>
+                {!isPhotographerUser && (
+                  <p className="text-xs text-neutral-500">
+                    Bấm "+ Thêm Lịch" để xếp lịch chụp kỷ yếu mới vào ngày này
+                  </p>
+                )}
               </div>
-              <button
-                onClick={() => handleCreateBookingForSelectedDay()}
-                className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Đặt Lịch Ngày Này
-              </button>
+              {!isPhotographerUser && (
+                <button
+                  onClick={() => handleCreateBookingForSelectedDay()}
+                  className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Đặt Lịch Ngày Này
+                </button>
+              )}
             </div>
 
             {selectedDateBookings.length === 0 ? (
               <div className="py-12 text-center text-neutral-400 text-xs bg-neutral-50 rounded-2xl border border-black/[0.04]">
                 <CalendarIcon className="w-8 h-8 mx-auto text-neutral-300 mb-2" />
                 <p className="font-semibold text-neutral-600">Ngày {selectedDay}/{month + 1}/{year} chưa có ca chụp nào.</p>
-                <p className="text-[11px] text-neutral-400 mt-1">Ekip thợ đang trống lịch 100%, sẵn sàng nhận booking!</p>
-                <button
-                  onClick={() => handleCreateBookingForSelectedDay()}
-                  className="mt-3 px-5 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold text-xs rounded-xl shadow-sm transition-all"
-                >
-                  + Tạo Booking Ngay
-                </button>
+                <p className="text-[11px] text-neutral-400 mt-1">
+                  {isPhotographerUser ? 'Bạn chưa có ca chụp nào trong ngày này.' : 'Ekip thợ đang trống lịch 100%, sẵn sàng nhận booking!'}
+                </p>
+                {!isPhotographerUser && (
+                  <button
+                    onClick={() => handleCreateBookingForSelectedDay()}
+                    className="mt-3 px-5 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold text-xs rounded-xl shadow-sm transition-all"
+                  >
+                    + Tạo Booking Ngay
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -436,9 +446,11 @@ export const PhotoCalendar: React.FC = () => {
                         </span>
                         <h4 className="font-bold text-neutral-900 text-sm mt-1">{bk.className} - {bk.schoolName}</h4>
                       </div>
-                      <span className="text-xs font-bold text-neutral-900 bg-white px-2.5 py-1 rounded-full border border-black/[0.06]">
-                        {bk.totalAmount.toLocaleString('vi-VN')}đ
-                      </span>
+                      {!isPhotographerUser && (
+                        <span className="text-xs font-bold text-neutral-900 bg-white px-2.5 py-1 rounded-full border border-black/[0.06]">
+                          {bk.totalAmount.toLocaleString('vi-VN')}đ
+                        </span>
+                      )}
                     </div>
 
                     <div className="space-y-1 text-xs text-neutral-600">
@@ -511,15 +523,17 @@ export const PhotoCalendar: React.FC = () => {
                     ))}
                   </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCreateBookingForSelectedDay(getDateStr(dayNum));
-                    }}
-                    className="text-[10px] font-bold text-neutral-700 bg-white hover:bg-neutral-900 hover:text-[#B8F23D] py-1 px-2 rounded-lg border border-black/[0.08] transition-colors text-center"
-                  >
-                    + Đặt lịch
-                  </button>
+                  {!isPhotographerUser && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCreateBookingForSelectedDay(getDateStr(dayNum));
+                      }}
+                      className="text-[10px] font-bold text-neutral-700 bg-white hover:bg-neutral-900 hover:text-[#B8F23D] py-1 px-2 rounded-lg border border-black/[0.08] transition-colors text-center"
+                    >
+                      + Đặt lịch
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -573,9 +587,11 @@ export const PhotoCalendar: React.FC = () => {
                         </span>
                         <h4 className="font-bold text-neutral-900 text-sm mt-1.5">{bk.className} - {bk.schoolName}</h4>
                       </div>
-                      <span className="font-bold text-neutral-900 bg-white px-2.5 py-1 rounded-full border border-black/[0.06]">
-                        {bk.totalAmount.toLocaleString('vi-VN')}đ
-                      </span>
+                      {!isPhotographerUser && (
+                        <span className="font-bold text-neutral-900 bg-white px-2.5 py-1 rounded-full border border-black/[0.06]">
+                          {bk.totalAmount.toLocaleString('vi-VN')}đ
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-neutral-600 flex items-center gap-1.5">
@@ -614,14 +630,16 @@ export const PhotoCalendar: React.FC = () => {
               >
                 Xem Timeline Ngày
               </button>
-              <button
-                type="button"
-                onClick={() => handleCreateBookingForSelectedDay()}
-                className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
-              >
-                <Plus className="w-4 h-4" />
-                Đặt Lịch Chụp Ngày Này
-              </button>
+              {!isPhotographerUser && (
+                <button
+                  type="button"
+                  onClick={() => handleCreateBookingForSelectedDay()}
+                  className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  Đặt Lịch Chụp Ngày Này
+                </button>
+              )}
             </div>
           </div>
         </div>
