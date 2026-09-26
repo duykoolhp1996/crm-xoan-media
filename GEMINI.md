@@ -10,3 +10,10 @@
 ## 2. Quy Tắc Tự Động Hóa (Automation Rules)
 - Kéo thẻ khách hàng từ `New Lead` sang `Đã liên hệ` trong Pipeline: Tự động phân bổ và gán nhân viên Sales tư vấn phụ trách.
 - Khách hàng từ chối hoặc hủy hợp đồng: Sử dụng nút `Khách từ chối (Lost)` trong Hồ sơ 360° để chuyển trạng thái sang Lost và lưu lý do.
+
+## 3. Vai Trò Zalo Bot (AI Task Man - Trợ Lý Công Việc Nội Bộ)
+- **Định vị cốt lõi**: Bot `Bot ai task mam` (ID: `663760632193924350`) **CHỈ LÀ TRỢ LÝ CÔNG VIỆC NỘI BỘ (Task & Ops Assistant)**, hoàn toàn **KHÔNG PHẢI** là chatbot tư vấn bán hàng hay nhắn tin tương tác với khách hàng.
+- **Phạm vi nghiệp vụ chính**:
+  1. **Nhắc việc & Quản trị Task**: Thông báo các task công việc cần xử lý, nhắc deadline hợp đồng hoặc công việc quá hạn.
+  2. **Bắn lịch ca chụp cho Ekip**: Báo lịch chụp mới, ngày chụp, trường lớp, địa điểm và phân công trưởng nháy/thợ phụ.
+  3. **Thông báo vận hành cho Quản lý / Admin**: Bắn thông báo chốt cọc VietQR, cập nhật tình trạng booking cho anh Tạ Duy và ban điều phối.
