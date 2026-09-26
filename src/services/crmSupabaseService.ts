@@ -2,7 +2,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { Customer, Photographer, SalesStaff } from '../types';
 
 /**
- * Service giao tiếp giữa CRM Xoắn Media và Supabase PostgreSQL
+ * Service giao tiếp giữa CRM Xoăn Media và Supabase PostgreSQL
  * Tự động chuyển đổi giữa Real Database & Local/Mock Data
  */
 

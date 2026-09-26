@@ -428,7 +428,7 @@ export const PriceQuoteModal: React.FC<PriceQuoteModalProps> = ({
       return `${idx + 1}. ${it.name} (${it.quantity} ${it.unit}): ${lineTotal.toLocaleString('vi-VN')} đ${it.discount > 0 ? ` (Đã giảm ${it.discount.toLocaleString('vi-VN')}đ)` : ''}`;
     }).join('\n');
 
-    const text = `📸 BẢNG BÁO GIÁ KỶ YẾU 2026 - XOẮN MEDIA STUDIO
+    const text = `📸 BẢNG BÁO GIÁ KỶ YẾU 2026 - XOĂN MEDIA STUDIO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎓 Kính gửi: Tập thể lớp ${customer.className} - ${customer.schoolName}
 👤 Đại diện: ${customer.name} (${customer.representativeRole || 'Lớp trưởng'}) - SĐT: ${customer.phone}
@@ -455,7 +455,7 @@ ${itemsText}
 • Ngân hàng: MB BANK • STK: 0981108601 • Chủ TK: CHU DUC DUY
 • Cú pháp CK: COC KYYEU ${customer.className.toUpperCase()} ${customer.phone}
 
-📞 Chuyên viên tư vấn: ${customer.assignedSalesName || 'Xoắn Media'}
+📞 Chuyên viên tư vấn: ${customer.assignedSalesName || 'Xoăn Media'}
 🌐 Hotline: 0981 108 601 • Website: xoanmedia.vn`;
 
     navigator.clipboard.writeText(text);
@@ -472,7 +472,7 @@ ${itemsText}
           <div className="flex items-center gap-3 min-w-0">
             <img
               src={logoXoan}
-              alt="Xoắn Media"
+              alt="Xoăn Media"
               className="w-9 h-9 rounded-xl object-cover shadow-sm border border-neutral-700 shrink-0"
             />
             <div className="min-w-0">
@@ -897,12 +897,12 @@ ${itemsText}
                 <div className="flex items-center gap-3">
                   <img
                     src={logoXoan}
-                    alt="Xoắn Media Studio"
+                    alt="Xoăn Media Studio"
                     className="w-14 h-14 rounded-2xl object-cover shadow-sm border border-neutral-200 shrink-0"
                   />
                   <div>
                     <h1 className="text-lg sm:text-xl font-black tracking-tight text-neutral-950 uppercase leading-none">
-                      XOẮN MEDIA STUDIO
+                      XOĂN MEDIA STUDIO
                     </h1>
                     <p className="text-[11px] text-neutral-600 font-semibold tracking-wide mt-1">
                       HỆ THỐNG KỶ YẾU & NGHỆ THUẬT HỌC ĐƯỜNG HÀNG ĐẦU
@@ -963,7 +963,7 @@ ${itemsText}
                     • Địa điểm: <strong className="text-neutral-900">{customer.shootingLocations?.join(', ') || 'Trường học & Ngoại cảnh'}</strong>
                   </p>
                   <p className="text-neutral-700 text-[11px]">
-                    • Sales tư vấn: <strong className="text-blue-700">{customer.assignedSalesName || 'Xoắn Media Sales Lead'}</strong>
+                    • Sales tư vấn: <strong className="text-blue-700">{customer.assignedSalesName || 'Xoăn Media Sales Lead'}</strong>
                   </p>
                 </div>
               </div>
@@ -1111,7 +1111,7 @@ ${itemsText}
 
                 <div className="space-y-8">
                   <div>
-                    <p className="font-bold text-neutral-900 uppercase text-[11px]">ĐẠI DIỆN XOẮN MEDIA STUDIO</p>
+                    <p className="font-bold text-neutral-900 uppercase text-[11px]">ĐẠI DIỆN XOĂN MEDIA STUDIO</p>
                     <p className="text-neutral-500 text-[10px]">(Ký tên & Đóng dấu xác nhận)</p>
                   </div>
                   <p className="font-bold text-neutral-900 text-xs uppercase">{customer.assignedSalesName || 'LÊ HOÀNG SƠN'}</p>

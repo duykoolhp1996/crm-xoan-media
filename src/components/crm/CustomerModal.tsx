@@ -564,7 +564,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
                     <option value="Phạm Quỳnh Nga (CSKH)">Phạm Quỳnh Nga (CSKH & Hợp đồng)</option>
                     <option value="Nguyễn Thu Hương (CSKH)">Nguyễn Thu Hương (CSKH)</option>
                     <option value="Đặng Mai Linh (Tư vấn & CSKH)">Đặng Mai Linh (Tư vấn & CSKH)</option>
-                    <option value="Admin Xoắn Media">Admin Xoắn Media</option>
+                    <option value="Admin Xoăn Media">Admin Xoăn Media</option>
                   </select>
                 </div>
               </div>

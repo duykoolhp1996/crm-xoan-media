@@ -79,7 +79,7 @@ export const SettingsModule: React.FC = () => {
     const userStr = staff.username || staff.email;
     const passStr = staff.password || (type === 'sales' ? 'XoanSales@2024' : 'PhotoXoan@2024');
     const roleName = type === 'sales' ? (staff.roleTitle || 'Chuyên viên Sales') : `Photographer (${staff.photographerType || 'Ekip Chụp'})`;
-    const text = `🎉 TÀI KHOẢN ĐĂNG NHẬP CRM XOẮN MEDIA\n👤 Họ tên: ${staff.name}\n🛡️ Phân quyền: ${roleName}\n🔑 Tên đăng nhập: ${userStr}\n🔒 Mật khẩu: ${passStr}\n🌐 Đăng nhập tại: https://duykoolhp1996.github.io/crm-xoan-media/`;
+    const text = `🎉 TÀI KHOẢN ĐĂNG NHẬP CRM XOĂN MEDIA\n👤 Họ tên: ${staff.name}\n🛡️ Phân quyền: ${roleName}\n🔑 Tên đăng nhập: ${userStr}\n🔒 Mật khẩu: ${passStr}\n🌐 Đăng nhập tại: https://duykoolhp1996.github.io/crm-xoan-media/`;
     navigator.clipboard.writeText(text);
     setCopiedId(staff.id);
     setTimeout(() => setCopiedId(null), 2500);
@@ -128,9 +128,9 @@ export const SettingsModule: React.FC = () => {
     setBotTestMessage(null);
     const result = await sendZaloBotNotification({
       type: 'test',
-      title: '🔔 Test Kết Nối Zalo Bot CRM Xoắn Media',
-      content: `Xin chào! Bot "${zaloBotConfig.botName}" (ID: ${zaloBotConfig.botId}) đã kết nối thành công với CRM Xoắn Media vào lúc ${new Date().toLocaleTimeString('vi-VN')}. Hệ thống sẵn sàng tự động bắn lịch chụp và thông báo chốt cọc! 🚀`,
-      recipient: zaloBotConfig.targetChatId || 'Kênh điều hành Xoắn Media'
+      title: '🔔 Test Kết Nối Zalo Bot CRM Xoăn Media',
+      content: `Xin chào! Bot "${zaloBotConfig.botName}" (ID: ${zaloBotConfig.botId}) đã kết nối thành công với CRM Xoăn Media vào lúc ${new Date().toLocaleTimeString('vi-VN')}. Hệ thống sẵn sàng tự động bắn lịch chụp và thông báo chốt cọc! 🚀`,
+      recipient: zaloBotConfig.targetChatId || 'Kênh điều hành Xoăn Media'
     });
     setIsTestingBot(false);
     setBotTestMessage(result.message);
@@ -916,7 +916,7 @@ export const SettingsModule: React.FC = () => {
             <div>
               <h2 className="text-sm font-bold text-neutral-900">Động Cơ Tự Động Hóa Vận Hành (Automation Engine)</h2>
               <p className="text-xs text-neutral-500 mt-0.5">
-                Các quy tắc kích hoạt tự động theo logic nghiệp vụ kỷ yếu Xoắn Media
+                Các quy tắc kích hoạt tự động theo logic nghiệp vụ kỷ yếu Xoăn Media
               </p>
             </div>
           </div>

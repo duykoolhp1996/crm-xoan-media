@@ -1,5 +1,5 @@
 -- =========================================================================
--- DATABASE SCHEMA CHUYÊN BIỆT CHO XOẮN MEDIA CRM (KỶ YẾU & HỌC ĐƯỜNG)
+-- DATABASE SCHEMA CHUYÊN BIỆT CHO XOĂN MEDIA CRM (KỶ YẾU & HỌC ĐƯỜNG)
 -- Hỗ trợ: PostgreSQL 14+ / Supabase với RLS, UUID, Timestamps, Triggers
 -- =========================================================================
 

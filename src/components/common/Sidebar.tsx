@@ -163,12 +163,12 @@ export const Sidebar: React.FC = () => {
       <div className="h-16 flex items-center gap-3 px-5 border-b border-black/[0.06] bg-white/40">
         <img
           src={logoXoan}
-          alt="Xoắn Media"
+          alt="Xoăn Media"
           className="w-10 h-10 rounded-2xl object-cover shadow-sm border border-black/[0.08]"
         />
         <div>
           <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-neutral-900 text-sm tracking-tight">XOẮN MEDIA</span>
+            <span className="font-extrabold text-neutral-900 text-sm tracking-tight">XOĂN MEDIA</span>
             <span className="text-[10px] font-bold bg-[#B8F23D] text-neutral-950 px-1.5 py-0.2 rounded-full shadow-xs">
               CRM
             </span>

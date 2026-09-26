@@ -27,7 +27,7 @@ const MainContent: React.FC = () => {
   const isPhotographer = currentRole === 'photographer' || currentUser?.role === 'photographer';
 
   React.useEffect(() => {
-    trackPageView(`/#${activeTab}`, `CRM Xoắn - ${activeTab}`);
+    trackPageView(`/#${activeTab}`, `CRM Xoăn - ${activeTab}`);
   }, [activeTab]);
 
   const isPipeline = activeTab === 'pipeline';

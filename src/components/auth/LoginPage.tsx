@@ -60,7 +60,7 @@ export const LoginPage: React.FC = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden shadow-xl border border-neutral-700/80 ring-2 ring-[#B8F23D]/20">
               <img
                 src={logoXoan}
-                alt="Xoắn Media Studio"
+                alt="Xoăn Media Studio"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
             <div>
               <div className="flex items-center justify-center gap-2">
                 <span className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                  XOẮN MEDIA
+                  XOĂN MEDIA
                 </span>
                 <span className="text-[11px] font-mono font-bold bg-[#B8F23D]/20 text-[#B8F23D] border border-[#B8F23D]/30 px-2 py-0.5 rounded-full">
                   CRM 2026
@@ -180,7 +180,7 @@ export const LoginPage: React.FC = () => {
           <div className="pt-3 border-t border-neutral-800/80 text-[11px] text-neutral-400 flex items-start gap-2">
             <HelpCircle className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
             <span>
-              Tài khoản & mật khẩu do <strong>Admin Xoắn Media</strong> cấp cho nhân sự Sales & Ekip Thợ Chụp. Quên mật khẩu vui lòng liên hệ Hotline Admin: <strong>0981 108 601</strong>.
+              Tài khoản & mật khẩu do <strong>Admin Xoăn Media</strong> cấp cho nhân sự Sales & Ekip Thợ Chụp. Quên mật khẩu vui lòng liên hệ Hotline Admin: <strong>0981 108 601</strong>.
             </span>
           </div>
 
@@ -188,7 +188,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Footer Copyright */}
         <p className="text-center text-[11px] text-neutral-600 mt-6">
-          © 2026 XOẮN MEDIA • Hệ Thống Nội Bộ Dành Riêng Cho Nhân Sự
+          © 2026 XOĂN MEDIA • Hệ Thống Nội Bộ Dành Riêng Cho Nhân Sự
         </p>
       </div>
     </div>

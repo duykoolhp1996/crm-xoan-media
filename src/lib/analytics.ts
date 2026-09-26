@@ -1,5 +1,5 @@
 /**
- * Google Analytics 4 (GA4) Tracker Module for Xoắn Media CRM
+ * Google Analytics 4 (GA4) Tracker Module for Xoăn Media CRM
  * Hỗ trợ tự động tải gtag.js, theo dõi PageView và Custom Events
  */
 

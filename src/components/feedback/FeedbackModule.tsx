@@ -118,7 +118,7 @@ export const FeedbackModule: React.FC = () => {
             Khoảnh khắc & Feedback từ các lớp
           </h1>
           <p className="text-xs sm:text-sm text-neutral-500 mt-2 font-normal max-w-2xl leading-relaxed">
-            Những chia sẻ, khoảnh khắc xúc động và phản hồi chân thực từ các lớp trưởng sau buổi chụp cùng Xoắn Media.
+            Những chia sẻ, khoảnh khắc xúc động và phản hồi chân thực từ các lớp trưởng sau buổi chụp cùng Xoăn Media.
           </p>
         </div>
 
@@ -128,7 +128,7 @@ export const FeedbackModule: React.FC = () => {
           <div className="flex items-center gap-1.5 bg-neutral-100 border border-black/[0.06] p-1.5 rounded-full shadow-xs">
             {/* 1. Collaborator Icon */}
             <button
-              onClick={() => alert('Thành viên cộng tác: Team Xoắn Media & Đại diện các lớp')}
+              onClick={() => alert('Thành viên cộng tác: Team Xoăn Media & Đại diện các lớp')}
               className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-neutral-900 hover:bg-white transition-all shadow-xs"
               title="Người cộng tác"
             >

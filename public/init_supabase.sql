@@ -1,5 +1,5 @@
 -- =========================================================================
--- SUPABASE POSTGRESQL MIGRATION: CRM XOẮN MEDIA (KỶ YẾU & HỌC ĐƯỜNG 2026)
+-- SUPABASE POSTGRESQL MIGRATION: CRM XOĂN MEDIA (KỶ YẾU & HỌC ĐƯỜNG 2026)
 -- Project Ref: etvbrbdysphrfzvnwvbk
 -- Tạo toàn bộ cấu trúc bảng lưu trữ & Seed dữ liệu thực tế
 -- =========================================================================
@@ -187,7 +187,7 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 
 -- =========================================================================
--- SEED DATA THỰC TẾ XOẮN MEDIA 2026
+-- SEED DATA THỰC TẾ XOĂN MEDIA 2026
 -- =========================================================================
 
 -- A. SEED 4 SALES CHÍNH THỨC (Kèm chính sách % hoa hồng & chia cố định)
@@ -215,7 +215,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- C. SEED 38 THỢ CHỤP THỰC TẾ NĂM 2026 TỪ GOOGLE SHEET
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-1', 'Doanh', '0866957128', 'doanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (LEAD - HẢI PHÒNG)', 'doanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-1', 'Doanh', '0866957128', 'doanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (LEAD - HẢI PHÒNG)', 'doanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -224,7 +224,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-2', 'Thành To', '0379552990', 'thanhto.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)', 'thanhto.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-2', 'Thành To', '0379552990', 'thanhto.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (LEAD - HÀ NỘI)', 'thanhto.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -233,7 +233,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-3', 'Thắng', '0904487526', 'thang.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (LEAD - HẢI PHÒNG)', 'thang.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-3', 'Thắng', '0904487526', 'thang.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (LEAD - HẢI PHÒNG)', 'thang.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -242,7 +242,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-4', 'Thành Con', '0358039115', 'thanhcon.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)', 'thanhcon.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-4', 'Thành Con', '0358039115', 'thanhcon.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (LEAD - HÀ NỘI)', 'thanhcon.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -251,7 +251,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-5', 'Văn', '0869526853', 'van.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)', 'van.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-5', 'Văn', '0869526853', 'van.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (LEAD - HÀ NỘI)', 'van.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -260,7 +260,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-6', 'Thành An', '0985120016', 'thanhan.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Quay phim'], ARRAY['Sony FX3 / A7SIII','Gimbal Ronin RS3','Mic Rode Wireless'], 'available', 1200000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (QUAY PHIM - HÀ NỘI)', 'thanhan.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-6', 'Thành An', '0985120016', 'thanhan.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Quay phim'], ARRAY['Sony FX3 / A7SIII','Gimbal Ronin RS3','Mic Rode Wireless'], 'available', 1200000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (QUAY PHIM - HÀ NỘI)', 'thanhan.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -269,7 +269,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-7', 'Thắng Quay Phim', '0367715204', 'thangquayphim.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Quay phim'], ARRAY['Sony FX3 / A7SIII','Gimbal Ronin RS3','Mic Rode Wireless'], 'available', 1200000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (QUAY PHIM - HẢI PHÒNG)', 'thangquayphim.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-7', 'Thắng Quay Phim', '0367715204', 'thangquayphim.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Quay phim'], ARRAY['Sony FX3 / A7SIII','Gimbal Ronin RS3','Mic Rode Wireless'], 'available', 1200000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (QUAY PHIM - HẢI PHÒNG)', 'thangquayphim.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -278,7 +278,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-8', 'Quang Nguyễn', '0974364661', 'quangnguyen.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Quay phim'], ARRAY['Sony FX3 / A7SIII','Gimbal Ronin RS3','Mic Rode Wireless'], 'available', 1200000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (QUAY PHIM - HẢI PHÒNG)', 'quangnguyen.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-8', 'Quang Nguyễn', '0974364661', 'quangnguyen.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Quay phim'], ARRAY['Sony FX3 / A7SIII','Gimbal Ronin RS3','Mic Rode Wireless'], 'available', 1200000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (QUAY PHIM - HẢI PHÒNG)', 'quangnguyen.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -287,7 +287,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-9', 'Quách Văn Huyền', '0988874108', 'quachvanhuyen.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)', 'quachvanhuyen.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-9', 'Quách Văn Huyền', '0988874108', 'quachvanhuyen.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (LEAD - HÀ NỘI)', 'quachvanhuyen.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -296,7 +296,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-10', 'Đức Trung', '0988874109', 'ductrung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)', 'ductrung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-10', 'Đức Trung', '0988874109', 'ductrung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Full-time', 4, ARRAY['Chụp chính'], ARRAY['Sony A7IV','Lens 24-70 GM II','Flash Godox V860III'], 'available', 1000000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (LEAD - HÀ NỘI)', 'ductrung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -305,7 +305,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-11', 'Tú Voi', '0328108778', 'tuvoi.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)', 'tuvoi.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-11', 'Tú Voi', '0328108778', 'tuvoi.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HÀ NỘI)', 'tuvoi.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -314,7 +314,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-12', 'Thuận Vũ', '0984458941', 'thuanvu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)', 'thuanvu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-12', 'Thuận Vũ', '0984458941', 'thuanvu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HÀ NỘI)', 'thuanvu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -323,7 +323,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-13', 'Long', '0981108601', 'long.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)', 'long.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-13', 'Long', '0981108601', 'long.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HÀ NỘI)', 'long.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -332,7 +332,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-14', 'Thái', '0345785671', 'thai.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)', 'thai.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-14', 'Thái', '0345785671', 'thai.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HÀ NỘI)', 'thai.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -341,7 +341,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-15', 'Lê Lâm Tùng', '0787312607', 'lelamtung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'lelamtung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-15', 'Lê Lâm Tùng', '0787312607', 'lelamtung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'lelamtung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -350,7 +350,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-16', 'Dũng Đen', '0988874115', 'dungden.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HÀ NỘI)', 'dungden.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-16', 'Dũng Đen', '0988874115', 'dungden.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HÀ NỘI)', 'dungden.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -359,7 +359,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-17', 'Hạo Nhiên', '0988874116', 'haonhien.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng','Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - KHÁC)', 'haonhien.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-17', 'Hạo Nhiên', '0988874116', 'haonhien.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng','Hà Nội'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - KHÁC)', 'haonhien.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -368,7 +368,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-18', 'Bin Hoàng', '0868710343', 'binhoang.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'binhoang.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-18', 'Bin Hoàng', '0868710343', 'binhoang.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'binhoang.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -377,7 +377,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-19', 'Phạm Hồng Quân', '0944879855', 'phamhongquan.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'phamhongquan.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-19', 'Phạm Hồng Quân', '0944879855', 'phamhongquan.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'phamhongquan.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -386,7 +386,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-20', 'Doãn Hiểu', '0328727894', 'doanhieu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'doanhieu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-20', 'Doãn Hiểu', '0328727894', 'doanhieu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'doanhieu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -395,7 +395,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-21', 'Phong Lê', '0975987565', 'phongle.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'phongle.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-21', 'Phong Lê', '0975987565', 'phongle.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'phongle.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -404,7 +404,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-22', 'Vũ Ngọc Tú', '0964458168', 'vungoctu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'vungoctu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-22', 'Vũ Ngọc Tú', '0964458168', 'vungoctu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'vungoctu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -413,7 +413,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-23', 'Nguyên Lê', '0988874122', 'nguyenle.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'nguyenle.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-23', 'Nguyên Lê', '0988874122', 'nguyenle.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'nguyenle.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -422,7 +422,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-24', 'Hổ Phách', '0989659634', 'hophach.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'hophach.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-24', 'Hổ Phách', '0989659634', 'hophach.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'hophach.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -431,7 +431,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-25', 'Hoàng Xuân Nguyễn', '0345707698', 'hoangxuannguyen.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'hoangxuannguyen.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-25', 'Hoàng Xuân Nguyễn', '0345707698', 'hoangxuannguyen.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'hoangxuannguyen.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -440,7 +440,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-26', 'Hoàng Vũ', '0975878459', 'hoangvu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'hoangvu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-26', 'Hoàng Vũ', '0975878459', 'hoangvu.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'hoangvu.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -449,7 +449,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-27', 'Nguyễn Thế Hoàng', '0849368598', 'nguyenthehoang.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'nguyenthehoang.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-27', 'Nguyễn Thế Hoàng', '0849368598', 'nguyenthehoang.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'nguyenthehoang.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -458,7 +458,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-28', 'Kim Tiền', '0393866710', 'kimtien.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'kimtien.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-28', 'Kim Tiền', '0393866710', 'kimtien.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'kimtien.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -467,7 +467,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-29', 'Phạm Chung', '0973458592', 'phamchung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'phamchung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-29', 'Phạm Chung', '0973458592', 'phamchung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'phamchung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -476,7 +476,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-30', 'Phạm Tùng', '0775303040', 'phamtung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'phamtung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-30', 'Phạm Tùng', '0775303040', 'phamtung.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'phamtung.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -485,7 +485,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-31', 'Tuấn Vịt', '0386028883', 'tuanvit.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'tuanvit.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-31', 'Tuấn Vịt', '0386028883', 'tuanvit.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'tuanvit.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -494,7 +494,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-32', 'Phạm Duy Thành', '0705403697', 'phamduythanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'phamduythanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-32', 'Phạm Duy Thành', '0705403697', 'phamduythanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'phamduythanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -503,7 +503,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-33', 'Nguyễn Đức Vượng', '0989413224', 'nguyenducvuong.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'nguyenducvuong.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-33', 'Nguyễn Đức Vượng', '0989413224', 'nguyenducvuong.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'nguyenducvuong.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -512,7 +512,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-34', 'Minh Tiến', '0376511051', 'minhtien.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'minhtien.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-34', 'Minh Tiến', '0376511051', 'minhtien.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'minhtien.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -521,7 +521,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-35', 'Hành Tây', '0988874134', 'hanhtay.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'hanhtay.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-35', 'Hành Tây', '0988874134', 'hanhtay.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'hanhtay.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -530,7 +530,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-36', 'Tuấn Thành', '0333640448', 'tuanthanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'tuanthanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-36', 'Tuấn Thành', '0333640448', 'tuanthanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'tuanthanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -539,7 +539,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-37', 'Trương Đức Mạnh', '0988874136', 'truongducmanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'truongducmanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-37', 'Trương Đức Mạnh', '0988874136', 'truongducmanh.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'truongducmanh.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,
@@ -548,7 +548,7 @@ ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     password = EXCLUDED.password;
 INSERT INTO public.photographers (id, full_name, phone, email, avatar, active_regions, photographer_type, experience_years, skills, equipment_list, status, rate_per_shoot, rating, completed_shoots_count, notes, username, password, can_login)
-VALUES ('photo-38', 'An Conan', '0777960967', 'anconan.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoắn Media (SP - HẢI PHÒNG)', 'anconan.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
+VALUES ('photo-38', 'An Conan', '0777960967', 'anconan.photo@xoanmedia.vn', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80', ARRAY['Hải Phòng'], 'Freelancer', 2, ARRAY['Chụp phụ'], ARRAY['Sony A7III','Lens 24-70mm','Flash Godox'], 'available', 600000, 5, 0, 'Thợ Ekip 2026 Xoăn Media (SP - HẢI PHÒNG)', 'anconan.photo@xoanmedia.vn', 'XoanPhoto@2026', true)
 ON CONFLICT (id) DO UPDATE SET 
     full_name = EXCLUDED.full_name,
     phone = EXCLUDED.phone,

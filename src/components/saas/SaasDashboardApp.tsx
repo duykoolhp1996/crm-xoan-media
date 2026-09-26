@@ -420,7 +420,7 @@ export const SaasDashboardApp: React.FC<SaasDashboardAppProps> = ({ onSwitchToCr
             {activeTab === 'cai-dat' && (
               <div className="space-y-6 pt-4 animate-in fade-in duration-200">
                 <div>
-                  <h1 className="text-2xl font-extrabold text-neutral-900">Cài Đặt Hệ Thống CRM Xoắn Media</h1>
+                  <h1 className="text-2xl font-extrabold text-neutral-900">Cài Đặt Hệ Thống CRM Xoăn Media</h1>
                   <p className="text-xs text-neutral-500 mt-1">Cấu hình thông báo Zalo ZNS, webhook và định mức chi trả thợ & CTV</p>
                 </div>
 
@@ -432,7 +432,7 @@ export const SaasDashboardApp: React.FC<SaasDashboardAppProps> = ({ onSwitchToCr
                         <label className="text-neutral-500 font-medium">Tên thương hiệu</label>
                         <input
                           type="text"
-                          defaultValue="Xoắn Media - Kỷ Yếu Số 1 Miền Bắc"
+                          defaultValue="Xoăn Media - Kỷ Yếu Số 1 Miền Bắc"
                           className="w-full mt-1 px-3.5 py-2 bg-neutral-100/80 rounded-xl border border-black/[0.06] text-neutral-900 font-semibold focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                         />
                       </div>

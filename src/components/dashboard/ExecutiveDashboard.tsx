@@ -299,7 +299,7 @@ export const ExecutiveDashboard: React.FC = () => {
               MÙA CAO ĐIỂM KỶ YẾU 2024
             </span>
             <span className="text-xs text-neutral-500 font-medium">
-              Hệ thống CRM Vận Hành & Quản Lý Doanh Thu Xoắn Media
+              Hệ thống CRM Vận Hành & Quản Lý Doanh Thu Xoăn Media
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold mt-3 tracking-tight text-neutral-900">
@@ -314,11 +314,11 @@ export const ExecutiveDashboard: React.FC = () => {
         <div className="relative z-10 shrink-0 hidden md:flex items-center gap-3.5 bg-white/80 backdrop-blur-md p-3 pr-5 rounded-2xl border border-black/[0.06] shadow-xs">
           <img
             src={logoXoan}
-            alt="Xoắn Media Studio"
+            alt="Xoăn Media Studio"
             className="w-12 h-12 rounded-xl object-cover shadow-sm border border-neutral-200"
           />
           <div>
-            <p className="text-xs font-black text-neutral-900 leading-tight">XOẮN MEDIA STUDIO</p>
+            <p className="text-xs font-black text-neutral-900 leading-tight">XOĂN MEDIA STUDIO</p>
             <p className="text-[10px] text-neutral-500 font-medium">Kỷ yếu & Nghệ thuật học đường</p>
             <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full inline-block mt-0.5">
               Hệ thống vận hành 2026
@@ -358,7 +358,7 @@ export const ExecutiveDashboard: React.FC = () => {
               ) : activeStaff ? (
                 `Chính sách hoa hồng: ${activeStaff.commissionType === 'percentage' ? `${activeStaff.commissionRate}% Doanh thu` : `${(activeStaff.commissionFixedAmount || 0).toLocaleString('vi-VN')}đ / HĐ chốt thành công`}`
               ) : (
-                `Tổng hợp doanh số và hoa hồng phân bổ cho ${salesStaff.length} tài khoản Sales & CTV trong hệ thống Xoắn Media`
+                `Tổng hợp doanh số và hoa hồng phân bổ cho ${salesStaff.length} tài khoản Sales & CTV trong hệ thống Xoăn Media`
               )}
             </p>
           </div>

@@ -1,5 +1,5 @@
 /**
- * Zalo Bot Service - Xoắn Media CRM
+ * Zalo Bot Service - Xoăn Media CRM
  * Quản trị kết nối và tự động gửi thông báo qua Bot Zalo "ai task mam"
  */
 
@@ -197,9 +197,9 @@ export const sendZaloBotNotification = async (params: {
   }
 
   const targetRecipient = params.recipient || config.targetChatId || 'zgr-c51cae5f6b33826ddb22';
-  const fullText = params.content.includes('[CRM XOẮN MEDIA')
+  const fullText = params.content.includes('[CRM XOĂN MEDIA')
     ? params.content
-    : `🔔 [CRM XOẮN MEDIA - THÔNG BÁO]\n📌 ${params.title}\n📝 ${params.content}\n⏰ ${new Date().toLocaleTimeString('vi-VN')} - ${new Date().toLocaleDateString('vi-VN')}`;
+    : `🔔 [CRM XOĂN MEDIA - THÔNG BÁO]\n📌 ${params.title}\n📝 ${params.content}\n⏰ ${new Date().toLocaleTimeString('vi-VN')} - ${new Date().toLocaleDateString('vi-VN')}`;
 
   let apiSuccess = false;
   let apiRes: any = null;
@@ -252,7 +252,7 @@ export const sendZaloBotTaskAssignment = async (params: {
 }): Promise<{ success: boolean; message: string; apiResponse?: any }> => {
   const { assigneeName, taskTitle, taskDetails, dueDate, assignerName } = params;
   const config = getZaloBotConfig();
-  const text = `📌 [CRM XOẮN MEDIA - PHÂN CÔNG TASK MỚI]\n━━━━━━━━━━━━━━━━━━━━\n👤 Người phụ trách: @${assigneeName}\n📋 Nhiệm vụ: ${taskTitle}${taskDetails ? `\n📝 Chi tiết: ${taskDetails}` : ''}\n📅 Hạn xử lý: ${dueDate || 'Trong ngày hôm nay'}\n🎯 Người giao việc: ${assignerName || 'Anh Tạ Duy (Admin)'}\n━━━━━━━━━━━━━━━━━━━━\n👉 @${assigneeName} vui lòng kiểm tra tiến độ và phản hồi tại nhóm nhé!`;
+  const text = `📌 [CRM XOĂN MEDIA - PHÂN CÔNG TASK MỚI]\n━━━━━━━━━━━━━━━━━━━━\n👤 Người phụ trách: @${assigneeName}\n📋 Nhiệm vụ: ${taskTitle}${taskDetails ? `\n📝 Chi tiết: ${taskDetails}` : ''}\n📅 Hạn xử lý: ${dueDate || 'Trong ngày hôm nay'}\n🎯 Người giao việc: ${assignerName || 'Anh Tạ Duy (Admin)'}\n━━━━━━━━━━━━━━━━━━━━\n👉 @${assigneeName} vui lòng kiểm tra tiến độ và phản hồi tại nhóm nhé!`;
 
   return sendZaloBotNotification({
     type: 'task',
@@ -295,7 +295,7 @@ export const notifyNewCustomerLeadToZaloGroup = async (customer: {
       ? customer.assignedSalesName
       : creatorStr;
 
-  const text = `🔥 [CRM XOẮN MEDIA - KHÁCH HÀNG MỚI]
+  const text = `🔥 [CRM XOĂN MEDIA - KHÁCH HÀNG MỚI]
 ━━━━━━━━━━━━━━━━━━━━
 👤 Khách hàng: ${customer.name}
 📞 SĐT / Zalo: ${customer.phone}

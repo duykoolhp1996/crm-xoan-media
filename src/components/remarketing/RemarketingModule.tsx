@@ -184,7 +184,7 @@ export const RemarketingModule: React.FC = () => {
           description: 'Gửi nội dung tư vấn ưu đãi cho ban cán sự lớp',
           config: {
             channel: 'Zalo',
-            templateContent: 'Chào {ten_khach}! Xoắn Media gửi ưu đãi kỷ yếu đặc biệt cho lớp mình.'
+            templateContent: 'Chào {ten_khach}! Xoăn Media gửi ưu đãi kỷ yếu đặc biệt cho lớp mình.'
           },
           position: { x: 630, y: 180 },
           next: `n4-${Date.now()}`

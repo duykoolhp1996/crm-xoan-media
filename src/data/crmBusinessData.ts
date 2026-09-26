@@ -85,7 +85,7 @@ export interface CrmActivityLogItem {
   amount?: string;
 }
 
-// 1. 4 Thẻ KPI Mùa Kỷ Yếu Xoắn Media
+// 1. 4 Thẻ KPI Mùa Kỷ Yếu Xoăn Media
 export const CRM_KPI_METRICS: CrmKpiMetric[] = [
   {
     id: 'kpi-revenue',
@@ -147,7 +147,7 @@ export const CRM_MONTHLY_REVENUE_DATA: CrmMonthlyRevenue[] = [
   { month: 'Thg 8', revenue: 721, previousPeriod: 590, target: 680 }
 ];
 
-// 3. Cơ cấu doanh thu theo gói kỷ yếu Xoắn Media
+// 3. Cơ cấu doanh thu theo gói kỷ yếu Xoăn Media
 export const CRM_PACKAGE_REVENUE_DATA = {
   totalFormatted: '2.780.000.000đ',
   growth: '+18.2%',
@@ -159,7 +159,7 @@ export const CRM_PACKAGE_REVENUE_DATA = {
   ]
 };
 
-// 4. Danh sách đội ngũ Thợ Chụp & Ekip Xoắn Media
+// 4. Danh sách đội ngũ Thợ Chụp & Ekip Xoăn Media
 export const CRM_PHOTOGRAPHERS: PhotographerMember[] = [
   {
     id: 'photo-1',
@@ -233,7 +233,7 @@ export const CRM_PHOTOGRAPHERS: PhotographerMember[] = [
   }
 ];
 
-// 5. Danh sách Đội ngũ CTV Sale / Cộng Tác Viên Bán Hàng Xoắn Media
+// 5. Danh sách Đội ngũ CTV Sale / Cộng Tác Viên Bán Hàng Xoăn Media
 export const CRM_CTV_SALES: CtvSaleMember[] = [
   {
     id: 'ctv-1',

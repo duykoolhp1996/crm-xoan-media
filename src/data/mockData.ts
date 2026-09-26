@@ -348,7 +348,7 @@ export const mockSchools: School[] = [
 
 export const mockSchoolClasses: SchoolClass[] = [];
 
-// Danh sách 38 thợ chụp chính thức năm 2026 từ Google Sheets của Xoắn Media
+// Danh sách 38 thợ chụp chính thức năm 2026 từ Google Sheets của Xoăn Media
 export const mockPhotographers: Photographer[] = photographersJson as Photographer[];
 
 export const mockCustomers: Customer[] = [
@@ -952,7 +952,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Tự động gửi bộ ảnh mẫu kỷ yếu Concept HOT (Retro, Prom, Thanh xuân) kèm link xem ảnh',
         config: {
           channel: 'Zalo',
-          templateContent: 'Chào {ten_khach}! Xoắn Media gửi bạn bộ sưu tập Concept Kỷ Yếu 2026 đang được các lớp chọn nhiều nhất: {link_portfolio}. Lớp mình thích phong cách nào bên em tư vấn chi tiết nhé!'
+          templateContent: 'Chào {ten_khach}! Xoăn Media gửi bạn bộ sưu tập Concept Kỷ Yếu 2026 đang được các lớp chọn nhiều nhất: {link_portfolio}. Lớp mình thích phong cách nào bên em tư vấn chi tiết nhé!'
         },
         position: { x: 630, y: 180 },
         next: 'wf1-n4',
@@ -1080,7 +1080,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Nhắc nhở nhẹ nhàng lịch cuối tuần đang kín dần để lớp sớm giữ ngày',
         config: {
           channel: 'Zalo',
-          templateContent: 'Chào bạn! Lịch chụp cuối tuần tháng 11 của Xoắn Media đang gần kín, lớp mình đã chốt được ngày chưa để bên em ưu tiên giữ thợ chụp chính cho lớp nhé!'
+          templateContent: 'Chào bạn! Lịch chụp cuối tuần tháng 11 của Xoăn Media đang gần kín, lớp mình đã chốt được ngày chưa để bên em ưu tiên giữ thợ chụp chính cho lớp nhé!'
         },
         position: { x: 630, y: 180 },
         next: 'wf2-n4',

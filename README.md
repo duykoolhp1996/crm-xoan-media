@@ -1,6 +1,6 @@
-# CRM XOẮN MEDIA - HỆ THỐNG QUẢN TRỊ DỊCH VỤ KỶ YẾU & HÌNH ẢNH HỌC ĐƯỜNG
+# CRM XOĂN MEDIA - HỆ THỐNG QUẢN TRỊ DỊCH VỤ KỶ YẾU & HÌNH ẢNH HỌC ĐƯỜNG
 
-Hệ thống **CRM chuyên biệt cho Xoắn Media** – giải pháp quản trị quan hệ khách hàng và điều hành dịch vụ chụp ảnh kỷ yếu, chụp ảnh tập thể trường lớp toàn diện, liên kết chặt chẽ 4 mắt xích trọng yếu:
+Hệ thống **CRM chuyên biệt cho Xoăn Media** – giải pháp quản trị quan hệ khách hàng và điều hành dịch vụ chụp ảnh kỷ yếu, chụp ảnh tập thể trường lớp toàn diện, liên kết chặt chẽ 4 mắt xích trọng yếu:
 
 $$\mathbf{CUSTOMER} \longrightarrow \mathbf{BOOKING} \longrightarrow \mathbf{PHOTOGRAPHER} \longrightarrow \mathbf{REMARKETING}$$
 
@@ -162,7 +162,7 @@ Thư mục xuất bản phẩm: `dist/`
 
 ---
 
-## 🎯 5 CÂU HỎI CỐT LÕI CRM XOẮN MEDIA GIẢI QUYẾT
+## 🎯 5 CÂU HỎI CỐT LÕI CRM XOĂN MEDIA GIẢI QUYẾT
 
 1. **Khách hàng của chúng ta là ai?** $\rightarrow$ Hồ sơ chi tiết lớp, trường (Ams, Chu Văn An, NEU...), ban đại diện (lớp trưởng, bí thư), sỉ số và concept mong muốn.
 2. **Khách hàng đến từ đâu?** $\rightarrow$ Hệ thống Attribution chính xác nguồn (Facebook Ads, TikTok Ads, Organic, Referral) kèm toàn bộ thông số UTM Campaign.

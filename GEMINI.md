@@ -1,4 +1,4 @@
-# Quy Tắc & Nghiệp Vụ CRM Xoắn Media
+# Quy Tắc & Nghiệp Vụ CRM Xoăn Media
 
 ## 1. Phân Quyền & Quản Lý Tài Khoản (User & Permissions)
 - **Cơ chế cấp tài khoản**: Cả nhân sự **Sales** và **Photographer (Thợ chụp / Ekip)** đều là các user thành viên được **Admin** tạo và cấp tài khoản + mật khẩu riêng biệt để đăng nhập và thực hiện các nghiệp vụ theo quyền hạn:

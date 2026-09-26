@@ -41,7 +41,7 @@ export const SaasHeader: React.FC<SaasHeaderProps> = ({
     <header className="h-16 px-6 sm:px-8 flex items-center justify-between z-20 transition-all">
       {/* Left: Minimal Breadcrumb */}
       <div className="flex items-center gap-2 text-xs sm:text-sm">
-        <span className="text-neutral-400 font-medium">Hệ Thống CRM Xoắn Media</span>
+        <span className="text-neutral-400 font-medium">Hệ Thống CRM Xoăn Media</span>
         <span className="text-neutral-300">/</span>
         <span className="font-semibold text-neutral-900 tracking-tight">
           {tabLabels[activeTab]}

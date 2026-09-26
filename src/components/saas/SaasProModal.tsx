@@ -42,7 +42,7 @@ export const SaasProModal: React.FC<SaasProModalProps> = ({ isOpen, onClose }) =
               Mở Khóa Toàn Bộ Tính Năng CRM Kỷ Yếu Chuyên Sâu
             </h2>
             <p className="text-xs text-neutral-500 mt-1">
-              Giải pháp quản lý tự động hóa dành riêng cho Xoắn Media mùa cao điểm kỷ yếu.
+              Giải pháp quản lý tự động hóa dành riêng cho Xoăn Media mùa cao điểm kỷ yếu.
             </p>
           </div>
 

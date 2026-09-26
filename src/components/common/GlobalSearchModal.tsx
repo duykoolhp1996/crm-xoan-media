@@ -133,7 +133,7 @@ export const GlobalSearchModal: React.FC = () => {
           {!query ? (
             <div className="py-8 text-center text-neutral-400 text-xs">
               <Search className="w-8 h-8 mx-auto text-neutral-300 mb-2.5" />
-              <p>Nhập từ khóa để tra cứu tức thì toàn bộ hệ thống Xoắn Media.</p>
+              <p>Nhập từ khóa để tra cứu tức thì toàn bộ hệ thống Xoăn Media.</p>
               <div className="flex justify-center gap-2 mt-3 flex-wrap">
                 <span className="px-2.5 py-1 bg-neutral-100 border border-neutral-200/80 rounded-xl text-neutral-600">Gợi ý: "Amsterdam"</span>
                 <span className="px-2.5 py-1 bg-neutral-100 border border-neutral-200/80 rounded-xl text-neutral-600">"0912883344"</span>
@@ -295,7 +295,7 @@ export const GlobalSearchModal: React.FC = () => {
         {/* Footer */}
         <div className="px-5 py-3 bg-neutral-50 border-t border-black/[0.05] flex items-center justify-between text-xs text-neutral-400">
           <span>Dùng phím <kbd className="px-1.5 py-0.5 bg-neutral-200 text-neutral-600 rounded">↑</kbd> <kbd className="px-1.5 py-0.5 bg-neutral-200 text-neutral-600 rounded">↓</kbd> để điều hướng</span>
-          <span>Hệ thống CRM Xoắn Media</span>
+          <span>Hệ thống CRM Xoăn Media</span>
         </div>
       </div>
     </div>

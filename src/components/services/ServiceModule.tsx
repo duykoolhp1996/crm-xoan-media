@@ -23,7 +23,7 @@ export const ServiceModule: React.FC = () => {
         <div>
           <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
             <Layers className="w-5 h-5 text-orange-500" />
-            Gói Dịch Vụ Chụp Ảnh Kỷ Yếu Xoắn Media
+            Gói Dịch Vụ Chụp Ảnh Kỷ Yếu Xoăn Media
           </h1>
           <p className="text-xs text-neutral-500 mt-0.5">
             Bảng cấu hình gói chụp chuẩn hóa cho Sales báo giá, tư vấn và hợp đồng với các lớp

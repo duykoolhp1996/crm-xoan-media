@@ -87,7 +87,7 @@ export const SaasAddWidgetModal: React.FC<SaasAddWidgetModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-extrabold tracking-tight">Thêm Khối Tiện Ích Chỉ Số</h2>
-              <p className="text-xs text-neutral-500 mt-0.5">Tùy biến bảng điều khiển CRM Xoắn Media theo nhu cầu</p>
+              <p className="text-xs text-neutral-500 mt-0.5">Tùy biến bảng điều khiển CRM Xoăn Media theo nhu cầu</p>
             </div>
           </div>
           <button

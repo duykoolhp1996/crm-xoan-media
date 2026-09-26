@@ -38,7 +38,7 @@ export const SaasHeroSection: React.FC<SaasHeroSectionProps> = ({
           Tổng Quan Doanh Thu & Vận Hành CRM
         </h1>
         <p className="text-xs sm:text-sm text-neutral-500 mt-1">
-          Theo dõi doanh số hợp đồng kỷ yếu, tiến độ ekip chụp và hiệu quả đội CTV sale Xoắn Media.
+          Theo dõi doanh số hợp đồng kỷ yếu, tiến độ ekip chụp và hiệu quả đội CTV sale Xoăn Media.
         </p>
       </div>
 

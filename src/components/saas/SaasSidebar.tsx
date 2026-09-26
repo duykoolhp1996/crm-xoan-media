@@ -59,7 +59,7 @@ export const SaasSidebar: React.FC<SaasSidebarProps> = ({
         <div
           className="flex flex-col items-center gap-1 group cursor-pointer"
           onClick={() => onSelectTab('dashboard')}
-          title="Xoắn Media CRM"
+          title="Xoăn Media CRM"
         >
           <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black text-lg shadow-[0_4px_16px_rgba(0,0,0,0.18)] transition-transform duration-200 group-hover:scale-105">
             ✦
@@ -124,11 +124,11 @@ export const SaasSidebar: React.FC<SaasSidebarProps> = ({
           {/* User Profile Avatar */}
           <div
             className="w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] cursor-pointer hover:ring-2 hover:ring-[#B8F23D] transition-all"
-            title="Tài khoản Quản lý Xoắn Media"
+            title="Tài khoản Quản lý Xoăn Media"
           >
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-              alt="Quản lý Xoắn Media"
+              alt="Quản lý Xoăn Media"
               className="w-full h-full object-cover"
             />
           </div>

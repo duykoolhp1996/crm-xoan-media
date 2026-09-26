@@ -80,7 +80,7 @@ export const KanbanPipeline: React.FC = () => {
     }
   };
 
-  // 13 Giai đoạn chuẩn của Xoắn Media
+  // 13 Giai đoạn chuẩn của Xoăn Media
   const STAGES: PipelineStage[] = [
     'New Lead',
     'Đã liên hệ',

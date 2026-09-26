@@ -79,7 +79,7 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
 
   if (!isOpen || !customer) return null;
 
-  // Cấu hình ngân hàng chính thức Xoắn Media
+  // Cấu hình ngân hàng chính thức Xoăn Media
   const bankConfig = {
     bankId: 'MB',
     bankName: 'MB BANK (Ngân hàng Quân Đội)',
@@ -114,7 +114,7 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
   // Sao chép tin nhắn Zalo hướng dẫn chuyển khoản
   const handleCopyZaloMessage = () => {
     const msg = isFinalPayment
-      ? `📸 XOẮN MEDIA STUDIO - QUYẾT TOÁN THANH TOÁN HẾT HỢP ĐỒNG KỶ YẾU
+      ? `📸 XOĂN MEDIA STUDIO - QUYẾT TOÁN THANH TOÁN HẾT HỢP ĐỒNG KỶ YẾU
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎓 Kính gửi: Tập thể lớp ${customer.className} - ${customer.schoolName}
 👤 Người đại diện: ${customer.name} (${customer.representativeRole || 'Lớp trưởng'}) - ${customer.phone}
@@ -137,8 +137,8 @@ Bạn mở App Ngân Hàng quét mã QR đính kèm để tự động điền �
 
 📞 Hotline/Zalo hỗ trợ: ${bankConfig.hotline}
 🌐 Website: xoanmedia.vn
-Xoắn Media Studio chân thành cảm ơn tập thể lớp đã tin tưởng và đồng hành cùng chúng mình trong mùa kỷ yếu này! ❤️`
-      : `📸 XOẮN MEDIA STUDIO - THÔNG TIN CHUYỂN KHOẢN ĐẶT CỌC KỶ YẾU
+Xoăn Media Studio chân thành cảm ơn tập thể lớp đã tin tưởng và đồng hành cùng chúng mình trong mùa kỷ yếu này! ❤️`
+      : `📸 XOĂN MEDIA STUDIO - THÔNG TIN CHUYỂN KHOẢN ĐẶT CỌC KỶ YẾU
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎓 Kính gửi: Tập thể lớp ${customer.className} - ${customer.schoolName}
 👤 Người đại diện: ${customer.name} (${customer.representativeRole || 'Lớp trưởng'}) - ${customer.phone}
@@ -157,7 +157,7 @@ Bạn mở App Ngân Hàng quét mã QR đính kèm để tự động điền �
 
 📞 Hotline/Zalo hỗ trợ: ${bankConfig.hotline}
 🌐 Website: xoanmedia.vn
-Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng Xoắn Media Studio! ❤️`;
+Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng Xoăn Media Studio! ❤️`;
 
     navigator.clipboard.writeText(msg);
     setCopiedZalo(true);
@@ -481,14 +481,14 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
                 {isFinalPayment ? 'VietQR Tất Toán' : 'VietQR Napas 247'}
               </div>
 
-              {/* Logo Xoắn & Ngân hàng */}
+              {/* Logo Xoăn & Ngân hàng */}
               <div className="flex items-center gap-2 mb-3">
                 <img
                   src={logoXoan}
-                  alt="Xoắn Media"
+                  alt="Xoăn Media"
                   className="w-8 h-8 rounded-xl object-cover shadow-xs border border-neutral-200"
                 />
-                <span className="font-extrabold text-neutral-900 text-xs">XOẮN MEDIA STUDIO</span>
+                <span className="font-extrabold text-neutral-900 text-xs">XOĂN MEDIA STUDIO</span>
               </div>
 
               {/* Khung Ảnh Mã QR */}

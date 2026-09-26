@@ -262,7 +262,7 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
               <p className="text-xs text-neutral-500">
                 {isEditMode
                   ? `Cập nhật thông tin chuyên môn, trang thiết bị và đơn giá cho ${photographerToEdit?.fullName}`
-                  : 'Khai báo thợ chụp, quay phim, flycam hoặc chuyên viên makeup vào hệ thống Xoắn Media'}
+                  : 'Khai báo thợ chụp, quay phim, flycam hoặc chuyên viên makeup vào hệ thống Xoăn Media'}
               </p>
             </div>
           </div>
@@ -336,7 +336,7 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
                 onChange={e => setFormData(prev => ({ ...prev, photographerType: e.target.value as any }))}
                 className="w-full px-3.5 py-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
               >
-                <option value="Full-time">Full-time (Nhân sự chính thức Xoắn Media)</option>
+                <option value="Full-time">Full-time (Nhân sự chính thức Xoăn Media)</option>
                 <option value="Freelancer">Freelancer (Thợ tự do nhận ca linh hoạt)</option>
                 <option value="Đối tác Studio">Đối tác Studio (Studio / Team liên kết ngoài)</option>
               </select>
