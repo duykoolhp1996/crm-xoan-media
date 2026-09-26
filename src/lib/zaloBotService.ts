@@ -408,5 +408,71 @@ export const notifyCustomerDepositToZaloGroup = async (params: {
   });
 };
 
+/**
+ * Tự động gửi thông báo chốt ngày chụp (Đã Booking) vào nhóm Zalo
+ */
+export const notifyShootDateScheduledToZaloGroup = async (params: {
+  customer: {
+    name: string;
+    phone: string;
+    className: string;
+    schoolName: string;
+    city?: string;
+    servicePackageName?: string;
+    serviceType?: string;
+    paidAmount?: number;
+    assignedSalesName?: string;
+    shootingLocations?: string[];
+    [key: string]: any;
+  };
+  shootDate: string;
+  timeSlot?: string;
+  location?: string;
+  leadPhotographerName?: string;
+}): Promise<{ success: boolean; message: string }> => {
+  const { customer, shootDate, timeSlot, location, leadPhotographerName } = params;
+  const config = getZaloBotConfig();
+
+  const formattedDate = new Date(shootDate).toLocaleDateString('vi-VN');
+  const salesName = customer.assignedSalesName || 'Sales Xoăn Media';
+  const depositStr = customer.paidAmount && customer.paidAmount > 0
+    ? `${customer.paidAmount.toLocaleString('vi-VN')} VNĐ`
+    : '2.000.000 VNĐ';
+
+  const text = `📅 <b>[CRM XOẮN MEDIA – THÔNG BÁO CHỐT NGÀY CHỤP (ĐÃ BOOKING)]</b>
+
+━━━━━━━━━━━━━━━━━━━━
+
+🎯 <b>TRẠNG THÁI:</b> 📸 <b>ĐÃ CHỐT LỊCH CHỤP THÀNH CÔNG</b>
+
+👤 <b>Khách hàng:</b> ${customer.name}
+📞 <b>SĐT / Zalo:</b> ${customer.phone}
+🎓 <b>Lớp:</b> ${customer.className}
+🏫 <b>Trường:</b> ${customer.schoolName}${customer.city ? ` – ${customer.city}` : ''}
+
+📅 <b>NGÀY CHỤP ĐÃ CHỐT:</b> <b>${formattedDate}</b> (${timeSlot || 'Cả ngày'})
+📍 <b>Địa điểm chụp:</b> ${location || customer.shootingLocations?.join(', ') || customer.schoolName}
+📦 <b>Gói dịch vụ:</b> ${customer.servicePackageName || customer.serviceType || 'Gói Kỷ Yếu BASIC'}
+💵 <b>Tiền cọc đã nhận:</b> <b>${depositStr}</b>
+👨‍💼 <b>Sales phụ trách:</b> ${salesName}${leadPhotographerName ? `\n📷 <b>Trưởng nháy chỉ định:</b> <b>${leadPhotographerName}</b>` : ''}
+
+━━━━━━━━━━━━━━━━━━━━
+
+⏰ <i>${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} – ${new Date().toLocaleDateString('vi-VN')}</i>
+
+👉 <b>Ban Điều Phối & Ekip Thợ:</b> Vui lòng kiểm tra lịch để sắp xếp trang phục, thiết bị và thợ chụp sẵn sàng cho buổi chụp của lớp! 🚀
+
+🚀 <b>CRM XOẮN MEDIA – CHỐT CỌC → GIỮ LỊCH → ĐIỀU PHỐI</b>`;
+
+  return sendZaloBotNotification({
+    type: 'booking',
+    title: `📅 Chốt lịch chụp: ${customer.className} - Ngày ${formattedDate}`,
+    content: text,
+    recipient: config.targetChatId,
+    parseMode: 'HTML',
+  });
+};
+
+
 
 

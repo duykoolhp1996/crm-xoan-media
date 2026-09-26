@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
+import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -57,6 +58,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [showLostModal, setShowLostModal] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'deposit' | 'final'>('deposit');
   const [lostReason, setLostReason] = useState('Giá cao hơn ngân sách dự kiến của lớp');
   const [customLostNote, setCustomLostNote] = useState('');
@@ -256,6 +258,32 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
               >
                 <QrCode className="w-3.5 h-3.5 text-neutral-950" />
                 <span>💰 Xác Nhận Cọc</span>
+              </button>
+            )}
+
+            {/* Nút Chốt Ngày Chụp: Hiển thị ở Đã đặt cọc */}
+            {customer.pipelineStage === 'Đã đặt cọc' && (
+              <button
+                type="button"
+                onClick={() => setShowScheduleModal(true)}
+                className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                title="Bắt buộc chốt ngày chụp để chuyển sang Đã Booking"
+              >
+                <Calendar className="w-3.5 h-3.5 text-white" />
+                <span>📅 Chốt Ngày Chụp</span>
+              </button>
+            )}
+
+            {/* Nút Xem / Đổi Lịch Chụp: Hiển thị ở Đã Booking */}
+            {customer.pipelineStage === 'Đã Booking' && (
+              <button
+                type="button"
+                onClick={() => setShowScheduleModal(true)}
+                className="px-3.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                title="Xem hoặc đổi ngày chụp kỷ yếu"
+              >
+                <Calendar className="w-3.5 h-3.5 text-purple-600" />
+                <span>📅 {customer.expectedShootDate ? `Lịch: ${new Date(customer.expectedShootDate).toLocaleDateString('vi-VN')}` : 'Đổi Lịch Chụp'}</span>
               </button>
             )}
 
@@ -666,6 +694,56 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       </button>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* Banner Giai Đoạn Đã Đặt Cọc: Bắt buộc chốt ngày chụp để lên Booking */}
+              {customer.pipelineStage === 'Đã đặt cọc' && (
+                <div className="p-4 bg-gradient-to-r from-emerald-50 via-lime-50/70 to-purple-50/70 border border-emerald-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                      <span className="text-xs font-bold text-emerald-950 uppercase tracking-wide">
+                        Đã Đặt Cọc Thành Công (Lớp {customer.className})
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-700">
+                      Đã nhận cọc: <strong className="text-emerald-900 font-extrabold">{(customer.paidAmount || 2000000).toLocaleString('vi-VN')}đ</strong> • Bước tiếp theo: <strong>Bắt buộc chốt ngày chụp</strong> để chuyển sang <em>Đã Booking</em> và xếp ekip.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowScheduleModal(true)}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    <span>📅 Chốt Ngày Chụp & Lên Đơn Booking</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Banner Giai Đoạn Đã Booking: Đã chốt ngày chụp */}
+              {customer.pipelineStage === 'Đã Booking' && (
+                <div className="p-4 bg-gradient-to-r from-purple-50 via-indigo-50 to-neutral-50 border border-purple-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse shrink-0" />
+                      <span className="text-xs font-bold text-purple-950 uppercase tracking-wide">
+                        Đã Booking – Đã Chốt Ngày Chụp Chính Thức
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-700">
+                      📅 Ngày chụp đã chốt: <strong className="text-purple-950 font-black text-sm">{customer.expectedShootDate ? new Date(customer.expectedShootDate).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</strong> • Địa điểm: <strong>{customer.shootingLocations?.join(', ') || customer.schoolName}</strong>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowScheduleModal(true)}
+                    className="w-full sm:w-auto px-4 py-2 bg-white hover:bg-purple-50 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 shrink-0 cursor-pointer"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-purple-600" />
+                    <span>📅 Đổi Ngày Chụp</span>
+                  </button>
                 </div>
               )}
 
@@ -1200,6 +1278,32 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
             </button>
           )}
 
+          {/* Nút Chốt Ngày Chụp: Hiển thị ở Đã đặt cọc */}
+          {customer.pipelineStage === 'Đã đặt cọc' && (
+            <button
+              type="button"
+              onClick={() => setShowScheduleModal(true)}
+              className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+              title="Bắt buộc chốt ngày chụp để chuyển sang Đã Booking"
+            >
+              <Calendar className="w-3.5 h-3.5 text-white" />
+              <span>📅 Chốt Ngày Chụp (Lên Booking)</span>
+            </button>
+          )}
+
+          {/* Nút Xem / Đổi Lịch Chụp: Hiển thị ở Đã Booking */}
+          {customer.pipelineStage === 'Đã Booking' && (
+            <button
+              type="button"
+              onClick={() => setShowScheduleModal(true)}
+              className="flex-1 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+              title="Xem hoặc đổi ngày chụp kỷ yếu"
+            >
+              <Calendar className="w-3.5 h-3.5 text-purple-600" />
+              <span>📅 {customer.expectedShootDate ? `Lịch chụp: ${new Date(customer.expectedShootDate).toLocaleDateString('vi-VN')}` : 'Đổi Lịch Chụp'}</span>
+            </button>
+          )}
+
           {/* Nút Tạo QR Thanh Toán Hết: CHỈ hiển thị ở Đã bàn giao */}
           {customer.pipelineStage === 'Đã bàn giao' && (
             <button
@@ -1313,6 +1417,13 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
         isOpen={showDepositModal}
         mode={paymentMode}
         onClose={() => setShowDepositModal(false)}
+      />
+
+      {/* Modal Chốt Ngày Chụp Bắt Buộc Khi Sang Đã Booking */}
+      <ScheduleBookingModal
+        customer={customer}
+        isOpen={showScheduleModal}
+        onClose={() => setShowScheduleModal(false)}
       />
     </div>,
     document.body

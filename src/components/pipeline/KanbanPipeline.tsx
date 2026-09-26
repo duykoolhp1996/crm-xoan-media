@@ -10,12 +10,14 @@ import {
   UserCheck,
   UserX,
   FileText,
-  QrCode
+  QrCode,
+  Calendar
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
+import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 
 export const KanbanPipeline: React.FC = () => {
   const {
@@ -33,6 +35,7 @@ export const KanbanPipeline: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
+  const [scheduleBookingCustomer, setScheduleBookingCustomer] = useState<Customer | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
 
   const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
@@ -134,6 +137,17 @@ export const KanbanPipeline: React.FC = () => {
         if (cust) {
           // Tự động mở modal cọc để nhập/chọn số tiền cọc và xác nhận thanh toán
           setPaymentConfig({ customer: cust, mode: 'deposit' });
+          setDraggedCustomerId(null);
+          return;
+        }
+      }
+
+      // BẮT BUỘC: Muốn chuyển sang "Đã Booking" PHẢI chốt được ngày chụp!
+      if (targetStage === 'Đã Booking') {
+        const cust = customers.find(c => c.id === customerId);
+        if (cust) {
+          // Tự động mở modal chốt ngày chụp & lên booking
+          setScheduleBookingCustomer(cust);
           setDraggedCustomerId(null);
           return;
         }
@@ -310,17 +324,47 @@ export const KanbanPipeline: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Badge Số Tiền Đã Cọc (Nếu đang ở Đã đặt cọc) */}
+                      {/* Badge Số Tiền Đã Cọc & Nút Chốt Ngày Chụp (Nếu đang ở Đã đặt cọc) */}
                       {cust.pipelineStage === 'Đã đặt cọc' && (
-                        <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-lime-50 border border-emerald-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                          <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            Đã nhận cọc:
+                        <>
+                          <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-lime-50 border border-emerald-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                            <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              Đã nhận cọc:
+                            </span>
+                            <span className="font-extrabold text-emerald-950 text-xs">
+                              {cust.paidAmount && cust.paidAmount > 0
+                                ? `${cust.paidAmount.toLocaleString('vi-VN')} đ`
+                                : '2.000.000 đ'}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setScheduleBookingCustomer(cust);
+                            }}
+                            className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-purple-600 hover:bg-purple-700 text-white border border-purple-700"
+                            title="Bắt buộc chốt ngày chụp để chuyển sang Đã Booking"
+                          >
+                            <Calendar className="w-3.5 h-3.5 text-white" />
+                            <span>📅 Chốt Ngày Chụp (Lên Booking)</span>
+                          </button>
+                        </>
+                      )}
+
+                      {/* Badge Ngày Chụp Đã Chốt (Nếu đang ở Đã Booking) */}
+                      {cust.pipelineStage === 'Đã Booking' && (
+                        <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                          <span className="text-purple-900 font-semibold flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                            Lịch chụp:
                           </span>
-                          <span className="font-extrabold text-emerald-950 text-xs">
-                            {cust.paidAmount && cust.paidAmount > 0
-                              ? `${cust.paidAmount.toLocaleString('vi-VN')} đ`
-                              : '2.000.000 đ'}
+                          <span className="font-extrabold text-purple-950 text-xs bg-white px-2 py-0.5 rounded-lg border border-purple-200">
+                            {cust.expectedShootDate
+                              ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN')
+                              : 'Chưa có ngày'}
                           </span>
                         </div>
                       )}
@@ -426,6 +470,13 @@ export const KanbanPipeline: React.FC = () => {
         isOpen={Boolean(paymentConfig)}
         mode={paymentConfig?.mode}
         onClose={() => setPaymentConfig(null)}
+      />
+
+      {/* Modal Chốt Ngày Chụp Bắt Buộc Khi Sang Đã Booking */}
+      <ScheduleBookingModal
+        customer={scheduleBookingCustomer}
+        isOpen={Boolean(scheduleBookingCustomer)}
+        onClose={() => setScheduleBookingCustomer(null)}
       />
     </div>
   );

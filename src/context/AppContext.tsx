@@ -137,6 +137,7 @@ interface AppContextType {
 
   // Notifications
   notifications: SystemNotification[];
+  addNotification: (notification: Omit<SystemNotification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
 
@@ -915,6 +916,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActivityLogs(prev => [newLog, ...prev]);
   };
 
+  const addNotification = (notifData: Omit<SystemNotification, 'id' | 'timestamp' | 'read'>) => {
+    const newNotif: SystemNotification = {
+      ...notifData,
+      id: `notif-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    setNotifications(prev => [newNotif, ...prev]);
+  };
+
   const markNotificationAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   };
@@ -1012,6 +1023,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activityLogs,
         addActivityLog,
         notifications,
+        addNotification,
         markNotificationAsRead,
         markAllNotificationsAsRead,
         isSearchOpen,
