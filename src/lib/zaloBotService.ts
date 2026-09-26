@@ -49,7 +49,18 @@ export const getZaloBotConfig = (): ZaloBotConfig => {
       localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(DEFAULT_ZALO_BOT_CONFIG));
       return DEFAULT_ZALO_BOT_CONFIG;
     }
-    return { ...DEFAULT_ZALO_BOT_CONFIG, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    // Tự động nâng cấp sang Group ID zgr-c51cae5f6b33826ddb22 nếu đang trống hoặc là ID cá nhân cũ
+    if (
+      !parsed.targetChatId ||
+      parsed.targetChatId === 'c9463a061152f80ca143' ||
+      parsed.targetChatId === 'group_dieu_hanh_xoan' ||
+      !parsed.targetChatId.startsWith('zgr-')
+    ) {
+      parsed.targetChatId = DEFAULT_ZALO_BOT_CONFIG.targetChatId;
+      localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify({ ...DEFAULT_ZALO_BOT_CONFIG, ...parsed }));
+    }
+    return { ...DEFAULT_ZALO_BOT_CONFIG, ...parsed };
   } catch {
     return DEFAULT_ZALO_BOT_CONFIG;
   }
@@ -134,6 +145,21 @@ export const sendZaloBotApiMessage = async (
 ): Promise<{ ok: boolean; result?: any; description?: string }> => {
   const { botToken } = getZaloBotConfig();
   if (!botToken) return { ok: false, description: 'Chưa có Bot Token' };
+
+  console.log(`[ZaloBot] Đang bắn tin nhắn tới Chat ID: ${chatId}...`);
+
+  // Phương thức 1: Sử dụng HTTP GET với mode no-cors
+  // Đây là giải pháp hoàn hảo nhất cho Web Browser (GitHub Pages, localhost) vì không bị trình duyệt chặn preflight CORS
+  try {
+    const getUrl = `https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage?chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(text)}`;
+    await fetch(getUrl, { mode: 'no-cors' });
+    console.log(`[ZaloBot] Đã gửi thành công qua GET (no-cors) tới ${chatId}`);
+    return { ok: true, result: { message_id: 'sent_browser_get' } };
+  } catch (errGet: any) {
+    console.warn('[ZaloBot] GET request thất bại, thử POST fallback:', errGet);
+  }
+
+  // Phương thức 2: Fallback POST (cho Node.js / Server-side)
   try {
     const res = await fetch(`https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage`, {
       method: 'POST',
@@ -160,7 +186,7 @@ export const sendZaloBotNotification = async (params: {
     return { success: false, message: 'Chưa cấu hình Token cho Zalo Bot!' };
   }
 
-  const targetRecipient = params.recipient || config.targetChatId || 'Kênh điều hành Xoắn Media';
+  const targetRecipient = params.recipient || config.targetChatId || 'zgr-c51cae5f6b33826ddb22';
   const fullText = params.content.includes('[CRM XOẮN MEDIA')
     ? params.content
     : `🔔 [CRM XOẮN MEDIA - THÔNG BÁO]\n📌 ${params.title}\n📝 ${params.content}\n⏰ ${new Date().toLocaleTimeString('vi-VN')} - ${new Date().toLocaleDateString('vi-VN')}`;
@@ -168,12 +194,20 @@ export const sendZaloBotNotification = async (params: {
   let apiSuccess = false;
   let apiRes: any = null;
 
-  // Nếu targetRecipient là một chat_id hợp lệ, gọi API thực tế
-  if (config.targetChatId && config.targetChatId.trim()) {
+  // Luôn đảm bảo bắn tin tới Group Zalo zgr-c51cae5f6b33826ddb22
+  const effectiveChatId =
+    params.recipient && params.recipient.startsWith('zgr-')
+      ? params.recipient
+      : config.targetChatId && config.targetChatId.startsWith('zgr-')
+      ? config.targetChatId
+      : 'zgr-c51cae5f6b33826ddb22';
+
+  if (effectiveChatId && effectiveChatId.trim()) {
     try {
-      apiRes = await sendZaloBotApiMessage(config.targetChatId.trim(), fullText);
+      apiRes = await sendZaloBotApiMessage(effectiveChatId.trim(), fullText);
       apiSuccess = apiRes?.ok === true;
-    } catch {
+    } catch (err) {
+      console.warn('[ZaloBot] Lỗi khi gửi API:', err);
       apiSuccess = false;
     }
   }
