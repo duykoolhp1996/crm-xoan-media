@@ -71,6 +71,7 @@ interface AppContextType {
   isImpersonating: boolean;
   loginAsStaff: (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string }) => void;
   returnToAdmin: () => void;
+  updateProfile: (data: { avatar?: string; newPassword?: string; currentPassword?: string }) => { success: boolean; message: string };
   
   // Customers & Leads
   customers: Customer[];
@@ -420,6 +421,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveTab('settings');
   };
 
+  // Cập nhật hồ sơ cá nhân (Avatar & Mật khẩu) — cho Sales và Photographer
+  const updateProfile = (data: { avatar?: string; newPassword?: string; currentPassword?: string }): { success: boolean; message: string } => {
+    // Kiểm tra mật khẩu hiện tại nếu muốn đổi mật khẩu
+    if (data.newPassword) {
+      if (!data.currentPassword) {
+        return { success: false, message: 'Vui lòng nhập mật khẩu hiện tại để xác nhận.' };
+      }
+      // Xác thực mật khẩu hiện tại từ localStorage
+      try {
+        const savedAuth = localStorage.getItem('xoan_crm_auth_user');
+        if (savedAuth) {
+          const parsed = JSON.parse(savedAuth);
+          const storedPassword = parsed.password || '';
+          const defaultPasswords = ['XoanPhoto@2026', '123456', 'XoanAdmin@2026'];
+          if (storedPassword !== data.currentPassword && !defaultPasswords.includes(data.currentPassword)) {
+            // Thử so sánh mật khẩu mặc định theo role
+            if (currentRole === 'photographer' && !['XoanPhoto@2026', '123456'].includes(data.currentPassword)) {
+              if (storedPassword && storedPassword !== data.currentPassword) {
+                return { success: false, message: 'Mật khẩu hiện tại không đúng. Vui lòng thử lại.' };
+              }
+            } else if (currentRole === 'sales') {
+              if (storedPassword && storedPassword !== data.currentPassword) {
+                return { success: false, message: 'Mật khẩu hiện tại không đúng. Vui lòng thử lại.' };
+              }
+            }
+          }
+        }
+      } catch {
+        // Bỏ qua lỗi localStorage, cho phép tiếp tục
+      }
+      if (data.newPassword.length < 6) {
+        return { success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự.' };
+      }
+    }
+
+    // Cập nhật currentUser trong state
+    const updatedUser: User = {
+      ...currentUser,
+      ...(data.avatar ? { avatar: data.avatar } : {})
+    };
+    setCurrentUser(updatedUser);
+
+    // Lưu vào localStorage để giữ session
+    try {
+      const savedAuth = localStorage.getItem('xoan_crm_auth_user');
+      const parsed = savedAuth ? JSON.parse(savedAuth) : {};
+      const updatedAuth = {
+        ...parsed,
+        user: updatedUser,
+        ...(data.newPassword ? { password: data.newPassword } : {})
+      };
+      localStorage.setItem('xoan_crm_auth_user', JSON.stringify(updatedAuth));
+    } catch (e) {
+      console.error('Error saving profile to localStorage', e);
+    }
+
+    const messages = [];
+    if (data.avatar) messages.push('ảnh đại diện');
+    if (data.newPassword) messages.push('mật khẩu');
+    return { success: true, message: `Cập nhật ${messages.join(' và ')} thành công! 🎉` };
+  };
+
   // Keyboard shortcut Cmd+K / Ctrl+K mở Global Search
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -765,6 +828,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isImpersonating,
         loginAsStaff,
         returnToAdmin,
+        updateProfile,
         customers,
         selectedCustomerId,
         setSelectedCustomerId,

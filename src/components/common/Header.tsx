@@ -8,6 +8,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { NotificationDrawer } from './NotificationDrawer';
+import { ProfileModal } from './ProfileModal';
 
 export const Header: React.FC = () => {
   const {
@@ -23,8 +24,10 @@ export const Header: React.FC = () => {
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+  const isSalesOrPhoto = currentRole === 'sales' || currentRole === 'photographer';
 
   const roleLabels: Record<UserRole, { label: string; badgeClass: string; desc: string }> = {
     admin: {
@@ -145,12 +148,21 @@ export const Header: React.FC = () => {
         </button>
 
         {/* User Profile Avatar */}
-        <div className="w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] shadow-xs cursor-pointer" title={currentUser.name}>
+        <div
+          className={`w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] shadow-xs relative group ${isSalesOrPhoto ? 'cursor-pointer hover:ring-2 hover:ring-neutral-900 transition-all' : ''}`}
+          title={isSalesOrPhoto ? `${currentUser.name} — Bấm để chỉnh sửa hồ sơ` : currentUser.name}
+          onClick={() => isSalesOrPhoto && setIsProfileOpen(true)}
+        >
           <img
             src={currentUser.avatar}
             alt={currentUser.name}
             className="w-full h-full object-cover"
           />
+          {isSalesOrPhoto && (
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-[9px] font-bold">Sửa</span>
+            </div>
+          )}
         </div>
 
         {/* Logout Button */}
@@ -168,6 +180,12 @@ export const Header: React.FC = () => {
       <NotificationDrawer
         isOpen={isNotifOpen}
         onClose={() => setIsNotifOpen(false)}
+      />
+
+      {/* Profile Modal — chỉ Sales & Photographer */}
+      <ProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
       />
     </header>
   );
