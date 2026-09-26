@@ -323,38 +323,38 @@ export const PhotographerReports: React.FC = () => {
           </p>
         </div>
 
-        {/* Card 2: Ca chụp thực tế */}
+        {/* Card 2: Lớp đã chụp / Lớp sẽ chụp */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
           <div className="flex items-center justify-between text-neutral-500 mb-2">
             <span className="text-xs font-semibold">
               {!isPhotographerUser
-                ? 'Ca Chụp Đã Bàn Giao'
+                ? 'Lớp Đã Chụp / Gán Lịch'
                 : isPhotoLead
-                ? `Ca Chụp Team ${myTeam}`
-                : 'Ca Chụp Của Bạn'}
+                ? `Lớp Đã Chụp (Team ${myTeam})`
+                : 'Lớp Đã Chụp Của Bạn'}
             </span>
             <CalendarCheck className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-700 tracking-tight">
             {totalSummary.totalCompletedShoots}{' '}
             <span className="text-sm font-semibold text-neutral-500">
-              / {totalSummary.totalAssignedShoots} ca gán
+              Lớp đã chụp
             </span>
           </div>
-          <p className="text-[11px] text-neutral-400 mt-1">
-            Tổng giờ tác nghiệp: {totalSummary.totalHours}h
+          <p className="text-[11px] text-amber-700 font-semibold mt-1">
+            ⏳ Sẽ chụp tiếp: {totalSummary.totalAssignedShoots - totalSummary.totalCompletedShoots} lớp
           </p>
         </div>
 
-        {/* Card 3: Thù Lao Thực Tế */}
+        {/* Card 3: Lương Nhận Được */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
           <div className="flex items-center justify-between text-neutral-500 mb-2">
             <span className="text-xs font-semibold">
               {!isPhotographerUser
-                ? 'Tổng Thù Lao Nghiệm Thu'
+                ? 'Tổng Lương Chi Trả Ekip'
                 : isPhotoLead
-                ? `Tổng Thù Lao Team ${myTeam}`
-                : 'Thù Lao Thực Nhận'}
+                ? `Lương Team ${myTeam} Nhận Được`
+                : 'Lương Nhận Được (Thực Nhận)'}
             </span>
             <DollarSign className="w-4 h-4 text-amber-600" />
           </div>
@@ -364,7 +364,7 @@ export const PhotographerReports: React.FC = () => {
           <p className="text-[11px] text-neutral-400 mt-1">
             {!isPhotographerUser || isPhotoLead
               ? 'Chi trả cho các thợ trong team'
-              : `Tạm tính đang làm: ${(performanceData[0]?.pendingEarnings || 0).toLocaleString('vi-VN')}đ`}
+              : `Lương tạm tính lớp tới: ${(performanceData[0]?.pendingEarnings || 0).toLocaleString('vi-VN')}đ`}
           </p>
         </div>
 

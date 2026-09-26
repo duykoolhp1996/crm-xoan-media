@@ -82,6 +82,9 @@ export const PhotographerDashboard: React.FC = () => {
   const [viewScope, setViewScope] = useState<'team' | 'personal'>('team');
   const isViewingTeam = isPhotoLead && viewScope === 'team';
 
+  // Bộ lọc danh sách lớp chụp: Tất cả / Lớp sẽ chụp / Lớp đã chụp
+  const [shootFilter, setShootFilter] = useState<'all' | 'upcoming' | 'completed'>('all');
+
   // 6. Lọc các booking liên quan:
   // - Nếu xem Team: tất cả ca chụp có thợ trong team tham gia hoặc thuộc khu vực team
   // - Nếu xem Cá nhân: ca chụp mà thợ chụp này trực tiếp tham gia
@@ -183,6 +186,13 @@ export const PhotographerDashboard: React.FC = () => {
     return [...upcomingShoots].sort((a, b) => (a.shootDate || '').localeCompare(b.shootDate || ''))[0];
   }, [upcomingShoots]);
 
+  // Danh sách các lớp theo bộ lọc (Tất cả / Lớp sẽ chụp / Lớp đã chụp)
+  const displayedShoots = useMemo(() => {
+    if (shootFilter === 'completed') return completedShoots;
+    if (shootFilter === 'upcoming') return upcomingShoots;
+    return relevantBookings;
+  }, [shootFilter, completedShoots, upcomingShoots, relevantBookings]);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* ── BANNER CHÀO MỪNG DÀNH RIÊNG CHO PHOTOGRAPHER ─────────────────── */}
@@ -245,111 +255,103 @@ export const PhotographerDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ── 4 THẺ KPI DOANH THU & BUỔI CHỤP THÀNH VIÊN ────────────────────── */}
+      {/* ── 4 THẺ KPI TRỌNG TÂM: SỐ LỚP ĐÃ CHỤP, SỐ LỚP SẼ CHỤP, LƯƠNG NHẬN ĐƯỢC ─── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Thù lao thực nhận từ các ca đã đi chụp */}
+        {/* KPI 1: Số lượng lớp đã chụp */}
         <div className="p-5 bg-white rounded-3xl border border-black/[0.08] shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
-              {isViewingTeam ? `Thù Lao Team ${myTeam}` : 'Thù Lao Đi Chụp'}
+              {isViewingTeam ? `Số Lớp Đã Chụp (Team ${myTeam})` : 'Số Lượng Lớp Đã Chụp'}
             </span>
             <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200/60 shadow-2xs">
-              <Coins className="w-4 h-4" />
+              <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-neutral-900 tracking-tight">
-              {totalEarnedAmount.toLocaleString('vi-VN')} <span className="text-sm font-bold text-neutral-500">đ</span>
+            <div className="text-3xl font-black text-neutral-900 tracking-tight">
+              {completedShoots.length} <span className="text-base font-bold text-neutral-500">Lớp</span>
             </div>
             <p className="text-xs text-emerald-700 font-semibold mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Đã chụp xong: <strong>{completedShoots.length} ca hoàn thành</strong>
+              ✓ Đã hoàn thành chụp & bàn giao file
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-400">
-            {isViewingTeam ? 'Tổng thu nhập các thợ trong team' : `Đơn giá: ${ratePerShoot.toLocaleString('vi-VN')} đ/buổi`}
+          <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-500 font-medium">
+            Lương tương ứng: <strong className="text-emerald-700 font-bold">{totalEarnedAmount.toLocaleString('vi-VN')} đ</strong>
           </div>
         </div>
 
-        {/* KPI 2: Thù lao tạm tính (Các ca sắp chụp) */}
+        {/* KPI 2: Số lượng lớp sẽ chụp */}
         <div className="p-5 bg-white rounded-3xl border border-black/[0.08] shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
-              Thù Lao Tạm Tính
+              {isViewingTeam ? `Số Lớp Sẽ Chụp (Team ${myTeam})` : 'Số Lượng Lớp Sẽ Chụp'}
             </span>
             <div className="w-9 h-9 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200/60 shadow-2xs">
-              <TrendingUp className="w-4 h-4" />
+              <Calendar className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-neutral-900 tracking-tight">
-              {totalPendingAmount.toLocaleString('vi-VN')} <span className="text-sm font-bold text-neutral-500">đ</span>
+            <div className="text-3xl font-black text-neutral-900 tracking-tight">
+              {upcomingShoots.length} <span className="text-base font-bold text-neutral-500">Lớp</span>
             </div>
             <p className="text-xs text-amber-700 font-semibold mt-1 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              Sắp diễn ra: <strong>{upcomingShoots.length} ca đã chốt lịch</strong>
+              ⏳ Đã chốt lịch, sẵn sàng tác nghiệp
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-400">
-            Dự kiến thanh toán sau khi hoàn tất ca chụp
+          <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-500 font-medium">
+            Lương dự kiến thêm: <strong className="text-amber-700 font-bold">+{totalPendingAmount.toLocaleString('vi-VN')} đ</strong>
           </div>
         </div>
 
-        {/* KPI 3: Tổng số buổi / ca đi chụp */}
-        <div className="p-5 bg-white rounded-3xl border border-black/[0.08] shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+        {/* KPI 3: Lương nhận được (Thực nhận từ các lớp đã chụp) */}
+        <div className="p-5 bg-gradient-to-br from-neutral-900 to-neutral-800 text-white rounded-3xl border border-black/[0.08] shadow-md hover:shadow-lg transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
-              Tổng Buổi Đi Chụp
+            <span className="text-xs font-bold text-[#B8F23D] uppercase tracking-wider">
+              {isViewingTeam ? `Lương Team ${myTeam} Nhận Được` : 'Lương Nhận Được'}
             </span>
-            <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-200/60 shadow-2xs">
-              <CalendarCheck className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-2xl bg-white/10 text-[#B8F23D] flex items-center justify-center border border-white/10 shadow-2xs">
+              <Coins className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-neutral-900 tracking-tight">
-              {relevantBookings.length} <span className="text-sm font-bold text-neutral-500">ca chụp</span>
+            <div className="text-3xl font-black text-[#B8F23D] tracking-tight">
+              {totalEarnedAmount.toLocaleString('vi-VN')} <span className="text-base font-bold text-white/70">đ</span>
+            </div>
+            <p className="text-xs text-neutral-300 font-medium mt-1">
+              Thực nhận từ <strong>{completedShoots.length} lớp</strong> đã chụp hoàn tất
+            </p>
+          </div>
+          <div className="mt-3 pt-3 border-t border-white/10 text-[11px] text-neutral-400">
+            {isViewingTeam ? 'Đã chi trả/tổng kết cho thợ' : `Mức lương: ${(ratePerShoot).toLocaleString('vi-VN')} đ / lớp`}
+          </div>
+        </div>
+
+        {/* KPI 4: Tổng lương cả mùa (Thực nhận + Tạm tính) */}
+        <div className="p-5 bg-white rounded-3xl border border-black/[0.08] shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+              Tổng Lương Cả Mùa (Dự Kiến)
+            </span>
+            <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-200/60 shadow-2xs">
+              <TrendingUp className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-3xl font-black text-neutral-900 tracking-tight">
+              {(totalEarnedAmount + totalPendingAmount).toLocaleString('vi-VN')} <span className="text-base font-bold text-neutral-500">đ</span>
             </div>
             <p className="text-xs text-neutral-600 font-medium mt-1">
-              {completedShoots.length} hoàn thành • {upcomingShoots.length} đang lên lịch
+              Tổng cộng <strong>{relevantBookings.length} lớp</strong> phụ trách
             </p>
           </div>
           <div className="mt-3 pt-3 border-t border-black/[0.06] flex items-center justify-between text-[11px]">
-            <span className="text-neutral-500">Xem trên Calendar</span>
+            <span className="text-neutral-500">Xem toàn bộ lịch</span>
             <button
               onClick={() => setActiveTab('calendar')}
               className="font-bold text-neutral-900 hover:text-black flex items-center gap-0.5"
             >
-              Mở lịch <ChevronRight className="w-3 h-3" />
+              Mở Calendar <ChevronRight className="w-3 h-3" />
             </button>
-          </div>
-        </div>
-
-        {/* KPI 4: Chất lượng & Đánh giá khách hàng */}
-        <div className="p-5 bg-white rounded-3xl border border-black/[0.08] shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
-              Chất Lượng & Đánh Giá
-            </span>
-            <div className="w-9 h-9 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-200/60 shadow-2xs">
-              <Star className="w-4 h-4 fill-orange-500 text-orange-500" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-2xl font-black text-neutral-900 tracking-tight flex items-center gap-1.5">
-              <span>5.0</span>
-              <div className="flex items-center">
-                {[1, 2, 3, 4, 5].map(s => (
-                  <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                ))}
-              </div>
-            </div>
-            <p className="text-xs text-emerald-700 font-semibold mt-1 flex items-center gap-1">
-              <Award className="w-3.5 h-3.5" />
-              100% đúng giờ & tác phong chuyên nghiệp
-            </p>
-          </div>
-          <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-400">
-            Dựa trên phản hồi từ các lớp kỷ yếu
           </div>
         </div>
       </div>
@@ -407,14 +409,14 @@ export const PhotographerDashboard: React.FC = () => {
             <div>
               <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
                 <Users className="w-4 h-4 text-neutral-900" />
-                Doanh Thu & Số Buổi Đi Chụp Từng Thành Viên — Team {myTeam}
+                Số Lượng Lớp & Lương Nhận Được Từng Thành Viên — Team {myTeam}
               </h2>
               <p className="text-xs text-neutral-500 mt-0.5">
-                Thống kê số buổi tác nghiệp thực tế và tổng thù lao của {teamPhotographers.length} thành viên thợ trong ekip
+                Bảng theo dõi số lớp đã chụp, số lớp sẽ chụp và tổng lương nhận được của {teamPhotographers.length} nhân sự ekip
               </p>
             </div>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
-              Tổng thù lao team: <strong>{totalEarnedAmount.toLocaleString('vi-VN')} đ</strong>
+            <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              Tổng lương team thực nhận: <strong>{totalEarnedAmount.toLocaleString('vi-VN')} đ</strong>
             </span>
           </div>
 
@@ -423,16 +425,17 @@ export const PhotographerDashboard: React.FC = () => {
               <thead>
                 <tr className="border-b border-black/[0.06] text-neutral-500 font-bold uppercase text-[10px] tracking-wider bg-neutral-50/60">
                   <th className="py-3 px-4 rounded-l-2xl">Thành Viên Ekip</th>
-                  <th className="py-3 px-4">Khu Vực & Vai Trò</th>
-                  <th className="py-3 px-4 text-center">Đã Đi Chụp</th>
-                  <th className="py-3 px-4 text-center">Sắp Tới</th>
-                  <th className="py-3 px-4 text-right">Đơn Giá / Buổi</th>
-                  <th className="py-3 px-4 text-right">Thù Lao Nhận Được</th>
+                  <th className="py-3 px-4">Vai Trò / Kỹ Năng</th>
+                  <th className="py-3 px-4 text-center">Lớp Đã Chụp</th>
+                  <th className="py-3 px-4 text-center">Lớp Sẽ Chụp</th>
+                  <th className="py-3 px-4 text-right">Lương / Lớp</th>
+                  <th className="py-3 px-4 text-right">Lương Nhận Được</th>
+                  <th className="py-3 px-4 text-right">Lương Tạm Tính</th>
                   <th className="py-3 px-4 text-center rounded-r-2xl">Trạng Thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/[0.04]">
-                {teamEarningsData.map((item, idx) => {
+                {teamEarningsData.map((item) => {
                   const p = item.photographer;
                   const isLeadSelf = p.id === currentPhotographer.id;
 
@@ -479,22 +482,26 @@ export const PhotographerDashboard: React.FC = () => {
 
                       <td className="py-3.5 px-4 text-center">
                         <span className="inline-block px-2.5 py-1 rounded-full font-bold text-xs bg-emerald-50 text-emerald-800 border border-emerald-200">
-                          {item.completedShoots} buổi
+                          {item.completedShoots} lớp
                         </span>
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
                         <span className="inline-block px-2.5 py-1 rounded-full font-bold text-xs bg-amber-50 text-amber-800 border border-amber-200">
-                          {item.upcomingShoots} ca
+                          {item.upcomingShoots} lớp
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right text-neutral-600 font-mono font-bold">
+                      <td className="py-3.5 px-4 text-right text-neutral-600 font-mono font-medium">
                         {(p.ratePerShoot || 1000000).toLocaleString('vi-VN')} đ
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-extrabold text-sm text-neutral-900 font-mono">
+                      <td className="py-3.5 px-4 text-right font-extrabold text-sm text-emerald-700 font-mono">
                         {item.earnedAmount.toLocaleString('vi-VN')} đ
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right font-bold text-xs text-amber-700 font-mono">
+                        +{item.pendingAmount.toLocaleString('vi-VN')} đ
                       </td>
 
                       <td className="py-3.5 px-4 text-center">
@@ -523,60 +530,116 @@ export const PhotographerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* ── DANH SÁCH CÁC CA ĐI CHỤP CỦA TÔI / TEAM ───────────────────────── */}
-      <div className="bg-white rounded-3xl border border-black/[0.08] p-5 sm:p-6 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      {/* ── DANH SÁCH CHI TIẾT CÁC LỚP CHỤP VÀ LƯƠNG NHẬN ĐƯỢC ───────────── */}
+      <div className="bg-white rounded-3xl border border-black/[0.08] p-5 sm:p-6 shadow-xs space-y-5">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
               <Camera className="w-4 h-4 text-neutral-900" />
-              {isViewingTeam ? `Danh Sách Ca Chụp Của Team ${myTeam}` : 'Danh Sách Ca Chụp Của Tôi'}
+              {isViewingTeam ? `Danh Sách Lớp Chụp Của Team ${myTeam}` : 'Danh Sách Lớp Chụp Của Tôi'}
             </h2>
             <p className="text-xs text-neutral-500 mt-0.5">
-              Chi tiết các lớp được phân công tác nghiệp, thời gian và mức thù lao nhận được
+              Theo dõi chi tiết số lượng lớp đã chụp, số lượng lớp sẽ chụp và mức lương nhận được của từng lớp
             </p>
           </div>
-          <button
-            onClick={() => setActiveTab('calendar')}
-            className="px-3.5 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-bold transition-all flex items-center gap-1.5"
-          >
-            <Calendar className="w-3.5 h-3.5" />
-            Mở Toàn Bộ Calendar
-          </button>
+
+          {/* Bộ lọc Tab: Tất cả / Lớp Sẽ Chụp / Lớp Đã Chụp */}
+          <div className="flex items-center gap-1.5 bg-neutral-100 p-1 rounded-2xl border border-black/[0.06] text-xs font-bold shrink-0">
+            <button
+              onClick={() => setShootFilter('all')}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                shootFilter === 'all'
+                  ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
+                  : 'text-neutral-600 hover:text-neutral-900'
+              }`}
+            >
+              Tất Cả ({relevantBookings.length} Lớp)
+            </button>
+            <button
+              onClick={() => setShootFilter('upcoming')}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                shootFilter === 'upcoming'
+                  ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
+                  : 'text-neutral-600 hover:text-neutral-900'
+              }`}
+            >
+              Lớp Sẽ Chụp ({upcomingShoots.length})
+            </button>
+            <button
+              onClick={() => setShootFilter('completed')}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                shootFilter === 'completed'
+                  ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
+                  : 'text-neutral-600 hover:text-neutral-900'
+              }`}
+            >
+              Lớp Đã Chụp ({completedShoots.length})
+            </button>
+          </div>
         </div>
 
-        {relevantBookings.length === 0 ? (
+        {displayedShoots.length === 0 ? (
           <div className="py-12 text-center text-neutral-400 text-xs bg-neutral-50 rounded-2xl border border-black/[0.04] space-y-2">
             <Camera className="w-10 h-10 mx-auto text-neutral-300" />
-            <p className="font-bold text-neutral-700 text-sm">Chưa có ca chụp nào được phân công</p>
+            <p className="font-bold text-neutral-700 text-sm">
+              {shootFilter === 'upcoming'
+                ? 'Hiện tại không có lớp nào sắp chụp'
+                : shootFilter === 'completed'
+                ? 'Chưa có lớp nào hoàn thành buổi chụp'
+                : 'Chưa có lớp chụp nào được phân công'}
+            </p>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-              Khi bộ phận Quản lý / Điều phối gán bạn vào các booking kỷ yếu, thông tin ca chụp và thù lao sẽ tự động xuất hiện tại đây.
+              Khi bộ phận Quản lý điều phối thêm lớp mới, thông tin lớp chụp và mức lương sẽ hiển thị ngay tại đây.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {relevantBookings.map(bk => {
+            {displayedShoots.map(bk => {
               const isDone = ['Hoàn thành', 'Đã chụp', 'Đã bàn giao'].includes(bk.bookingStatus);
 
               return (
                 <div
                   key={bk.id}
-                  className="p-4 bg-neutral-50 rounded-2xl border border-black/[0.06] hover:bg-neutral-100/70 transition-all space-y-3"
+                  className={`p-4 rounded-2xl border transition-all space-y-3 ${
+                    isDone
+                      ? 'bg-emerald-50/30 border-emerald-200/80 hover:bg-emerald-50/50'
+                      : 'bg-neutral-50 border-black/[0.06] hover:bg-neutral-100/70'
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className="font-mono text-[10px] font-bold bg-white border border-black/[0.08] px-2 py-0.5 rounded shadow-2xs text-neutral-800">
-                        {bk.code}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] font-bold bg-white border border-black/[0.08] px-2 py-0.5 rounded shadow-2xs text-neutral-800">
+                          {bk.code}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            isDone
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                              : 'bg-amber-100 text-amber-900 border-amber-200'
+                          }`}
+                        >
+                          {isDone ? '✓ LỚP ĐÃ CHỤP' : '⏳ LỚP SẼ CHỤP'}
+                        </span>
+                      </div>
                       <h4 className="font-extrabold text-neutral-900 text-sm mt-1.5">
                         {bk.className} — {bk.schoolName}
                       </h4>
                       <p className="text-xs text-neutral-500 mt-0.5">{bk.packageName}</p>
                     </div>
 
-                    {/* Thù lao ca chụp */}
+                    {/* Mức lương của lớp chụp */}
                     <div className="text-right shrink-0">
-                      <span className="text-[10px] text-neutral-400 font-bold block">Thù lao ca:</span>
-                      <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 inline-block mt-0.5">
+                      <span className="text-[10px] text-neutral-400 font-bold block">
+                        {isDone ? 'Lương nhận được:' : 'Lương tạm tính:'}
+                      </span>
+                      <span
+                        className={`text-xs font-black px-2.5 py-0.5 rounded-full border inline-block mt-0.5 font-mono ${
+                          isDone
+                            ? 'text-emerald-800 bg-emerald-100/80 border-emerald-300'
+                            : 'text-amber-800 bg-amber-100/80 border-amber-300'
+                        }`}
+                      >
                         + {(currentPhotographer.ratePerShoot || 1000000).toLocaleString('vi-VN')} đ
                       </span>
                     </div>
@@ -598,25 +661,22 @@ export const PhotographerDashboard: React.FC = () => {
                     <p className="flex items-center gap-2 truncate text-neutral-700 font-semibold pt-1 border-t border-neutral-100">
                       <Camera className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
                       Thợ chính: <strong className="text-neutral-900">{bk.assignments.leadPhotographerName || 'Đang cập nhật'}</strong>
+                      {bk.assignments.videographerName && (
+                        <span className="text-neutral-500 font-normal"> • Quay: {bk.assignments.videographerName}</span>
+                      )}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between pt-1">
-                    <span
-                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                        isDone
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                          : 'bg-amber-50 text-amber-800 border-amber-200'
-                      }`}
-                    >
-                      {isDone ? '✓ Đã chụp xong' : '⏳ Sắp tác nghiệp'}
+                    <span className="text-[11px] text-neutral-500">
+                      Trạng thái: <strong className={isDone ? 'text-emerald-700' : 'text-amber-700'}>{bk.bookingStatus}</strong>
                     </span>
 
                     <button
                       onClick={() => setActiveTab('calendar')}
                       className="text-xs font-bold text-neutral-700 hover:text-black flex items-center gap-1"
                     >
-                      Xem lịch <ChevronRight className="w-3 h-3" />
+                      Xem trên Calendar <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -628,3 +688,4 @@ export const PhotographerDashboard: React.FC = () => {
     </div>
   );
 };
+
