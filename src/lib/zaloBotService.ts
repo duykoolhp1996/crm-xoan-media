@@ -161,7 +161,9 @@ export const sendZaloBotNotification = async (params: {
   }
 
   const targetRecipient = params.recipient || config.targetChatId || 'Kênh điều hành Xoắn Media';
-  const fullText = `🔔 [CRM XOẮN MEDIA - THÔNG BÁO]\n📌 ${params.title}\n📝 ${params.content}\n⏰ ${new Date().toLocaleTimeString('vi-VN')} - ${new Date().toLocaleDateString('vi-VN')}`;
+  const fullText = params.content.includes('[CRM XOẮN MEDIA')
+    ? params.content
+    : `🔔 [CRM XOẮN MEDIA - THÔNG BÁO]\n📌 ${params.title}\n📝 ${params.content}\n⏰ ${new Date().toLocaleTimeString('vi-VN')} - ${new Date().toLocaleDateString('vi-VN')}`;
 
   let apiSuccess = false;
   let apiRes: any = null;
@@ -215,4 +217,58 @@ export const sendZaloBotTaskAssignment = async (params: {
     recipient: config.targetChatId,
   });
 };
+
+/**
+ * Tự động gửi thông báo khách hàng mới vào nhóm Zalo
+ */
+export const notifyNewCustomerLeadToZaloGroup = async (customer: {
+  name: string;
+  phone: string;
+  className: string;
+  schoolName: string;
+  city?: string;
+  source?: string;
+  servicePackageName?: string;
+  expectedBudget?: number;
+  assignedSalesName?: string;
+  studentCount?: number;
+  notes?: string;
+}): Promise<{ success: boolean; message: string }> => {
+  const config = getZaloBotConfig();
+  if (!config.notifyNewLead) {
+    return { success: false, message: 'Thông báo khách hàng mới đang bị tắt trong cài đặt.' };
+  }
+
+  const budgetStr =
+    customer.expectedBudget && customer.expectedBudget > 0
+      ? `${customer.expectedBudget.toLocaleString('vi-VN')} VNĐ`
+      : 'Chưa xác định';
+
+  const salesStr =
+    customer.assignedSalesName && customer.assignedSalesName !== 'Chưa gán'
+      ? customer.assignedSalesName
+      : 'Đang chờ phân bổ Sales tư vấn';
+
+  const text = `🔥 [CRM XOẮN MEDIA - KHÁCH HÀNG MỚI]
+━━━━━━━━━━━━━━━━━━━━
+👤 Khách hàng: ${customer.name}
+📞 SĐT / Zalo: ${customer.phone}
+🎓 Lớp & Trường: ${customer.className} - ${customer.schoolName}${customer.city ? ` (${customer.city})` : ''}
+👥 Sĩ số dự kiến: ${customer.studentCount ? `${customer.studentCount} bạn` : 'Chưa cập nhật'}
+📦 Gói quan tâm: ${customer.servicePackageName || 'Tư vấn kỷ yếu'}
+💰 Ngân sách dự kiến: ${budgetStr}
+🌐 Nguồn tiếp cận: ${customer.source || 'Facebook/TikTok/Zalo'}
+👨‍💼 Sales phụ trách: ${salesStr}${customer.notes ? `\n📝 Nhu cầu / Ghi chú: ${customer.notes}` : ''}
+━━━━━━━━━━━━━━━━━━━━
+⏰ ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${new Date().toLocaleDateString('vi-VN')}
+👉 Đội ngũ Sales vui lòng liên hệ tư vấn trong vòng 15 phút để đạt tỷ lệ chốt cao nhất! 🚀`;
+
+  return sendZaloBotNotification({
+    type: 'lead',
+    title: `Khách mới: ${customer.name} - ${customer.className} (${customer.schoolName})`,
+    content: text,
+    recipient: config.targetChatId,
+  });
+};
+
 

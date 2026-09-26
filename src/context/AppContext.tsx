@@ -38,7 +38,7 @@ import {
   mockMoments
 } from '../data/mockData';
 import { crmSupabaseService } from '../services/crmSupabaseService';
-import { sendZaloBotNotification } from '../lib/zaloBotService';
+import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup } from '../lib/zaloBotService';
 
 export type NavigationTab = 
   | 'dashboard'
@@ -516,6 +516,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       title: 'Tạo mới khách hàng',
       description: `Khách hàng ${customerData.name} (${customerData.className} - ${customerData.schoolName}) được thêm vào hệ thống.`,
       performedByName: currentUser.name
+    });
+
+    // Tự động bắn thông báo khách hàng mới vào nhóm Zalo
+    notifyNewCustomerLeadToZaloGroup(customerData).catch(err => {
+      console.warn('[Zalo Bot] Lỗi gửi thông báo khách mới:', err);
     });
   };
 
