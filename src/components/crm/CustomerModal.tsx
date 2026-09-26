@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { LeadSource, PipelineStage } from '../../types';
 import { VIETNAM_LOCATIONS, getDistrictsByCity } from '../../data/vietnamLocations';
-import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones, UserCheck, Globe, Layers } from 'lucide-react';
+import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones, UserCheck, Globe, Layers, AlertTriangle, AlertCircle } from 'lucide-react';
 
 interface CustomerModalProps {
   isOpen: boolean;
@@ -10,7 +10,10 @@ interface CustomerModalProps {
 }
 
 export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
-  const { addCustomer, schools, servicePackages, salesStaff, currentUser } = useApp();
+  const { addCustomer, schools, servicePackages, salesStaff, currentUser, customers } = useApp();
+
+  // Tự động gán Sales là chính mình nếu user đang đăng nhập có vai trò Sales
+  const initialSalesName = currentUser.role === 'sales' ? currentUser.name : 'Chưa gán';
 
   const [formData, setFormData] = useState({
     name: '',
@@ -41,7 +44,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     utmMedium: 'cpc',
     utmCampaign: 'lead_form_kyyeu',
     pipelineStage: 'New Lead' as PipelineStage,
-    assignedSalesName: 'Chưa gán',
+    assignedSalesName: initialSalesName,
     assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)'
   });
 
@@ -66,6 +69,18 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     }));
   };
 
+  // Chuẩn hóa số điện thoại để kiểm tra trùng
+  const cleanPhone = (p?: string) => (p || '').replace(/\D/g, '');
+
+  const cleanInputPhone = cleanPhone(formData.phone);
+  const duplicateCustomer = cleanInputPhone.length >= 8
+    ? (customers || []).find(c => {
+        const cPhone = cleanPhone(c.phone);
+        const cZalo = cleanPhone(c.zalo);
+        return (cPhone && cPhone === cleanInputPhone) || (cZalo && cZalo === cleanInputPhone);
+      })
+    : null;
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -75,10 +90,25 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
       return;
     }
 
+    if (duplicateCustomer) {
+      alert(
+        `⚠️ SỐ ĐIỆN THOẠI ĐÃ BỊ TRÙNG!\n\n` +
+        `Số điện thoại "${formData.phone}" đã tồn tại trên hệ thống với thông tin:\n` +
+        `• Khách hàng: ${duplicateCustomer.name}\n` +
+        `• Lớp / Trường: ${duplicateCustomer.className} - ${duplicateCustomer.schoolName}\n` +
+        `• Sales phụ trách: ${duplicateCustomer.assignedSalesName || 'Chưa gán'}\n` +
+        `• Trạng thái: ${duplicateCustomer.pipelineStage}\n\n` +
+        `Vui lòng kiểm tra lại để tránh trùng lặp lead!`
+      );
+      return;
+    }
+
     const selectedPkg = servicePackages.find(p => p.id === formData.servicePackageId);
 
     let salesName = formData.assignedSalesName;
-    if (formData.pipelineStage !== 'New Lead' && salesName === 'Chưa gán') {
+    if ((!salesName || salesName === 'Chưa gán') && currentUser.role === 'sales') {
+      salesName = currentUser.name;
+    } else if (formData.pipelineStage !== 'New Lead' && salesName === 'Chưa gán') {
       salesName = currentUser.role === 'sales' ? currentUser.name : (salesStaff[0]?.name || 'Lê Hoàng Sơn (Sales Lead)');
     }
     const matchedSales = salesStaff.find(s => s.name === salesName);
@@ -118,7 +148,9 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
       pipelineStage: formData.pipelineStage,
       assignedSalesId: salesId,
       assignedSalesName: salesName,
-      assignedCareStaffName: formData.assignedCareStaffName
+      assignedCareStaffName: formData.assignedCareStaffName,
+      createdById: currentUser.id,
+      createdByName: currentUser.name
     });
 
     onClose();
@@ -169,15 +201,39 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
                 />
               </div>
               <div>
-                <label className="font-semibold text-neutral-700">Số điện thoại *</label>
+                <div className="flex items-center justify-between">
+                  <label className="font-semibold text-neutral-700">Số điện thoại *</label>
+                  {duplicateCustomer && (
+                    <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
+                      Đã trùng SĐT
+                    </span>
+                  )}
+                </div>
                 <input
                   type="tel"
                   required
                   placeholder="0912..."
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+                  className={`w-full mt-1 px-3 py-2 bg-neutral-50 border text-neutral-900 placeholder-neutral-400 rounded-xl focus:bg-white focus:outline-none focus:ring-2 transition-all ${
+                    duplicateCustomer
+                      ? 'border-rose-400 focus:ring-rose-500 bg-rose-50/40 text-rose-900 font-medium'
+                      : 'border-black/[0.08] focus:ring-[#B8F23D]'
+                  }`}
                 />
+                {duplicateCustomer && (
+                  <div className="mt-1.5 p-2.5 bg-rose-50 border border-rose-300 rounded-xl text-rose-900 text-[11px] space-y-1 animate-in fade-in duration-150">
+                    <div className="flex items-center gap-1 font-bold text-rose-700">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      <span>Số điện thoại đã tồn tại trên CRM!</span>
+                    </div>
+                    <div className="pl-4 space-y-0.5 text-neutral-700 text-[10.5px]">
+                      <p>• Khách hàng: <strong className="text-rose-900">{duplicateCustomer.name}</strong> ({duplicateCustomer.className} - {duplicateCustomer.schoolName})</p>
+                      <p>• Sales phụ trách: <strong className="text-neutral-900">{duplicateCustomer.assignedSalesName || 'Chưa gán'}</strong></p>
+                      <p>• Trạng thái: <span className="px-1.5 py-0.2 bg-white rounded border border-rose-200 text-rose-800 font-medium">{duplicateCustomer.pipelineStage}</span></p>
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="font-semibold text-neutral-700">Vai trò trong lớp</label>

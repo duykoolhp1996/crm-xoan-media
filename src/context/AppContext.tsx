@@ -498,9 +498,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Customer handlers
   const addCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>) => {
     const newId = `cust-${Date.now()}`;
+    const creatorName = customerData.createdByName || currentUser.name;
+    const creatorId = customerData.createdById || currentUser.id;
+    const salesName = customerData.assignedSalesName || (currentUser.role === 'sales' ? currentUser.name : 'Chưa gán');
+
     const newCustomer: Customer = {
       ...customerData,
       id: newId,
+      createdById: creatorId,
+      createdByName: creatorName,
+      assignedSalesName: salesName,
       totalRevenue: customerData.expectedBudget || 0,
       paidAmount: 0,
       createdAt: new Date().toISOString(),
@@ -514,12 +521,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       customerId: newId,
       type: 'lead_created',
       title: 'Tạo mới khách hàng',
-      description: `Khách hàng ${customerData.name} (${customerData.className} - ${customerData.schoolName}) được thêm vào hệ thống.`,
-      performedByName: currentUser.name
+      description: `Khách hàng ${customerData.name} (${customerData.className} - ${customerData.schoolName}) được nhập vào hệ thống bởi ${creatorName}.`,
+      performedByName: creatorName
     });
 
     // Tự động bắn thông báo khách hàng mới vào nhóm Zalo
-    notifyNewCustomerLeadToZaloGroup(customerData).catch(err => {
+    notifyNewCustomerLeadToZaloGroup({
+      ...customerData,
+      createdByName: creatorName,
+      assignedSalesName: salesName
+    }).catch(err => {
       console.warn('[Zalo Bot] Lỗi gửi thông báo khách mới:', err);
     });
   };

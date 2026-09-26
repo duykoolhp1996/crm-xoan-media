@@ -90,6 +90,8 @@ export interface Customer {
   assignedSalesName: string;
   assignedCareStaffId?: string;
   assignedCareStaffName?: string;
+  createdById?: string;
+  createdByName?: string;
   
   // Tài chính tổng hợp
   totalRevenue: number;

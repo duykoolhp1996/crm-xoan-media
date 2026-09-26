@@ -277,6 +277,7 @@ export const notifyNewCustomerLeadToZaloGroup = async (customer: {
   assignedSalesName?: string;
   studentCount?: number;
   notes?: string;
+  createdByName?: string;
 }): Promise<{ success: boolean; message: string }> => {
   const config = getZaloBotConfig();
   if (config.notifyNewLead === false) {
@@ -288,10 +289,11 @@ export const notifyNewCustomerLeadToZaloGroup = async (customer: {
       ? `${customer.expectedBudget.toLocaleString('vi-VN')} VNĐ`
       : 'Chưa xác định';
 
+  const creatorStr = customer.createdByName || 'Tạ Duy (Admin)';
   const salesStr =
     customer.assignedSalesName && customer.assignedSalesName !== 'Chưa gán'
       ? customer.assignedSalesName
-      : 'Đang chờ phân bổ Sales tư vấn';
+      : creatorStr;
 
   const text = `🔥 [CRM XOẮN MEDIA - KHÁCH HÀNG MỚI]
 ━━━━━━━━━━━━━━━━━━━━
@@ -302,10 +304,11 @@ export const notifyNewCustomerLeadToZaloGroup = async (customer: {
 📦 Gói quan tâm: ${customer.servicePackageName || 'Tư vấn kỷ yếu'}
 💰 Ngân sách dự kiến: ${budgetStr}
 🌐 Nguồn tiếp cận: ${customer.source || 'Facebook/TikTok/Zalo'}
+✍️ Người nhập lead: ${creatorStr}
 👨‍💼 Sales phụ trách: ${salesStr}${customer.notes ? `\n📝 Nhu cầu / Ghi chú: ${customer.notes}` : ''}
 ━━━━━━━━━━━━━━━━━━━━
 ⏰ ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${new Date().toLocaleDateString('vi-VN')}
-👉 Đội ngũ Sales vui lòng liên hệ tư vấn trong vòng 15 phút để đạt tỷ lệ chốt cao nhất! 🚀`;
+👉 @${salesStr} vui lòng liên hệ tư vấn trong 15 phút để đạt tỷ lệ chốt cao nhất! 🚀`;
 
   return sendZaloBotNotification({
     type: 'lead',
