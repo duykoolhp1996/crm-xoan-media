@@ -33,7 +33,7 @@ export const DEFAULT_ZALO_BOT_CONFIG: ZaloBotConfig = {
   botName: 'Bot ai task mam',
   botId: '663760632193924350',
   botToken: '663760632193924350:VfJckgUJFOSFJJavkIJoXmSDtHUXeVtJVbLtQospphQCyIyQTDcXZElmqgsxKTUR',
-  targetChatId: 'c9463a061152f80ca143', // Tạ Duy (Admin / Quản lý)
+  targetChatId: 'zgr-c51cae5f6b33826ddb22', // Nhóm Điều Phối & Vận Hành Ekip (Zalo Group)
   webhookUrl: 'https://n8n.duyhiendigi.com/webhook-test/acca5225-56a7-4116-9150-d3856470e025',
   notifyNewLead: true,
   notifyPhotographerSchedule: true,
