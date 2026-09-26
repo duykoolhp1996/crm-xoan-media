@@ -14,7 +14,8 @@ import {
   Sparkles,
   MapPin,
   Headphones,
-  UserCheck
+  UserCheck,
+  Trash2
 } from 'lucide-react';
 import { CustomerDetail360 } from './CustomerDetail360';
 import { CustomerModal } from './CustomerModal';
@@ -25,6 +26,7 @@ export const CustomerList: React.FC = () => {
     selectedCustomerId,
     setSelectedCustomerId,
     updateCustomerStage,
+    deleteCustomer,
     currentUser,
     currentRole,
     salesStaff
@@ -267,16 +269,30 @@ export const CustomerList: React.FC = () => {
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCustomerId(cust.id);
-                        }}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-900 hover:text-[#B8F23D] text-neutral-800 text-[11px] font-bold transition-all"
-                      >
-                        Chi tiết
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCustomerId(cust.id);
+                          }}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-900 hover:text-[#B8F23D] text-neutral-800 text-[11px] font-bold transition-all"
+                        >
+                          Chi tiết
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa khách hàng "${cust.name}" (${cust.className} - ${cust.phone}) khỏi hệ thống CRM không?`)) {
+                              deleteCustomer(cust.id);
+                            }
+                          }}
+                          title="Xóa khách hàng này"
+                          className="p-1.5 rounded-xl text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

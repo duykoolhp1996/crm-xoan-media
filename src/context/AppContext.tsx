@@ -77,7 +77,8 @@ interface AppContextType {
   customers: Customer[];
   selectedCustomerId: string | null;
   setSelectedCustomerId: (id: string | null) => void;
-  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>) => void;
+  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>) => boolean;
+  deleteCustomer: (id: string) => void;
   updateCustomerStage: (customerId: string, newStage: PipelineStage) => void;
   updateCustomer: (customer: Customer) => void;
 
@@ -511,7 +512,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Customer handlers
-  const addCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>) => {
+  const addCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>): boolean => {
+    // 1. Kiểm tra trùng SĐT ngay tại nguồn dữ liệu trung tâm (Single Source of Truth)
+    const cleanP = (customerData.phone || '').replace(/\D/g, '');
+    const cleanZ = (customerData.zalo || '').replace(/\D/g, '');
+
+    if (cleanP.length >= 4) {
+      const duplicate = customers.find(c => {
+        const cp = (c.phone || '').replace(/\D/g, '');
+        const cz = (c.zalo || '').replace(/\D/g, '');
+        return (cp && (cp === cleanP || cp === cleanZ)) || (cz && (cz === cleanP || cz === cleanZ));
+      });
+
+      if (duplicate) {
+        alert(
+          `⚠️ SỐ ĐIỆN THOẠI ĐÃ TỒN TẠI TRÊN HỆ THỐNG!\n\n` +
+          `Số điện thoại "${customerData.phone}" đã bị trùng với khách hàng:\n` +
+          `• Tên khách hàng: ${duplicate.name}\n` +
+          `• Lớp / Trường: ${duplicate.className} - ${duplicate.schoolName}\n` +
+          `• Sales phụ trách: ${duplicate.assignedSalesName || 'Chưa gán'}\n` +
+          `• Trạng thái hiện tại: ${duplicate.pipelineStage}\n\n` +
+          `Hệ thống từ chối lưu để đảm bảo tính duy nhất của dữ liệu CRM!`
+        );
+        return false;
+      }
+    }
+
     const newId = `cust-${Date.now()}`;
     const creatorName = customerData.createdByName || currentUser.name;
     const creatorId = customerData.createdById || currentUser.id;
@@ -548,6 +574,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }).catch(err => {
       console.warn('[Zalo Bot] Lỗi gửi thông báo khách mới:', err);
     });
+
+    return true;
+  };
+
+  const deleteCustomer = (id: string) => {
+    setCustomers(prev => prev.filter(c => c.id !== id));
+    crmSupabaseService.deleteCustomer(id).catch(() => {});
   };
 
   const updateCustomerStage = (customerId: string, newStage: PipelineStage) => {
@@ -882,6 +915,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         selectedCustomerId,
         setSelectedCustomerId,
         addCustomer,
+        deleteCustomer,
         updateCustomerStage,
         updateCustomer,
         bookings,

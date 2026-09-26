@@ -15,7 +15,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
   // Tự động gán Sales là chính mình nếu user đang đăng nhập có vai trò Sales
   const initialSalesName = currentUser.role === 'sales' ? currentUser.name : 'Chưa gán';
 
-  const [formData, setFormData] = useState({
+  const getInitialFormData = () => ({
     name: '',
     phone: '',
     email: '',
@@ -48,6 +48,15 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)'
   });
 
+  const [formData, setFormData] = useState(getInitialFormData);
+
+  // Tự động làm mới form mỗi khi mở modal
+  React.useEffect(() => {
+    if (isOpen) {
+      setFormData(getInitialFormData());
+    }
+  }, [isOpen]);
+
   const availableDistricts = getDistrictsByCity(formData.city);
 
   const handleCityChange = (cityName: string) => {
@@ -73,11 +82,13 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
   const cleanPhone = (p?: string) => (p || '').replace(/\D/g, '');
 
   const cleanInputPhone = cleanPhone(formData.phone);
-  const duplicateCustomer = cleanInputPhone.length >= 8
+  const cleanInputZalo = cleanPhone(formData.zalo);
+  const duplicateCustomer = cleanInputPhone.length >= 4
     ? (customers || []).find(c => {
         const cPhone = cleanPhone(c.phone);
         const cZalo = cleanPhone(c.zalo);
-        return (cPhone && cPhone === cleanInputPhone) || (cZalo && cZalo === cleanInputPhone);
+        return (cPhone && (cPhone === cleanInputPhone || (cleanInputZalo && cPhone === cleanInputZalo))) ||
+               (cZalo && ((cleanInputPhone && cZalo === cleanInputPhone) || (cleanInputZalo && cZalo === cleanInputZalo)));
       })
     : null;
 
@@ -90,15 +101,24 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
       return;
     }
 
-    if (duplicateCustomer) {
+    const inputCleanPhone = cleanPhone(formData.phone);
+    const inputCleanZalo = cleanPhone(formData.zalo);
+    const directDup = (customers || []).find(c => {
+      const cPhone = cleanPhone(c.phone);
+      const cZalo = cleanPhone(c.zalo);
+      return (cPhone && (cPhone === inputCleanPhone || (inputCleanZalo && cPhone === inputCleanZalo))) ||
+             (cZalo && ((inputCleanPhone && cZalo === inputCleanPhone) || (inputCleanZalo && cZalo === inputCleanZalo)));
+    });
+
+    if (directDup) {
       alert(
         `⚠️ SỐ ĐIỆN THOẠI ĐÃ BỊ TRÙNG!\n\n` +
         `Số điện thoại "${formData.phone}" đã tồn tại trên hệ thống với thông tin:\n` +
-        `• Khách hàng: ${duplicateCustomer.name}\n` +
-        `• Lớp / Trường: ${duplicateCustomer.className} - ${duplicateCustomer.schoolName}\n` +
-        `• Sales phụ trách: ${duplicateCustomer.assignedSalesName || 'Chưa gán'}\n` +
-        `• Trạng thái: ${duplicateCustomer.pipelineStage}\n\n` +
-        `Vui lòng kiểm tra lại để tránh trùng lặp lead!`
+        `• Khách hàng: ${directDup.name}\n` +
+        `• Lớp / Trường: ${directDup.className} - ${directDup.schoolName}\n` +
+        `• Sales phụ trách: ${directDup.assignedSalesName || 'Chưa gán'}\n` +
+        `• Trạng thái: ${directDup.pipelineStage}\n\n` +
+        `Hệ thống từ chối lưu để tránh trùng lặp dữ liệu CRM!`
       );
       return;
     }
@@ -114,7 +134,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     const matchedSales = salesStaff.find(s => s.name === salesName);
     const salesId = matchedSales?.id || (salesName === currentUser.name ? currentUser.id : '');
 
-    addCustomer({
+    const success = addCustomer({
       name: formData.name,
       phone: formData.phone,
       email: formData.email,
@@ -153,7 +173,9 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
       createdByName: currentUser.name
     });
 
-    onClose();
+    if (success) {
+      onClose();
+    }
   };
 
   return (
@@ -582,9 +604,14 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold transition-all shadow-sm active:scale-95"
+              disabled={Boolean(duplicateCustomer)}
+              className={`px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm ${
+                duplicateCustomer
+                  ? 'bg-rose-100 text-rose-700 border border-rose-300 cursor-not-allowed opacity-80'
+                  : 'bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] active:scale-95'
+              }`}
             >
-              Lưu Khách Hàng Vào Hệ Thống
+              {duplicateCustomer ? '⚠️ SĐT Đã Trùng - Không Thể Lưu' : 'Lưu Khách Hàng Vào Hệ Thống'}
             </button>
           </div>
         </form>
