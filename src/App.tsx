@@ -7,6 +7,7 @@ import { LoginPage } from './components/auth/LoginPage';
 
 // Real CRM Modules
 import { ExecutiveDashboard } from './components/dashboard/ExecutiveDashboard';
+import { PhotographerDashboard } from './components/dashboard/PhotographerDashboard';
 import { CustomerList } from './components/crm/CustomerList';
 import { KanbanPipeline } from './components/pipeline/KanbanPipeline';
 import { SchoolClassModule } from './components/schools/SchoolClassModule';
@@ -22,7 +23,9 @@ import { SettingsModule } from './components/settings/SettingsModule';
 import { initGA4, trackPageView } from './lib/analytics';
 
 const MainContent: React.FC = () => {
-  const { activeTab } = useApp();
+  const { activeTab, currentUser, currentRole } = useApp();
+
+  const isPhotographer = currentRole === 'photographer' || currentUser?.role === 'photographer';
 
   React.useEffect(() => {
     trackPageView(`/#${activeTab}`, `CRM Xoắn - ${activeTab}`);
@@ -33,7 +36,7 @@ const MainContent: React.FC = () => {
   return (
     <main className={`flex-1 ${isPipeline ? 'overflow-hidden flex flex-col min-h-0 p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain'}`}>
       <div className={`${isPipeline ? 'w-full h-full flex flex-col min-h-0' : 'max-w-7xl mx-auto space-y-6'}`}>
-        {activeTab === 'dashboard' && <ExecutiveDashboard />}
+        {activeTab === 'dashboard' && (isPhotographer ? <PhotographerDashboard /> : <ExecutiveDashboard />)}
         {(activeTab === 'customers' || activeTab === 'leads') && <CustomerList />}
         {activeTab === 'pipeline' && <KanbanPipeline />}
         {activeTab === 'schools' && <SchoolClassModule />}

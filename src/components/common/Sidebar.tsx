@@ -57,9 +57,11 @@ export const Sidebar: React.FC = () => {
       items: [
         {
           id: 'dashboard',
-          label: 'Dashboard Điều Hành',
+          label: isPhotoRole
+            ? (isPhotoLead ? 'Dashboard Team Chụp' : 'Dashboard Cá Nhân')
+            : (currentRole === 'sales' ? 'Dashboard Doanh Số' : 'Dashboard Điều Hành'),
           icon: LayoutDashboard,
-          roles: ['admin', 'manager', 'sales', 'marketing']
+          roles: ['admin', 'manager', 'sales', 'marketing', 'photographer']
         }
       ]
     },
