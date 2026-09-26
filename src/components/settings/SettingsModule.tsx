@@ -538,10 +538,17 @@ export const SettingsModule: React.FC = () => {
                   {/* Footer Card: Pricing & Action Buttons */}
                   <div className="pt-3 border-t border-black/[0.06] space-y-2.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-neutral-500">Thù lao / buổi:</span>
-                      <strong className="text-neutral-900 font-extrabold text-sm">
-                        {p.ratePerShoot.toLocaleString('vi-VN')}đ
-                      </strong>
+                      <span className="text-neutral-500">Cơ chế lương:</span>
+                      <div className="text-right">
+                        <strong className="text-neutral-900 font-extrabold text-sm font-mono block">
+                          {p.salaryType === 'monthly'
+                            ? `${(p.monthlySalary || 15000000).toLocaleString('vi-VN')}đ`
+                            : `${p.ratePerShoot.toLocaleString('vi-VN')}đ`}
+                        </strong>
+                        <span className="text-[10px] font-bold text-neutral-400">
+                          {p.salaryType === 'monthly' ? '📅 Lương tháng' : '📸 Theo buổi chụp'}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Nút Đăng nhập thử với quyền thợ này */}

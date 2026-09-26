@@ -110,10 +110,10 @@ export const PhotographerReports: React.FC = () => {
       // Doanh thu thực tế mang về từ các lớp thợ này phục vụ (không lấy số ảo)
       const totalRevenueGenerated = pBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
 
-      // Thù lao thực tế: ca đã hoàn thành * đơn giá ca
-      const totalEarnings = completedCount * p.ratePerShoot;
-      // Thù lao tạm tính đang diễn ra
-      const pendingEarnings = inProgressCount * p.ratePerShoot;
+      // Lương thực tế theo 2 loại: Lương tháng hoặc Theo buổi chụp
+      const isMonthly = p.salaryType === 'monthly';
+      const totalEarnings = isMonthly ? (p.monthlySalary || 15000000) : (completedCount * p.ratePerShoot);
+      const pendingEarnings = isMonthly ? (inProgressCount * (p.ratePerShoot || 0)) : (inProgressCount * p.ratePerShoot);
 
       // Giờ tác nghiệp thực tế (8h / ca hoàn thành)
       const hoursWorked = completedCount * 8;
@@ -592,18 +592,20 @@ export const PhotographerReports: React.FC = () => {
                       </p>
                     </td>
 
-                    {/* Cột 7: Thù lao nhận */}
+                    {/* Cột 7: Lương nhận được */}
                     <td className="py-3.5 px-4 text-right">
-                      <p className="font-extrabold text-emerald-700 text-sm">
+                      <p className="font-extrabold text-emerald-700 text-sm font-mono">
                         {item.totalEarnings.toLocaleString('vi-VN')}đ
                       </p>
-                      {item.pendingEarnings > 0 && (
-                        <p className="text-[11px] text-amber-600 font-semibold">
+                      {item.pendingEarnings > 0 && item.salaryType !== 'monthly' && (
+                        <p className="text-[11px] text-amber-600 font-semibold font-mono">
                           +{item.pendingEarnings.toLocaleString('vi-VN')}đ chờ nghiệm thu
                         </p>
                       )}
                       <span className="text-[10px] text-neutral-400 block mt-0.5">
-                        Định mức: {item.ratePerShoot.toLocaleString('vi-VN')}đ/buổi
+                        {item.salaryType === 'monthly'
+                          ? `📅 Lương tháng: ${(item.monthlySalary || 15000000).toLocaleString('vi-VN')}đ`
+                          : `📸 Theo ca: ${item.ratePerShoot.toLocaleString('vi-VN')}đ/lớp`}
                       </span>
                     </td>
                   </tr>

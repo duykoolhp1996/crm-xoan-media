@@ -266,8 +266,17 @@ export const PhotographerList: React.FC = () => {
               {/* Stats & Actions */}
               <div className="pt-3 border-t border-black/[0.06] space-y-2 text-xs">
                 <div className="flex items-center justify-between text-neutral-500">
-                  <span>Thù lao / buổi:</span>
-                  <strong className="text-neutral-900 font-bold">{photo.ratePerShoot.toLocaleString('vi-VN')}đ</strong>
+                  <span>Cơ chế lương:</span>
+                  <div className="text-right">
+                    <strong className="text-neutral-900 font-bold font-mono">
+                      {photo.salaryType === 'monthly'
+                        ? `${(photo.monthlySalary || 15000000).toLocaleString('vi-VN')}đ`
+                        : `${photo.ratePerShoot.toLocaleString('vi-VN')}đ`}
+                    </strong>
+                    <span className="text-[10px] text-neutral-400 block font-medium">
+                      {photo.salaryType === 'monthly' ? '📅 Lương tháng' : '📸 Theo buổi'}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between text-neutral-500">

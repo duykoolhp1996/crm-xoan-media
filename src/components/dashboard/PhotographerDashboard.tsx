@@ -129,11 +129,12 @@ export const PhotographerDashboard: React.FC = () => {
     );
   }, [relevantBookings]);
 
-  // 8. Tính doanh thu / thù lao thành viên đi chụp:
-  // Thù lao = Số buổi đi chụp hoàn thành × đơn giá ratePerShoot của thợ
+  // 8. Tính lương theo 2 loại: Lương Tháng (Cố định) hoặc Theo Buổi Chụp
+  const isMonthlySalary = currentPhotographer.salaryType === 'monthly';
+  const monthlySalary = currentPhotographer.monthlySalary || 15000000;
   const ratePerShoot = currentPhotographer.ratePerShoot || 1000000;
 
-  // Tính thù lao theo team (tổng thù lao của các thợ trong team đi chụp)
+  // Tính lương theo team (dành cho Lead xem nhân sự team mình)
   const teamEarningsData = useMemo(() => {
     return teamPhotographers.map(p => {
       const pBookings = bookings.filter(
@@ -150,12 +151,20 @@ export const PhotographerDashboard: React.FC = () => {
       const pUpcoming = pBookings.filter(b =>
         ['Sắp chụp', 'Đang chụp', 'Hậu kỳ', 'Đã xác nhận'].includes(b.bookingStatus)
       ).length;
+
+      const isPMonthly = p.salaryType === 'monthly';
+      const pMonthlySalary = p.monthlySalary || 15000000;
       const pRate = p.ratePerShoot || 1000000;
-      const earned = pCompleted * pRate;
-      const pending = pUpcoming * pRate;
+
+      // Nếu lương tháng: nhận lương tháng cố định; nếu theo buổi chụp: lớp hoàn thành * pRate
+      const earned = isPMonthly ? pMonthlySalary : (pCompleted * pRate);
+      const pending = isPMonthly ? (pUpcoming * (p.ratePerShoot || 0)) : (pUpcoming * pRate);
 
       return {
         photographer: p,
+        salaryType: isPMonthly ? ('monthly' as const) : ('per_shoot' as const),
+        monthlySalary: pMonthlySalary,
+        ratePerShoot: pRate,
         totalShoots: pBookings.length,
         completedShoots: pCompleted,
         upcomingShoots: pUpcoming,
@@ -165,20 +174,26 @@ export const PhotographerDashboard: React.FC = () => {
     });
   }, [teamPhotographers, bookings]);
 
-  // Thù lao thực nhận và tạm tính
+  // Lương thực nhận và tạm tính
   const totalEarnedAmount = useMemo(() => {
     if (isViewingTeam) {
       return teamEarningsData.reduce((sum, item) => sum + item.earnedAmount, 0);
     }
+    if (isMonthlySalary) {
+      return monthlySalary;
+    }
     return completedShoots.length * ratePerShoot;
-  }, [isViewingTeam, teamEarningsData, completedShoots.length, ratePerShoot]);
+  }, [isViewingTeam, teamEarningsData, isMonthlySalary, monthlySalary, completedShoots.length, ratePerShoot]);
 
   const totalPendingAmount = useMemo(() => {
     if (isViewingTeam) {
       return teamEarningsData.reduce((sum, item) => sum + item.pendingAmount, 0);
     }
+    if (isMonthlySalary) {
+      return upcomingShoots.length * (currentPhotographer.ratePerShoot || 0);
+    }
     return upcomingShoots.length * ratePerShoot;
-  }, [isViewingTeam, teamEarningsData, upcomingShoots.length, ratePerShoot]);
+  }, [isViewingTeam, teamEarningsData, isMonthlySalary, upcomingShoots.length, currentPhotographer.ratePerShoot, ratePerShoot]);
 
   // Ca chụp gần nhất tiếp theo
   const nextShoot = useMemo(() => {
@@ -318,11 +333,19 @@ export const PhotographerDashboard: React.FC = () => {
               {totalEarnedAmount.toLocaleString('vi-VN')} <span className="text-base font-bold text-white/70">đ</span>
             </div>
             <p className="text-xs text-neutral-300 font-medium mt-1">
-              Thực nhận từ <strong>{completedShoots.length} lớp</strong> đã chụp hoàn tất
+              {isViewingTeam
+                ? `Tổng lương ${teamPhotographers.length} thợ trong Team ${myTeam}`
+                : isMonthlySalary
+                ? `Chế độ Lương Tháng Cố Định (Full-time Lead)`
+                : `Thực nhận từ ${completedShoots.length} lớp đã chụp hoàn tất`}
             </p>
           </div>
           <div className="mt-3 pt-3 border-t border-white/10 text-[11px] text-neutral-400">
-            {isViewingTeam ? 'Đã chi trả/tổng kết cho thợ' : `Mức lương: ${(ratePerShoot).toLocaleString('vi-VN')} đ / lớp`}
+            {isViewingTeam
+              ? 'Chi trả theo quy chế lương studio'
+              : isMonthlySalary
+              ? `Lương cứng: ${(monthlySalary).toLocaleString('vi-VN')} đ/tháng`
+              : `Mức lương: ${(ratePerShoot).toLocaleString('vi-VN')} đ / lớp`}
           </div>
         </div>
 
@@ -428,7 +451,7 @@ export const PhotographerDashboard: React.FC = () => {
                   <th className="py-3 px-4">Vai Trò / Kỹ Năng</th>
                   <th className="py-3 px-4 text-center">Lớp Đã Chụp</th>
                   <th className="py-3 px-4 text-center">Lớp Sẽ Chụp</th>
-                  <th className="py-3 px-4 text-right">Lương / Lớp</th>
+                  <th className="py-3 px-4 text-right">Cơ Chế Lương</th>
                   <th className="py-3 px-4 text-right">Lương Nhận Được</th>
                   <th className="py-3 px-4 text-right">Lương Tạm Tính</th>
                   <th className="py-3 px-4 text-center rounded-r-2xl">Trạng Thái</th>
@@ -492,8 +515,22 @@ export const PhotographerDashboard: React.FC = () => {
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4 text-right text-neutral-600 font-mono font-medium">
-                        {(p.ratePerShoot || 1000000).toLocaleString('vi-VN')} đ
+                      <td className="py-3.5 px-4 text-right">
+                        {p.salaryType === 'monthly' ? (
+                          <div>
+                            <span className="font-black text-indigo-700 text-xs font-mono">
+                              {(p.monthlySalary || 15000000).toLocaleString('vi-VN')} đ
+                            </span>
+                            <span className="block text-[9px] text-neutral-400 font-bold uppercase">Lương tháng</span>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className="font-bold text-neutral-800 text-xs font-mono">
+                              {(p.ratePerShoot || 1000000).toLocaleString('vi-VN')} đ
+                            </span>
+                            <span className="block text-[9px] text-neutral-400 font-bold uppercase">Theo ca</span>
+                          </div>
+                        )}
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-extrabold text-sm text-emerald-700 font-mono">
@@ -501,7 +538,7 @@ export const PhotographerDashboard: React.FC = () => {
                       </td>
 
                       <td className="py-3.5 px-4 text-right font-bold text-xs text-amber-700 font-mono">
-                        +{item.pendingAmount.toLocaleString('vi-VN')} đ
+                        {p.salaryType === 'monthly' ? '0 đ' : `+${item.pendingAmount.toLocaleString('vi-VN')} đ`}
                       </td>
 
                       <td className="py-3.5 px-4 text-center">

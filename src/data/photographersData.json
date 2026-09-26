@@ -19,7 +19,9 @@
       "Flash Godox V860III"
     ],
     "status": "available",
-    "ratePerShoot": 1000000,
+    "salaryType": "monthly",
+    "monthlySalary": 15000000,
+    "ratePerShoot": 500000,
     "rating": 0,
     "completedShootsCount": 0,
     "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HẢI PHÒNG)",
@@ -48,7 +50,9 @@
       "Flash Godox V860III"
     ],
     "status": "available",
-    "ratePerShoot": 1000000,
+    "salaryType": "monthly",
+    "monthlySalary": 15000000,
+    "ratePerShoot": 500000,
     "rating": 0,
     "completedShootsCount": 0,
     "notes": "Thợ Ekip 2026 Xoắn Media (LEAD - HÀ NỘI)",

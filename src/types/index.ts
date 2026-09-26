@@ -130,6 +130,7 @@ export interface SchoolClass {
 // 3. Quản lý Thợ / Photographer
 export type PhotographerStatus = 'available' | 'busy' | 'offline' | 'inactive';
 export type PhotographerSkill = 'Chụp chính' | 'Chụp phụ' | 'Flycam' | 'Quay phim' | 'Makeup' | 'Chỉnh màu (Colorist)';
+export type PhotographerSalaryType = 'per_shoot' | 'monthly';
 
 export interface Photographer {
   id: string;
@@ -143,7 +144,10 @@ export interface Photographer {
   skills: PhotographerSkill[];
   equipmentList: string[]; // Sony A7IV + 24-70 GM, Canon R6 + 50 1.2, DJI Mini 4 Pro, Đèn Godox AD600...
   status: PhotographerStatus;
-  ratePerShoot: number; // Đơn giá trả thợ / buổi (VD: 800,000đ)
+  // Cơ chế lương setup bởi Admin: lương tháng hoặc theo buổi chụp
+  salaryType?: PhotographerSalaryType; // 'monthly' (Lương tháng) | 'per_shoot' (Theo buổi chụp)
+  monthlySalary?: number; // Mức lương tháng cố định (VD: 12,000,000đ)
+  ratePerShoot: number; // Đơn giá trả thợ / buổi (VD: 1,000,000đ)
   rating: number; // 4.9/5
   completedShootsCount: number;
   notes?: string;

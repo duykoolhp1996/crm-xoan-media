@@ -65,6 +65,8 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
     photographerType: 'Freelancer' as 'Full-time' | 'Freelancer' | 'Đối tác Studio',
     experienceYears: 3,
     status: 'available' as PhotographerStatus,
+    salaryType: 'per_shoot' as 'per_shoot' | 'monthly',
+    monthlySalary: 10000000,
     ratePerShoot: 1000000,
     skills: ['Chụp chính'] as PhotographerSkill[],
     activeRegions: ['Hải Phòng'] as string[],
@@ -94,6 +96,8 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         photographerType: photographerToEdit.photographerType,
         experienceYears: photographerToEdit.experienceYears,
         status: photographerToEdit.status,
+        salaryType: photographerToEdit.salaryType || (photographerToEdit.photographerType === 'Full-time' ? 'monthly' : 'per_shoot'),
+        monthlySalary: photographerToEdit.monthlySalary || 10000000,
         ratePerShoot: photographerToEdit.ratePerShoot,
         skills: photographerToEdit.skills || [],
         activeRegions: photographerToEdit.activeRegions || ['Hải Phòng'],
@@ -112,6 +116,8 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         photographerType: 'Freelancer',
         experienceYears: 3,
         status: 'available',
+        salaryType: 'per_shoot',
+        monthlySalary: 10000000,
         ratePerShoot: 1000000,
         skills: ['Chụp chính'],
         activeRegions: ['Hải Phòng'],
@@ -176,6 +182,8 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         photographerType: formData.photographerType,
         experienceYears: Number(formData.experienceYears) || 1,
         status: formData.status,
+        salaryType: formData.salaryType,
+        monthlySalary: Number(formData.monthlySalary) || 0,
         ratePerShoot: Number(formData.ratePerShoot) || 0,
         skills: formData.skills,
         activeRegions: formData.activeRegions,
@@ -194,6 +202,8 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         photographerType: formData.photographerType,
         experienceYears: Number(formData.experienceYears) || 1,
         status: formData.status,
+        salaryType: formData.salaryType,
+        monthlySalary: Number(formData.monthlySalary) || 0,
         ratePerShoot: Number(formData.ratePerShoot) || 0,
         skills: formData.skills,
         activeRegions: formData.activeRegions,
@@ -312,24 +322,115 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
             </div>
           </div>
 
-          {/* Row 3: Thù lao / Buổi, Kinh nghiệm, Trạng thái */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="font-bold text-neutral-800 flex items-center gap-1.5 mb-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                Thù Lao / Ca Chụp (VNĐ)
+          {/* Khối Cấu Hình Lương (Admin Setup) — 2 loại: Lương Tháng hoặc Theo Buổi Chụp */}
+          <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-200/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="font-extrabold text-neutral-900 text-xs flex items-center gap-1.5 uppercase tracking-wider">
+                <DollarSign className="w-4 h-4 text-emerald-700" />
+                Cơ Chế & Chính Sách Lương (Admin Cấu Hình)
               </label>
-              <input
-                type="number"
-                step="50000"
-                min="0"
-                placeholder="VD: 1000000"
-                value={formData.ratePerShoot}
-                onChange={e => setFormData(prev => ({ ...prev, ratePerShoot: Number(e.target.value) }))}
-                className="w-full px-3.5 py-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-              />
+              <span className="text-[10px] font-bold text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                {formData.salaryType === 'monthly' ? '📅 Lương Tháng' : '📸 Theo Buổi Chụp'}
+              </span>
             </div>
 
+            {/* Chọn Loại Lương: 2 Loại */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, salaryType: 'monthly' }))}
+                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
+                  formData.salaryType === 'monthly'
+                    ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-xs'
+                    : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                }`}
+              >
+                📅 1. Lương Tháng Cố Định
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, salaryType: 'per_shoot' }))}
+                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
+                  formData.salaryType === 'per_shoot'
+                    ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-xs'
+                    : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                }`}
+              >
+                📸 2. Theo Buổi Chụp (Ca)
+              </button>
+            </div>
+
+            {/* Input số tiền tương ứng */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {formData.salaryType === 'monthly' ? (
+                <div>
+                  <label className="text-xs font-bold text-neutral-800 mb-1 block">
+                    Mức Lương Tháng Cố Định (VNĐ/tháng)
+                  </label>
+                  <input
+                    type="number"
+                    step="500000"
+                    min="0"
+                    placeholder="VD: 12000000"
+                    value={formData.monthlySalary}
+                    onChange={e => setFormData(prev => ({ ...prev, monthlySalary: Number(e.target.value) }))}
+                    className="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-neutral-900 font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <p className="text-[10px] text-neutral-500 mt-1">
+                    Chi trả cố định hàng tháng cho thợ Full-time / Quản lý ekip
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-bold text-neutral-800 mb-1 block">
+                    Thù Lao / Buổi Chụp (VNĐ/buổi)
+                  </label>
+                  <input
+                    type="number"
+                    step="50000"
+                    min="0"
+                    placeholder="VD: 1000000"
+                    value={formData.ratePerShoot}
+                    onChange={e => setFormData(prev => ({ ...prev, ratePerShoot: Number(e.target.value) }))}
+                    className="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-neutral-900 font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <p className="text-[10px] text-neutral-500 mt-1">
+                    Tính theo: Số buổi đi chụp thực tế × Đơn giá/buổi
+                  </p>
+                </div>
+              )}
+
+              {/* Đơn giá ca dự phòng nếu là Lương tháng */}
+              {formData.salaryType === 'monthly' ? (
+                <div>
+                  <label className="text-xs font-bold text-neutral-800 mb-1 block">
+                    Định mức / Phụ cấp ca thêm (nếu vượt KPI)
+                  </label>
+                  <input
+                    type="number"
+                    step="50000"
+                    min="0"
+                    placeholder="VD: 500000"
+                    value={formData.ratePerShoot}
+                    onChange={e => setFormData(prev => ({ ...prev, ratePerShoot: Number(e.target.value) }))}
+                    className="w-full px-3.5 py-2.5 bg-white border border-black/[0.08] rounded-xl text-neutral-900 font-bold focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+                  />
+                  <p className="text-[10px] text-neutral-500 mt-1">
+                    Thưởng thêm mỗi ca khi vượt chỉ tiêu tháng
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center text-xs text-neutral-600 bg-white/70 p-3 rounded-xl border border-black/[0.05]">
+                  <p>
+                    💡 Freelancer và đối tác nhận thù lao tự động tính: <strong>Lớp đã chụp × {formData.ratePerShoot.toLocaleString('vi-VN')}đ</strong>.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Row: Kinh nghiệm & Trạng thái */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="font-bold text-neutral-800 flex items-center gap-1.5 mb-1.5">
                 <Award className="w-3.5 h-3.5 text-amber-500" />
