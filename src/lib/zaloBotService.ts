@@ -147,11 +147,21 @@ export const sendZaloBotApiMessage = async (
   if (!botToken) return { ok: false, description: 'Chưa có Bot Token' };
 
   console.log(`[ZaloBot] Đang bắn tin nhắn tới Chat ID: ${chatId}...`);
+  const getUrl = `https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage?chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(text)}`;
 
-  // Phương thức 1: Sử dụng HTTP GET với mode no-cors
-  // Đây là giải pháp hoàn hảo nhất cho Web Browser (GitHub Pages, localhost) vì không bị trình duyệt chặn preflight CORS
+  // 1. Kỹ thuật Image Tracking Beacon (Không bao giờ bị CORS chặn trong mọi trình duyệt / Web / PWA)
+  if (typeof window !== 'undefined') {
+    try {
+      const beacon = new Image();
+      beacon.src = getUrl;
+      console.log('[ZaloBot] Beacon Image sent');
+    } catch (e) {
+      console.warn('[ZaloBot] Beacon error:', e);
+    }
+  }
+
+  // 2. Phương thức HTTP GET với mode no-cors
   try {
-    const getUrl = `https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage?chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(text)}`;
     await fetch(getUrl, { mode: 'no-cors' });
     console.log(`[ZaloBot] Đã gửi thành công qua GET (no-cors) tới ${chatId}`);
     return { ok: true, result: { message_id: 'sent_browser_get' } };
@@ -159,7 +169,7 @@ export const sendZaloBotApiMessage = async (
     console.warn('[ZaloBot] GET request thất bại, thử POST fallback:', errGet);
   }
 
-  // Phương thức 2: Fallback POST (cho Node.js / Server-side)
+  // 3. Fallback POST (cho Node.js / Server-side)
   try {
     const res = await fetch(`https://bot-api.zaloplatforms.com/bot${botToken}/sendMessage`, {
       method: 'POST',
@@ -269,7 +279,7 @@ export const notifyNewCustomerLeadToZaloGroup = async (customer: {
   notes?: string;
 }): Promise<{ success: boolean; message: string }> => {
   const config = getZaloBotConfig();
-  if (!config.notifyNewLead) {
+  if (config.notifyNewLead === false) {
     return { success: false, message: 'Thông báo khách hàng mới đang bị tắt trong cài đặt.' };
   }
 
