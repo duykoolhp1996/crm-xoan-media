@@ -18,7 +18,13 @@ import {
   UserX,
   RotateCcw,
   FileText,
-  QrCode
+  QrCode,
+  Copy,
+  Check,
+  ChevronDown,
+  Info,
+  DollarSign,
+  Sparkles
 } from 'lucide-react';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
@@ -44,7 +50,9 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   } = useApp();
 
   const customer = customers.find(c => c.id === customerId);
-  const [activeTab, setActiveTabLocal] = useState<'timeline' | 'bookings' | 'marketing' | 'feedbacks'>('timeline');
+  const [activeTab, setActiveTabLocal] = useState<'timeline' | 'bookings' | 'marketing' | 'feedbacks' | 'fullinfo'>('timeline');
+  const [showQuickDetails, setShowQuickDetails] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [noteContent, setNoteContent] = useState('');
   const [showLostModal, setShowLostModal] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -54,6 +62,35 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [customLostNote, setCustomLostNote] = useState('');
 
   if (!customer) return null;
+
+  const handleCopy = (text: string, key: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => {
+      setCopiedKey(prev => prev === key ? null : prev);
+    }, 2000);
+  };
+
+  const fullAddress = [
+    customer.schoolName,
+    customer.district,
+    customer.city || customer.region
+  ].filter(Boolean).join(', ');
+
+  const fullSummaryText = `📸 THÔNG TIN KHÁCH HÀNG - XOĂN MEDIA
+━━━━━━━━━━━━━━━━━━━━
+👤 Khách hàng: ${customer.name} (${customer.representativeRole})
+📞 Số điện thoại: ${customer.phone}
+🏫 Lớp & Trường: ${customer.className} - ${customer.schoolName}
+📍 Địa chỉ / Khu vực: ${fullAddress}
+👥 Sĩ số: ${customer.studentCount} bạn (${customer.academicYear})
+📦 Gói dịch vụ: ${customer.servicePackageName || customer.serviceType || 'Kỷ yếu Concept'}
+✨ Concept: ${customer.concept || 'Chưa chọn'}
+💰 Ngân sách dự kiến: ${customer.expectedBudget?.toLocaleString('vi-VN')}đ
+📍 Địa điểm chụp: ${customer.shootingLocations?.join(', ') || 'Chưa xác định'}
+👨‍💼 Sales phụ trách: ${customer.assignedSalesName || 'Chưa gán'}
+${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
 
   // Lấy các bookings của khách hàng này
   const customerBookings = bookings.filter(b => b.customerId === customer.id);
@@ -91,13 +128,30 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
               {customer.className.slice(0, 3)}
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base sm:text-lg font-bold text-neutral-900">{customer.name}</h2>
                 <span className="text-xs bg-neutral-100 text-neutral-800 border border-black/[0.06] px-2.5 py-0.5 rounded-full font-semibold">
                   {customer.representativeRole}
                 </span>
+
+                {/* Nút Xem Thêm & Copy Thông Tin Đầy Đủ */}
+                <button
+                  type="button"
+                  onClick={() => setShowQuickDetails(prev => !prev)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all border shadow-2xs cursor-pointer ${
+                    showQuickDetails
+                      ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900'
+                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                  }`}
+                  title="Nhấn để xem đầy đủ Địa chỉ, Số điện thoại và sao chép 1 chạm"
+                >
+                  <Copy className="w-3 h-3" />
+                  <span>{showQuickDetails ? 'Thu gọn' : 'Xem thêm (Địa chỉ + SĐT)'}</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showQuickDetails ? 'rotate-180' : ''}`} />
+                </button>
               </div>
-              <p className="text-xs text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
+
+              <div className="text-xs text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
                 <span className="flex items-center gap-1 font-medium text-neutral-700">
                   <School className="w-3.5 h-3.5 text-neutral-500" />
                   <span>{customer.className} - {customer.schoolName}</span>
@@ -113,7 +167,35 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
                     </span>
                   </>
                 )}
-              </p>
+
+                {/* Nút Copy Địa Chỉ Nhanh */}
+                <button
+                  type="button"
+                  onClick={() => handleCopy(fullAddress, 'header_addr')}
+                  className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-black/[0.06] flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Sao chép địa chỉ đầy đủ"
+                >
+                  {copiedKey === 'header_addr' ? (
+                    <span className="text-emerald-700 font-bold flex items-center gap-0.5"><Check className="w-3 h-3 text-emerald-600" /> Đã copy Đ/C</span>
+                  ) : (
+                    <span className="flex items-center gap-0.5"><Copy className="w-3 h-3 text-neutral-500" /> Copy Đ/C</span>
+                  )}
+                </button>
+
+                {/* Nút Copy SĐT Nhanh */}
+                <button
+                  type="button"
+                  onClick={() => handleCopy(customer.phone, 'header_phone')}
+                  className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1 cursor-pointer transition-colors"
+                  title={`Sao chép SĐT: ${customer.phone}`}
+                >
+                  {copiedKey === 'header_phone' ? (
+                    <span className="text-emerald-700 font-bold flex items-center gap-0.5"><Check className="w-3 h-3 text-emerald-600" /> Đã copy SĐT</span>
+                  ) : (
+                    <span className="flex items-center gap-0.5"><Phone className="w-3 h-3 text-blue-600" /> Copy SĐT</span>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -259,6 +341,229 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           </div>
         </div>
 
+        {/* Panel Mở Rộng: Xem Thêm & Copy Đầy Đủ Thông Tin (Địa chỉ, SĐT...) */}
+        {showQuickDetails && (
+          <div className="bg-gradient-to-r from-emerald-50/80 via-neutral-50 to-blue-50/70 border-b border-black/[0.08] p-4 sm:p-5 shrink-0 max-h-[46vh] overflow-y-auto custom-scrollbar animate-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-2.5 border-b border-black/[0.06]">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <div>
+                  <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
+                    Thông Tin Chi Tiết Khách Hàng (Sẵn Sàng Sao Chép)
+                  </h4>
+                  <p className="text-[11px] text-neutral-500">
+                    Bấm "Copy" tại từng mục hoặc "Sao chép tất cả" để dán vào Zalo / Ekip / Shipper
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleCopy(fullSummaryText, 'quick_all')}
+                  className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                >
+                  {copiedKey === 'quick_all' ? (
+                    <><Check className="w-3.5 h-3.5 text-[#B8F23D]" /> ✓ Đã copy tất cả!</>
+                  ) : (
+                    <><Copy className="w-3.5 h-3.5" /> 📋 Sao chép toàn bộ</>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowQuickDetails(false)}
+                  className="w-7 h-7 rounded-lg bg-neutral-200/70 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 transition-colors cursor-pointer"
+                  title="Đóng bảng chi tiết"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Lưới các trường thông tin */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+              {/* 1. Số điện thoại */}
+              <div className="p-3 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-2.5 hover:border-black/[0.14] transition-all">
+                <div className="flex items-start gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Phone className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-neutral-500 font-medium">Số điện thoại / Zalo</p>
+                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">{customer.phone}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(customer.phone, 'quick_phone')}
+                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
+                    copiedKey === 'quick_phone'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                  }`}
+                >
+                  {copiedKey === 'quick_phone' ? (
+                    <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
+                  ) : (
+                    <><Copy className="w-3 h-3" /> Copy SĐT</>
+                  )}
+                </button>
+              </div>
+
+              {/* 2. Địa chỉ đầy đủ */}
+              <div className="p-3 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-2.5 hover:border-black/[0.14] transition-all">
+                <div className="flex items-start gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-xl bg-rose-50 text-rose-600 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-neutral-500 font-medium">Địa chỉ & Khu vực</p>
+                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={fullAddress}>
+                      {fullAddress || 'Chưa cập nhật'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(fullAddress, 'quick_addr')}
+                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
+                    copiedKey === 'quick_addr'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                  }`}
+                >
+                  {copiedKey === 'quick_addr' ? (
+                    <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
+                  ) : (
+                    <><Copy className="w-3 h-3" /> Copy Đ/C</>
+                  )}
+                </button>
+              </div>
+
+              {/* 3. Lớp & Trường học */}
+              <div className="p-3 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-2.5 hover:border-black/[0.14] transition-all">
+                <div className="flex items-start gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <School className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-neutral-500 font-medium">Lớp & Trường</p>
+                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={`${customer.className} - ${customer.schoolName}`}>
+                      {customer.className} - {customer.schoolName}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(`${customer.className} - ${customer.schoolName}`, 'quick_school')}
+                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
+                    copiedKey === 'quick_school'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                  }`}
+                >
+                  {copiedKey === 'quick_school' ? (
+                    <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
+                  ) : (
+                    <><Copy className="w-3 h-3" /> Copy</>
+                  )}
+                </button>
+              </div>
+
+              {/* 4. Người đại diện & Chức vụ */}
+              <div className="p-3 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-2.5 hover:border-black/[0.14] transition-all">
+                <div className="flex items-start gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-xl bg-purple-50 text-purple-600 border border-purple-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <UserCheck className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-neutral-500 font-medium">Người đại diện</p>
+                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
+                      {customer.name} ({customer.representativeRole})
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(`${customer.name} (${customer.representativeRole})`, 'quick_rep')}
+                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
+                    copiedKey === 'quick_rep'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                  }`}
+                >
+                  {copiedKey === 'quick_rep' ? (
+                    <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
+                  ) : (
+                    <><Copy className="w-3 h-3" /> Copy</>
+                  )}
+                </button>
+              </div>
+
+              {/* 5. Gói dịch vụ & Dự toán */}
+              <div className="p-3 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-2.5 hover:border-black/[0.14] transition-all">
+                <div className="flex items-start gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <DollarSign className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-neutral-500 font-medium">Gói dịch vụ & Dự toán</p>
+                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
+                      {customer.servicePackageName || 'Kỷ yếu Concept'} • {customer.expectedBudget.toLocaleString('vi-VN')}đ
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(`${customer.servicePackageName || 'Kỷ yếu Concept'} - ${customer.expectedBudget.toLocaleString('vi-VN')}đ`, 'quick_pkg')}
+                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
+                    copiedKey === 'quick_pkg'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                  }`}
+                >
+                  {copiedKey === 'quick_pkg' ? (
+                    <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
+                  ) : (
+                    <><Copy className="w-3 h-3" /> Copy</>
+                  )}
+                </button>
+              </div>
+
+              {/* 6. Concept & Địa điểm chụp */}
+              <div className="p-3 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-2.5 hover:border-black/[0.14] transition-all">
+                <div className="flex items-start gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-xl bg-pink-50 text-pink-600 border border-pink-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-neutral-500 font-medium">Concept & Địa điểm</p>
+                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
+                      {customer.concept} • {customer.shootingLocations?.join(', ') || 'Chưa chọn'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(`Concept: ${customer.concept} - Địa điểm: ${customer.shootingLocations?.join(', ') || 'Chưa chọn'}`, 'quick_concept')}
+                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
+                    copiedKey === 'quick_concept'
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                  }`}
+                >
+                  {copiedKey === 'quick_concept' ? (
+                    <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
+                  ) : (
+                    <><Copy className="w-3 h-3" /> Copy</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Navigation Tabs */}
         <div className="shrink-0 flex items-center border-b border-black/[0.06] bg-white px-6 gap-2 text-xs font-semibold overflow-x-auto custom-scrollbar py-3 z-10">
           <button
@@ -304,6 +609,17 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
           >
             <Heart className="w-3.5 h-3.5" />
             Feedback ({feedbacks.filter(fb => fb.customerId === customer.id).length})
+          </button>
+          <button
+            onClick={() => setActiveTabLocal('fullinfo')}
+            className={`py-2 px-3.5 rounded-xl flex items-center gap-1.5 transition-all whitespace-nowrap shrink-0 ${
+              activeTab === 'fullinfo'
+                ? 'bg-neutral-900 text-[#B8F23D] shadow-sm font-bold'
+                : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+            }`}
+          >
+            <Copy className="w-3.5 h-3.5" />
+            Thông Tin Chi Tiết (Copy)
           </button>
         </div>
 
@@ -587,10 +903,222 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
               )}
             </div>
           )}
+
+          {/* Tab 5: Thông Tin Đầy Đủ & Copy (Xem thêm) */}
+          {activeTab === 'fullinfo' && (
+            <div className="space-y-4 text-xs">
+              <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200/80 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    <span className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
+                      Hồ Sơ Chi Tiết Khách Hàng - Sao Chép Nhanh
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-600">
+                    Toàn bộ thông tin liên hệ, địa chỉ trường, concept và tài chính đã được tổng hợp sẵn để copy tiện lợi.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopy(fullSummaryText, 'tab_all_full')}
+                  className="w-full sm:w-auto px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 shrink-0 cursor-pointer"
+                >
+                  {copiedKey === 'tab_all_full' ? (
+                    <><Check className="w-4 h-4 text-[#B8F23D]" /> ✓ Đã sao chép toàn bộ!</>
+                  ) : (
+                    <><Copy className="w-4 h-4" /> 📋 Sao chép toàn bộ thông tin</>
+                  )}
+                </button>
+              </div>
+
+              {/* Lưới chi tiết lớn */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {/* 1. Số điện thoại */}
+                <div className="p-4 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-neutral-500 font-medium">Số điện thoại / Zalo</p>
+                      <p className="text-sm font-bold text-neutral-900 truncate mt-0.5">{customer.phone}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(customer.phone, 'tab_phone')}
+                    className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
+                      copiedKey === 'tab_phone'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                    }`}
+                  >
+                    {copiedKey === 'tab_phone' ? (
+                      <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
+                    ) : (
+                      <><Copy className="w-3.5 h-3.5" /> Copy SĐT</>
+                    )}
+                  </button>
+                </div>
+
+                {/* 2. Địa chỉ đầy đủ */}
+                <div className="p-4 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 border border-rose-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-neutral-500 font-medium">Địa chỉ & Khu vực</p>
+                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={fullAddress}>
+                        {fullAddress || 'Chưa cập nhật'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(fullAddress, 'tab_addr')}
+                    className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
+                      copiedKey === 'tab_addr'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                    }`}
+                  >
+                    {copiedKey === 'tab_addr' ? (
+                      <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
+                    ) : (
+                      <><Copy className="w-3.5 h-3.5" /> Copy Đ/C</>
+                    )}
+                  </button>
+                </div>
+
+                {/* 3. Lớp & Trường học */}
+                <div className="p-4 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <School className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-neutral-500 font-medium">Lớp & Trường học</p>
+                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={`${customer.className} - ${customer.schoolName}`}>
+                        {customer.className} - {customer.schoolName}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(`${customer.className} - ${customer.schoolName}`, 'tab_school')}
+                    className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
+                      copiedKey === 'tab_school'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                    }`}
+                  >
+                    {copiedKey === 'tab_school' ? (
+                      <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
+                    ) : (
+                      <><Copy className="w-3.5 h-3.5" /> Copy</>
+                    )}
+                  </button>
+                </div>
+
+                {/* 4. Người đại diện & Chức vụ */}
+                <div className="p-4 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 border border-purple-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <UserCheck className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-neutral-500 font-medium">Người đại diện liên hệ</p>
+                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
+                        {customer.name} ({customer.representativeRole})
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(`${customer.name} (${customer.representativeRole})`, 'tab_rep')}
+                    className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
+                      copiedKey === 'tab_rep'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                    }`}
+                  >
+                    {copiedKey === 'tab_rep' ? (
+                      <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
+                    ) : (
+                      <><Copy className="w-3.5 h-3.5" /> Copy</>
+                    )}
+                  </button>
+                </div>
+
+                {/* 5. Gói dịch vụ & Dự toán */}
+                <div className="p-4 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <DollarSign className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-neutral-500 font-medium">Gói dịch vụ & Dự toán</p>
+                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
+                        {customer.servicePackageName || 'Kỷ yếu Concept'} • {customer.expectedBudget.toLocaleString('vi-VN')}đ
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(`${customer.servicePackageName || 'Kỷ yếu Concept'} - ${customer.expectedBudget.toLocaleString('vi-VN')}đ`, 'tab_pkg')}
+                    className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
+                      copiedKey === 'tab_pkg'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                    }`}
+                  >
+                    {copiedKey === 'tab_pkg' ? (
+                      <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
+                    ) : (
+                      <><Copy className="w-3.5 h-3.5" /> Copy</>
+                    )}
+                  </button>
+                </div>
+
+                {/* 6. Concept & Địa điểm chụp */}
+                <div className="p-4 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-xl bg-pink-50 text-pink-600 border border-pink-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-neutral-500 font-medium">Concept & Địa điểm</p>
+                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
+                        {customer.concept} • {customer.shootingLocations?.join(', ') || 'Chưa chọn'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(`Concept: ${customer.concept} - Địa điểm: ${customer.shootingLocations?.join(', ') || 'Chưa chọn'}`, 'tab_concept')}
+                    className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
+                      copiedKey === 'tab_concept'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                    }`}
+                  >
+                    {copiedKey === 'tab_concept' ? (
+                      <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
+                    ) : (
+                      <><Copy className="w-3.5 h-3.5" /> Copy</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Quick Actions */}
-        <div className="p-4 bg-neutral-50/70 border-t border-black/[0.06] flex items-center justify-between gap-3">
+        <div className="p-4 bg-neutral-50/70 border-t border-black/[0.06] flex items-center justify-between gap-2.5 flex-wrap sm:flex-nowrap">
           <a
             href={`tel:${customer.phone}`}
             className="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 border border-black/[0.08] text-neutral-800 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
@@ -598,6 +1126,24 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
             <Phone className="w-3.5 h-3.5 text-neutral-700" />
             Gọi {customer.phone}
           </a>
+
+          {/* Nút Copy SĐT ở Footer */}
+          <button
+            type="button"
+            onClick={() => handleCopy(customer.phone, 'footer_phone')}
+            className={`px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
+              copiedKey === 'footer_phone'
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-black/[0.08]'
+            }`}
+            title={`Sao chép SĐT: ${customer.phone}`}
+          >
+            {copiedKey === 'footer_phone' ? (
+              <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy SĐT</>
+            ) : (
+              <><Copy className="w-3.5 h-3.5 text-neutral-600" /> Copy SĐT</>
+            )}
+          </button>
 
           <a
             href={`https://zalo.me/${customer.phone}`}
@@ -608,6 +1154,21 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
             <MessageSquare className="w-3.5 h-3.5" />
             Nhắn Zalo
           </a>
+
+          {/* Nút Xem Thêm & Copy Ở Footer */}
+          <button
+            type="button"
+            onClick={() => setShowQuickDetails(prev => !prev)}
+            className={`px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
+              showQuickDetails
+                ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900'
+                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+            }`}
+            title="Mở bảng thông tin chi tiết đầy đủ để copy"
+          >
+            <Info className="w-3.5 h-3.5" />
+            <span>{showQuickDetails ? 'Đóng chi tiết' : 'Xem thêm (Đ/C, SĐT)'}</span>
+          </button>
 
           {/* Nút Tạo / Sửa Báo Giá: CHỈ hiển thị ở Đang tư vấn, Đã gửi báo giá, Đang thương lượng */}
           {['Đang tư vấn', 'Đã gửi báo giá', 'Đang thương lượng'].includes(customer.pipelineStage) && (
