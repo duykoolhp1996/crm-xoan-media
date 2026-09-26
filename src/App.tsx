@@ -17,7 +17,6 @@ import { PhotographerList } from './components/photographers/PhotographerList';
 import { ServiceModule } from './components/services/ServiceModule';
 import { FeedbackModule } from './components/feedback/FeedbackModule';
 import { RemarketingModule } from './components/remarketing/RemarketingModule';
-import { MarketingReports } from './components/reports/MarketingReports';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { initGA4, trackPageView } from './lib/analytics';
@@ -46,7 +45,6 @@ const MainContent: React.FC = () => {
         {activeTab === 'services' && <ServiceModule />}
         {activeTab === 'feedbacks' && <FeedbackModule />}
         {activeTab === 'remarketing' && <RemarketingModule />}
-        {activeTab === 'reports-marketing' && <MarketingReports />}
         {activeTab === 'reports-photographer' && <PhotographerReports />}
         {activeTab === 'settings' && <SettingsModule />}
       </div>

@@ -142,12 +142,6 @@ export const Sidebar: React.FC = () => {
       groupTitle: 'BÁO CÁO & HỆ THỐNG',
       items: [
         {
-          id: 'reports-marketing',
-          label: 'Báo Cáo Doanh Thu & CTV',
-          icon: TrendingUp,
-          roles: ['admin', 'manager', 'marketing']
-        },
-        {
           id: 'reports-photographer',
           label: isPhotoRole ? (isPhotoLead ? 'Hiệu Suất & DS Team' : 'Thù Lao & Ca Chụp') : 'Hiệu Suất Thợ Chụp',
           icon: BarChart3,

@@ -52,7 +52,6 @@ export type NavigationTab =
   | 'feedbacks'
   | 'remarketing'
   | 'tasks'
-  | 'reports-marketing'
   | 'reports-photographer'
   | 'settings';
 
