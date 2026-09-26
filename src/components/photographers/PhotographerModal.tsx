@@ -86,6 +86,27 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
     setFormData(prev => ({ ...prev, password: result }));
   };
 
+  // Format số tiền thành chữ tóm tắt dễ đọc (VD: 10 triệu VNĐ)
+  const toVnMoneyText = (amount: number) => {
+    if (!amount || amount <= 0) return '0 VNĐ';
+    if (amount >= 1000000) {
+      const m = amount / 1000000;
+      return `≈ ${m % 1 === 0 ? m : m.toFixed(1)} triệu đồng`;
+    }
+    if (amount >= 1000) {
+      const k = amount / 1000;
+      return `≈ ${k % 1 === 0 ? k : k.toFixed(0)} nghìn đồng`;
+    }
+    return `≈ ${amount.toLocaleString('vi-VN')} VNĐ`;
+  };
+
+  // Xử lý nhập tiền tệ có format dấu chấm phân cách hàng nghìn
+  const handleMoneyChange = (field: 'monthlySalary' | 'ratePerShoot', rawVal: string) => {
+    const digitsOnly = rawVal.replace(/\D/g, '');
+    const num = digitsOnly ? parseInt(digitsOnly, 10) : 0;
+    setFormData(prev => ({ ...prev, [field]: num }));
+  };
+
   useEffect(() => {
     if (photographerToEdit) {
       setFormData({
@@ -361,68 +382,157 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
             </div>
 
             {/* Input số tiền tương ứng */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               {formData.salaryType === 'monthly' ? (
                 <div>
-                  <label className="text-xs font-bold text-neutral-800 mb-1 block">
-                    Mức Lương Tháng Cố Định (VNĐ/tháng)
-                  </label>
-                  <input
-                    type="number"
-                    step="500000"
-                    min="0"
-                    placeholder="VD: 12000000"
-                    value={formData.monthlySalary}
-                    onChange={e => setFormData(prev => ({ ...prev, monthlySalary: Number(e.target.value) }))}
-                    className="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-neutral-900 font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-neutral-800">
+                      Mức Lương Tháng Cố Định
+                    </label>
+                    <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md">
+                      {toVnMoneyText(formData.monthlySalary)}
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="0"
+                      value={(formData.monthlySalary || 0).toLocaleString('vi-VN')}
+                      onChange={e => handleMoneyChange('monthlySalary', e.target.value)}
+                      className="w-full pl-3.5 pr-14 py-2.5 bg-white border-2 border-emerald-300 rounded-xl text-neutral-900 font-black text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tracking-tight"
+                    />
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-neutral-400 bg-neutral-100 px-2 py-1 rounded-lg pointer-events-none">
+                      VNĐ/tháng
+                    </span>
+                  </div>
+
+                  {/* Nút chọn nhanh mức lương tháng */}
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                    <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
+                    {[8000000, 10000000, 12000000, 15000000, 18000000, 20000000].map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, monthlySalary: val }))}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
+                          formData.monthlySalary === val
+                            ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-2xs'
+                            : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                        }`}
+                      >
+                        {val / 1000000} Triệu
+                      </button>
+                    ))}
+                  </div>
                   <p className="text-[10px] text-neutral-500 mt-1">
                     Chi trả cố định hàng tháng cho thợ Full-time / Quản lý ekip
                   </p>
                 </div>
               ) : (
                 <div>
-                  <label className="text-xs font-bold text-neutral-800 mb-1 block">
-                    Thù Lao / Buổi Chụp (VNĐ/buổi)
-                  </label>
-                  <input
-                    type="number"
-                    step="50000"
-                    min="0"
-                    placeholder="VD: 1000000"
-                    value={formData.ratePerShoot}
-                    onChange={e => setFormData(prev => ({ ...prev, ratePerShoot: Number(e.target.value) }))}
-                    className="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl text-neutral-900 font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-neutral-800">
+                      Thù Lao / Buổi Chụp
+                    </label>
+                    <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md">
+                      {toVnMoneyText(formData.ratePerShoot)}
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="0"
+                      value={(formData.ratePerShoot || 0).toLocaleString('vi-VN')}
+                      onChange={e => handleMoneyChange('ratePerShoot', e.target.value)}
+                      className="w-full pl-3.5 pr-14 py-2.5 bg-white border-2 border-emerald-300 rounded-xl text-neutral-900 font-black text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tracking-tight"
+                    />
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-neutral-400 bg-neutral-100 px-2 py-1 rounded-lg pointer-events-none">
+                      VNĐ/buổi
+                    </span>
+                  </div>
+
+                  {/* Nút chọn nhanh thù lao ca */}
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                    <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
+                    {[500000, 800000, 1000000, 1200000, 1500000].map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, ratePerShoot: val }))}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
+                          formData.ratePerShoot === val
+                            ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-2xs'
+                            : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                        }`}
+                      >
+                        {val >= 1000000 ? `${val / 1000000} Tr` : `${val / 1000}k`}
+                      </button>
+                    ))}
+                  </div>
                   <p className="text-[10px] text-neutral-500 mt-1">
-                    Tính theo: Số buổi đi chụp thực tế × Đơn giá/buổi
+                    Tự động tính: Số lớp đi chụp thực tế × Đơn giá/buổi
                   </p>
                 </div>
               )}
 
-              {/* Đơn giá ca dự phòng nếu là Lương tháng */}
+              {/* Định mức ca thêm nếu là Lương tháng */}
               {formData.salaryType === 'monthly' ? (
                 <div>
-                  <label className="text-xs font-bold text-neutral-800 mb-1 block">
-                    Định mức / Phụ cấp ca thêm (nếu vượt KPI)
-                  </label>
-                  <input
-                    type="number"
-                    step="50000"
-                    min="0"
-                    placeholder="VD: 500000"
-                    value={formData.ratePerShoot}
-                    onChange={e => setFormData(prev => ({ ...prev, ratePerShoot: Number(e.target.value) }))}
-                    className="w-full px-3.5 py-2.5 bg-white border border-black/[0.08] rounded-xl text-neutral-900 font-bold focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-neutral-800">
+                      Định mức / Phụ cấp ca thêm (vượt KPI)
+                    </label>
+                    <span className="text-[11px] font-bold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md">
+                      {toVnMoneyText(formData.ratePerShoot)}
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="0"
+                      value={(formData.ratePerShoot || 0).toLocaleString('vi-VN')}
+                      onChange={e => handleMoneyChange('ratePerShoot', e.target.value)}
+                      className="w-full pl-3.5 pr-14 py-2.5 bg-white border border-black/[0.12] rounded-xl text-neutral-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-[#B8F23D] font-mono tracking-tight"
+                    />
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-neutral-400 bg-neutral-100 px-2 py-1 rounded-lg pointer-events-none">
+                      VNĐ/ca
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                    <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
+                    {[300000, 500000, 700000, 1000000].map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, ratePerShoot: val }))}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
+                          formData.ratePerShoot === val
+                            ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900'
+                            : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                        }`}
+                      >
+                        {val >= 1000000 ? `${val / 1000000} Tr` : `${val / 1000}k`}
+                      </button>
+                    ))}
+                  </div>
                   <p className="text-[10px] text-neutral-500 mt-1">
-                    Thưởng thêm mỗi ca khi vượt chỉ tiêu tháng
+                    Thưởng thêm mỗi ca khi chụp vượt chỉ tiêu tháng
                   </p>
                 </div>
               ) : (
-                <div className="flex items-center text-xs text-neutral-600 bg-white/70 p-3 rounded-xl border border-black/[0.05]">
-                  <p>
-                    💡 Freelancer và đối tác nhận thù lao tự động tính: <strong>Lớp đã chụp × {formData.ratePerShoot.toLocaleString('vi-VN')}đ</strong>.
+                <div className="flex flex-col justify-center text-xs text-neutral-700 bg-white p-3.5 rounded-xl border border-emerald-200/80 space-y-1">
+                  <p className="font-bold text-emerald-800 flex items-center gap-1.5">
+                    ✓ Cơ Chế Trả Thù Lao Linh Hoạt
+                  </p>
+                  <p className="text-[11px] text-neutral-500 leading-relaxed">
+                    Freelancer & Đối tác sẽ được hệ thống CRM tự động tổng hợp số ca chụp thực tế trong tháng và nghiệm thu theo mức: <strong className="text-neutral-900 font-bold">{formData.ratePerShoot.toLocaleString('vi-VN')} đ / lớp</strong>.
                   </p>
                 </div>
               )}
