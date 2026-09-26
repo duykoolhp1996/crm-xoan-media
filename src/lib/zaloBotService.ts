@@ -193,3 +193,26 @@ export const sendZaloBotNotification = async (params: {
     apiResponse: apiRes,
   };
 };
+
+/**
+ * Giao task và tag thành viên trong nhóm Zalo
+ */
+export const sendZaloBotTaskAssignment = async (params: {
+  assigneeName: string;
+  taskTitle: string;
+  taskDetails?: string;
+  dueDate?: string;
+  assignerName?: string;
+}): Promise<{ success: boolean; message: string; apiResponse?: any }> => {
+  const { assigneeName, taskTitle, taskDetails, dueDate, assignerName } = params;
+  const config = getZaloBotConfig();
+  const text = `📌 [CRM XOẮN MEDIA - PHÂN CÔNG TASK MỚI]\n━━━━━━━━━━━━━━━━━━━━\n👤 Người phụ trách: @${assigneeName}\n📋 Nhiệm vụ: ${taskTitle}${taskDetails ? `\n📝 Chi tiết: ${taskDetails}` : ''}\n📅 Hạn xử lý: ${dueDate || 'Trong ngày hôm nay'}\n🎯 Người giao việc: ${assignerName || 'Anh Tạ Duy (Admin)'}\n━━━━━━━━━━━━━━━━━━━━\n👉 @${assigneeName} vui lòng kiểm tra tiến độ và phản hồi tại nhóm nhé!`;
+
+  return sendZaloBotNotification({
+    type: 'task',
+    title: `Giao task cho @${assigneeName}: ${taskTitle}`,
+    content: text,
+    recipient: config.targetChatId,
+  });
+};
+
