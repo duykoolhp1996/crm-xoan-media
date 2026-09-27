@@ -15,7 +15,10 @@ import {
   Move,
   Info,
   Maximize,
-  Layers
+  Layers,
+  X,
+  Link2,
+  Unlink
 } from 'lucide-react';
 
 interface NodeCanvasProps {
@@ -25,10 +28,21 @@ interface NodeCanvasProps {
   onAddNodeAfter?: (sourceNodeId: string, branch?: 'next' | 'yes' | 'no') => void;
   onUpdateNodePosition?: (nodeId: string, newPosition: { x: number; y: number }) => void;
   onAddSpecificNode?: (type: WorkflowNodeType) => void;
+  onConnectNodes?: (sourceId: string, targetId: string, branch: 'next' | 'yes' | 'no') => void;
+  onDisconnectNodes?: (sourceId: string, branch: 'next' | 'yes' | 'no') => void;
 }
 
 const NODE_WIDTH = 250;
 const NODE_HEIGHT = 150;
+
+interface WireDragState {
+  sourceNodeId: string;
+  branch: 'next' | 'yes' | 'no';
+  startX: number;
+  startY: number;
+  currentX: number;
+  currentY: number;
+}
 
 export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   nodes,
@@ -36,15 +50,22 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   onSelectNode,
   onAddNodeAfter,
   onUpdateNodePosition,
-  onAddSpecificNode
+  onAddSpecificNode,
+  onConnectNodes,
+  onDisconnectNodes
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(0.85);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   // Quản lý vị trí kéo thả cục bộ của từng Node
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+
+  // Trạng thái kéo dây nối giữa 2 điểm (Port-to-Port dragging)
+  const [wireDrag, setWireDrag] = useState<WireDragState | null>(null);
+  const [hoveredTargetNodeId, setHoveredTargetNodeId] = useState<string | null>(null);
 
   // Đồng bộ vị trí từ props nodes
   useEffect(() => {
@@ -59,7 +80,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
     });
   }, [nodes, draggingNodeId]);
 
-  // Ref lưu trạng thái bắt đầu kéo chuột
+  // Ref lưu trạng thái bắt đầu kéo di chuyển node
   const dragRef = useRef<{
     nodeId: string;
     startX: number;
@@ -69,41 +90,82 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
     hasMoved: boolean;
   } | null>(null);
 
-  // Lắng nghe sự kiện di chuyển và thả chuột toàn màn hình
+  // Lắng nghe sự kiện di chuyển và thả chuột toàn màn hình cho KÉO NODE & KÉO DÂY NỐI
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!dragRef.current) return;
-      const { nodeId, startX, startY, nodeStartX, nodeStartY } = dragRef.current;
-      const dx = (e.clientX - startX) / zoomLevel;
-      const dy = (e.clientY - startY) / zoomLevel;
+      // 1. Xử lý kéo di chuyển node
+      if (dragRef.current) {
+        const { nodeId, startX, startY, nodeStartX, nodeStartY } = dragRef.current;
+        const dx = (e.clientX - startX) / zoomLevel;
+        const dy = (e.clientY - startY) / zoomLevel;
 
-      if (Math.hypot(dx, dy) > 4) {
-        dragRef.current.hasMoved = true;
+        if (Math.hypot(dx, dy) > 4) {
+          dragRef.current.hasMoved = true;
+        }
+
+        const newX = Math.max(20, Math.round(nodeStartX + dx));
+        const newY = Math.max(20, Math.round(nodeStartY + dy));
+
+        setPositions(prev => ({
+          ...prev,
+          [nodeId]: { x: newX, y: newY }
+        }));
       }
 
-      const newX = Math.max(20, Math.round(nodeStartX + dx));
-      const newY = Math.max(20, Math.round(nodeStartY + dy));
+      // 2. Xử lý kéo dây nối điểm (Port dragging)
+      if (wireDrag && canvasRef.current) {
+        const canvasRect = canvasRef.current.getBoundingClientRect();
+        const mouseX = (e.clientX - canvasRect.left) / zoomLevel;
+        const mouseY = (e.clientY - canvasRect.top) / zoomLevel;
 
-      setPositions(prev => ({
-        ...prev,
-        [nodeId]: { x: newX, y: newY }
-      }));
+        setWireDrag(prev =>
+          prev ? { ...prev, currentX: Math.round(mouseX), currentY: Math.round(mouseY) } : null
+        );
+
+        // Kiểm tra xem chuột đang hover trên node nào khác node nguồn
+        let foundTarget: string | null = null;
+        for (const n of nodes) {
+          if (n.id === wireDrag.sourceNodeId) continue;
+          const nPos = getNodePos(n);
+          if (
+            mouseX >= nPos.x - 20 &&
+            mouseX <= nPos.x + NODE_WIDTH + 20 &&
+            mouseY >= nPos.y - 15 &&
+            mouseY <= nPos.y + NODE_HEIGHT + 15
+          ) {
+            foundTarget = n.id;
+            break;
+          }
+        }
+        setHoveredTargetNodeId(foundTarget);
+      }
     };
 
     const handleMouseUp = () => {
-      if (!dragRef.current) return;
-      const { nodeId, hasMoved } = dragRef.current;
-      const finalPos = positions[nodeId];
+      // 1. Hoàn tất kéo di chuyển node
+      if (dragRef.current) {
+        const { nodeId, hasMoved } = dragRef.current;
+        const finalPos = positions[nodeId];
 
-      if (hasMoved && finalPos && onUpdateNodePosition) {
-        onUpdateNodePosition(nodeId, finalPos);
+        if (hasMoved && finalPos && onUpdateNodePosition) {
+          onUpdateNodePosition(nodeId, finalPos);
+        }
+
+        dragRef.current = null;
+        setDraggingNodeId(null);
       }
 
-      dragRef.current = null;
-      setDraggingNodeId(null);
+      // 2. Hoàn tất kéo dây nối 2 điểm
+      if (wireDrag) {
+        if (hoveredTargetNodeId && hoveredTargetNodeId !== wireDrag.sourceNodeId) {
+          onConnectNodes?.(wireDrag.sourceNodeId, hoveredTargetNodeId, wireDrag.branch);
+        }
+        setWireDrag(null);
+        setHoveredTargetNodeId(null);
+      }
     };
 
-    if (draggingNodeId) {
+    if (draggingNodeId || wireDrag) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       return () => {
@@ -111,9 +173,9 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
         window.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [draggingNodeId, zoomLevel, positions, onUpdateNodePosition]);
+  }, [draggingNodeId, wireDrag, hoveredTargetNodeId, zoomLevel, positions, nodes, onUpdateNodePosition, onConnectNodes]);
 
-  // Helper tính toán tọa độ cổng vào/ra (Ports)
+  // Helper tính toán tọa độ node
   const getNodePos = (node: WorkflowNode) => {
     return positions[node.id] || node.position || { x: 50, y: 180 };
   };
@@ -277,8 +339,9 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
             {nodes.length} Nodes
           </span>
           <span className="text-neutral-300">|</span>
-          <span className="text-neutral-500 text-[11px] hidden sm:inline">
-            🖱️ <strong>Nhấp đúp (Double-click)</strong> vào Node để mở Popup • Giữ chuột để kéo thả
+          <span className="text-neutral-600 text-[11px] font-medium hidden sm:inline flex items-center gap-1">
+            <Link2 className="w-3.5 h-3.5 text-blue-600 inline" />
+            <strong>Kéo 2 điểm với nhau để nối</strong> • Bấm <strong>✕</strong> trên dây để hủy nối • <strong>Double-click</strong> để sửa
           </span>
         </div>
 
@@ -372,6 +435,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
         className="overflow-auto custom-scrollbar p-6 min-h-[580px] max-h-[720px] select-none flex-1"
       >
         <div
+          ref={canvasRef}
           className="relative transition-transform duration-75 origin-top-left"
           style={{
             width: `${maxX}px`,
@@ -381,7 +445,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
             backgroundSize: '24px 24px'
           }}
         >
-          {/* SVG Connecting Paths */}
+          {/* SVG Connecting Paths & Dynamic Dragging Wire */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
             <defs>
               <marker
@@ -417,19 +481,34 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
               >
                 <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#EF4444" />
               </marker>
+              <marker
+                id="arrow-wire-drag"
+                viewBox="0 0 10 10"
+                refX="7"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#3B82F6" />
+              </marker>
             </defs>
 
+            {/* Render các đường nối hiện có */}
             {edges.map(edge => {
               const dx = (edge.x2 - edge.x1) / 2;
               const pathD = `M ${edge.x1} ${edge.y1} C ${edge.x1 + dx} ${edge.y1}, ${edge.x2 - dx} ${edge.y2}, ${edge.x2} ${edge.y2}`;
 
               const isYes = edge.type === 'yes';
               const isNo = edge.type === 'no';
-              const strokeColor = isYes ? '#10B981' : isNo ? '#EF4444' : '#CBD5E1';
+              const strokeColor = isYes ? '#10B981' : isNo ? '#EF4444' : '#94A3B8';
               const markerId = isYes ? 'url(#arrow-yes)' : isNo ? 'url(#arrow-no)' : 'url(#arrow-standard)';
 
+              const midX = (edge.x1 + edge.x2) / 2;
+              const midY = (edge.y1 + edge.y2) / 2;
+
               return (
-                <g key={edge.id}>
+                <g key={edge.id} className="pointer-events-auto group/edge">
                   {/* Đường kết nối cong */}
                   <path
                     d={pathD}
@@ -438,6 +517,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                     strokeWidth={isYes || isNo ? 2.5 : 2}
                     strokeDasharray={isNo ? '4 3' : 'none'}
                     markerEnd={markerId}
+                    className="group-hover/edge:stroke-blue-500 transition-colors"
                   />
 
                   {/* Nhãn trên đường rẽ nhánh */}
@@ -486,9 +566,70 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                       </text>
                     </g>
                   )}
+
+                  {/* Nút bấm hủy nối dây (Disconnect) */}
+                  <g
+                    transform={`translate(${midX}, ${midY})`}
+                    onClick={e => {
+                      e.stopPropagation();
+                      const branch = edge.type === 'yes' ? 'yes' : edge.type === 'no' ? 'no' : 'next';
+                      onDisconnectNodes?.(edge.fromNode.id, branch);
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <circle
+                      r="10"
+                      fill="#FFFFFF"
+                      stroke="#EF4444"
+                      strokeWidth="1.5"
+                      className="opacity-70 group-hover/edge:opacity-100 hover:scale-125 hover:fill-rose-500 transition-all shadow-sm"
+                    />
+                    <text
+                      textAnchor="middle"
+                      dy="3.5"
+                      fill="#EF4444"
+                      fontSize="9"
+                      fontWeight="black"
+                      className="select-none pointer-events-none group-hover/edge:fill-white font-sans"
+                    >
+                      ✕
+                    </text>
+                  </g>
                 </g>
               );
             })}
+
+            {/* Dây nối sống động đang được người dùng kéo chuột (Live Wire Dragging) */}
+            {wireDrag && (
+              <g className="pointer-events-none">
+                {(() => {
+                  const dx = (wireDrag.currentX - wireDrag.startX) / 2;
+                  const pathD = `M ${wireDrag.startX} ${wireDrag.startY} C ${wireDrag.startX + dx} ${wireDrag.startY}, ${wireDrag.currentX - dx} ${wireDrag.currentY}, ${wireDrag.currentX} ${wireDrag.currentY}`;
+                  const color =
+                    wireDrag.branch === 'yes' ? '#10B981' : wireDrag.branch === 'no' ? '#EF4444' : '#2563EB';
+
+                  return (
+                    <>
+                      <path
+                        d={pathD}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={3}
+                        strokeDasharray="6 4"
+                        markerEnd="url(#arrow-wire-drag)"
+                      />
+                      <circle
+                        cx={wireDrag.currentX}
+                        cy={wireDrag.currentY}
+                        r={6}
+                        fill={color}
+                        className="animate-pulse"
+                      />
+                    </>
+                  );
+                })()}
+              </g>
+            )}
           </svg>
 
           {/* Node Cards Rendering (Kéo thả thoải mái - Double-click mới mở Popup) */}
@@ -497,13 +638,14 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
             const theme = getNodeHeaderTheme(node.type);
             const isActive = activeNodeId === node.id;
             const isDragging = draggingNodeId === node.id;
+            const isTargetCandidate = hoveredTargetNodeId === node.id && wireDrag?.sourceNodeId !== node.id;
 
             return (
               <div
                 key={node.id}
                 onMouseDown={e => {
                   const target = e.target as HTMLElement;
-                  if (target.closest('button, .port-action')) return;
+                  if (target.closest('button, .port-action, .port-wire')) return;
 
                   const currentPos = getNodePos(node);
                   dragRef.current = {
@@ -525,14 +667,16 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                   top: `${pos.y}px`,
                   width: `${NODE_WIDTH}px`
                 }}
-                className={`absolute bg-white rounded-2xl border transition-shadow duration-150 cursor-grab active:cursor-grabbing shadow-sm group select-none ${
-                  isDragging
+                className={`absolute bg-white rounded-2xl border transition-all duration-150 cursor-grab active:cursor-grabbing shadow-sm group select-none ${
+                  isTargetCandidate
+                    ? 'ring-4 ring-emerald-500 scale-[1.04] shadow-2xl z-40 border-emerald-500'
+                    : isDragging
                     ? 'ring-4 ring-[#B8F23D]/80 shadow-2xl scale-[1.03] z-40 border-neutral-900'
                     : isActive
                     ? theme.activeRing + ' shadow-xl scale-105 z-30'
                     : 'border-black/[0.1] hover:shadow-lg ' + theme.borderHover + ' z-10'
                 }`}
-                title="Double-click (nhấp đúp) để chỉnh sửa • Bấm giữ để kéo di chuyển"
+                title="Double-click (nhấp đúp) để chỉnh sửa • Kéo cổng bên phải đến node khác để nối dây"
               >
                 {/* Node Header */}
                 <div className="p-3 border-b border-black/[0.04] flex items-center justify-between bg-neutral-50/70 rounded-t-2xl">
@@ -546,6 +690,11 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                     {isDragging && (
                       <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[8px] font-bold rounded-md animate-pulse">
                         Đang kéo...
+                      </span>
+                    )}
+                    {isTargetCandidate && (
+                      <span className="px-1.5 py-0.5 bg-emerald-600 text-white text-[8px] font-bold rounded-md animate-pulse">
+                        Thả để nối!
                       </span>
                     )}
                   </div>
@@ -585,46 +734,92 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                       <span className="font-bold text-emerald-600">{node.stats.successRate}% hiệu quả</span>
                     </>
                   ) : (
-                    <span>Tự động kích hoạt 24/7</span>
+                    <span>Tự do kết nối</span>
                   )}
                 </div>
 
-                {/* Input Connection Port (Trái) */}
+                {/* Input Connection Port (Trái) - Nhận kết nối */}
                 {node.type !== 'trigger' && (
                   <div
-                    className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-neutral-400 shadow-xs flex items-center justify-center group-hover:border-blue-500 transition-colors"
-                    title="Cổng nhận tín hiệu"
+                    className={`absolute -left-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white border-2 shadow-xs flex items-center justify-center transition-all ${
+                      isTargetCandidate
+                        ? 'border-emerald-500 bg-emerald-50 scale-125 ring-2 ring-emerald-400/50'
+                        : 'border-neutral-400 group-hover:border-blue-500'
+                    }`}
+                    title="Cổng nhận tín hiệu đầu vào"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 group-hover:bg-blue-500" />
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        isTargetCandidate ? 'bg-emerald-600' : 'bg-neutral-400 group-hover:bg-blue-500'
+                      }`}
+                    />
                   </div>
                 )}
 
-                {/* Output Connection Port (Phải) */}
-                {node.type !== 'end' && (
+                {/* Output Connection Port (Phải) - BẤM GIỮ VÀ KÉO ĐỂ NỐI DÂY */}
+                {node.type !== 'end' && node.type !== 'condition' && (
                   <div
-                    onClick={e => {
+                    onMouseDown={e => {
+                      const portX = pos.x + NODE_WIDTH;
+                      const portY = pos.y + NODE_HEIGHT / 2;
                       e.stopPropagation();
-                      if (onAddNodeAfter) onAddNodeAfter(node.id, 'next');
+                      e.preventDefault();
+                      setWireDrag({
+                        sourceNodeId: node.id,
+                        branch: 'next',
+                        startX: portX,
+                        startY: portY,
+                        currentX: portX,
+                        currentY: portY
+                      });
                     }}
-                    className="port-action absolute -right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-neutral-400 shadow-xs flex items-center justify-center hover:scale-125 hover:border-emerald-500 transition-all cursor-pointer"
-                    title="Cổng chuyển luồng - Bấm để thêm bước tiếp theo"
+                    className="port-wire absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-blue-500 shadow-md flex items-center justify-center hover:scale-125 hover:bg-blue-50 cursor-crosshair transition-all z-20"
+                    title="🖱️ Bấm giữ và kéo điểm này sang Node khác để nối dây!"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 hover:bg-emerald-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-600 hover:scale-110" />
                   </div>
                 )}
 
-                {/* Condition specific Yes/No Ports */}
+                {/* Condition specific Yes/No Ports - KÉO ĐIỂM ĐÚNG/SAI */}
                 {node.type === 'condition' && (
                   <>
                     <div
-                      className="absolute -right-2.5 top-1/2 -translate-y-[26px] w-4 h-4 rounded-full bg-emerald-50 border-2 border-emerald-500 shadow-xs flex items-center justify-center text-[8px] font-bold text-emerald-700"
-                      title="Cổng nhánh Đúng (YES)"
+                      onMouseDown={e => {
+                        const portX = pos.x + NODE_WIDTH;
+                        const portY = pos.y + NODE_HEIGHT / 2 - 20;
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setWireDrag({
+                          sourceNodeId: node.id,
+                          branch: 'yes',
+                          startX: portX,
+                          startY: portY,
+                          currentX: portX,
+                          currentY: portY
+                        });
+                      }}
+                      className="port-wire absolute -right-3 top-1/2 -translate-y-[28px] w-6 h-6 rounded-full bg-emerald-50 border-2 border-emerald-500 shadow-md flex items-center justify-center text-[9px] font-extrabold text-emerald-700 hover:scale-125 cursor-crosshair transition-all z-20"
+                      title="Kéo cổng Đúng (YES) đến Node tiếp theo"
                     >
                       ✓
                     </div>
                     <div
-                      className="absolute -right-2.5 top-1/2 translate-y-[10px] w-4 h-4 rounded-full bg-rose-50 border-2 border-rose-500 shadow-xs flex items-center justify-center text-[8px] font-bold text-rose-700"
-                      title="Cổng nhánh Sai (NO)"
+                      onMouseDown={e => {
+                        const portX = pos.x + NODE_WIDTH;
+                        const portY = pos.y + NODE_HEIGHT / 2 + 20;
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setWireDrag({
+                          sourceNodeId: node.id,
+                          branch: 'no',
+                          startX: portX,
+                          startY: portY,
+                          currentX: portX,
+                          currentY: portY
+                        });
+                      }}
+                      className="port-wire absolute -right-3 top-1/2 translate-y-[12px] w-6 h-6 rounded-full bg-rose-50 border-2 border-rose-500 shadow-md flex items-center justify-center text-[9px] font-extrabold text-rose-700 hover:scale-125 cursor-crosshair transition-all z-20"
+                      title="Kéo cổng Sai (NO) đến Node tiếp theo"
                     >
                       ✕
                     </div>

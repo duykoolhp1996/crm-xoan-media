@@ -265,22 +265,69 @@ export const RemarketingModule: React.FC = () => {
       stats: { processedCount: 0, successRate: 100 }
     };
 
-    // Tự động nối dây từ node trước nếu chưa có kết nối
-    let updatedNodes = [...existingNodes];
-    if (lastNode && lastNode.type !== 'end' && lastNode.type !== 'condition' && !lastNode.next) {
-      updatedNodes = updatedNodes.map(n => (n.id === lastNode.id ? { ...n, next: newId } : n));
-    }
-
+    // Node mới được thêm độc lập trên canvas, không ép nối dây tự động
     const updatedWf: RemarketingWorkflow = {
       ...currentWorkflow,
-      nodes: [...updatedNodes, newNode],
+      nodes: [...existingNodes, newNode],
       updatedAt: new Date().toISOString().slice(0, 10)
     };
 
     updateWorkflow(updatedWf);
     setSelectedNode(newNode);
     setIsDrawerOpen(true);
-    showToast(`Đã thêm bước "${title}" vào sơ đồ. Đang mở Popup cấu hình.`);
+    showToast(`Đã thêm bước "${title}" vào sơ đồ. Kéo điểm nối để liên kết với bước khác.`);
+  };
+
+  // Nối dây giữa 2 node bằng kéo thả Port-to-Port
+  const handleConnectNodes = (sourceId: string, targetId: string, branch: 'next' | 'yes' | 'no') => {
+    if (!currentWorkflow || sourceId === targetId) return;
+
+    const updatedNodes = currentWorkflow.nodes.map(n => {
+      if (n.id !== sourceId) return n;
+      if (branch === 'yes') {
+        return { ...n, yesNext: targetId };
+      } else if (branch === 'no') {
+        return { ...n, noNext: targetId };
+      } else {
+        return { ...n, next: targetId };
+      }
+    });
+
+    const updatedWf: RemarketingWorkflow = {
+      ...currentWorkflow,
+      nodes: updatedNodes,
+      updatedAt: new Date().toISOString().slice(0, 10)
+    };
+
+    updateWorkflow(updatedWf);
+    showToast('Đã kết nối thành công hai bước quy trình!');
+  };
+
+  // Ngắt kết nối dây giữa 2 node
+  const handleDisconnectNodes = (sourceId: string, branch: 'next' | 'yes' | 'no') => {
+    if (!currentWorkflow) return;
+
+    const updatedNodes = currentWorkflow.nodes.map(n => {
+      if (n.id !== sourceId) return n;
+      const clone = { ...n };
+      if (branch === 'yes') {
+        delete clone.yesNext;
+      } else if (branch === 'no') {
+        delete clone.noNext;
+      } else {
+        delete clone.next;
+      }
+      return clone;
+    });
+
+    const updatedWf: RemarketingWorkflow = {
+      ...currentWorkflow,
+      nodes: updatedNodes,
+      updatedAt: new Date().toISOString().slice(0, 10)
+    };
+
+    updateWorkflow(updatedWf);
+    showToast('Đã ngắt liên kết giữa hai bước.');
   };
 
   // Tạo workflow mới
@@ -987,6 +1034,8 @@ export const RemarketingModule: React.FC = () => {
                 onAddNodeAfter={handleAddNodeAfter}
                 onUpdateNodePosition={handleUpdateNodePosition}
                 onAddSpecificNode={handleAddNewNodeOfType}
+                onConnectNodes={handleConnectNodes}
+                onDisconnectNodes={handleDisconnectNodes}
               />
 
               {/* Quick Guidance Box */}
@@ -1120,6 +1169,8 @@ export const RemarketingModule: React.FC = () => {
                   onAddNodeAfter={handleAddNodeAfter}
                   onUpdateNodePosition={handleUpdateNodePosition}
                   onAddSpecificNode={handleAddNewNodeOfType}
+                  onConnectNodes={handleConnectNodes}
+                  onDisconnectNodes={handleDisconnectNodes}
                 />
               </div>
 
