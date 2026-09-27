@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { WorkflowNode, WorkflowNodeType } from '../../types';
 import {
   X,
@@ -103,15 +104,15 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
 
   const badge = getNodeBadge(formData.type);
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-hidden animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[160] overflow-hidden animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-neutral-900/40 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-neutral-900/50 backdrop-blur-xs transition-opacity"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10 z-[161]">
         <div className="w-screen max-w-md bg-white border-l border-black/[0.08] shadow-2xl flex flex-col justify-between">
           {/* Header */}
           <div className="p-6 border-b border-black/[0.06] flex items-center justify-between bg-neutral-50/50">
@@ -430,6 +431,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { RemarketingWorkflow, WorkflowNode, Customer } from '../../types';
 import { useApp } from '../../context/AppContext';
 import {
@@ -162,8 +163,8 @@ export const WorkflowSimulationModal: React.FC<WorkflowSimulationModalProps> = (
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[160] overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
       <div onClick={onClose} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm" />
 
       <div className="relative w-full max-w-2xl bg-white border border-black/[0.08] rounded-3xl shadow-2xl overflow-hidden z-10 text-xs">
@@ -287,6 +288,7 @@ export const WorkflowSimulationModal: React.FC<WorkflowSimulationModalProps> = (
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

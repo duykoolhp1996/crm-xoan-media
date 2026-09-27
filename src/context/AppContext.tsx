@@ -117,6 +117,9 @@ interface AppContextType {
   campaigns: RemarketingCampaign[];
   workflows: RemarketingWorkflow[];
   toggleWorkflow: (id: string) => void;
+  updateWorkflow: (workflow: RemarketingWorkflow) => void;
+  addWorkflow: (workflow: RemarketingWorkflow) => void;
+  deleteWorkflow: (id: string) => void;
   addCampaign: (campaign: Omit<RemarketingCampaign, 'id' | 'spent' | 'reach' | 'leadsGenerated'>) => void;
 
   // Tasks
@@ -168,7 +171,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>(mockServicePackages);
   const [segments, setSegments] = useState<RemarketingSegment[]>(mockRemarketingSegments);
   const [campaigns, setCampaigns] = useState<RemarketingCampaign[]>(mockRemarketingCampaigns);
-  const [workflows, setWorkflows] = useState<RemarketingWorkflow[]>(mockWorkflows);
+  const [workflows, setWorkflows] = useState<RemarketingWorkflow[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_workflows');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load workflows from localStorage', e);
+    }
+    return mockWorkflows;
+  });
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(mockActivityLogs);
   const [notifications, setNotifications] = useState<SystemNotification[]>(mockNotifications);
@@ -878,7 +892,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleWorkflow = (id: string) => {
-    setWorkflows(prev => prev.map(w => w.id === id ? { ...w, isActive: !w.isActive } : w));
+    setWorkflows(prev => {
+      const updated = prev.map(w => w.id === id ? { ...w, isActive: !w.isActive, updatedAt: new Date().toISOString().slice(0, 10) } : w);
+      try {
+        localStorage.setItem('crm_xoan_workflows', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const updateWorkflow = (updatedWf: RemarketingWorkflow) => {
+    setWorkflows(prev => {
+      const updated = prev.map(w => w.id === updatedWf.id ? { ...updatedWf, updatedAt: new Date().toISOString().slice(0, 10) } : w);
+      try {
+        localStorage.setItem('crm_xoan_workflows', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const addWorkflow = (newWf: RemarketingWorkflow) => {
+    setWorkflows(prev => {
+      const updated = [newWf, ...prev];
+      try {
+        localStorage.setItem('crm_xoan_workflows', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const deleteWorkflow = (id: string) => {
+    setWorkflows(prev => {
+      const updated = prev.filter(w => w.id !== id);
+      try {
+        localStorage.setItem('crm_xoan_workflows', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const addCampaign = (campData: Omit<RemarketingCampaign, 'id' | 'spent' | 'reach' | 'leadsGenerated'>) => {
@@ -1011,6 +1061,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         campaigns,
         workflows,
         toggleWorkflow,
+        updateWorkflow,
+        addWorkflow,
+        deleteWorkflow,
         addCampaign,
         tasks,
         addTask,
