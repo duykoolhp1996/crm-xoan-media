@@ -105,17 +105,16 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
   const badge = getNodeBadge(formData.type);
 
   return createPortal(
-    <div className="fixed inset-0 z-[160] overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[170] overflow-y-auto p-4 flex items-center justify-center animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-neutral-900/50 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm transition-opacity"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10 z-[161]">
-        <div className="w-screen max-w-md bg-white border-l border-black/[0.08] shadow-2xl flex flex-col justify-between">
-          {/* Header */}
-          <div className="p-6 border-b border-black/[0.06] flex items-center justify-between bg-neutral-50/50">
+      <div className="relative w-full max-w-xl bg-white border border-black/[0.08] rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="p-5 sm:p-6 border-b border-black/[0.06] flex items-center justify-between bg-neutral-50/70">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${badge.color}`}>
@@ -430,8 +429,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
             </div>
           </div>
         </div>
-      </div>
-    </div>,
-    document.body
-  );
-};
+      </div>,
+      document.body
+    );
+  };

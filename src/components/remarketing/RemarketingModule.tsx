@@ -30,7 +30,9 @@ import {
   Tag,
   Check,
   Zap,
-  Info
+  Info,
+  X,
+  Maximize2
 } from 'lucide-react';
 
 export const RemarketingModule: React.FC = () => {
@@ -50,6 +52,9 @@ export const RemarketingModule: React.FC = () => {
 
   // Chế độ xem của tab Workflows: 'list' (Danh sách kịch bản) | 'editor' (Trang sơ đồ Node kịch bản)
   const [workflowView, setWorkflowView] = useState<'list' | 'editor'>('list');
+
+  // Popup Modal mở sơ đồ Workflow dạng floating popup
+  const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
 
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>(workflows[0]?.id || 'wf-1');
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
@@ -74,7 +79,7 @@ export const RemarketingModule: React.FC = () => {
   const [isCreateCampModalOpen, setIsCreateCampModalOpen] = useState(false);
   const [isCreateWfModalOpen, setIsCreateWfModalOpen] = useState(false);
 
-  // Workflow hiện tại đang xem trong Editor
+  // Workflow hiện tại đang xem trong Editor hoặc Popup
   const currentWorkflow = workflows.find(w => w.id === selectedWorkflowId) || workflows[0];
 
   // Form tạo chiến dịch remarketing
@@ -114,6 +119,20 @@ export const RemarketingModule: React.FC = () => {
       return matchSearch && matchCategory && matchStatus;
     });
   }, [workflows, searchQuery, categoryFilter, statusFilter]);
+
+  // Cập nhật vị trí kéo thả của node trên canvas
+  const handleUpdateNodePosition = (nodeId: string, newPosition: { x: number; y: number }) => {
+    if (!currentWorkflow) return;
+    const updatedNodes = currentWorkflow.nodes.map(n =>
+      n.id === nodeId ? { ...n, position: newPosition } : n
+    );
+    const updatedWf: RemarketingWorkflow = {
+      ...currentWorkflow,
+      nodes: updatedNodes,
+      updatedAt: new Date().toISOString().slice(0, 10)
+    };
+    updateWorkflow(updatedWf);
+  };
 
   // Lưu node sau khi chỉnh sửa
   const handleSaveNode = (updatedNode: WorkflowNode) => {
@@ -178,7 +197,7 @@ export const RemarketingModule: React.FC = () => {
     updateWorkflow(updatedWf);
     setSelectedNode(newNode);
     setIsDrawerOpen(true);
-    showToast('Đã thêm bước mới. Vui lòng thiết lập thông số trong bảng cấu hình.');
+    showToast('Đã thêm bước mới. Vui lòng thiết lập thông số trong popup cấu hình.');
   };
 
   // Tạo workflow mới
@@ -247,11 +266,11 @@ export const RemarketingModule: React.FC = () => {
 
     addWorkflow(newWf);
     setSelectedWorkflowId(newWf.id);
-    setWorkflowView('editor'); // Sang thẳng trang chỉnh sửa node của kịch bản vừa tạo
     setIsCreateWfModalOpen(false);
+    setIsWorkflowModalOpen(true); // Mở ngay popup sơ đồ node của kịch bản mới
     setNewWfName('');
     setNewWfDesc('');
-    showToast(`Đã tạo kịch bản "${newWf.name}". Đang mở sơ đồ Node để chỉnh sửa.`);
+    showToast(`Đã tạo kịch bản "${newWf.name}". Đang mở Popup sơ đồ Node để chỉnh sửa.`);
   };
 
   // Nhân bản workflow
@@ -569,7 +588,7 @@ export const RemarketingModule: React.FC = () => {
                 </div>
               </div>
 
-              {/* Workflows List Table / Cards */}
+              {/* Workflows List Cards */}
               <div className="space-y-4">
                 {filteredWorkflows.length === 0 ? (
                   <div className="bg-white border border-black/[0.08] rounded-3xl p-12 text-center space-y-3">
@@ -633,7 +652,7 @@ export const RemarketingModule: React.FC = () => {
                               <h3
                                 onClick={() => {
                                   setSelectedWorkflowId(wf.id);
-                                  setWorkflowView('editor');
+                                  setIsWorkflowModalOpen(true);
                                 }}
                                 className="text-base font-extrabold text-neutral-900 hover:text-blue-600 cursor-pointer transition-colors flex items-center gap-2"
                               >
@@ -716,16 +735,16 @@ export const RemarketingModule: React.FC = () => {
                               {wf.isActive ? 'Đang Chạy Tự Động' : 'Đang Tạm Dừng'}
                             </button>
 
-                            {/* Main CTA: Chỉnh sửa Sơ Đồ Node */}
+                            {/* Main CTA: Mở Sơ Đồ Node Dạng POPUP */}
                             <button
                               onClick={() => {
                                 setSelectedWorkflowId(wf.id);
-                                setWorkflowView('editor');
+                                setIsWorkflowModalOpen(true);
                               }}
                               className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-xs transition-all active:scale-95"
                             >
                               <GitBranch className="w-4 h-4" />
-                              Chỉnh Sửa Sơ Đồ Node
+                              Mở Sơ Đồ Node (Popup)
                             </button>
 
                             {/* Secondary Buttons: Chạy Thử / Duplicate / Xóa */}
@@ -749,7 +768,6 @@ export const RemarketingModule: React.FC = () => {
                                 <Copy className="w-3.5 h-3.5" />
                               </button>
 
-                              {/* Cho phép xóa nếu có nhiều hơn 1 workflow */}
                               {workflows.length > 1 && (
                                 <button
                                   onClick={() => handleDeleteWorkflow(wf.id, wf.name)}
@@ -771,7 +789,7 @@ export const RemarketingModule: React.FC = () => {
           )}
 
           {/* ========================================================
-              VIEW 2: TRANG SƠ ĐỒ WORKFLOW & CHỈNH SỬA NODE (workflowView === 'editor')
+              VIEW 2: TRANG SƠ ĐỒ WORKFLOW TOÀN TRANG (NẾU CẦN XEM TOÀN MÀN HÌNH)
               ======================================================== */}
           {workflowView === 'editor' && currentWorkflow && (
             <div className="space-y-4 animate-in fade-in duration-200">
@@ -875,7 +893,7 @@ export const RemarketingModule: React.FC = () => {
                 </div>
               </div>
 
-              {/* Core Interactive Node Canvas */}
+              {/* Core Interactive Node Canvas with Draggable Nodes */}
               <NodeCanvas
                 nodes={currentWorkflow.nodes}
                 activeNodeId={activeSimNodeId}
@@ -884,6 +902,7 @@ export const RemarketingModule: React.FC = () => {
                   setIsDrawerOpen(true);
                 }}
                 onAddNodeAfter={handleAddNodeAfter}
+                onUpdateNodePosition={handleUpdateNodePosition}
               />
 
               {/* Quick Guidance Box */}
@@ -892,9 +911,9 @@ export const RemarketingModule: React.FC = () => {
                 <div className="space-y-0.5">
                   <p className="font-bold">Hướng dẫn tùy chỉnh sơ đồ Node Workflow:</p>
                   <p className="text-[11px] text-blue-700 leading-relaxed">
-                    • <strong>Chỉnh sửa nội dung:</strong> Bấm trực tiếp vào bất kỳ <strong>Node</strong> nào để mở bảng cấu hình thời gian chờ (Delay), nội dung tin nhắn Zalo/SMS/Email hoặc rẽ nhánh điều kiện If/Else.
-                    <br />• <strong>Thêm bước tiếp theo:</strong> Bấm vào vòng tròn cổng kết nối màu xanh ở cạnh phải của mỗi Node hoặc sử dụng nút thêm bước.
-                    <br />• <strong>Mô phỏng:</strong> Bấm nút <strong>"Mô Phỏng Chạy Thử"</strong> để xem luồng tín hiệu phát sáng qua từng node với khách hàng mẫu thực tế.
+                    • <strong>Kéo thả node:</strong> Bấm giữ chuột trên bất kỳ Node nào để kéo & thả di chuyển tự do trên canvas, các đường dây nối sẽ tự động uốn theo.
+                    <br />• <strong>Chỉnh sửa nội dung:</strong> Bấm vào Node để mở Popup cấu hình thời gian chờ, tin nhắn Zalo/SMS hoặc rẽ nhánh điều kiện If/Else.
+                    <br />• <strong>Thêm bước tiếp theo:</strong> Bấm vào vòng tròn cổng kết nối màu xanh ở cạnh phải của mỗi Node.
                   </p>
                 </div>
               </div>
@@ -902,6 +921,148 @@ export const RemarketingModule: React.FC = () => {
           )}
         </>
       )}
+
+      {/* ========================================================
+          POPUP MODAL TOÀN DIỆN MỞ SƠ ĐỒ WORKFLOW (FLOATING POPUP CANVAS)
+          ======================================================== */}
+      {isWorkflowModalOpen &&
+        currentWorkflow &&
+        createPortal(
+          <div className="fixed inset-0 z-[150] p-2 sm:p-5 flex items-center justify-center animate-in fade-in duration-200">
+            {/* Backdrop */}
+            <div
+              onClick={() => setIsWorkflowModalOpen(false)}
+              className="fixed inset-0 bg-neutral-900/70 backdrop-blur-sm transition-opacity"
+            />
+
+            {/* Modal Dialog Window */}
+            <div className="relative w-full max-w-[96vw] h-[92vh] bg-white border border-black/[0.08] rounded-3xl shadow-2xl overflow-hidden z-10 flex flex-col">
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-black/[0.06] bg-neutral-50/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center shrink-0 shadow-xs">
+                    <GitBranch className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight truncate">
+                        {currentWorkflow.name}
+                      </h2>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                          getCategoryBadge(currentWorkflow.category).color
+                        }`}
+                      >
+                        {getCategoryBadge(currentWorkflow.category).label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-500 truncate mt-0.5">
+                      Sự kiện kích hoạt: <strong className="text-purple-700">{currentWorkflow.triggerEvent}</strong> •{' '}
+                      {currentWorkflow.nodes.length} bước (Nodes)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Header Actions */}
+                <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
+                  {/* Workflow Switcher Dropdown */}
+                  <select
+                    value={selectedWorkflowId}
+                    onChange={e => setSelectedWorkflowId(e.target.value)}
+                    className="px-3 py-2 bg-white border border-black/[0.1] rounded-xl text-xs font-bold text-neutral-800 focus:outline-none"
+                    title="Đổi sang kịch bản khác"
+                  >
+                    {workflows.map(w => (
+                      <option key={w.id} value={w.id}>
+                        {w.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Toggle Active Button */}
+                  <button
+                    onClick={() => {
+                      toggleWorkflow(currentWorkflow.id);
+                      showToast(
+                        currentWorkflow.isActive
+                          ? 'Đã tạm dừng kịch bản.'
+                          : 'Đã kích hoạt kịch bản chạy tự động 24/7.'
+                      );
+                    }}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all ${
+                      currentWorkflow.isActive
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                    }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        currentWorkflow.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-neutral-400'
+                      }`}
+                    />
+                    {currentWorkflow.isActive ? 'Đang Hoạt Động' : 'Tạm Dừng'}
+                  </button>
+
+                  {/* Run Simulation */}
+                  <button
+                    onClick={() => setIsSimModalOpen(true)}
+                    className="px-3.5 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-900 font-extrabold text-xs rounded-xl flex items-center gap-1.5 shadow-xs transition-transform active:scale-95"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    Chạy Thử
+                  </button>
+
+                  {/* Close Popup Button */}
+                  <button
+                    onClick={() => setIsWorkflowModalOpen(false)}
+                    className="w-9 h-9 rounded-full bg-white hover:bg-neutral-100 border border-black/[0.08] flex items-center justify-center text-neutral-500 hover:text-neutral-900 transition-colors shadow-xs"
+                    title="Đóng popup sơ đồ"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body: Interactive Node Canvas with Drag & Drop */}
+              <div className="flex-1 overflow-hidden p-4 bg-[#F9FAFB]">
+                <NodeCanvas
+                  nodes={currentWorkflow.nodes}
+                  activeNodeId={activeSimNodeId}
+                  onSelectNode={node => {
+                    setSelectedNode(node);
+                    setIsDrawerOpen(true);
+                  }}
+                  onAddNodeAfter={handleAddNodeAfter}
+                  onUpdateNodePosition={handleUpdateNodePosition}
+                />
+              </div>
+
+              {/* Modal Footer Guidance */}
+              <div className="px-5 py-3 border-t border-black/[0.06] bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-neutral-500 shrink-0">
+                <div className="flex items-center gap-2 text-[11px]">
+                  <Info className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>
+                    💡 <strong>Mẹo:</strong> Bấm giữ chuột trên bất kỳ Node nào để <strong>kéo & thả di chuyển tự do</strong>. Bấm vào Node để <strong>mở Popup cấu hình</strong>.
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Tự động lưu tọa độ
+                  </span>
+                  <button
+                    onClick={() => setIsWorkflowModalOpen(false)}
+                    className="px-4 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-colors"
+                  >
+                    Hoàn Tất & Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* ========================================================
           TAB 2: CAMPAIGNS (CHIẾN DỊCH ADS & QUẢNG CÁO)
@@ -1021,7 +1182,7 @@ export const RemarketingModule: React.FC = () => {
         </div>
       )}
 
-      {/* Slide-over Node Detail Drawer */}
+      {/* Centered Popup Modal Cấu Hình Bước (Node Config Modal) */}
       <NodeDetailDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
@@ -1069,7 +1230,7 @@ export const RemarketingModule: React.FC = () => {
                     <option value="Lead Nurturing">Nuôi dưỡng Lead mới (Lead Nurturing)</option>
                     <option value="Quote Follow-up">Bám đuổi báo giá (Quote Follow-up)</option>
                     <option value="Lost Recovery">Cứu vãn khách Lost (Lost Recovery)</option>
-                    <option value="Upsell / Loyalty">Tri ấn & Bán chéo (Upsell / Loyalty)</option>
+                    <option value="Upsell / Loyalty">Tri ân & Bán chéo (Upsell / Loyalty)</option>
                   </select>
                 </div>
 

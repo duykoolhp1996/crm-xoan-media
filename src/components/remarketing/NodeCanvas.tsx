@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { WorkflowNode, WorkflowNodeType } from '../../types';
 import {
   Sparkles,
@@ -12,8 +12,8 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
-  HelpCircle,
-  ArrowRight
+  Move,
+  Info
 } from 'lucide-react';
 
 interface NodeCanvasProps {
@@ -21,6 +21,7 @@ interface NodeCanvasProps {
   activeNodeId?: string | null;
   onSelectNode: (node: WorkflowNode) => void;
   onAddNodeAfter?: (sourceNodeId: string, branch?: 'next' | 'yes' | 'no') => void;
+  onUpdateNodePosition?: (nodeId: string, newPosition: { x: number; y: number }) => void;
 }
 
 const NODE_WIDTH = 250;
@@ -30,13 +31,85 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   nodes,
   activeNodeId,
   onSelectNode,
-  onAddNodeAfter
+  onAddNodeAfter,
+  onUpdateNodePosition
 }) => {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
 
+  // Quản lý vị trí kéo thả cục bộ của từng Node
+  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+
+  // Đồng bộ vị trí từ props nodes
+  useEffect(() => {
+    setPositions(prev => {
+      const nextPos = { ...prev };
+      nodes.forEach(n => {
+        if (!nextPos[n.id] || (n.position && !draggingNodeId)) {
+          nextPos[n.id] = n.position || { x: 50, y: 180 };
+        }
+      });
+      return nextPos;
+    });
+  }, [nodes, draggingNodeId]);
+
+  // Ref lưu trạng thái bắt đầu kéo chuột
+  const dragRef = useRef<{
+    nodeId: string;
+    startX: number;
+    startY: number;
+    nodeStartX: number;
+    nodeStartY: number;
+    hasMoved: boolean;
+  } | null>(null);
+
+  // Lắng nghe sự kiện di chuyển và thả chuột toàn màn hình
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragRef.current) return;
+      const { nodeId, startX, startY, nodeStartX, nodeStartY } = dragRef.current;
+      const dx = (e.clientX - startX) / zoomLevel;
+      const dy = (e.clientY - startY) / zoomLevel;
+
+      if (Math.hypot(dx, dy) > 4) {
+        dragRef.current.hasMoved = true;
+      }
+
+      const newX = Math.max(20, Math.round(nodeStartX + dx));
+      const newY = Math.max(20, Math.round(nodeStartY + dy));
+
+      setPositions(prev => ({
+        ...prev,
+        [nodeId]: { x: newX, y: newY }
+      }));
+    };
+
+    const handleMouseUp = () => {
+      if (!dragRef.current) return;
+      const { nodeId, hasMoved } = dragRef.current;
+      const finalPos = positions[nodeId];
+
+      if (hasMoved && finalPos && onUpdateNodePosition) {
+        onUpdateNodePosition(nodeId, finalPos);
+      }
+
+      dragRef.current = null;
+      setDraggingNodeId(null);
+    };
+
+    if (draggingNodeId) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [draggingNodeId, zoomLevel, positions, onUpdateNodePosition]);
+
   // Helper tính toán tọa độ cổng vào/ra (Ports)
   const getNodePos = (node: WorkflowNode) => {
-    return node.position || { x: 50, y: 180 };
+    return positions[node.id] || node.position || { x: 50, y: 180 };
   };
 
   const getNodeHeaderTheme = (type: WorkflowNodeType) => {
@@ -94,8 +167,10 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   };
 
   // Tính toán kích thước canvas dựa trên vị trí các node
-  const maxX = Math.max(...nodes.map(n => getNodePos(n).x + NODE_WIDTH + 150), 1200);
-  const maxY = Math.max(...nodes.map(n => getNodePos(n).y + NODE_HEIGHT + 150), 550);
+  const allX = nodes.map(n => getNodePos(n).x + NODE_WIDTH + 180);
+  const allY = nodes.map(n => getNodePos(n).y + NODE_HEIGHT + 180);
+  const maxX = Math.max(...allX, 1400);
+  const maxY = Math.max(...allY, 650);
 
   // Tạo danh sách đường nối (edges)
   interface Edge {
@@ -170,14 +245,19 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   return (
     <div className="relative w-full rounded-3xl border border-black/[0.08] bg-[#F9FAFB] overflow-hidden shadow-xs">
       {/* Canvas Toolbars */}
-      <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-black/[0.08] shadow-xs text-xs font-semibold text-neutral-600">
+      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-black/[0.08] shadow-xs text-xs font-semibold text-neutral-600">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span>Quy Trình Hoạt Động (Flow Canvas)</span>
+        <span>Sơ Đồ Tự Động Hóa (Canvas)</span>
         <span className="text-neutral-300">|</span>
         <span className="text-neutral-500">{nodes.length} Nodes</span>
+        <span className="text-neutral-300">|</span>
+        <span className="text-blue-600 font-bold flex items-center gap-1 text-[11px]">
+          <Move className="w-3 h-3" />
+          Kéo thả node tự do
+        </span>
       </div>
 
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1.5 rounded-2xl border border-black/[0.08] shadow-xs text-xs">
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border border-black/[0.08] shadow-xs text-xs">
         <button
           onClick={() => setZoomLevel(prev => Math.min(prev + 0.1, 1.4))}
           className="p-1.5 hover:bg-neutral-100 rounded-xl text-neutral-600 transition-colors"
@@ -207,7 +287,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
       {/* Main Interactive Canvas Area */}
       <div className="overflow-auto custom-scrollbar p-6 min-h-[580px] max-h-[720px] select-none">
         <div
-          className="relative transition-transform duration-150 origin-top-left"
+          className="relative transition-transform duration-100 origin-top-left"
           style={{
             width: `${maxX}px`,
             height: `${maxY}px`,
@@ -326,43 +406,72 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
             })}
           </svg>
 
-          {/* Node Cards Rendering */}
+          {/* Node Cards Rendering (Có thể kéo thả di chuyển) */}
           {nodes.map(node => {
             const pos = getNodePos(node);
             const theme = getNodeHeaderTheme(node.type);
             const isActive = activeNodeId === node.id;
+            const isDragging = draggingNodeId === node.id;
 
             return (
               <div
                 key={node.id}
-                onClick={() => onSelectNode(node)}
+                onMouseDown={e => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button, .port-action')) return;
+
+                  const currentPos = getNodePos(node);
+                  dragRef.current = {
+                    nodeId: node.id,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    nodeStartX: currentPos.x,
+                    nodeStartY: currentPos.y,
+                    hasMoved: false
+                  };
+                  setDraggingNodeId(node.id);
+                }}
+                onClick={() => {
+                  // Nếu là thao tác kéo chuột thì không mở modal cấu hình
+                  if (dragRef.current?.hasMoved) return;
+                  onSelectNode(node);
+                }}
                 style={{
                   left: `${pos.x}px`,
                   top: `${pos.y}px`,
                   width: `${NODE_WIDTH}px`
                 }}
-                className={`absolute bg-white rounded-2xl border transition-all duration-200 cursor-pointer shadow-sm group ${
-                  isActive
+                className={`absolute bg-white rounded-2xl border transition-shadow duration-150 cursor-grab active:cursor-grabbing shadow-sm group select-none ${
+                  isDragging
+                    ? 'ring-4 ring-[#B8F23D]/80 shadow-2xl scale-[1.03] z-40 border-neutral-900'
+                    : isActive
                     ? theme.activeRing + ' shadow-xl scale-105 z-30'
-                    : 'border-black/[0.1] hover:shadow-md ' + theme.borderHover + ' z-10'
+                    : 'border-black/[0.1] hover:shadow-lg ' + theme.borderHover + ' z-10'
                 }`}
               >
                 {/* Node Header */}
                 <div className="p-3 border-b border-black/[0.04] flex items-center justify-between bg-neutral-50/70 rounded-t-2xl">
                   <div className="flex items-center gap-1.5">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${theme.badgeBg}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${theme.badgeBg}`}
+                    >
                       {theme.icon}
                       {theme.label}
                     </span>
+                    {isDragging && (
+                      <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[8px] font-bold rounded-md animate-pulse">
+                        Đang kéo...
+                      </span>
+                    )}
                   </div>
 
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       onSelectNode(node);
                     }}
                     className="w-5 h-5 rounded-md hover:bg-neutral-200 text-neutral-400 hover:text-neutral-900 flex items-center justify-center transition-colors"
-                    title="Cấu hình bước này"
+                    title="Cấu hình bước này (mở popup)"
                   >
                     <Settings className="w-3 h-3" />
                   </button>
@@ -374,9 +483,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                     {node.title}
                   </h4>
                   {node.subtitle && (
-                    <p className="text-[10px] font-semibold text-neutral-500">
-                      {node.subtitle}
-                    </p>
+                    <p className="text-[10px] font-semibold text-neutral-500">{node.subtitle}</p>
                   )}
                   <p className="text-[11px] text-neutral-500 leading-relaxed line-clamp-2">
                     {node.description}
@@ -387,7 +494,9 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                 <div className="px-3.5 py-2 border-t border-black/[0.04] bg-neutral-50/40 rounded-b-2xl flex items-center justify-between text-[10px] text-neutral-400">
                   {node.stats ? (
                     <>
-                      <span>Đã chạy: <strong className="text-neutral-700">{node.stats.processedCount}</strong></span>
+                      <span>
+                        Đã chạy: <strong className="text-neutral-700">{node.stats.processedCount}</strong>
+                      </span>
                       <span className="font-bold text-emerald-600">{node.stats.successRate}% hiệu quả</span>
                     </>
                   ) : (
@@ -408,11 +517,11 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                 {/* Output Connection Port (Phải) */}
                 {node.type !== 'end' && (
                   <div
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       if (onAddNodeAfter) onAddNodeAfter(node.id, 'next');
                     }}
-                    className="absolute -right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-neutral-400 shadow-xs flex items-center justify-center hover:scale-125 hover:border-emerald-500 transition-all"
+                    className="port-action absolute -right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-neutral-400 shadow-xs flex items-center justify-center hover:scale-125 hover:border-emerald-500 transition-all cursor-pointer"
                     title="Cổng chuyển luồng - Bấm để thêm bước tiếp theo"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 hover:bg-emerald-500" />
