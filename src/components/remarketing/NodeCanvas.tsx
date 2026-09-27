@@ -13,7 +13,9 @@ import {
   ZoomOut,
   Maximize2,
   Move,
-  Info
+  Info,
+  Maximize,
+  Layers
 } from 'lucide-react';
 
 interface NodeCanvasProps {
@@ -22,6 +24,7 @@ interface NodeCanvasProps {
   onSelectNode: (node: WorkflowNode) => void;
   onAddNodeAfter?: (sourceNodeId: string, branch?: 'next' | 'yes' | 'no') => void;
   onUpdateNodePosition?: (nodeId: string, newPosition: { x: number; y: number }) => void;
+  onAddSpecificNode?: (type: WorkflowNodeType) => void;
 }
 
 const NODE_WIDTH = 250;
@@ -32,9 +35,12 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   activeNodeId,
   onSelectNode,
   onAddNodeAfter,
-  onUpdateNodePosition
+  onUpdateNodePosition,
+  onAddSpecificNode
 }) => {
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [zoomLevel, setZoomLevel] = useState<number>(0.85);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Quản lý vị trí kéo thả cục bộ của từng Node
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
@@ -112,6 +118,23 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
     return positions[node.id] || node.position || { x: 50, y: 180 };
   };
 
+  // Tự động thu phóng để thấy trọn vẹn tất cả các Node (Fit to view)
+  const handleFitToView = () => {
+    if (!containerRef.current) return;
+    const containerWidth = containerRef.current.clientWidth - 60;
+    const maxNodeX = Math.max(...nodes.map(n => getNodePos(n).x + NODE_WIDTH + 80), 1200);
+    const fitZoom = Math.min(1, Math.max(0.5, containerWidth / maxNodeX));
+    setZoomLevel(Number(fitZoom.toFixed(2)));
+  };
+
+  // Tự động căn chỉnh khi danh sách nodes thay đổi
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFitToView();
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [nodes.length]);
+
   const getNodeHeaderTheme = (type: WorkflowNodeType) => {
     switch (type) {
       case 'trigger':
@@ -167,9 +190,9 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   };
 
   // Tính toán kích thước canvas dựa trên vị trí các node
-  const allX = nodes.map(n => getNodePos(n).x + NODE_WIDTH + 180);
-  const allY = nodes.map(n => getNodePos(n).y + NODE_HEIGHT + 180);
-  const maxX = Math.max(...allX, 1400);
+  const allX = nodes.map(n => getNodePos(n).x + NODE_WIDTH + 200);
+  const allY = nodes.map(n => getNodePos(n).y + NODE_HEIGHT + 200);
+  const maxX = Math.max(...allX, 1600);
   const maxY = Math.max(...allY, 650);
 
   // Tạo danh sách đường nối (edges)
@@ -243,51 +266,113 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
   });
 
   return (
-    <div className="relative w-full rounded-3xl border border-black/[0.08] bg-[#F9FAFB] overflow-hidden shadow-xs">
-      {/* Canvas Toolbars */}
-      <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-black/[0.08] shadow-xs text-xs font-semibold text-neutral-600">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span>Sơ Đồ Tự Động Hóa (Canvas)</span>
-        <span className="text-neutral-300">|</span>
-        <span className="text-neutral-500">{nodes.length} Nodes</span>
-        <span className="text-neutral-300">|</span>
-        <span className="text-blue-600 font-bold flex items-center gap-1 text-[11px]">
-          <Move className="w-3 h-3" />
-          Kéo thả node tự do
-        </span>
-      </div>
+    <div className="relative w-full rounded-3xl border border-black/[0.08] bg-[#F9FAFB] overflow-hidden shadow-xs flex flex-col">
+      {/* Top Action & Palette Bar */}
+      <div className="z-20 bg-white/95 backdrop-blur-md px-4 py-2.5 border-b border-black/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
+        {/* Left: Info & Nodes Count */}
+        <div className="flex items-center gap-2 font-semibold text-neutral-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="font-extrabold text-neutral-900">Sơ Đồ Workflow:</span>
+          <span className="bg-neutral-100 text-neutral-800 px-2 py-0.5 rounded-lg border border-black/[0.06] font-bold">
+            {nodes.length} Nodes
+          </span>
+          <span className="text-neutral-300">|</span>
+          <span className="text-neutral-500 text-[11px] hidden sm:inline">
+            🖱️ <strong>Nhấp đúp (Double-click)</strong> vào Node để mở Popup • Giữ chuột để kéo thả
+          </span>
+        </div>
 
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border border-black/[0.08] shadow-xs text-xs">
-        <button
-          onClick={() => setZoomLevel(prev => Math.min(prev + 0.1, 1.4))}
-          className="p-1.5 hover:bg-neutral-100 rounded-xl text-neutral-600 transition-colors"
-          title="Phóng to"
-        >
-          <ZoomIn className="w-4 h-4" />
-        </button>
-        <span className="text-[11px] font-mono font-bold text-neutral-500 px-1">
-          {Math.round(zoomLevel * 100)}%
-        </span>
-        <button
-          onClick={() => setZoomLevel(prev => Math.max(prev - 0.1, 0.7))}
-          className="p-1.5 hover:bg-neutral-100 rounded-xl text-neutral-600 transition-colors"
-          title="Thu nhỏ"
-        >
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => setZoomLevel(1)}
-          className="p-1.5 hover:bg-neutral-100 rounded-xl text-neutral-600 transition-colors"
-          title="Đặt lại tỉ lệ (100%)"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
+        {/* Center: Add Specific Node Type Palette */}
+        {onAddSpecificNode && (
+          <div className="flex flex-wrap items-center gap-1.5 bg-neutral-50 p-1 rounded-xl border border-black/[0.06]">
+            <span className="text-[10px] font-bold text-neutral-400 px-1 uppercase tracking-wider">
+              Thêm Node:
+            </span>
+            <button
+              onClick={() => onAddSpecificNode('trigger')}
+              className="px-2 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg font-bold flex items-center gap-1 text-[10px] transition-colors"
+              title="Thêm điểm kích hoạt Pipeline"
+            >
+              <Sparkles className="w-3 h-3 text-purple-600" /> + Trigger
+            </button>
+            <button
+              onClick={() => onAddSpecificNode('delay')}
+              className="px-2 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg font-bold flex items-center gap-1 text-[10px] transition-colors"
+              title="Thêm bước chờ thời gian"
+            >
+              <Clock className="w-3 h-3 text-sky-600" /> + Delay
+            </button>
+            <button
+              onClick={() => onAddSpecificNode('action')}
+              className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg font-bold flex items-center gap-1 text-[10px] transition-colors"
+              title="Thêm hành động gửi tin Zalo/SMS"
+            >
+              <Send className="w-3 h-3 text-emerald-600" /> + Action
+            </button>
+            <button
+              onClick={() => onAddSpecificNode('condition')}
+              className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg font-bold flex items-center gap-1 text-[10px] transition-colors"
+              title="Thêm rẽ nhánh điều kiện If/Else"
+            >
+              <GitFork className="w-3 h-3 text-amber-600" /> + Condition
+            </button>
+            <button
+              onClick={() => onAddSpecificNode('notification')}
+              className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg font-bold flex items-center gap-1 text-[10px] transition-colors"
+              title="Thêm task giao việc cho Sales"
+            >
+              <Bell className="w-3 h-3 text-rose-600" /> + Task
+            </button>
+            <button
+              onClick={() => onAddSpecificNode('end')}
+              className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-neutral-300 rounded-lg font-bold flex items-center gap-1 text-[10px] transition-colors"
+              title="Thêm kết thúc luồng"
+            >
+              <CheckCircle2 className="w-3 h-3 text-neutral-600" /> + End
+            </button>
+          </div>
+        )}
+
+        {/* Right: Zoom & Fit to Screen Controls */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={handleFitToView}
+            className="px-2.5 py-1 bg-white hover:bg-neutral-100 border border-black/[0.08] text-neutral-700 rounded-xl font-bold flex items-center gap-1 text-[11px] shadow-xs transition-colors"
+            title="Tự động thu phóng để nhìn thấy toàn bộ tất cả các Node"
+          >
+            <Maximize className="w-3.5 h-3.5 text-blue-600" />
+            Xem Toàn Bộ ({nodes.length} Nodes)
+          </button>
+
+          <div className="flex items-center bg-white border border-black/[0.08] rounded-xl p-0.5 shadow-xs">
+            <button
+              onClick={() => setZoomLevel(prev => Math.min(prev + 0.1, 1.4))}
+              className="p-1 hover:bg-neutral-100 rounded-lg text-neutral-600 transition-colors"
+              title="Phóng to"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-[10px] font-mono font-bold text-neutral-600 px-1.5">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <button
+              onClick={() => setZoomLevel(prev => Math.max(prev - 0.1, 0.4))}
+              className="p-1 hover:bg-neutral-100 rounded-lg text-neutral-600 transition-colors"
+              title="Thu nhỏ"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Main Interactive Canvas Area */}
-      <div className="overflow-auto custom-scrollbar p-6 min-h-[580px] max-h-[720px] select-none">
+      <div
+        ref={containerRef}
+        className="overflow-auto custom-scrollbar p-6 min-h-[580px] max-h-[720px] select-none flex-1"
+      >
         <div
-          className="relative transition-transform duration-100 origin-top-left"
+          className="relative transition-transform duration-75 origin-top-left"
           style={{
             width: `${maxX}px`,
             height: `${maxY}px`,
@@ -406,7 +491,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
             })}
           </svg>
 
-          {/* Node Cards Rendering (Có thể kéo thả di chuyển) */}
+          {/* Node Cards Rendering (Kéo thả thoải mái - Double-click mới mở Popup) */}
           {nodes.map(node => {
             const pos = getNodePos(node);
             const theme = getNodeHeaderTheme(node.type);
@@ -431,9 +516,8 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                   };
                   setDraggingNodeId(node.id);
                 }}
-                onClick={() => {
-                  // Nếu là thao tác kéo chuột thì không mở modal cấu hình
-                  if (dragRef.current?.hasMoved) return;
+                onDoubleClick={e => {
+                  e.stopPropagation();
                   onSelectNode(node);
                 }}
                 style={{
@@ -448,6 +532,7 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                     ? theme.activeRing + ' shadow-xl scale-105 z-30'
                     : 'border-black/[0.1] hover:shadow-lg ' + theme.borderHover + ' z-10'
                 }`}
+                title="Double-click (nhấp đúp) để chỉnh sửa • Bấm giữ để kéo di chuyển"
               >
                 {/* Node Header */}
                 <div className="p-3 border-b border-black/[0.04] flex items-center justify-between bg-neutral-50/70 rounded-t-2xl">
@@ -470,10 +555,10 @@ export const NodeCanvas: React.FC<NodeCanvasProps> = ({
                       e.stopPropagation();
                       onSelectNode(node);
                     }}
-                    className="w-5 h-5 rounded-md hover:bg-neutral-200 text-neutral-400 hover:text-neutral-900 flex items-center justify-center transition-colors"
-                    title="Cấu hình bước này (mở popup)"
+                    className="w-6 h-6 rounded-lg hover:bg-neutral-200 text-neutral-400 hover:text-neutral-900 flex items-center justify-center transition-colors"
+                    title="Cấu hình bước này (Click hoặc Double click)"
                   >
-                    <Settings className="w-3 h-3" />
+                    <Settings className="w-3.5 h-3.5" />
                   </button>
                 </div>
 

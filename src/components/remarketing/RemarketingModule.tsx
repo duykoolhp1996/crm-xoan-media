@@ -200,6 +200,89 @@ export const RemarketingModule: React.FC = () => {
     showToast('Đã thêm bước mới. Vui lòng thiết lập thông số trong popup cấu hình.');
   };
 
+  // Thêm nhanh một node mới theo loại (Trigger, Delay, Action, Condition, Notification, End)
+  const handleAddNewNodeOfType = (type: WorkflowNode['type']) => {
+    if (!currentWorkflow) return;
+
+    const newId = `node-${Date.now()}`;
+    const existingNodes = currentWorkflow.nodes;
+
+    // Tính toán tọa độ đặt node thông minh
+    const lastNode = existingNodes[existingNodes.length - 1];
+    const newX = lastNode?.position ? lastNode.position.x + 280 : 50 + existingNodes.length * 280;
+    const newY = lastNode?.position ? lastNode.position.y : 180;
+
+    let title = 'Bước Mới';
+    let subtitle = '';
+    let description = '';
+    let config: any = {};
+
+    switch (type) {
+      case 'trigger':
+        title = 'Sự Kiện Kích Hoạt Mới';
+        subtitle = 'Lắng nghe sự kiện';
+        description = 'Kích hoạt khi có thay đổi trạng thái Pipeline hoặc khách hàng mới';
+        break;
+      case 'delay':
+        title = 'Chờ 24 Giờ';
+        subtitle = 'Thời gian đếm ngược';
+        description = 'Tạm dừng quy trình và chờ khung giờ vàng hoạt động';
+        config = { delayHours: 24 };
+        break;
+      case 'action':
+        title = 'Gửi Tin Nhắn Chăm Sóc';
+        subtitle = 'Zalo OA / SMS';
+        description = 'Tự động gửi ưu đãi kỷ yếu hoặc portfolio ảnh mẫu cho khách';
+        config = { channel: 'Zalo', templateContent: 'Chào {ten_khach}! Xoăn Media gửi ưu đãi kỷ yếu đặc biệt cho lớp {lop}...' };
+        break;
+      case 'condition':
+        title = 'Khách Có Trả Lời Tin?';
+        subtitle = 'Rẽ nhánh If/Else';
+        description = 'Kiểm tra phản hồi của khách để chuyển tiếp nhánh Đúng (YES) hoặc Sai (NO)';
+        config = { conditionField: 'customer_replied', conditionOperator: 'is_true' };
+        break;
+      case 'notification':
+        title = 'Tạo Task: Sales Gọi Điện';
+        subtitle = 'Nhắc việc CRM';
+        description = 'Tự động giao việc trực tiếp cho nhân viên Sales phụ trách gọi điện tư vấn';
+        config = { actionType: 'create_task', assignedRole: 'Sales Tư Vấn', taskTitle: 'Gọi điện chốt lịch cho lớp {lop}' };
+        break;
+      case 'end':
+        title = 'Hoàn Tất Quy Trình';
+        subtitle = 'Mục tiêu hoàn thành';
+        description = 'Khách hàng hoàn tất kịch bản hoặc chuyển sang giai đoạn tiếp theo';
+        break;
+    }
+
+    const newNode: WorkflowNode = {
+      id: newId,
+      type,
+      title,
+      subtitle,
+      description,
+      config,
+      position: { x: newX, y: newY },
+      stats: { processedCount: 0, successRate: 100 }
+    };
+
+    // Tự động nối dây từ node trước nếu chưa có kết nối
+    let updatedNodes = [...existingNodes];
+    if (lastNode && lastNode.type !== 'end' && lastNode.type !== 'condition' && !lastNode.next) {
+      updatedNodes = updatedNodes.map(n => (n.id === lastNode.id ? { ...n, next: newId } : n));
+    }
+
+    const updatedWf: RemarketingWorkflow = {
+      ...currentWorkflow,
+      nodes: [...updatedNodes, newNode],
+      updatedAt: new Date().toISOString().slice(0, 10)
+    };
+
+    updateWorkflow(updatedWf);
+    setSelectedNode(newNode);
+    setIsDrawerOpen(true);
+    showToast(`Đã thêm bước "${title}" vào sơ đồ. Đang mở Popup cấu hình.`);
+  };
+
   // Tạo workflow mới
   const handleCreateWorkflow = (e: React.FormEvent) => {
     e.preventDefault();
@@ -893,7 +976,7 @@ export const RemarketingModule: React.FC = () => {
                 </div>
               </div>
 
-              {/* Core Interactive Node Canvas with Draggable Nodes */}
+              {/* Core Interactive Node Canvas with Draggable Nodes & Palette */}
               <NodeCanvas
                 nodes={currentWorkflow.nodes}
                 activeNodeId={activeSimNodeId}
@@ -903,17 +986,19 @@ export const RemarketingModule: React.FC = () => {
                 }}
                 onAddNodeAfter={handleAddNodeAfter}
                 onUpdateNodePosition={handleUpdateNodePosition}
+                onAddSpecificNode={handleAddNewNodeOfType}
               />
 
               {/* Quick Guidance Box */}
               <div className="bg-blue-50/70 border border-blue-200 p-4 rounded-2xl text-xs text-blue-900 flex items-start gap-3">
                 <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <div className="space-y-0.5">
-                  <p className="font-bold">Hướng dẫn tùy chỉnh sơ đồ Node Workflow:</p>
+                  <p className="font-bold">Hướng dẫn thao tác với sơ đồ Node Workflow:</p>
                   <p className="text-[11px] text-blue-700 leading-relaxed">
-                    • <strong>Kéo thả node:</strong> Bấm giữ chuột trên bất kỳ Node nào để kéo & thả di chuyển tự do trên canvas, các đường dây nối sẽ tự động uốn theo.
-                    <br />• <strong>Chỉnh sửa nội dung:</strong> Bấm vào Node để mở Popup cấu hình thời gian chờ, tin nhắn Zalo/SMS hoặc rẽ nhánh điều kiện If/Else.
-                    <br />• <strong>Thêm bước tiếp theo:</strong> Bấm vào vòng tròn cổng kết nối màu xanh ở cạnh phải của mỗi Node.
+                    • <strong>Kéo thả di chuyển:</strong> Bấm giữ chuột trên bất kỳ Node nào để kéo & thả di chuyển tự do khắp canvas (không bị mở nhầm popup).
+                    <br />• <strong>Mở Popup cấu hình:</strong> <strong>Nhấp đúp (Double-click)</strong> vào Node hoặc bấm biểu tượng bánh răng <Settings className="w-3 h-3 inline text-neutral-600" /> để mở Popup chỉnh sửa thông số.
+                    <br />• <strong>Thêm bước mới:</strong> Bấm trực tiếp vào các nút trên thanh công cụ (+ Trigger, + Delay, + Action, + Condition, + Task, + End) hoặc bấm cổng tròn màu xanh của Node.
+                    <br />• <strong>Xem toàn bộ nodes:</strong> Bấm nút "Xem Toàn Bộ ({currentWorkflow.nodes.length} Nodes)" để tự động thu phóng nhìn trọn vẹn toàn bộ quy trình.
                   </p>
                 </div>
               </div>
@@ -1023,7 +1108,7 @@ export const RemarketingModule: React.FC = () => {
                 </div>
               </div>
 
-              {/* Modal Body: Interactive Node Canvas with Drag & Drop */}
+              {/* Modal Body: Interactive Node Canvas with Drag & Drop & Palette */}
               <div className="flex-1 overflow-hidden p-4 bg-[#F9FAFB]">
                 <NodeCanvas
                   nodes={currentWorkflow.nodes}
@@ -1034,6 +1119,7 @@ export const RemarketingModule: React.FC = () => {
                   }}
                   onAddNodeAfter={handleAddNodeAfter}
                   onUpdateNodePosition={handleUpdateNodePosition}
+                  onAddSpecificNode={handleAddNewNodeOfType}
                 />
               </div>
 
@@ -1042,7 +1128,7 @@ export const RemarketingModule: React.FC = () => {
                 <div className="flex items-center gap-2 text-[11px]">
                   <Info className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>
-                    💡 <strong>Mẹo:</strong> Bấm giữ chuột trên bất kỳ Node nào để <strong>kéo & thả di chuyển tự do</strong>. Bấm vào Node để <strong>mở Popup cấu hình</strong>.
+                    💡 <strong>Mẹo:</strong> <strong>Nhấp đúp (Double-click)</strong> vào Node để mở Popup cấu hình. Bấm giữ chuột để kéo thả di chuyển tự do.
                   </span>
                 </div>
 
