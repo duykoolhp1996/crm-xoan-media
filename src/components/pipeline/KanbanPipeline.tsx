@@ -11,13 +11,16 @@ import {
   UserX,
   FileText,
   QrCode,
-  Calendar
+  Calendar,
+  FolderOpen,
+  ExternalLink
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
+import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 
 export const KanbanPipeline: React.FC = () => {
   const {
@@ -36,6 +39,7 @@ export const KanbanPipeline: React.FC = () => {
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
   const [scheduleBookingCustomer, setScheduleBookingCustomer] = useState<Customer | null>(null);
+  const [uploadDriveCustomer, setUploadDriveCustomer] = useState<Customer | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
 
   const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
@@ -153,16 +157,25 @@ export const KanbanPipeline: React.FC = () => {
         }
       }
 
-      // Nếu kéo thả sang "Hoàn thành" từ "Đã bàn giao" mà còn tiền chưa tất toán
+      // BẮT BUỘC: Muốn chuyển sang "Đã chụp" PHẢI có Link Google Drive!
+      if (targetStage === 'Đã chụp') {
+        const cust = customers.find(c => c.id === customerId);
+        if (cust) {
+          // Tự động mở modal nộp Link Google Drive của Photo
+          setUploadDriveCustomer(cust);
+          setDraggedCustomerId(null);
+          return;
+        }
+      }
+
+      // BẮT BUỘC: Muốn chuyển sang "Hoàn thành" PHẢI nhập và xác nhận toàn bộ số tiền!
       if (targetStage === 'Hoàn thành') {
         const cust = customers.find(c => c.id === customerId);
-        if (cust && cust.pipelineStage === 'Đã bàn giao') {
-          const remaining = (cust.totalRevenue || cust.expectedBudget || 0) - (cust.paidAmount || 0);
-          if (remaining > 0) {
-            setPaymentConfig({ customer: cust, mode: 'final' });
-            setDraggedCustomerId(null);
-            return;
-          }
+        if (cust) {
+          // Bắt buộc mở modal quyết toán để nhập toàn bộ số tiền
+          setPaymentConfig({ customer: cust, mode: 'final' });
+          setDraggedCustomerId(null);
+          return;
         }
       }
 
@@ -354,19 +367,78 @@ export const KanbanPipeline: React.FC = () => {
                         </>
                       )}
 
-                      {/* Badge Ngày Chụp Đã Chốt (Nếu đang ở Đã Booking) */}
+                      {/* Badge Ngày Chụp Đã Chốt & Nút Bàn Giao Drive (Nếu đang ở Đã Booking) */}
                       {cust.pipelineStage === 'Đã Booking' && (
-                        <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                          <span className="text-purple-900 font-semibold flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                            Lịch chụp:
-                          </span>
-                          <span className="font-extrabold text-purple-950 text-xs bg-white px-2 py-0.5 rounded-lg border border-purple-200">
-                            {cust.expectedShootDate
-                              ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN')
-                              : 'Chưa có ngày'}
-                          </span>
-                        </div>
+                        <>
+                          <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                            <span className="text-purple-900 font-semibold flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              Lịch chụp:
+                            </span>
+                            <span className="font-extrabold text-purple-950 text-xs bg-white px-2 py-0.5 rounded-lg border border-purple-200">
+                              {cust.expectedShootDate
+                                ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN')
+                                : 'Chưa có ngày'}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUploadDriveCustomer(cust);
+                            }}
+                            className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-blue-600 hover:bg-blue-700 text-white border border-blue-700"
+                            title="Bắt buộc nộp Link Google Drive ảnh gốc để chuyển sang Đã chụp"
+                          >
+                            <FolderOpen className="w-3.5 h-3.5 text-white" />
+                            <span>📸 Nộp Link Drive (Đã Chụp)</span>
+                          </button>
+                        </>
+                      )}
+
+                      {/* Badge Link Google Drive (Nếu đang ở Đã chụp hoặc Đang hậu kỳ) */}
+                      {(cust.pipelineStage === 'Đã chụp' || cust.pipelineStage === 'Đang hậu kỳ') && (
+                        (cust.rawDriveUrl || cust.driveUrl) ? (
+                          <div className="mt-2 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                            <a
+                              href={cust.rawDriveUrl || cust.driveUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 truncate hover:underline"
+                              title={cust.rawDriveUrl || cust.driveUrl}
+                            >
+                              <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                              <span className="truncate">Drive Ảnh Gốc</span>
+                              <ExternalLink className="w-3 h-3 shrink-0" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setUploadDriveCustomer(cust);
+                              }}
+                              className="text-[10px] text-blue-700 hover:text-blue-900 font-bold px-2 py-0.5 rounded-lg bg-white border border-blue-200 shrink-0 cursor-pointer shadow-2xs ml-1"
+                              title="Cập nhật lại Link Google Drive"
+                            >
+                              Đổi link
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setUploadDriveCustomer(cust);
+                            }}
+                            className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 animate-pulse"
+                            title="CẢNH BÁO: Chưa có Link Google Drive ảnh gốc! Nhấn để nộp ngay"
+                          >
+                            <FolderOpen className="w-3.5 h-3.5 text-rose-600" />
+                            <span>⚠️ Thiếu Link Drive! Nộp Ngay</span>
+                          </button>
+                        )
                       )}
 
                       {/* 1. Nút Tạo / Chỉnh Sửa Báo Giá: CHỈ hiển thị ở Đang tư vấn, Đã gửi báo giá, Đang thương lượng */}
@@ -405,20 +477,33 @@ export const KanbanPipeline: React.FC = () => {
                         </button>
                       )}
 
-                      {/* 3. Nút Tạo QR Thanh Toán Hết (Tất toán): CHỈ hiển thị ở Đã bàn giao */}
-                      {cust.pipelineStage === 'Đang hậu kỳ' ? null : cust.pipelineStage === 'Đã bàn giao' && (
+                      {/* 3. Nút Nhập Toàn Bộ Tiền & Quyết Toán: CHỈ hiển thị ở Đã bàn giao */}
+                      {cust.pipelineStage === 'Đã bàn giao' && (
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setPaymentConfig({ customer: cust, mode: 'final' });
                           }}
-                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-gradient-to-r from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-950 border border-teal-300"
-                          title="Tất toán: Tạo mã VietQR thanh toán toàn bộ số tiền còn lại (Tổng bill - cọc)"
+                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-teal-600 hover:bg-teal-700 text-white border border-teal-700"
+                          title="Bắt buộc nhập toàn bộ số tiền hợp đồng để chuyển sang Hoàn thành"
                         >
-                          <QrCode className="w-3.5 h-3.5 text-teal-700" />
-                          <span>Tạo QR Thanh Toán Hết</span>
+                          <QrCode className="w-3.5 h-3.5 text-white" />
+                          <span>💰 Nhập Toàn Bộ Tiền & Hoàn Thành</span>
                         </button>
+                      )}
+
+                      {/* 4. Badge Đã Thu Đủ 100% Tiền: CHỈ hiển thị ở Hoàn thành */}
+                      {cust.pipelineStage === 'Hoàn thành' && (
+                        <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-300 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                          <span className="text-emerald-900 font-semibold flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            Đã thu đủ 100%:
+                          </span>
+                          <span className="font-extrabold text-emerald-950 text-xs">
+                            {(cust.totalRevenue || cust.paidAmount || 0).toLocaleString('vi-VN')} đ
+                          </span>
+                        </div>
                       )}
 
                       {/* Nhanh: chuyển stage */}
@@ -477,6 +562,13 @@ export const KanbanPipeline: React.FC = () => {
         customer={scheduleBookingCustomer}
         isOpen={Boolean(scheduleBookingCustomer)}
         onClose={() => setScheduleBookingCustomer(null)}
+      />
+
+      {/* Modal Bắt Buộc Nộp Link Google Drive Khi Sang Đã Chụp */}
+      <UploadPhotoDriveModal
+        customer={uploadDriveCustomer}
+        isOpen={Boolean(uploadDriveCustomer)}
+        onClose={() => setUploadDriveCustomer(null)}
       />
     </div>
   );

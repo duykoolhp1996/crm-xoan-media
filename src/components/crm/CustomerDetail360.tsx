@@ -24,11 +24,15 @@ import {
   ChevronDown,
   Info,
   DollarSign,
-  Sparkles
+  Sparkles,
+  FolderOpen,
+  ExternalLink,
+  CheckCircle2
 } from 'lucide-react';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
+import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -59,6 +63,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showUploadDriveModal, setShowUploadDriveModal] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'deposit' | 'final'>('deposit');
   const [lostReason, setLostReason] = useState('Giá cao hơn ngân sách dự kiến của lớp');
   const [customLostNote, setCustomLostNote] = useState('');
@@ -274,20 +279,67 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
               </button>
             )}
 
-            {/* Nút Xem / Đổi Lịch Chụp: Hiển thị ở Đã Booking */}
+            {/* Nút Xem / Đổi Lịch Chụp & Nút Bàn Giao Drive: Hiển thị ở Đã Booking */}
             {customer.pipelineStage === 'Đã Booking' && (
-              <button
-                type="button"
-                onClick={() => setShowScheduleModal(true)}
-                className="px-3.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
-                title="Xem hoặc đổi ngày chụp kỷ yếu"
-              >
-                <Calendar className="w-3.5 h-3.5 text-purple-600" />
-                <span>📅 {customer.expectedShootDate ? `Lịch: ${new Date(customer.expectedShootDate).toLocaleDateString('vi-VN')}` : 'Đổi Lịch Chụp'}</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(true)}
+                  className="px-3.5 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                  title="Xem hoặc đổi ngày chụp kỷ yếu"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-purple-600" />
+                  <span>📅 {customer.expectedShootDate ? `Lịch: ${new Date(customer.expectedShootDate).toLocaleDateString('vi-VN')}` : 'Đổi Lịch Chụp'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowUploadDriveModal(true)}
+                  className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                  title="Bắt buộc nộp Link Google Drive ảnh gốc để chuyển sang Đã chụp"
+                >
+                  <FolderOpen className="w-3.5 h-3.5 text-white" />
+                  <span>📸 Nộp Link Drive (Đã Chụp)</span>
+                </button>
+              </>
             )}
 
-            {/* Nút Tạo QR Thanh Toán Hết: CHỈ hiển thị ở Đã bàn giao */}
+            {/* Nút Xem / Đổi Link Google Drive: Hiển thị ở Đã chụp & Đang hậu kỳ */}
+            {(customer.pipelineStage === 'Đã chụp' || customer.pipelineStage === 'Đang hậu kỳ') && (
+              <div className="flex items-center gap-1.5">
+                {(customer.rawDriveUrl || customer.driveUrl) ? (
+                  <a
+                    href={customer.rawDriveUrl || customer.driveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+                    title="Mở thư mục Google Drive ảnh gốc"
+                  >
+                    <FolderOpen className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Mở Drive ↗</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowUploadDriveModal(true)}
+                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs animate-pulse cursor-pointer"
+                  >
+                    <FolderOpen className="w-3.5 h-3.5" />
+                    <span>⚠️ Nộp Link Drive</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowUploadDriveModal(true)}
+                  className="px-2 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold"
+                  title="Cập nhật / Đổi Link Google Drive"
+                >
+                  Đổi
+                </button>
+              </div>
+            )}
+
+            {/* Nút Quyết Toán Toàn Bộ Tiền & Hoàn Thành: CHỈ hiển thị ở Đã bàn giao */}
             {customer.pipelineStage === 'Đã bàn giao' && (
               <button
                 type="button"
@@ -296,10 +348,10 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                   setShowDepositModal(true);
                 }}
                 className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white border border-teal-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
-                title="Tất toán: Tạo mã VietQR thanh toán hết số tiền còn lại (Tổng bill - cọc)"
+                title="Bắt buộc nhập toàn bộ số tiền để chuyển sang Hoàn thành"
               >
                 <QrCode className="w-3.5 h-3.5 text-white" />
-                <span>Tạo QR Thanh Toán Hết</span>
+                <span>💰 Quyết Toán Đủ Tiền & Hoàn Thành</span>
               </button>
             )}
 
@@ -736,14 +788,81 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       📅 Ngày chụp đã chốt: <strong className="text-purple-950 font-black text-sm">{customer.expectedShootDate ? new Date(customer.expectedShootDate).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</strong> • Địa điểm: <strong>{customer.shootingLocations?.join(', ') || customer.schoolName}</strong>
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowScheduleModal(true)}
-                    className="w-full sm:w-auto px-4 py-2 bg-white hover:bg-purple-50 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 shrink-0 cursor-pointer"
-                  >
-                    <Calendar className="w-3.5 h-3.5 text-purple-600" />
-                    <span>📅 Đổi Ngày Chụp</span>
-                  </button>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setShowScheduleModal(true)}
+                      className="flex-1 sm:flex-initial px-3.5 py-2 bg-white hover:bg-purple-50 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 shrink-0 cursor-pointer"
+                    >
+                      <Calendar className="w-3.5 h-3.5 text-purple-600" />
+                      <span>📅 Đổi Ngày Chụp</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowUploadDriveModal(true)}
+                      className="flex-1 sm:flex-initial px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                    >
+                      <FolderOpen className="w-3.5 h-3.5" />
+                      <span>📸 Nộp Drive (Đã Chụp)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Banner Giai Đoạn Đã Chụp: Bàn giao file gốc & Link Google Drive */}
+              {(customer.pipelineStage === 'Đã chụp' || customer.pipelineStage === 'Đang hậu kỳ') && (
+                <div className="p-4 bg-gradient-to-r from-blue-50 via-cyan-50 to-indigo-50 border border-blue-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0" />
+                      <span className="text-xs font-bold text-blue-950 uppercase tracking-wide">
+                        {customer.pipelineStage === 'Đã chụp' ? 'Đã Hoàn Thành Buổi Chụp – Đã Có Link Drive' : 'Đang Hậu Kỳ & Blend Màu'} (Lớp {customer.className})
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-700 flex items-center gap-1 flex-wrap">
+                      <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                      <span>Link Google Drive:</span>
+                      {(customer.rawDriveUrl || customer.driveUrl) ? (
+                        <a
+                          href={customer.rawDriveUrl || customer.driveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-700 font-extrabold underline hover:text-blue-900 inline-flex items-center gap-1 truncate max-w-sm"
+                        >
+                          {customer.rawDriveUrl || customer.driveUrl}
+                          <ExternalLink className="w-3 h-3 inline shrink-0" />
+                        </a>
+                      ) : (
+                        <span className="text-rose-600 font-bold">⚠️ Chưa có link Drive!</span>
+                      )}
+                    </p>
+                    {customer.photoNotes && (
+                      <p className="text-[11px] text-neutral-600 italic">
+                        📝 Dặn dò từ Photo: "{customer.photoNotes}"
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    {(customer.rawDriveUrl || customer.driveUrl) && (
+                      <a
+                        href={customer.rawDriveUrl || customer.driveUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 sm:flex-initial px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5" />
+                        <span>Mở Google Drive</span>
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowUploadDriveModal(true)}
+                      className="flex-1 sm:flex-initial px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-800 border border-black/[0.08] rounded-xl text-xs font-semibold shadow-2xs"
+                    >
+                      {(customer.rawDriveUrl || customer.driveUrl) ? 'Đổi Link' : 'Nộp Link Drive'}
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -767,11 +886,32 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       setPaymentMode('final');
                       setShowDepositModal(true);
                     }}
-                    className="w-full sm:w-auto px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                    className="w-full sm:w-auto px-4 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
                   >
                     <QrCode className="w-3.5 h-3.5" />
-                    <span>Tạo QR Thanh Toán Hết</span>
+                    <span>💰 Nhập Đủ Tiền & Hoàn Thành</span>
                   </button>
+                </div>
+              )}
+
+              {/* Banner Giai Đoạn Hoàn Thành: Đã tất toán đủ 100% */}
+              {customer.pipelineStage === 'Hoàn thành' && (
+                <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50/60 to-white border border-emerald-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                      <span className="text-xs font-bold text-emerald-950 uppercase tracking-wide">
+                        Dự Án Kỷ Yếu Đã Hoàn Thành Trọn Gói (Lớp {customer.className})
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-700">
+                      Tổng doanh thu: <strong className="text-emerald-900 font-extrabold">{(customer.totalRevenue || customer.paidAmount || 0).toLocaleString('vi-VN')}đ</strong> • Đã thu đủ: <strong className="text-emerald-900 font-extrabold">{(customer.paidAmount || 0).toLocaleString('vi-VN')}đ (100%)</strong> • Công nợ: <strong className="text-emerald-700">0đ</strong>
+                    </p>
+                  </div>
+                  <div className="px-3.5 py-1.5 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-300 flex items-center gap-1.5 shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Đã Quyết Toán 100%</span>
+                  </div>
                 </div>
               )}
 
@@ -1293,15 +1433,62 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
 
           {/* Nút Xem / Đổi Lịch Chụp: Hiển thị ở Đã Booking */}
           {customer.pipelineStage === 'Đã Booking' && (
-            <button
-              type="button"
-              onClick={() => setShowScheduleModal(true)}
-              className="flex-1 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
-              title="Xem hoặc đổi ngày chụp kỷ yếu"
-            >
-              <Calendar className="w-3.5 h-3.5 text-purple-600" />
-              <span>📅 {customer.expectedShootDate ? `Lịch chụp: ${new Date(customer.expectedShootDate).toLocaleDateString('vi-VN')}` : 'Đổi Lịch Chụp'}</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setShowScheduleModal(true)}
+                className="flex-1 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                title="Xem hoặc đổi ngày chụp kỷ yếu"
+              >
+                <Calendar className="w-3.5 h-3.5 text-purple-600" />
+                <span>📅 {customer.expectedShootDate ? `Lịch: ${new Date(customer.expectedShootDate).toLocaleDateString('vi-VN')}` : 'Đổi Lịch Chụp'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowUploadDriveModal(true)}
+                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                title="Bắt buộc nộp Link Google Drive ảnh gốc để chuyển sang Đã chụp"
+              >
+                <FolderOpen className="w-3.5 h-3.5 text-white" />
+                <span>📸 Nộp Drive (Đã Chụp)</span>
+              </button>
+            </>
+          )}
+
+          {/* Nút Mở / Đổi Link Drive: Hiển thị ở Đã chụp & Đang hậu kỳ */}
+          {(customer.pipelineStage === 'Đã chụp' || customer.pipelineStage === 'Đang hậu kỳ') && (
+            <>
+              {(customer.rawDriveUrl || customer.driveUrl) ? (
+                <a
+                  href={customer.rawDriveUrl || customer.driveUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
+                  title="Mở Google Drive ảnh gốc"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" />
+                  <span>Mở Google Drive Ảnh Gốc ↗</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowUploadDriveModal(true)}
+                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95 animate-pulse"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" />
+                  <span>⚠️ Nộp Link Drive Ngay</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowUploadDriveModal(true)}
+                className="px-3.5 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-semibold transition-colors"
+                title="Đổi hoặc cập nhật Link Google Drive"
+              >
+                Đổi link
+              </button>
+            </>
           )}
 
           {/* Nút Tạo QR Thanh Toán Hết: CHỈ hiển thị ở Đã bàn giao */}
@@ -1424,6 +1611,13 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
         customer={customer}
         isOpen={showScheduleModal}
         onClose={() => setShowScheduleModal(false)}
+      />
+
+      {/* Modal Bắt Buộc Nộp Link Google Drive Khi Sang Đã Chụp */}
+      <UploadPhotoDriveModal
+        customer={customer}
+        isOpen={showUploadDriveModal}
+        onClose={() => setShowUploadDriveModal(false)}
       />
     </div>,
     document.body

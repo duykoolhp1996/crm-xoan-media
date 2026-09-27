@@ -79,6 +79,13 @@ export interface Customer {
   specialRequests?: string;
   notes?: string;
 
+  // Bàn giao Ảnh & Link Google Drive của Photo
+  rawDriveUrl?: string; // Link Google Drive ảnh gốc RAW/JPG buổi chụp
+  driveUrl?: string; // Alias link Google Drive chung
+  photoNotes?: string; // Lời dặn dò/ghi chú của Photo cho bộ phận Hậu Kỳ / Designer
+  shotDate?: string; // Ngày chụp thực tế hoàn thành
+  photoCount?: number; // Ước tính số lượng ảnh đã chụp (VD: 1200)
+
   // Nguồn Marketing
   source: LeadSource;
   campaignName?: string;
@@ -212,6 +219,12 @@ export interface Booking {
   // Trạng thái vận hành
   bookingStatus: BookingStatus;
   assignments: BookingAssignment;
+  
+  // Bàn giao Link Google Drive của Photo
+  rawDriveUrl?: string; // Link Google Drive ảnh gốc
+  driveUrl?: string; // Link Google Drive
+  photoNotes?: string; // Lời dặn dò của Photo cho bộ phận Hậu Kỳ
+  photoCount?: number; // Số lượng ảnh bàn giao
   
   notes?: string;
   createdAt: string;

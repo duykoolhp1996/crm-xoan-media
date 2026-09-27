@@ -24,6 +24,8 @@ import {
   DollarSign
 } from 'lucide-react';
 
+import { notifyFinalPaymentCompletedToZaloGroup } from '../../lib/zaloBotService';
+
 interface DepositQrModalProps {
   customer: Customer | null;
   isOpen: boolean;
@@ -37,14 +39,23 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
   onClose,
   mode
 }) => {
-  const { updateCustomer, addActivityLog, currentUser } = useApp();
+  const {
+    updateCustomer,
+    addActivityLog,
+    currentUser,
+    bookings,
+    updateBooking,
+    addNotification
+  } = useApp();
 
-  // Chế độ: 'final' (Tất toán đợt cuối khi Đã bàn giao) hoặc 'deposit' (Cọc giữ lịch khi Đang thương lượng)
+  // Chế độ: 'final' (Tất toán đợt cuối khi Đã bàn giao / Chuyển sang Hoàn thành) hoặc 'deposit' (Cọc giữ lịch khi Đang thương lượng)
   const isFinalPayment = mode ? mode === 'final' : (customer?.pipelineStage === 'Đã bàn giao');
 
   // Tổng kinh phí hợp đồng & số tiền đã thanh toán trước đó
-  const totalBudget = customer ? (customer.totalRevenue || customer.expectedBudget || 0) : 0;
+  const initialBudget = customer ? (customer.totalRevenue || customer.expectedBudget || 10000000) : 10000000;
+  const [finalContractBudget, setFinalContractBudget] = useState<number>(initialBudget);
   const paidSoFar = customer?.paidAmount || 0;
+  const totalBudget = isFinalPayment ? finalContractBudget : initialBudget;
   const remainingAmount = Math.max(0, totalBudget - paidSoFar);
 
   // Khởi tạo số tiền thanh toán
@@ -66,12 +77,13 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
   // Cập nhật lại số tiền thanh toán khi customer hoặc mode thay đổi
   useEffect(() => {
     if (customer) {
+      const initTotal = customer.totalRevenue || customer.expectedBudget || 10000000;
+      setFinalContractBudget(initTotal);
       if (isFinalPayment) {
-        const remaining = Math.max(0, (customer.totalRevenue || customer.expectedBudget || 0) - (customer.paidAmount || 0));
+        const remaining = Math.max(0, initTotal - (customer.paidAmount || 0));
         setPaymentAmount(remaining);
       } else {
-        const total = customer.totalRevenue || customer.expectedBudget || 10000000;
-        setPaymentAmount(Math.round((total * 0.3) / 10000) * 10000);
+        setPaymentAmount(Math.round((initTotal * 0.3) / 10000) * 10000);
       }
       setIsSuccess(false);
     }
@@ -187,30 +199,78 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
   // Xác nhận đã nhận tiền & cập nhật tiến trình
   const handleConfirmPayment = () => {
     if (paymentAmount <= 0) {
-      alert('Vui lòng nhập số tiền cọc lớn hơn 0đ để chuyển sang Đã đặt cọc!');
+      alert('Vui lòng nhập số tiền thanh toán lớn hơn 0đ!');
       return;
     }
 
-    const newPaidAmount = (customer.paidAmount || 0) + paymentAmount;
-    const targetStage: PipelineStage = isFinalPayment ? 'Hoàn thành' : 'Đã đặt cọc';
+    if (isFinalPayment) {
+      const finalRevenue = Math.max(finalContractBudget, paidSoFar + paymentAmount);
 
-    updateCustomer({
-      ...customer,
-      paidAmount: newPaidAmount,
-      pipelineStage: targetStage,
-      notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] ${isFinalPayment ? 'Đã tất toán toàn bộ' : 'Đã đặt cọc'} ${paymentAmount.toLocaleString('vi-VN')}đ qua QR MB Bank. ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
-      updatedAt: new Date().toISOString()
-    });
+      updateCustomer({
+        ...customer,
+        totalRevenue: finalRevenue,
+        paidAmount: finalRevenue, // Hoàn thành: Đã thu đủ 100% toàn bộ số tiền
+        pipelineStage: 'Hoàn thành',
+        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã tất toán toàn bộ hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ (Đợt cuối: ${paymentAmount.toLocaleString('vi-VN')}đ). ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
+        updatedAt: new Date().toISOString()
+      });
 
-    addActivityLog({
-      customerId: customer.id,
-      type: isFinalPayment ? 'delivered' : 'deposit_paid',
-      title: isFinalPayment ? 'Xác nhận tất toán hợp đồng thành công' : 'Xác nhận đặt cọc thành công',
-      description: isFinalPayment
-        ? `Khách đã thanh toán đủ số tiền còn lại ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Hợp đồng chuyển sang 'Hoàn thành'.`
-        : `Khách đã thanh toán cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Tiến trình chuyển sang 'Đã đặt cọc'.`,
-      performedByName: currentUser.name
-    });
+      // Đồng bộ đơn Booking sang Hoàn thành & Đã thanh toán đủ
+      const matchedBk = bookings.find(b => b.customerId === customer.id);
+      if (matchedBk) {
+        updateBooking({
+          ...matchedBk,
+          bookingStatus: 'Hoàn thành',
+          paymentStatus: 'Đã thanh toán đủ',
+          totalAmount: finalRevenue,
+          remainingAmount: 0
+        });
+      }
+
+      addActivityLog({
+        customerId: customer.id,
+        type: 'delivered',
+        title: '🎉 Quyết toán & Hoàn thành hợp đồng',
+        description: `Khách hàng ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% toàn bộ số tiền ${finalRevenue.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Hợp đồng chuyển sang 'Hoàn thành'.`,
+        performedByName: currentUser.name
+      });
+
+      // Bắn Zalo Bot thông báo tất toán & hoàn thành
+      notifyFinalPaymentCompletedToZaloGroup({
+        customer,
+        totalRevenue: finalRevenue,
+        paidAmount: finalRevenue,
+        depositAmount: paidSoFar,
+        finalPaidAmount: paymentAmount,
+        notes: customNote
+      }).catch(err => console.warn('[Zalo Bot] Lỗi gửi thông báo tất toán:', err));
+
+      // Chuông thông báo nội bộ
+      addNotification({
+        type: 'upcoming_booking',
+        title: `🎉 TẤT TOÁN XONG: ${customer.className}`,
+        message: `Lớp ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ. Dự án hoàn tất!`,
+        severity: 'info'
+      });
+    } else {
+      const newPaidAmount = (customer.paidAmount || 0) + paymentAmount;
+
+      updateCustomer({
+        ...customer,
+        paidAmount: newPaidAmount,
+        pipelineStage: 'Đã đặt cọc',
+        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã đặt cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua QR MB Bank. ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
+        updatedAt: new Date().toISOString()
+      });
+
+      addActivityLog({
+        customerId: customer.id,
+        type: 'deposit_paid',
+        title: 'Xác nhận đặt cọc thành công',
+        description: `Khách đã thanh toán cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Tiến trình chuyển sang 'Đã đặt cọc'.`,
+        performedByName: currentUser.name
+      });
+    }
 
     setIsSuccess(true);
     setTimeout(() => {
@@ -330,12 +390,47 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
               </div>
             </div>
 
+            {/* Nếu là Tất Toán Hoàn Thành: Cho phép nhập/chốt lại Tổng Giá Trị Hợp Đồng */}
+            {isFinalPayment && (
+              <div className="p-4 bg-teal-50/60 rounded-2xl border border-teal-200/90 shadow-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-extrabold text-teal-950 flex items-center gap-1.5">
+                    <DollarSign className="w-4 h-4 text-teal-700" />
+                    <span>Tổng Giá Trị Hợp Đồng Thực Tế (VNĐ)</span>
+                    <span className="text-teal-600 font-bold">* (Bắt buộc)</span>
+                  </label>
+                  <span className="text-[10px] text-teal-800 bg-teal-100 px-2 py-0.5 rounded-full font-bold">
+                    Tổng Bill Chốt
+                  </span>
+                </div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="50000"
+                    value={finalContractBudget}
+                    onChange={(e) => {
+                      const newTotal = Math.max(0, parseInt(e.target.value) || 0);
+                      setFinalContractBudget(newTotal);
+                      setPaymentAmount(Math.max(0, newTotal - paidSoFar));
+                    }}
+                    className="w-full text-lg font-black text-teal-950 px-4 py-2 rounded-xl border border-teal-300 focus:outline-none focus:border-teal-600 bg-white font-mono"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-neutral-400 text-xs">
+                    VNĐ
+                  </span>
+                </div>
+                <p className="text-[10px] text-teal-700">
+                  💡 Nhập tổng kinh phí trọn gói của lớp (đã bao gồm phát sinh nếu có) để chốt đúng doanh thu khi Hoàn thành.
+                </p>
+              </div>
+            )}
+
             {/* Thiết lập số tiền thanh toán */}
             <div className="p-4 bg-white rounded-2xl border border-black/[0.06] shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
                   <CreditCard className={`w-4 h-4 ${isFinalPayment ? 'text-teal-600' : 'text-emerald-600'}`} />
-                  <span>{isFinalPayment ? 'Số Tiền Thanh Toán Tất Toán (VNĐ)' : 'Số Tiền Cọc Đợt 1 (VNĐ)'}</span>
+                  <span>{isFinalPayment ? 'Số Tiền Thanh Toán Tất Toán Đợt Cuối (VNĐ)' : 'Số Tiền Cọc Đợt 1 (VNĐ)'}</span>
                 </label>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                   isFinalPayment ? 'text-teal-700 bg-teal-50' : 'text-emerald-700 bg-emerald-50'
@@ -576,9 +671,9 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
                 <CheckCircle2 className="w-4 h-4" />
                 <span>
                   {paymentAmount <= 0
-                    ? '⚠️ Vui lòng nhập số tiền cọc > 0đ'
+                    ? '⚠️ Vui lòng nhập số tiền thanh toán > 0đ'
                     : isFinalPayment
-                    ? `Xác Nhận Đã Thanh Toán Đủ ${paymentAmount.toLocaleString('vi-VN')}đ`
+                    ? `Xác Nhận Đã Thu Đủ Toàn Bộ ${(paidSoFar + paymentAmount).toLocaleString('vi-VN')}đ & Hoàn Thành`
                     : `Xác Nhận Đã Nhận Cọc ${paymentAmount.toLocaleString('vi-VN')}đ & Chuyển Sang "Đã Đặt Cọc"`}
                 </span>
               </button>

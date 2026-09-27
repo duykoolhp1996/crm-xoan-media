@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   X,
@@ -413,10 +414,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, emb
     );
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div onClick={onClose} className="fixed inset-0 bg-neutral-900/60 backdrop-blur-md" />
       {content}
-    </div>
+    </div>,
+    document.body
   );
 };

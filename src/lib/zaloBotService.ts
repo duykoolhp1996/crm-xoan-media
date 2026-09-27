@@ -473,6 +473,127 @@ export const notifyShootDateScheduledToZaloGroup = async (params: {
   });
 };
 
+/**
+ * Tự động gửi thông báo hoàn thành buổi chụp & bàn giao Link Google Drive (Đã chụp) vào nhóm Zalo
+ */
+export const notifyShootingCompletedToZaloGroup = async (params: {
+  customer: {
+    name: string;
+    phone: string;
+    className: string;
+    schoolName: string;
+    city?: string;
+    servicePackageName?: string;
+    assignedSalesName?: string;
+    shootingLocations?: string[];
+    [key: string]: any;
+  };
+  rawDriveUrl: string;
+  photographerName?: string;
+  photoCount?: number;
+  notes?: string;
+}): Promise<{ success: boolean; message: string }> => {
+  const { customer, rawDriveUrl, photographerName, photoCount, notes } = params;
+  const config = getZaloBotConfig();
+
+  const text = `🎉 <b>[CRM XOĂN MEDIA – HOÀN THÀNH BUỔI CHỤP & BÀN GIAO DRIVE]</b>
+
+━━━━━━━━━━━━━━━━━━━━
+
+📸 <b>TRẠNG THÁI:</b> ✅ <b>ĐÃ CHỤP – BÀN GIAO FILE GỐC</b>
+
+🎓 <b>Lớp:</b> ${customer.className}
+🏫 <b>Trường:</b> ${customer.schoolName}${customer.city ? ` – ${customer.city}` : ''}
+👤 <b>Khách hàng:</b> ${customer.name}
+📞 <b>SĐT:</b> ${customer.phone}
+
+📷 <b>Photo bàn giao:</b> <b>${photographerName || 'Thợ chụp Xoăn Media'}</b>
+${photoCount ? `📦 <b>Số lượng file:</b> ~${photoCount.toLocaleString('vi-VN')} ảnh\n` : ''}📁 <b>LINK GOOGLE DRIVE ẢNH GỐC:</b>
+👉 ${rawDriveUrl}
+${notes ? `\n📝 <b>Ghi chú từ Photo:</b> <i>${notes}</i>\n` : ''}
+━━━━━━━━━━━━━━━━━━━━
+
+⏰ <i>${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} – ${new Date().toLocaleDateString('vi-VN')}</i>
+
+👏 Chúc mừng Ekip đã hoàn thành buổi chụp xuất sắc! 🌟
+
+👉 <b>Bộ Phận Hậu Kỳ / Designer:</b> Vui lòng truy cập Link Google Drive để bắt đầu kiểm tra file, lọc ảnh và triển khai blend màu theo tiến độ.
+
+🚀 <b>CRM XOĂN MEDIA – CHỤP KỶ YẾU CHUYÊN NGHIỆP</b>`;
+
+  return sendZaloBotNotification({
+    type: 'booking',
+    title: `📸 Đã chụp & có link Drive: ${customer.className} (${customer.schoolName})`,
+    content: text,
+    recipient: config.targetChatId,
+    parseMode: 'HTML',
+  });
+};
+
+/**
+ * Tự động gửi thông báo tất toán & hoàn thành hợp đồng vào nhóm Zalo
+ */
+export const notifyFinalPaymentCompletedToZaloGroup = async (params: {
+  customer: {
+    name: string;
+    phone: string;
+    className: string;
+    schoolName: string;
+    city?: string;
+    assignedSalesName?: string;
+    servicePackageName?: string;
+    [key: string]: any;
+  };
+  totalRevenue: number;
+  paidAmount: number;
+  depositAmount: number;
+  finalPaidAmount: number;
+  notes?: string;
+}): Promise<{ success: boolean; message: string }> => {
+  const { customer, totalRevenue, paidAmount, depositAmount, finalPaidAmount, notes } = params;
+  const config = getZaloBotConfig();
+
+  const salesName = customer.assignedSalesName || 'Sales Xoăn Media';
+
+  const text = `🎉 <b>[CRM XOĂN MEDIA – TẤT TOÁN VÀ HOÀN THÀNH HỢP ĐỒNG]</b>
+
+━━━━━━━━━━━━━━━━━━━━
+
+💰 <b>TRẠNG THÁI:</b> ✅ <b>HOÀN THÀNH – ĐÃ THU ĐỦ 100% TIỀN</b>
+
+🎓 <b>Lớp:</b> ${customer.className}
+🏫 <b>Trường:</b> ${customer.schoolName}${customer.city ? ` – ${customer.city}` : ''}
+👤 <b>Khách hàng:</b> ${customer.name}
+📞 <b>SĐT:</b> ${customer.phone}
+
+📦 <b>Gói dịch vụ:</b> ${customer.servicePackageName || 'Gói Kỷ Yếu Trọn Gói'}
+
+💵 <b>TỔNG DOANH THU HỢP ĐỒNG:</b> <b>${totalRevenue.toLocaleString('vi-VN')} VNĐ</b>
+💰 <b>Số tiền cọc đợt 1:</b> ${depositAmount.toLocaleString('vi-VN')} VNĐ
+💳 <b>Đã thanh toán đợt cuối:</b> ${finalPaidAmount.toLocaleString('vi-VN')} VNĐ
+✨ <b>TỔNG THỰC THU:</b> <b>${paidAmount.toLocaleString('vi-VN')} VNĐ</b> (Công nợ: 0 VNĐ)
+
+👨‍💼 <b>Sales phụ trách:</b> ${salesName}
+${notes ? `\n📝 <b>Ghi chú:</b> <i>${notes}</i>\n` : ''}
+━━━━━━━━━━━━━━━━━━━━
+
+⏰ <i>${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} – ${new Date().toLocaleDateString('vi-VN')}</i>
+
+👏 Chúc mừng @${salesName} và toàn thể Ekip Xoăn Media đã hoàn thành trọn vẹn hợp đồng kỷ yếu cho lớp! 🌟
+
+🚀 <b>CRM XOĂN MEDIA – HOÀN THÀNH DỰ ÁN KỶ YẾU</b>`;
+
+  return sendZaloBotNotification({
+    type: 'deposit',
+    title: `🎉 Tất toán hợp đồng: ${customer.className} - ${totalRevenue.toLocaleString('vi-VN')}đ`,
+    content: text,
+    recipient: config.targetChatId,
+    parseMode: 'HTML',
+  });
+};
+
+
+
 
 
 

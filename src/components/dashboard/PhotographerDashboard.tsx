@@ -15,8 +15,12 @@ import {
   Sparkles,
   CalendarCheck,
   Video,
-  Award
+  Award,
+  FolderOpen,
+  ExternalLink
 } from 'lucide-react';
+import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
+import { Booking } from '../../types';
 
 export const PhotographerDashboard: React.FC = () => {
   const {
@@ -84,6 +88,7 @@ export const PhotographerDashboard: React.FC = () => {
 
   // Bộ lọc danh sách lớp chụp: Tất cả / Lớp sẽ chụp / Lớp đã chụp
   const [shootFilter, setShootFilter] = useState<'all' | 'upcoming' | 'completed'>('all');
+  const [selectedBookingForDrive, setSelectedBookingForDrive] = useState<Booking | null>(null);
 
   // 6. Lọc các booking liên quan:
   // - Nếu xem Team: tất cả ca chụp có thợ trong team tham gia hoặc thuộc khu vực team
@@ -704,6 +709,51 @@ export const PhotographerDashboard: React.FC = () => {
                     </p>
                   </div>
 
+                  {/* Bàn giao Link Google Drive của Photo */}
+                  <div className="pt-2 border-t border-black/[0.04]">
+                    {!isDone ? (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedBookingForDrive(bk)}
+                        className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                        title="Bắt buộc nộp Link Google Drive ảnh gốc để chuyển sang trạng thái Đã chụp"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>📸 Đã Chụp Xong & Nộp Link Drive</span>
+                      </button>
+                    ) : (
+                      <div className="p-2.5 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between text-xs gap-2">
+                        {(bk.rawDriveUrl || bk.driveUrl) ? (
+                          <a
+                            href={bk.rawDriveUrl || bk.driveUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 truncate hover:underline"
+                            title={bk.rawDriveUrl || bk.driveUrl}
+                          >
+                            <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                            <span className="truncate">Drive Ảnh Gốc</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        ) : (
+                          <span className="text-amber-800 font-bold text-[11px] flex items-center gap-1">
+                            <FolderOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span>Chưa lưu link Drive</span>
+                          </span>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => setSelectedBookingForDrive(bk)}
+                          className="text-[10px] text-blue-700 hover:text-blue-900 font-bold px-2 py-0.5 rounded-lg bg-white border border-blue-200 shrink-0 shadow-2xs hover:bg-neutral-50 cursor-pointer"
+                          title="Cập nhật hoặc đổi Link Google Drive"
+                        >
+                          {(bk.rawDriveUrl || bk.driveUrl) ? 'Đổi link' : 'Nộp link'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex items-center justify-between pt-1">
                     <span className="text-[11px] text-neutral-500">
                       Trạng thái: <strong className={isDone ? 'text-emerald-700' : 'text-amber-700'}>{bk.bookingStatus}</strong>
@@ -722,6 +772,13 @@ export const PhotographerDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal Bắt Buộc Nộp Link Google Drive Của Photo */}
+      <UploadPhotoDriveModal
+        booking={selectedBookingForDrive}
+        isOpen={Boolean(selectedBookingForDrive)}
+        onClose={() => setSelectedBookingForDrive(null)}
+      />
     </div>
   );
 };
