@@ -17,9 +17,10 @@ import {
   Heart,
   LogOut
 } from 'lucide-react';
+import { MessengerIcon } from '../chat/MessengerIcon';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, currentRole, notifications, customers, feedbacks, currentUser, logout, photographers } = useApp();
+  const { activeTab, setActiveTab, currentRole, notifications, customers, feedbacks, currentUser, logout, photographers, unreadMessengerCount } = useApp();
 
   const newLeadsCount = customers.filter(c => c.pipelineStage === 'New Lead').length;
   const unreadAlerts = notifications.filter(n => !n.read && n.severity === 'danger').length;
@@ -68,6 +69,13 @@ export const Sidebar: React.FC = () => {
     {
       groupTitle: 'CRM & KHÁCH HÀNG',
       items: [
+        {
+          id: 'chat-messenger',
+          label: 'Chat Messenger (Facebook)',
+          icon: MessengerIcon,
+          badge: unreadMessengerCount > 0 ? unreadMessengerCount : undefined,
+          roles: ['admin', 'manager', 'sales']
+        },
         {
           id: 'customers',
           label: 'Danh Sách Khách Hàng',

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   User,
   UserRole,
@@ -17,7 +17,9 @@ import {
   PipelineStage,
   ClassFeedback,
   ClassMoment,
-  SalesStaff
+  SalesStaff,
+  FacebookChatConversation,
+  FacebookChatMessage
 } from '../types';
 import {
   mockUsers,
@@ -37,6 +39,7 @@ import {
   mockFeedbacks,
   mockMoments
 } from '../data/mockData';
+import { mockMessengerConversations } from '../data/mockMessengerData';
 import { crmSupabaseService } from '../services/crmSupabaseService';
 import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup, notifyCustomerDepositToZaloGroup } from '../lib/zaloBotService';
 
@@ -54,7 +57,8 @@ export type NavigationTab =
   | 'remarketing'
   | 'tasks'
   | 'reports-photographer'
-  | 'settings';
+  | 'settings'
+  | 'chat-messenger';
 
 interface AppContextType {
   currentUser: User;
@@ -149,6 +153,16 @@ interface AppContextType {
   setIsSearchOpen: (open: boolean) => void;
   dateFilter: string;
   setDateFilter: (filter: string) => void;
+
+  // Facebook Messenger Live Chat cho Sales
+  messengerConversations: FacebookChatConversation[];
+  activeConversationId: string | null;
+  setActiveConversationId: (id: string | null) => void;
+  sendMessengerMessage: (convId: string, text: string, sender?: 'sales' | 'customer', attachments?: any[]) => void;
+  markMessengerAsRead: (convId: string) => void;
+  updateMessengerStage: (convId: string, stage: PipelineStage) => void;
+  updateMessengerNotes: (convId: string, notes: string) => void;
+  unreadMessengerCount: number;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -1014,6 +1028,88 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMoments(prev => [newMoment, ...prev]);
   };
 
+  // Quản lý tin nhắn Facebook Messenger Live Chat cho Sales
+  const [messengerConversations, setMessengerConversations] = useState<FacebookChatConversation[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_messenger_chats');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load messenger chats from localStorage', e);
+    }
+    return mockMessengerConversations;
+  });
+
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(() => {
+    return mockMessengerConversations[0]?.id || null;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('crm_xoan_messenger_chats', JSON.stringify(messengerConversations));
+    } catch (e) {
+      console.error('Failed to save messenger chats to localStorage', e);
+    }
+  }, [messengerConversations]);
+
+  const sendMessengerMessage = (convId: string, text: string, sender: 'sales' | 'customer' = 'sales', attachments?: any[]) => {
+    if (!text.trim() && (!attachments || attachments.length === 0)) return;
+
+    const newMsg: FacebookChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender,
+      senderName: sender === 'sales' ? `${currentUser.name} (Sales)` : 'Khách Hàng',
+      senderAvatar: sender === 'sales' ? currentUser.avatar : undefined,
+      text: text.trim(),
+      timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      attachments
+    };
+
+    setMessengerConversations(prev =>
+      prev.map(c => {
+        if (c.id !== convId) return c;
+        return {
+          ...c,
+          lastMessage: text.trim() || (attachments?.length ? '[Đính kèm ảnh]' : ''),
+          lastMessageTime: newMsg.timestamp,
+          messages: [...c.messages, newMsg]
+        };
+      })
+    );
+  };
+
+  const markMessengerAsRead = (convId: string) => {
+    setMessengerConversations(prev =>
+      prev.map(c => (c.id === convId ? { ...c, unreadCount: 0 } : c))
+    );
+  };
+
+  const updateMessengerStage = (convId: string, stage: PipelineStage) => {
+    setMessengerConversations(prev =>
+      prev.map(c => {
+        if (c.id !== convId) return c;
+        return { ...c, pipelineStage: stage };
+      })
+    );
+
+    const targetConv = messengerConversations.find(c => c.id === convId);
+    if (targetConv?.customerId) {
+      updateCustomerStage(targetConv.customerId, stage);
+    }
+  };
+
+  const updateMessengerNotes = (convId: string, notes: string) => {
+    setMessengerConversations(prev =>
+      prev.map(c => (c.id === convId ? { ...c, notes } : c))
+    );
+  };
+
+  const unreadMessengerCount = useMemo(() => {
+    return messengerConversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+  }, [messengerConversations]);
+
   return (
     <AppContext.Provider
       value={{
@@ -1082,7 +1178,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isSearchOpen,
         setIsSearchOpen,
         dateFilter,
-        setDateFilter
+        setDateFilter,
+        messengerConversations,
+        activeConversationId,
+        setActiveConversationId,
+        sendMessengerMessage,
+        markMessengerAsRead,
+        updateMessengerStage,
+        updateMessengerNotes,
+        unreadMessengerCount
       }}
     >
       {children}

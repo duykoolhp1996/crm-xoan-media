@@ -19,6 +19,8 @@ import { FeedbackModule } from './components/feedback/FeedbackModule';
 import { RemarketingModule } from './components/remarketing/RemarketingModule';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
+import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
+import { SalesMessengerFloatingWidget } from './components/chat/SalesMessengerFloatingWidget';
 import { initGA4, trackPageView } from './lib/analytics';
 
 const MainContent: React.FC = () => {
@@ -30,14 +32,15 @@ const MainContent: React.FC = () => {
     trackPageView(`/#${activeTab}`, `CRM Xoăn - ${activeTab}`);
   }, [activeTab]);
 
-  const isPipeline = activeTab === 'pipeline';
+  const isNoOuterScroll = activeTab === 'pipeline' || activeTab === 'chat-messenger';
 
   return (
-    <main className={`flex-1 ${isPipeline ? 'overflow-hidden flex flex-col min-h-0 p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain'}`}>
-      <div className={`${isPipeline ? 'w-full h-full flex flex-col min-h-0' : 'max-w-7xl mx-auto space-y-6'}`}>
+    <main className={`flex-1 ${isNoOuterScroll ? 'overflow-hidden flex flex-col min-h-0 p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain'}`}>
+      <div className={`${isNoOuterScroll ? 'w-full h-full flex flex-col min-h-0' : 'max-w-7xl mx-auto space-y-6'}`}>
         {activeTab === 'dashboard' && (isPhotographer ? <PhotographerDashboard /> : <ExecutiveDashboard />)}
         {(activeTab === 'customers' || activeTab === 'leads') && <CustomerList />}
         {activeTab === 'pipeline' && <KanbanPipeline />}
+        {activeTab === 'chat-messenger' && <SalesMessengerInbox />}
         {activeTab === 'schools' && <SchoolClassModule />}
         {activeTab === 'bookings' && <BookingModule />}
         {activeTab === 'calendar' && <PhotoCalendar />}
@@ -76,6 +79,9 @@ const CrmAppShell: React.FC = () => {
 
       {/* Global Search Modal (Cmd+K) */}
       <GlobalSearchModal />
+
+      {/* Floating Facebook Messenger Chat Widget cho Tài Khoản Sales */}
+      <SalesMessengerFloatingWidget />
     </div>
   );
 };

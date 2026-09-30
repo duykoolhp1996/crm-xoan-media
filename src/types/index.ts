@@ -489,3 +489,39 @@ export interface QuoteData {
   note?: string; // Ghi chú ưu đãi toàn đơn
 }
 
+// 13. Khung Chat Facebook Messenger cho Tài Khoản Sales
+export interface FacebookChatMessage {
+  id: string;
+  sender: 'customer' | 'sales' | 'system';
+  senderName: string;
+  senderAvatar?: string;
+  text: string;
+  timestamp: string;
+  attachments?: {
+    type: 'image' | 'file';
+    url: string;
+    name?: string;
+  }[];
+  isQuickReply?: boolean;
+}
+
+export interface FacebookChatConversation {
+  id: string;
+  customerId?: string;
+  customerName: string;
+  customerAvatar: string;
+  customerClass?: string;
+  customerSchool?: string;
+  customerPhone?: string;
+  facebookUrl?: string;
+  pageName: string;
+  unreadCount: number;
+  lastMessage: string;
+  lastMessageTime: string;
+  assignedSalesName?: string;
+  pipelineStage: PipelineStage;
+  tags: string[];
+  notes?: string;
+  messages: FacebookChatMessage[];
+}
+
