@@ -25,7 +25,9 @@ import {
   ChevronRight,
   PlusCircle,
   FileText,
-  AlertCircle
+  AlertCircle,
+  PanelRightClose,
+  PanelRightOpen
 } from 'lucide-react';
 
 const STAGE_COLORS: Record<PipelineStage, { bg: string; text: string; border: string }> = {
@@ -64,6 +66,7 @@ export const SalesMessengerInbox: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [noteText, setNoteText] = useState('');
   const [showSimulateMenu, setShowSimulateMenu] = useState(false);
+  const [showCrmPanel, setShowCrmPanel] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConv = messengerConversations.find(c => c.id === activeConversationId) || messengerConversations[0];
@@ -420,6 +423,20 @@ export const SalesMessengerInbox: React.FC = () => {
                   <Phone className="w-4 h-4" />
                 </a>
               )}
+
+              {/* Nút Xem/Ẩn Hồ Sơ CRM (Tách riêng biệt Chat Khách) */}
+              <button
+                onClick={() => setShowCrmPanel(!showCrmPanel)}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
+                  showCrmPanel
+                    ? 'bg-neutral-900 text-white border-neutral-900 shadow-xs'
+                    : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-black/[0.04]'
+                }`}
+                title={showCrmPanel ? 'Thu gọn hồ sơ CRM để mở rộng khung chat' : 'Mở xem hồ sơ khách trên CRM'}
+              >
+                {showCrmPanel ? <PanelRightClose className="w-3.5 h-3.5 text-[#B8F23D]" /> : <PanelRightOpen className="w-3.5 h-3.5 text-neutral-600" />}
+                <span className="hidden md:inline">{showCrmPanel ? 'Đóng Hồ Sơ' : 'Hồ Sơ CRM'}</span>
+              </button>
             </div>
           </div>
 
@@ -571,8 +588,8 @@ export const SalesMessengerInbox: React.FC = () => {
       {/* ========================================================
           CỘT PHẢI: THÔNG TIN KHÁCH HÀNG CRM 360° (CRM CONTEXT SIDEBAR)
           ======================================================== */}
-      {activeConv && (
-        <div className="w-72 lg:w-80 border-l border-black/[0.06] bg-white flex flex-col shrink-0 overflow-y-auto p-4 space-y-5">
+      {showCrmPanel && activeConv && (
+        <div className="w-72 lg:w-80 border-l border-black/[0.06] bg-white flex flex-col shrink-0 overflow-y-auto p-4 space-y-5 animate-in slide-in-from-right-4 duration-200">
           {/* Card Hồ sơ khách hàng */}
           <div className="text-center space-y-2 pb-4 border-b border-black/[0.06]">
             <img

@@ -42,7 +42,7 @@ export const Sidebar: React.FC = () => {
     id: NavigationTab;
     label: string;
     icon: React.ElementType;
-    badge?: number;
+    badge?: number | string;
     badgeColor?: string;
     roles?: string[];
   }
@@ -67,15 +67,20 @@ export const Sidebar: React.FC = () => {
       ]
     },
     {
-      groupTitle: 'CRM & KHÁCH HÀNG',
+      groupTitle: 'HỘP THƯ & CHAT KHÁCH HÀNG',
       items: [
         {
           id: 'chat-messenger',
-          label: 'Chat Messenger (Facebook)',
+          label: 'Hộp Thư Messenger (Fanpage)',
           icon: MessengerIcon,
-          badge: unreadMessengerCount > 0 ? unreadMessengerCount : undefined,
+          badge: unreadMessengerCount > 0 ? `${unreadMessengerCount} tin mới` : undefined,
           roles: ['admin', 'manager', 'sales']
-        },
+        }
+      ]
+    },
+    {
+      groupTitle: 'CRM & KHÁCH HÀNG',
+      items: [
         {
           id: 'customers',
           label: 'Danh Sách Khách Hàng',
