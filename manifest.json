@@ -1,0 +1,25 @@
+{
+  "name": "CRM Xoăn Media - Hệ Thống Quản Trị Kỷ Yếu",
+  "short_name": "Xoăn CRM",
+  "description": "Hệ thống quản trị, chăm sóc khách hàng, lịch chụp kỷ yếu Xoăn Media",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0C0E12",
+  "theme_color": "#0C0E12",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./logo-xoan.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
