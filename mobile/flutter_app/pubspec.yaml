@@ -1,0 +1,37 @@
+name: crm_xoan_media
+description: "Ứng dụng Mobile CRM Quản Trị & Vận Hành Kỷ Yếu Xoăn Media"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # WebView hiện đại hỗ trợ tải file, camera, javascript channel
+  flutter_inappwebview: ^6.1.5
+  
+  # Kết nối Supabase Backend (Database, Auth, Storage, Realtime)
+  supabase_flutter: ^2.8.0
+  
+  # Push Notification thông báo ca chụp & lead mới
+  firebase_core: ^3.6.0
+  firebase_messaging: ^15.1.3
+  flutter_local_notifications: ^17.2.3
+  
+  # Tiện ích native: Quyền truy cập camera/ảnh, mở link, rung máy
+  permission_handler: ^11.3.1
+  url_launcher: ^6.3.1
+  flutter_native_splash: ^2.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon.png
