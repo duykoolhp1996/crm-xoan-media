@@ -1037,23 +1037,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMoments(prev => [newMoment, ...prev]);
   };
 
-  // Quản lý tin nhắn Facebook Messenger Live Chat cho Sales
+  // Quản lý tin nhắn Facebook Messenger Live Chat cho Sales (Dữ liệu Live thật 100%, không dùng demo)
   const [messengerConversations, setMessengerConversations] = useState<FacebookChatConversation[]>(() => {
     try {
       const saved = localStorage.getItem('crm_xoan_messenger_chats');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Lọc bỏ triệt để mọi dữ liệu demo (conv-fb-1..5 hoặc dữ liệu mẫu không phải live Facebook)
+          const liveOnly = parsed.filter(c => c.isLiveFacebook === true || (c.id && !c.id.startsWith('conv-fb-')));
+          return liveOnly;
+        }
       }
     } catch (e) {
       console.error('Failed to load messenger chats from localStorage', e);
     }
-    return mockMessengerConversations;
+    return [];
   });
 
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(() => {
-    return mockMessengerConversations[0]?.id || null;
-  });
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -1120,15 +1122,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       if (mappedList.length > 0) {
-        setMessengerConversations(prev => {
-          const liveIds = new Set(mappedList.map(m => m.id));
-          const remainingPrev = prev.filter(p => !liveIds.has(p.id));
-          return [...mappedList, ...remainingPrev];
-        });
+        setMessengerConversations(mappedList);
 
-        if (!activeConversationId || activeConversationId.startsWith('conv-fb-1')) {
-          setActiveConversationId(mappedList[0].id);
-        }
+        setActiveConversationId(prev => {
+          if (!prev || prev.startsWith('conv-fb-') || !mappedList.some(m => m.id === prev)) {
+            return mappedList[0].id;
+          }
+          return prev;
+        });
       }
     } catch (error) {
       console.error('Lỗi đồng bộ Facebook:', error);

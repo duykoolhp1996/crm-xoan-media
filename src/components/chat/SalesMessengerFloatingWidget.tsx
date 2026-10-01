@@ -185,8 +185,9 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
           </div>
 
           {/* Body tin nhắn nếu không thu nhỏ */}
-          {!isMinimized && activeConv && (
-            <>
+          {!isMinimized && (
+            activeConv ? (
+              <>
               {/* Vùng tin nhắn */}
               <div className="flex-1 overflow-y-auto p-3.5 space-y-3 bg-[#F0F2F5]/30">
                 <div className="text-center my-1">
@@ -287,7 +288,20 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
                 )}
               </form>
             </>
-          )}
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-neutral-400 bg-neutral-50/50">
+              <MessageCircle className="w-10 h-10 text-neutral-300 mb-2" />
+              <p className="text-xs font-bold text-neutral-700">Chưa có cuộc trò chuyện nào</p>
+              <p className="text-[11px] text-neutral-400 mt-1 mb-3">Mở hộp thư để đồng bộ từ Facebook Fanpage</p>
+              <button
+                onClick={handleOpenFullScreen}
+                className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
+              >
+                Mở Toàn Màn Hình
+              </button>
+            </div>
+          )
+        )}
         </div>
       )}
 
