@@ -27,6 +27,7 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
     sendMessengerMessage,
     markMessengerAsRead,
     unreadMessengerCount,
+    activeTab,
     setActiveTab
   } = useApp();
 
@@ -53,7 +54,7 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
     }
   }, [isOpen, activeConv?.id]);
 
-  if (!isSalesAccount) return null;
+  if (!isSalesAccount || activeTab === 'chat-messenger') return null;
 
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -79,14 +80,14 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-[999] flex flex-col items-end select-none">
+    <div className="fixed bottom-20 lg:bottom-5 right-3 sm:right-5 z-40 flex flex-col items-end select-none">
       {/* ========================================================
           CỬA SỔ KHUNG CHAT NỔI (FLOATING CHAT WINDOW)
           ======================================================== */}
       {isOpen && (
         <div
-          className={`w-[360px] sm:w-[390px] bg-white rounded-3xl shadow-2xl border border-black/[0.1] overflow-hidden flex flex-col transition-all duration-200 mb-3 animate-in fade-in slide-in-from-bottom-5 ${
-            isMinimized ? 'h-14' : 'h-[520px]'
+          className={`w-[calc(100vw-1.5rem)] sm:w-[390px] max-w-[390px] bg-white rounded-3xl shadow-2xl border border-black/[0.1] overflow-hidden flex flex-col transition-all duration-200 mb-3 animate-in fade-in slide-in-from-bottom-5 ${
+            isMinimized ? 'h-14' : 'h-[70vh] sm:h-[520px]'
           }`}
         >
           {/* Header thanh lịch với dải màu gradient Facebook Messenger */}

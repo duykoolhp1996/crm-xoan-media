@@ -21,6 +21,7 @@ import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
 import { SalesMessengerFloatingWidget } from './components/chat/SalesMessengerFloatingWidget';
+import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { initGA4, trackPageView } from './lib/analytics';
 
 const MainContent: React.FC = () => {
@@ -35,7 +36,7 @@ const MainContent: React.FC = () => {
   const isNoOuterScroll = activeTab === 'pipeline' || activeTab === 'chat-messenger';
 
   return (
-    <main className={`flex-1 ${isNoOuterScroll ? 'overflow-hidden flex flex-col min-h-0 p-3 sm:p-4 lg:p-5' : 'overflow-y-auto p-4 sm:p-6 lg:p-8 custom-scrollbar overscroll-contain'}`}>
+    <main className={`flex-1 ${isNoOuterScroll ? 'overflow-hidden flex flex-col min-h-0 p-2 sm:p-4 lg:p-5 pb-20 lg:pb-5' : 'overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 lg:pb-8 custom-scrollbar overscroll-contain'}`}>
       <div className={`${isNoOuterScroll ? 'w-full h-full flex flex-col min-h-0' : 'max-w-7xl mx-auto space-y-6'}`}>
         {activeTab === 'dashboard' && (isPhotographer ? <PhotographerDashboard /> : <ExecutiveDashboard />)}
         {(activeTab === 'customers' || activeTab === 'leads') && <CustomerList />}
@@ -82,6 +83,9 @@ const CrmAppShell: React.FC = () => {
 
       {/* Floating Facebook Messenger Chat Widget cho Tài Khoản Sales */}
       <SalesMessengerFloatingWidget />
+
+      {/* Mobile Bottom Navigation Bar (iOS / Android App Style) */}
+      <MobileBottomNav />
     </div>
   );
 };

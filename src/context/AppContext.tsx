@@ -154,6 +154,10 @@ interface AppContextType {
   dateFilter: string;
   setDateFilter: (filter: string) => void;
 
+  // Mobile Navigation Drawer
+  isMobileSidebarOpen: boolean;
+  setIsMobileSidebarOpen: (open: boolean) => void;
+
   // Facebook Messenger Live Chat cho Sales
   messengerConversations: FacebookChatConversation[];
   activeConversationId: string | null;
@@ -205,6 +209,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [dateFilter, setDateFilter] = useState<string>('this_month');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
   const [isImpersonating, setIsImpersonating] = useState<boolean>(false);
 
@@ -1179,6 +1184,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsSearchOpen,
         dateFilter,
         setDateFilter,
+        isMobileSidebarOpen,
+        setIsMobileSidebarOpen,
         messengerConversations,
         activeConversationId,
         setActiveConversationId,

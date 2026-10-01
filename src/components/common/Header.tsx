@@ -5,7 +5,8 @@ import {
   Search,
   Bell,
   Calendar as CalendarIcon,
-  LogOut
+  LogOut,
+  Menu
 } from 'lucide-react';
 import { NotificationDrawer } from './NotificationDrawer';
 import { ProfileModal } from './ProfileModal';
@@ -24,7 +25,8 @@ export const Header: React.FC = () => {
     logout,
     activeTab,
     setActiveTab,
-    unreadMessengerCount
+    unreadMessengerCount,
+    setIsMobileSidebarOpen
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -78,16 +80,25 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="h-16 bg-white/80 backdrop-blur-2xl border-b border-black/[0.06] px-6 flex items-center justify-between sticky top-0 z-10 transition-all duration-200 shadow-xs">
-      {/* Left: Global Search Pill Trigger (Apple Spotlight Style) */}
-      <div className="flex items-center gap-4 flex-1 max-w-xl">
+    <header className="h-14 sm:h-16 bg-white/80 backdrop-blur-2xl border-b border-black/[0.06] px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 transition-all duration-200 shadow-xs">
+      {/* Left: Mobile Menu Toggle Button & Spotlight Search */}
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-xl">
+        <button
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className="lg:hidden p-2 -ml-1 rounded-xl text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100 active:scale-95 transition-all"
+          title="Mở menu điều hướng"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         <button
           onClick={() => setIsSearchOpen(true)}
-          className="flex items-center gap-3 w-full bg-neutral-100/80 hover:bg-neutral-100 active:scale-[0.99] text-neutral-500 hover:text-neutral-800 px-4 py-2 rounded-2xl text-xs sm:text-sm border border-black/[0.05] shadow-xs transition-all duration-200 group"
+          className="flex items-center gap-2 sm:gap-3 w-full bg-neutral-100/80 hover:bg-neutral-100 active:scale-[0.99] text-neutral-500 hover:text-neutral-800 px-3 sm:px-4 py-2 rounded-2xl text-xs sm:text-sm border border-black/[0.05] shadow-xs transition-all duration-200 group"
         >
-          <Search className="w-4 h-4 text-neutral-400 group-hover:text-neutral-800 transition-colors" />
+          <Search className="w-4 h-4 text-neutral-400 group-hover:text-neutral-800 transition-colors shrink-0" />
           <span className="flex-1 text-left truncate tracking-normal">
-            Tìm kiếm khách hàng, lớp, số ĐT, thợ, booking...
+            <span className="inline sm:hidden">Tìm nhanh...</span>
+            <span className="hidden sm:inline">Tìm kiếm khách hàng, lớp, số ĐT, thợ, booking...</span>
           </span>
           <kbd className="hidden sm:inline-flex items-center gap-1 bg-white border border-neutral-200 px-2 py-0.5 rounded-lg text-[10px] font-semibold text-neutral-500 shadow-xs">
             ⌘K

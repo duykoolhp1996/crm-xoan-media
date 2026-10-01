@@ -27,7 +27,9 @@ import {
   FileText,
   AlertCircle,
   PanelRightClose,
-  PanelRightOpen
+  PanelRightOpen,
+  ArrowLeft,
+  X
 } from 'lucide-react';
 
 const STAGE_COLORS: Record<PipelineStage, { bg: string; text: string; border: string }> = {
@@ -61,6 +63,7 @@ export const SalesMessengerInbox: React.FC = () => {
     customers
   } = useApp();
 
+  const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTab, setFilterTab] = useState<'all' | 'unread' | 'consulting' | 'deposited'>('all');
   const [inputText, setInputText] = useState('');
@@ -156,7 +159,7 @@ export const SalesMessengerInbox: React.FC = () => {
       {/* ========================================================
           CỘT TRÁI: DANH SÁCH CUỘC HỘI THOẠI MESSENGER (INBOX LIST)
           ======================================================== */}
-      <div className="w-80 md:w-96 border-r border-black/[0.06] flex flex-col bg-neutral-50/50 shrink-0">
+      <div className={`${mobileView === 'list' ? 'flex' : 'hidden'} md:flex w-full md:w-80 lg:w-96 border-r border-black/[0.06] flex-col bg-neutral-50/50 shrink-0 h-full`}>
         {/* Header danh sách */}
         <div className="p-4 border-b border-black/[0.06] bg-white space-y-3">
           <div className="flex items-center justify-between">
@@ -254,7 +257,10 @@ export const SalesMessengerInbox: React.FC = () => {
               return (
                 <div
                   key={conv.id}
-                  onClick={() => setActiveConversationId(conv.id)}
+                  onClick={() => {
+                    setActiveConversationId(conv.id);
+                    setMobileView('chat');
+                  }}
                   className={`p-3.5 flex items-start gap-3 cursor-pointer transition-colors relative ${
                     isSelected ? 'bg-blue-50/70 border-l-4 border-l-blue-600' : 'hover:bg-neutral-100/60'
                   }`}
@@ -328,24 +334,33 @@ export const SalesMessengerInbox: React.FC = () => {
           CỘT GIỮA: KHUNG CHAT MESSENGER CHÍNH (CHAT CONVERSATION)
           ======================================================== */}
       {activeConv ? (
-        <div className="flex-1 flex flex-col min-w-0 bg-[#F0F2F5]/40">
+        <div className={`${mobileView === 'chat' ? 'flex' : 'hidden'} md:flex flex-1 flex-col min-w-0 bg-[#F0F2F5]/40 h-full`}>
           {/* Header khung chat */}
-          <div className="px-5 py-3.5 bg-white border-b border-black/[0.06] flex items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="relative">
+          <div className="px-3 sm:px-5 py-3 sm:py-3.5 bg-white border-b border-black/[0.06] flex items-center justify-between gap-2 sm:gap-3 shadow-2xs">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              {/* Nút quay lại danh sách trên Mobile */}
+              <button
+                onClick={() => setMobileView('list')}
+                className="md:hidden p-2 -ml-1 text-neutral-700 hover:text-neutral-950 hover:bg-neutral-100 rounded-xl transition-colors shrink-0"
+                title="Quay lại danh sách chat"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              <div className="relative shrink-0">
                 <img
                   src={activeConv.customerAvatar}
                   alt={activeConv.customerName}
-                  className="w-10 h-10 rounded-full object-cover border border-black/[0.08]"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-black/[0.08]"
                 />
-                <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500 border-2 border-white" />
               </div>
 
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-black text-neutral-900 truncate">{activeConv.customerName}</h3>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <h3 className="text-xs sm:text-sm font-black text-neutral-900 truncate">{activeConv.customerName}</h3>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    className={`text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border ${
                       STAGE_COLORS[activeConv.pipelineStage]?.bg
                     } ${STAGE_COLORS[activeConv.pipelineStage]?.text} ${
                       STAGE_COLORS[activeConv.pipelineStage]?.border
@@ -354,7 +369,7 @@ export const SalesMessengerInbox: React.FC = () => {
                     {activeConv.pipelineStage}
                   </span>
                 </div>
-                <p className="text-[11px] text-neutral-500 truncate flex items-center gap-1.5">
+                <p className="text-[10px] sm:text-[11px] text-neutral-500 truncate flex items-center gap-1 sm:gap-1.5">
                   <span className="font-semibold text-neutral-700">{activeConv.customerClass}</span>
                   <span>•</span>
                   <span>{activeConv.customerSchool}</span>
@@ -589,129 +604,273 @@ export const SalesMessengerInbox: React.FC = () => {
           CỘT PHẢI: THÔNG TIN KHÁCH HÀNG CRM 360° (CRM CONTEXT SIDEBAR)
           ======================================================== */}
       {showCrmPanel && activeConv && (
-        <div className="w-72 lg:w-80 border-l border-black/[0.06] bg-white flex flex-col shrink-0 overflow-y-auto p-4 space-y-5 animate-in slide-in-from-right-4 duration-200">
-          {/* Card Hồ sơ khách hàng */}
-          <div className="text-center space-y-2 pb-4 border-b border-black/[0.06]">
-            <img
-              src={activeConv.customerAvatar}
-              alt={activeConv.customerName}
-              className="w-16 h-16 rounded-full object-cover mx-auto border-2 border-blue-500 shadow-sm"
-            />
-            <div>
-              <h3 className="text-sm font-black text-neutral-900">{activeConv.customerName}</h3>
-              <p className="text-xs text-blue-600 font-bold">
-                {activeConv.customerClass} • {activeConv.customerSchool}
-              </p>
-            </div>
-
-            {/* Trạng thái Pipeline Dropdown */}
-            <div className="pt-2">
-              <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
-                Giai đoạn Pipeline
-              </label>
-              <select
-                value={activeConv.pipelineStage}
-                onChange={e => updateMessengerStage(activeConv.id, e.target.value as PipelineStage)}
-                className="w-full px-3 py-1.5 bg-neutral-50 border border-black/[0.1] rounded-xl text-xs font-bold text-neutral-800 focus:outline-none focus:border-blue-500"
-              >
-                <option value="New Lead">1. New Lead (Mới)</option>
-                <option value="Đã liên hệ">2. Đã liên hệ</option>
-                <option value="Đang tư vấn">3. Đang tư vấn</option>
-                <option value="Đã gửi báo giá">4. Đã gửi báo giá</option>
-                <option value="Đang thương lượng">5. Đang thương lượng</option>
-                <option value="Đã đặt cọc">6. Đã đặt cọc</option>
-                <option value="Đã Booking">7. Đã Booking</option>
-                <option value="Lost">Khách từ chối (Lost)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Chi tiết liên hệ */}
-          <div className="space-y-2.5 text-xs">
-            <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-blue-600" /> Thông Tin Chi Tiết
-            </h4>
-
-            <div className="p-3 bg-neutral-50 rounded-2xl border border-black/[0.04] space-y-2">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-neutral-500">Số điện thoại:</span>
-                <span className="font-bold text-neutral-900">{activeConv.customerPhone || 'Chưa cập nhật'}</span>
+        <>
+          {/* Desktop Sidebar Panel */}
+          <div className="hidden md:flex w-72 lg:w-80 border-l border-black/[0.06] bg-white flex-col shrink-0 overflow-y-auto p-4 space-y-5 animate-in slide-in-from-right-4 duration-200">
+            {/* Card Hồ sơ khách hàng */}
+            <div className="text-center space-y-2 pb-4 border-b border-black/[0.06]">
+              <img
+                src={activeConv.customerAvatar}
+                alt={activeConv.customerName}
+                className="w-16 h-16 rounded-full object-cover mx-auto border-2 border-blue-500 shadow-sm"
+              />
+              <div>
+                <h3 className="text-sm font-black text-neutral-900">{activeConv.customerName}</h3>
+                <p className="text-xs text-blue-600 font-bold">
+                  {activeConv.customerClass} • {activeConv.customerSchool}
+                </p>
               </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-neutral-500">Lớp:</span>
-                <span className="font-bold text-neutral-900">{activeConv.customerClass || 'Chưa rõ'}</span>
-              </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-neutral-500">Trường:</span>
-                <span className="font-bold text-neutral-900 truncate max-w-[150px]">{activeConv.customerSchool}</span>
-              </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-neutral-500">Sales phụ trách:</span>
-                <span className="font-bold text-emerald-700">{activeConv.assignedSalesName || currentUser.name}</span>
+
+              {/* Trạng thái Pipeline Dropdown */}
+              <div className="pt-2">
+                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
+                  Giai đoạn Pipeline
+                </label>
+                <select
+                  value={activeConv.pipelineStage}
+                  onChange={e => updateMessengerStage(activeConv.id, e.target.value as PipelineStage)}
+                  className="w-full px-3 py-1.5 bg-neutral-50 border border-black/[0.1] rounded-xl text-xs font-bold text-neutral-800 focus:outline-none focus:border-blue-500"
+                >
+                  <option value="New Lead">1. New Lead (Mới)</option>
+                  <option value="Đã liên hệ">2. Đã liên hệ</option>
+                  <option value="Đang tư vấn">3. Đang tư vấn</option>
+                  <option value="Đã gửi báo giá">4. Đã gửi báo giá</option>
+                  <option value="Đang thương lượng">5. Đang thương lượng</option>
+                  <option value="Đã đặt cọc">6. Đã đặt cọc</option>
+                  <option value="Đã Booking">7. Đã Booking</option>
+                  <option value="Lost">Khách từ chối (Lost)</option>
+                </select>
               </div>
             </div>
-          </div>
 
-          {/* Thao tác CRM nhanh (Action buttons) */}
-          <div className="space-y-2">
-            <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" /> Thao Tác Nhanh
-            </h4>
+            {/* Chi tiết liên hệ */}
+            <div className="space-y-2.5 text-xs">
+              <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-blue-600" /> Thông Tin Chi Tiết
+              </h4>
 
-            <button
-              onClick={() => {
-                setActiveTab('pipeline');
-              }}
-              className="w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-xl text-xs font-bold flex items-center justify-between transition-colors border border-blue-200"
-            >
-              <span>Xem trên Customer Pipeline</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+              <div className="p-3 bg-neutral-50 rounded-2xl border border-black/[0.04] space-y-2">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-neutral-500">Số điện thoại:</span>
+                  <span className="font-bold text-neutral-900">{activeConv.customerPhone || 'Chưa cập nhật'}</span>
+                </div>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-neutral-500">Lớp:</span>
+                  <span className="font-bold text-neutral-900">{activeConv.customerClass || 'Chưa rõ'}</span>
+                </div>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-neutral-500">Trường:</span>
+                  <span className="font-bold text-neutral-900 truncate max-w-[150px]">{activeConv.customerSchool}</span>
+                </div>
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="text-neutral-500">Sales phụ trách:</span>
+                  <span className="font-bold text-emerald-700">{activeConv.assignedSalesName || currentUser.name}</span>
+                </div>
+              </div>
+            </div>
 
-            <button
-              onClick={() => {
-                setActiveTab('bookings');
-              }}
-              className="w-full px-3 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-900 rounded-xl text-xs font-black flex items-center justify-between transition-colors shadow-2xs"
-            >
-              <span>Tạo Booking / Khóa Lịch</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+            {/* Thao tác CRM nhanh (Action buttons) */}
+            <div className="space-y-2">
+              <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-600" /> Thao Tác Nhanh
+              </h4>
 
-            {linkedCustomer && (
               <button
                 onClick={() => {
-                  setSelectedCustomerId(linkedCustomer.id);
-                  setActiveTab('customers');
+                  setActiveTab('pipeline');
                 }}
-                className="w-full px-3 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold flex items-center justify-between transition-colors"
+                className="w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-xl text-xs font-bold flex items-center justify-between transition-colors border border-blue-200"
               >
-                <span>Mở Hồ Sơ 360° Đầy Đủ</span>
+                <span>Xem trên Customer Pipeline</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
-            )}
+
+              <button
+                onClick={() => {
+                  setActiveTab('bookings');
+                }}
+                className="w-full px-3 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-900 rounded-xl text-xs font-black flex items-center justify-between transition-colors shadow-2xs"
+              >
+                <span>Tạo Booking / Khóa Lịch</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+
+              {linkedCustomer && (
+                <button
+                  onClick={() => {
+                    setSelectedCustomerId(linkedCustomer.id);
+                    setActiveTab('customers');
+                  }}
+                  className="w-full px-3 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold flex items-center justify-between transition-colors"
+                >
+                  <span>Mở Hồ Sơ 360° Đầy Đủ</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Ghi chú nội bộ Sales */}
+            <div className="space-y-2 pt-2 border-t border-black/[0.06]">
+              <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-neutral-600" /> Ghi Chú Sales
+              </h4>
+              <textarea
+                rows={3}
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                placeholder="Ghi chú yêu cầu concept, lưu ý về lớp..."
+                className="w-full p-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:border-blue-400 resize-none"
+              />
+              <button
+                onClick={handleSaveNotes}
+                className="w-full py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-colors"
+              >
+                Lưu Ghi Chú
+              </button>
+            </div>
           </div>
 
-          {/* Ghi chú nội bộ Sales */}
-          <div className="space-y-2 pt-2 border-t border-black/[0.06]">
-            <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-neutral-600" /> Ghi Chú Sales
-            </h4>
-            <textarea
-              rows={3}
-              value={noteText}
-              onChange={e => setNoteText(e.target.value)}
-              placeholder="Ghi chú yêu cầu concept, lưu ý về lớp..."
-              className="w-full p-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:border-blue-400 resize-none"
-            />
-            <button
-              onClick={handleSaveNotes}
-              className="w-full py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-colors"
-            >
-              Lưu Ghi Chú
-            </button>
+          {/* Mobile Off-canvas Slide Drawer */}
+          <div className="md:hidden fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-in fade-in">
+            <div className="w-[85vw] max-w-sm bg-white h-full overflow-y-auto p-4 space-y-5 shadow-2xl animate-in slide-in-from-right duration-200">
+              <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+                <h3 className="font-black text-sm text-neutral-900">Hồ Sơ Khách Hàng CRM</h3>
+                <button
+                  onClick={() => setShowCrmPanel(false)}
+                  className="p-1.5 rounded-xl hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900"
+                  title="Đóng hồ sơ"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Card Hồ sơ khách hàng */}
+              <div className="text-center space-y-2 pb-4 border-b border-black/[0.06]">
+                <img
+                  src={activeConv.customerAvatar}
+                  alt={activeConv.customerName}
+                  className="w-16 h-16 rounded-full object-cover mx-auto border-2 border-blue-500 shadow-sm"
+                />
+                <div>
+                  <h3 className="text-sm font-black text-neutral-900">{activeConv.customerName}</h3>
+                  <p className="text-xs text-blue-600 font-bold">
+                    {activeConv.customerClass} • {activeConv.customerSchool}
+                  </p>
+                </div>
+
+                {/* Trạng thái Pipeline Dropdown */}
+                <div className="pt-2">
+                  <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block mb-1">
+                    Giai đoạn Pipeline
+                  </label>
+                  <select
+                    value={activeConv.pipelineStage}
+                    onChange={e => updateMessengerStage(activeConv.id, e.target.value as PipelineStage)}
+                    className="w-full px-3 py-1.5 bg-neutral-50 border border-black/[0.1] rounded-xl text-xs font-bold text-neutral-800 focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="New Lead">1. New Lead (Mới)</option>
+                    <option value="Đã liên hệ">2. Đã liên hệ</option>
+                    <option value="Đang tư vấn">3. Đang tư vấn</option>
+                    <option value="Đã gửi báo giá">4. Đã gửi báo giá</option>
+                    <option value="Đang thương lượng">5. Đang thương lượng</option>
+                    <option value="Đã đặt cọc">6. Đã đặt cọc</option>
+                    <option value="Đã Booking">7. Đã Booking</option>
+                    <option value="Lost">Khách từ chối (Lost)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Chi tiết liên hệ */}
+              <div className="space-y-2.5 text-xs">
+                <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-blue-600" /> Thông Tin Chi Tiết
+                </h4>
+
+                <div className="p-3 bg-neutral-50 rounded-2xl border border-black/[0.04] space-y-2">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-neutral-500">Số điện thoại:</span>
+                    <span className="font-bold text-neutral-900">{activeConv.customerPhone || 'Chưa cập nhật'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-neutral-500">Lớp:</span>
+                    <span className="font-bold text-neutral-900">{activeConv.customerClass || 'Chưa rõ'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-neutral-500">Trường:</span>
+                    <span className="font-bold text-neutral-900 truncate max-w-[150px]">{activeConv.customerSchool}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="text-neutral-500">Sales phụ trách:</span>
+                    <span className="font-bold text-emerald-700">{activeConv.assignedSalesName || currentUser.name}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thao tác CRM nhanh (Action buttons) */}
+              <div className="space-y-2">
+                <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-600" /> Thao Tác Nhanh
+                </h4>
+
+                <button
+                  onClick={() => {
+                    setShowCrmPanel(false);
+                    setActiveTab('pipeline');
+                  }}
+                  className="w-full px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-xl text-xs font-bold flex items-center justify-between transition-colors border border-blue-200"
+                >
+                  <span>Xem trên Customer Pipeline</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowCrmPanel(false);
+                    setActiveTab('bookings');
+                  }}
+                  className="w-full px-3 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-900 rounded-xl text-xs font-black flex items-center justify-between transition-colors shadow-2xs"
+                >
+                  <span>Tạo Booking / Khóa Lịch</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+
+                {linkedCustomer && (
+                  <button
+                    onClick={() => {
+                      setShowCrmPanel(false);
+                      setSelectedCustomerId(linkedCustomer.id);
+                      setActiveTab('customers');
+                    }}
+                    className="w-full px-3 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold flex items-center justify-between transition-colors"
+                  >
+                    <span>Mở Hồ Sơ 360° Đầy Đủ</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Ghi chú nội bộ Sales */}
+              <div className="space-y-2 pt-2 border-t border-black/[0.06]">
+                <h4 className="text-[11px] font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-neutral-600" /> Ghi Chú Sales
+                </h4>
+                <textarea
+                  rows={3}
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  placeholder="Ghi chú yêu cầu concept, lưu ý về lớp..."
+                  className="w-full p-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:border-blue-400 resize-none"
+                />
+                <button
+                  onClick={handleSaveNotes}
+                  className="w-full py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-colors"
+                >
+                  Lưu Ghi Chú
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
