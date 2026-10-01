@@ -143,8 +143,11 @@ export class FacebookApiService {
     let data = await res.json();
 
     if (!res.ok) {
-      if (data.error?.code === 10 || data.error?.error_subcode === 2018278) {
+      if (data.error?.error_subcode === 2018278 || (data.error?.code === 10 && data.error?.message?.includes('khoảng thời gian'))) {
         throw new Error('Đã quá cửa sổ 24 giờ của Facebook (Khách chưa nhắn lại quá 24h). Khách chỉ cần nhắn 1 tin mới vào Page là chat lại được ngay.');
+      }
+      if (data.error?.error_subcode === 2018300 || (data.error?.code === 10 && data.error?.message?.includes('kiểm soát thread'))) {
+        throw new Error('Fanpage đang bật "Tác nhân AI" (Meta AI Agent) kiểm soát hội thoại này. Bạn vào Hộp thư Meta Business Suite bấm "Tiếp quản cuộc trò chuyện" (Take over) là CRM gửi được ngay.');
       }
       throw new Error(data.error?.message || 'Lỗi gửi tin nhắn qua Facebook Graph API');
     }
