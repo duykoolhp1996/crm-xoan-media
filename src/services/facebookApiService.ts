@@ -142,24 +142,10 @@ export class FacebookApiService {
 
     let data = await res.json();
 
-    // Nếu bị lỗi chính sách 24h của Facebook (#10 / #2018278) -> Thử gửi kèm Tag CONFIRMED_EVENT_UPDATE cho sự kiện kỷ yếu
-    if (!res.ok && (data.error?.code === 10 || data.error?.error_subcode === 2018278)) {
-      payload = {
-        recipient: { id: recipientPsid },
-        messaging_type: 'MESSAGE_TAG',
-        tag: 'CONFIRMED_EVENT_UPDATE',
-        message: { text }
-      };
-
-      res = await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      data = await res.json();
-    }
-
     if (!res.ok) {
+      if (data.error?.code === 10 || data.error?.error_subcode === 2018278) {
+        throw new Error('Đã quá cửa sổ 24 giờ của Facebook (Khách chưa nhắn lại quá 24h). Khách chỉ cần nhắn 1 tin mới vào Page là chat lại được ngay.');
+      }
       throw new Error(data.error?.message || 'Lỗi gửi tin nhắn qua Facebook Graph API');
     }
 

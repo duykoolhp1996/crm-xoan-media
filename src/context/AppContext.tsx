@@ -1172,7 +1172,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetConv = messengerConversations.find(c => c.id === convId);
     if (targetConv?.facebookPsid && sender === 'sales') {
       FacebookApiService.sendMessage(targetConv.facebookPsid, text.trim()).catch(err => {
-        console.warn('Gửi qua Facebook Graph API (có thể cần duyệt quyền hoặc nằm ngoài 24h):', err);
+        console.warn('Gửi qua Facebook Graph API:', err);
+        const errorSystemMsg: FacebookChatMessage = {
+          id: `err-${Date.now()}`,
+          sender: 'customer',
+          senderName: 'Cảnh Báo Facebook API',
+          text: `⚠️ Chưa gửi được tới Facebook của khách: ${err.message}`,
+          timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+        };
+        setMessengerConversations(prev =>
+          prev.map(c => (c.id === convId ? { ...c, messages: [...c.messages, errorSystemMsg] } : c))
+        );
       });
     }
   };
