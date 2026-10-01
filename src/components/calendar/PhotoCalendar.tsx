@@ -261,10 +261,10 @@ export const PhotoCalendar: React.FC = () => {
           </div>
 
           {/* Day Grid */}
-          <div className="grid grid-cols-7 divide-x divide-y divide-black/[0.06] min-h-[550px]">
+          <div className="grid grid-cols-7 divide-x divide-y divide-black/[0.06] min-h-[300px] sm:min-h-[550px]">
             {/* Empty slots trước ngày 1 */}
             {Array.from({ length: startDayOffset }).map((_, idx) => (
-              <div key={`empty-${idx}`} className="p-2 bg-neutral-50/40 min-h-[115px]" />
+              <div key={`empty-${idx}`} className="p-1 sm:p-2 bg-neutral-50/40 aspect-square sm:aspect-auto sm:min-h-[115px]" />
             ))}
 
             {/* Các ngày trong tháng */}
@@ -279,7 +279,7 @@ export const PhotoCalendar: React.FC = () => {
                 <div
                   key={`day-${day}`}
                   onClick={() => handleSelectDay(day)}
-                  className={`p-2.5 min-h-[115px] transition-all relative flex flex-col justify-between cursor-pointer group ${
+                  className={`p-1.5 sm:p-2.5 aspect-square sm:aspect-auto sm:min-h-[115px] transition-all relative flex flex-col justify-between cursor-pointer group ${
                     isSelected
                       ? 'ring-2 ring-neutral-900 bg-neutral-50 z-10 shadow-sm'
                       : isToday
@@ -301,18 +301,34 @@ export const PhotoCalendar: React.FC = () => {
                     </span>
 
                     {dayBookings.length > 0 ? (
-                      <span className="text-[10px] font-bold bg-neutral-100 text-neutral-700 border border-black/[0.08] px-2 py-0.5 rounded-full">
-                        {dayBookings.length} ca
+                      <span className="text-[9px] sm:text-[10px] font-bold bg-neutral-100 text-neutral-700 border border-black/[0.08] px-1 sm:px-2 py-0.5 rounded-full">
+                        <span className="hidden sm:inline">{dayBookings.length} ca</span>
+                        <span className="sm:hidden">{dayBookings.length}</span>
                       </span>
                     ) : (
-                      <span className="opacity-0 group-hover:opacity-100 text-[10px] font-bold text-neutral-400 transition-opacity">
+                      <span className="opacity-0 group-hover:opacity-100 text-[10px] font-bold text-neutral-400 transition-opacity hidden sm:inline">
                         + Chọn
                       </span>
                     )}
                   </div>
 
-                  {/* Booking Badges trong ô ngày */}
-                  <div className="space-y-1.5 mt-1.5 flex-1">
+                  {/* Chấm tròn Dots trên Mobile (đảm bảo ô luôn là hình vuông chuẩn đẹp) */}
+                  {dayBookings.length > 0 && (
+                    <div className="flex sm:hidden items-center justify-center gap-1 mt-auto pb-0.5">
+                      {dayBookings.slice(0, 3).map((bk, dotIdx) => {
+                        const hasConflict = bk.assignments.leadPhotographerName?.includes('Trùng Lịch');
+                        const isUnassigned = !bk.assignments.leadPhotographerId;
+                        const dotColor = hasConflict ? 'bg-rose-500' : isUnassigned ? 'bg-amber-500' : 'bg-[#79ba07]';
+                        return <span key={dotIdx} className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />;
+                      })}
+                      {dayBookings.length > 3 && (
+                        <span className="text-[8px] font-black text-neutral-500">+</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Booking Badges trong ô ngày (Chỉ hiển thị trên Desktop để không làm dài ô trên Mobile) */}
+                  <div className="hidden sm:block space-y-1.5 mt-1.5 flex-1">
                     {dayBookings.slice(0, 2).map((bk) => {
                       const hasConflict = bk.assignments.leadPhotographerName?.includes('Trùng Lịch');
                       const isUnassigned = !bk.assignments.leadPhotographerId;

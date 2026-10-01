@@ -518,7 +518,7 @@ export const ExecutiveDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* 6. Paytin Recent Activity: Lịch Chụp & Booking Gần Nhất */}
+        {/* 6. Paytin Recent Activity: Lịch Chụp & Booking Gần Nhất (Thiết kế ô vuông aspect-square) */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-black text-neutral-900 uppercase tracking-wider">
@@ -531,7 +531,8 @@ export const ExecutiveDashboard: React.FC = () => {
               Xem tất cả &gt;
             </button>
           </div>
-          <div className="space-y-2">
+          {/* Lưới 2 cột các ô vuông bo góc chuẩn Paytin (aspect-square) */}
+          <div className="grid grid-cols-2 gap-2.5">
             {upcomingBookings.map(bk => (
               <div
                 key={bk.id}
@@ -539,25 +540,35 @@ export const ExecutiveDashboard: React.FC = () => {
                   setSelectedBookingId(bk.id);
                   setActiveTab('bookings');
                 }}
-                className="bg-white hover:bg-neutral-50 p-3 rounded-2xl border border-black/[0.06] shadow-xs flex items-center justify-between gap-3 cursor-pointer transition-all active:scale-[0.99]"
+                className="bg-white hover:bg-neutral-50 p-3 sm:p-3.5 rounded-3xl border border-black/[0.06] shadow-xs aspect-square flex flex-col justify-between cursor-pointer transition-all active:scale-95 group"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center shrink-0 font-black shadow-2xs">
+                {/* Top: Icon máy ảnh + Huy hiệu trạng thái */}
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black shadow-2xs group-hover:scale-105 transition-transform">
                     <Camera className="w-4 h-4" />
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="text-xs font-black text-neutral-900 truncate">{bk.customerName}</h4>
-                    <p className="text-[10px] text-neutral-500 truncate flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {bk.shootDate} • {bk.packageName || 'Kỷ yếu Concept'}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="text-xs font-black text-neutral-900 block">
-                    {(bk.totalAmount / 1000000).toFixed(1)} Tr
-                  </span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                     {bk.bookingStatus}
+                  </span>
+                </div>
+
+                {/* Middle: Tên lớp & Trường */}
+                <div className="my-1">
+                  <h4 className="text-xs font-black text-neutral-900 line-clamp-2 leading-tight">
+                    {bk.className}
+                  </h4>
+                  <p className="text-[10px] text-neutral-500 truncate mt-0.5">
+                    {bk.schoolName}
+                  </p>
+                </div>
+
+                {/* Bottom: Ngày chụp + Số tiền */}
+                <div className="pt-2 border-t border-black/[0.04] flex items-center justify-between">
+                  <span className="text-[10px] text-neutral-400 font-semibold flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-neutral-400" /> {bk.shootDate.slice(5)}
+                  </span>
+                  <span className="text-xs font-black text-neutral-900">
+                    {(bk.totalAmount / 1000000).toFixed(1)} Tr
                   </span>
                 </div>
               </div>
