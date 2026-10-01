@@ -290,6 +290,286 @@ export const ExecutiveDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-200">
+      {/* ========================================================
+          GIAO DIỆN MOBILE ĐỈNH CAO CHUẨN PAYTIN (FINTECH APP STYLE)
+          Hiển thị ưu tiên trên Mobile / Tablet - BẢO TOÀN 100% CÔNG NĂNG & SỐ LIỆU
+          ======================================================== */}
+      <div className="md:hidden space-y-4">
+        {/* 1. Paytin Header: Avatar tròn + Welcome Back */}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <div className="flex items-center gap-3">
+            <img
+              src={currentUser.avatar || mySalesStaff?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+              alt={currentUser.name}
+              className="w-11 h-11 rounded-full object-cover border-2 border-[#B8F23D] shadow-xs"
+            />
+            <div>
+              <p className="text-[11px] text-neutral-500 font-medium">Chào mừng trở lại 👋</p>
+              <h2 className="text-base font-black text-neutral-900 leading-tight">
+                {currentUser.name}
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#B8F23D] animate-ping" />
+            <span className="px-2.5 py-1 rounded-full bg-neutral-900 text-[#B8F23D] text-[10px] font-extrabold uppercase tracking-wide">
+              {currentRole}
+            </span>
+          </div>
+        </div>
+
+        {/* 2. Paytin Hero Black Card + Side Neon Card (Thẻ Doanh Thu & Thực Thu) */}
+        <div className="flex flex-col gap-2.5">
+          {/* Main Card (Thẻ Đen Than Sang Xịn) */}
+          <div className="bg-[#121316] text-white rounded-[28px] p-5 relative overflow-hidden shadow-xl border border-white/5">
+            {/* Họa tiết sao lấp lánh ✦ */}
+            <div className="absolute top-4 right-16 text-[#B8F23D]/30 text-xl font-mono select-none pointer-events-none">✦</div>
+            <div className="absolute bottom-5 right-8 text-[#B8F23D]/20 text-xs font-mono select-none pointer-events-none">✦</div>
+
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-black tracking-widest text-[#B8F23D] uppercase">XOĂN CRM</span>
+                <span className="text-[9px] bg-white/10 text-neutral-300 px-2 py-0.5 rounded-full font-bold">Mùa 2024</span>
+              </div>
+              <button
+                onClick={() => setActiveTab('bookings')}
+                className="bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 px-3 py-1 rounded-full text-[11px] font-black flex items-center gap-1 shadow-sm active:scale-95 transition-all"
+              >
+                <span>+ Lập Booking</span>
+              </button>
+            </div>
+
+            <div className="my-2">
+              <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-wider block mb-0.5">
+                Tổng Doanh Thu Hợp Đồng
+              </span>
+              <div className="text-3xl font-black text-white tracking-tight">
+                ₫ {(totalContractRevenue).toLocaleString('vi-VN')}
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-neutral-400">
+              <span className="font-mono tracking-widest text-[11px] text-neutral-300">
+                •••• •••• {filteredCustomers.length} LỚP
+              </span>
+              <span className="text-[11px] font-bold text-[#B8F23D]">
+                {totalStudents.toLocaleString('vi-VN')} Học sinh
+              </span>
+            </div>
+          </div>
+
+          {/* Mini Card Đôi Màu Xanh Neon Dựng Kèm (Side NFC Card) */}
+          <div
+            onClick={() => setActiveTab('bookings')}
+            className="bg-[#B8F23D] text-neutral-950 rounded-2xl p-3.5 flex items-center justify-between shadow-md cursor-pointer active:scale-98 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-neutral-950/10 flex items-center justify-center font-black text-lg">
+                )))
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider block opacity-75">
+                  Thực Thu Đã Thu Cọc
+                </span>
+                <span className="text-sm font-black leading-tight">
+                  ₫ {(totalCollectedRevenue).toLocaleString('vi-VN')} ({((totalCollectedRevenue / (totalContractRevenue || 1)) * 100).toFixed(0)}%)
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-[10px] font-bold text-neutral-800 bg-white/40 px-2 py-0.5 rounded-full">
+                Xem Lịch &gt;
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Paytin Quick Actions: 4 Nút Tròn Trắng Bo Mềm */}
+        <div className="grid grid-cols-4 gap-2 select-none">
+          <button
+            onClick={() => setActiveTab('customers')}
+            className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-white hover:bg-neutral-50 border border-black/[0.06] shadow-xs active:scale-95 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-full bg-[#F4FBE8] text-neutral-900 flex items-center justify-center group-hover:bg-[#B8F23D] transition-colors shadow-2xs">
+              <Users className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold text-neutral-800 tracking-tight">+ Khách</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('services')}
+            className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-white hover:bg-neutral-50 border border-black/[0.06] shadow-xs active:scale-95 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-full bg-[#F4FBE8] text-neutral-900 flex items-center justify-center group-hover:bg-[#B8F23D] transition-colors shadow-2xs">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold text-neutral-800 tracking-tight">Báo Giá</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-white hover:bg-neutral-50 border border-black/[0.06] shadow-xs active:scale-95 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-full bg-[#F4FBE8] text-neutral-900 flex items-center justify-center group-hover:bg-[#B8F23D] transition-colors shadow-2xs">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold text-neutral-800 tracking-tight">Booking</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('pipeline')}
+            className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-white hover:bg-neutral-50 border border-black/[0.06] shadow-xs active:scale-95 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-full bg-[#F4FBE8] text-neutral-900 flex items-center justify-center group-hover:bg-[#B8F23D] transition-colors shadow-2xs">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold text-neutral-800 tracking-tight">Pipeline</span>
+          </button>
+        </div>
+
+        {/* 4. Paytin Quick Contacts: Ekip Trực Chiến & Sales Hôm Nay (Quick Send) */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-black text-neutral-900 uppercase tracking-wider">
+              Ekip & Sales Hôm Nay
+            </h3>
+            <button
+              onClick={() => setActiveTab('photographers')}
+              className="text-[11px] font-bold text-neutral-500 hover:text-neutral-900"
+            >
+              Xem tất cả &gt;
+            </button>
+          </div>
+          <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
+            {salesStaff.slice(0, 6).map(staff => (
+              <div
+                key={staff.id}
+                onClick={() => {
+                  if (!isSalesUser) setSelectedStaffId(staff.id);
+                }}
+                className="flex flex-col items-center gap-1 shrink-0 cursor-pointer group"
+              >
+                <div className={`relative p-0.5 rounded-full ${selectedStaffId === staff.id ? 'ring-2 ring-[#B8F23D]' : ''}`}>
+                  <img
+                    src={staff.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                    alt={staff.name}
+                    className="w-11 h-11 rounded-full object-cover border border-black/[0.08] group-hover:scale-105 transition-transform"
+                  />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                </div>
+                <span className="text-[10px] font-bold text-neutral-700 truncate max-w-[60px]">
+                  {staff.name.split(' ')[0]}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 5. Paytin Statistics: 2 Thẻ KPI Song Song (1 Xanh Neon, 1 Đen Than) */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {/* Card 1: Xanh Neon (Tỉ lệ chốt đơn & Goal) */}
+          <div
+            onClick={() => setActiveTab('pipeline')}
+            className="bg-[#D8FC64] text-neutral-950 rounded-3xl p-4 flex flex-col justify-between shadow-xs cursor-pointer active:scale-98 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase flex items-center gap-1">
+                <TrendingUp className="w-3.5 h-3.5" /> Tỉ Lệ Chốt
+              </span>
+              <span className="w-2 h-2 rounded-full bg-neutral-950/20" />
+            </div>
+            <div className="my-2">
+              <span className="text-3xl font-black tracking-tight">{winRate}%</span>
+              <p className="text-[10px] font-medium opacity-80 mt-0.5">
+                {bookedLeads}/{totalLeads} HĐ chốt cọc
+              </p>
+            </div>
+            <div className="pt-2 border-t border-black/10 flex items-center justify-between text-[10px] font-bold">
+              <span>Mục tiêu mùa:</span>
+              <span>{bookedLeads}/300</span>
+            </div>
+          </div>
+
+          {/* Card 2: Đen Than (Thực Thu & Công Nợ) */}
+          <div
+            onClick={() => setActiveTab('bookings')}
+            className="bg-[#121316] text-white rounded-3xl p-4 flex flex-col justify-between shadow-xs cursor-pointer active:scale-98 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase text-neutral-400 flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5 text-[#B8F23D]" /> Đã Thu Cọc
+              </span>
+              <span className="w-2 h-2 rounded-full bg-[#B8F23D]" />
+            </div>
+            <div className="my-2">
+              <span className="text-2xl font-black text-white tracking-tight">
+                {((totalCollectedRevenue) / 1000000).toFixed(1)} Tr
+              </span>
+              <p className="text-[10px] text-neutral-400 font-medium mt-0.5">
+                Nợ: {((totalRemainingDebt) / 1000000).toFixed(1)} Tr
+              </p>
+            </div>
+            <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-400 font-bold">
+              <span>Đạt tiến độ:</span>
+              <span className="text-[#B8F23D]">
+                {totalContractRevenue > 0 ? Math.round((totalCollectedRevenue / totalContractRevenue) * 100) : 0}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 6. Paytin Recent Activity: Lịch Chụp & Booking Gần Nhất */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-black text-neutral-900 uppercase tracking-wider">
+              Lịch Chụp & Booking Gần Nhất
+            </h3>
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className="text-[11px] font-bold text-neutral-500 hover:text-neutral-900"
+            >
+              Xem tất cả &gt;
+            </button>
+          </div>
+          <div className="space-y-2">
+            {upcomingBookings.map(bk => (
+              <div
+                key={bk.id}
+                onClick={() => {
+                  setSelectedBookingId(bk.id);
+                  setActiveTab('bookings');
+                }}
+                className="bg-white hover:bg-neutral-50 p-3 rounded-2xl border border-black/[0.06] shadow-xs flex items-center justify-between gap-3 cursor-pointer transition-all active:scale-[0.99]"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center shrink-0 font-black shadow-2xs">
+                    <Camera className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-black text-neutral-900 truncate">{bk.customerName}</h4>
+                    <p className="text-[10px] text-neutral-500 truncate flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {bk.shootDate} • {bk.packageName || 'Kỷ yếu Concept'}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-black text-neutral-900 block">
+                    {(bk.totalAmount / 1000000).toFixed(1)} Tr
+                  </span>
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                    {bk.bookingStatus}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================
+          PHẦN ĐIỀU HÀNH CHI TIẾT (DESKTOP & TOÀN HỆ THỐNG CRM)
+          BẢO TOÀN 100% TẤT CẢ CÁC BẢNG BIỂU, BỘ LỌC, RECHARTS & PHÂN BỔ HOA HỒNG
+          ======================================================== */}
       {/* Welcome Banner - Soft Glassmorphism Light Style */}
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-[#B8F23D]/25 via-emerald-50/60 to-white/80 backdrop-blur-2xl border border-black/[0.06] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="relative z-10 max-w-2xl">

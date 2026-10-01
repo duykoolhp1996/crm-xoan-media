@@ -65,7 +65,7 @@ const CrmAppShell: React.FC = () => {
   }
 
   return (
-    <div className="relative flex h-screen bg-[#F6F7F9] text-neutral-900 overflow-hidden font-sans selection:bg-[#B8F23D]/60 selection:text-neutral-900">
+    <div className="relative flex h-screen bg-[#F4FBE8] text-neutral-900 overflow-hidden font-sans selection:bg-[#B8F23D]/60 selection:text-neutral-900">
       {/* Spatial Ambient Glow Layer */}
       <div className="ambient-glow" aria-hidden="true" />
 
