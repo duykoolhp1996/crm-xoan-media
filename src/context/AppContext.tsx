@@ -42,6 +42,7 @@ import {
 import { mockMessengerConversations } from '../data/mockMessengerData';
 import { crmSupabaseService } from '../services/crmSupabaseService';
 import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup, notifyCustomerDepositToZaloGroup } from '../lib/zaloBotService';
+import { FacebookApiService } from '../services/facebookApiService';
 
 export type NavigationTab = 
   | 'dashboard'
@@ -167,6 +168,9 @@ interface AppContextType {
   updateMessengerStage: (convId: string, stage: PipelineStage) => void;
   updateMessengerNotes: (convId: string, notes: string) => void;
   unreadMessengerCount: number;
+  isSyncingFacebook: boolean;
+  syncFacebookLiveConversations: () => Promise<void>;
+  facebookPageName: string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -1059,6 +1063,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [messengerConversations]);
 
+  const [isSyncingFacebook, setIsSyncingFacebook] = useState(false);
+  const [facebookPageName, setFacebookPageName] = useState('Duy Hiền Digital Marketing');
+
+  // Hàm đồng bộ hội thoại thực tế từ Fanpage Facebook qua Graph API
+  const syncFacebookLiveConversations = async () => {
+    setIsSyncingFacebook(true);
+    try {
+      const fbConvs = await FacebookApiService.getConversations();
+      const pageId = FacebookApiService.getPageId();
+
+      const mappedList: FacebookChatConversation[] = fbConvs.map(fc => {
+        // Tìm người tham gia không phải là Page (Khách Hàng)
+        const customerPart = fc.participants.data.find(p => p.id !== pageId) || fc.participants.data[0];
+        const psid = customerPart?.id || '';
+        const custName = customerPart?.name || 'Khách Hàng Facebook';
+
+        // Lấy danh sách tin nhắn và sắp xếp theo thời gian tăng dần
+        const rawMsgs = (fc.messages?.data || []).slice().reverse();
+        const mappedMsgs: FacebookChatMessage[] = rawMsgs.map(rm => ({
+          id: rm.id,
+          sender: rm.from.id === pageId ? 'sales' : 'customer',
+          senderName: rm.from.name,
+          text: rm.message || (rm.attachments?.data?.length ? '[Hình ảnh đính kèm]' : ''),
+          timestamp: new Date(rm.created_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+          attachments: rm.attachments?.data?.map(att => ({
+            type: 'image' as const,
+            url: att.image_data?.url || att.file_url || 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=500',
+            name: att.name || 'image.jpg'
+          }))
+        }));
+
+        const lastRaw = rawMsgs[rawMsgs.length - 1];
+
+        return {
+          id: `fb-${fc.id}`,
+          facebookPsid: psid,
+          isLiveFacebook: true,
+          customerName: custName,
+          customerAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(custName)}&background=0084FF&color=fff&bold=true`,
+          customerClass: 'Khách Fanpage Live',
+          customerSchool: 'Facebook Messenger',
+          facebookUrl: `https://facebook.com/${psid}`,
+          pageName: 'Duy Hiền Digital Marketing',
+          unreadCount: fc.unread_count || 0,
+          lastMessage: lastRaw?.message || 'Cuộc trò chuyện Facebook Messenger',
+          lastMessageTime: lastRaw?.created_time
+            ? new Date(lastRaw.created_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+            : 'Mới đây',
+          assignedSalesName: currentUser.name,
+          pipelineStage: 'Đang tư vấn',
+          tags: ['Facebook Fanpage', 'Live Chat', 'Messenger API'],
+          notes: `Khách hàng nhắn tin trực tiếp qua Fanpage Facebook (PSID: ${psid})`,
+          messages: mappedMsgs
+        };
+      });
+
+      if (mappedList.length > 0) {
+        setMessengerConversations(prev => {
+          const liveIds = new Set(mappedList.map(m => m.id));
+          const remainingPrev = prev.filter(p => !liveIds.has(p.id));
+          return [...mappedList, ...remainingPrev];
+        });
+
+        if (!activeConversationId || activeConversationId.startsWith('conv-fb-1')) {
+          setActiveConversationId(mappedList[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Lỗi đồng bộ Facebook:', error);
+    } finally {
+      setIsSyncingFacebook(false);
+    }
+  };
+
+  // Tự động kéo tin nhắn thực tế từ Fanpage khi khởi động ứng dụng
+  useEffect(() => {
+    syncFacebookLiveConversations();
+  }, []);
+
   const sendMessengerMessage = (convId: string, text: string, sender: 'sales' | 'customer' = 'sales', attachments?: any[]) => {
     if (!text.trim() && (!attachments || attachments.length === 0)) return;
 
@@ -1083,6 +1166,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
       })
     );
+
+    // Gửi tin nhắn thực tế qua Facebook Graph API nếu là cuộc trò chuyện Fanpage
+    const targetConv = messengerConversations.find(c => c.id === convId);
+    if (targetConv?.facebookPsid && sender === 'sales') {
+      FacebookApiService.sendMessage(targetConv.facebookPsid, text.trim()).catch(err => {
+        console.warn('Gửi qua Facebook Graph API (có thể cần duyệt quyền hoặc nằm ngoài 24h):', err);
+      });
+    }
   };
 
   const markMessengerAsRead = (convId: string) => {
@@ -1193,7 +1284,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         markMessengerAsRead,
         updateMessengerStage,
         updateMessengerNotes,
-        unreadMessengerCount
+        unreadMessengerCount,
+        isSyncingFacebook,
+        syncFacebookLiveConversations,
+        facebookPageName
       }}
     >
       {children}

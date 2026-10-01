@@ -523,5 +523,7 @@ export interface FacebookChatConversation {
   tags: string[];
   notes?: string;
   messages: FacebookChatMessage[];
+  facebookPsid?: string;
+  isLiveFacebook?: boolean;
 }
 

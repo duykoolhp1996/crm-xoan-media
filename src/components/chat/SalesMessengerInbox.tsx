@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { FacebookApiService } from '../../services/facebookApiService';
 import { MessengerIcon } from './MessengerIcon';
 import { quickReplyTemplates } from '../../data/mockMessengerData';
 import { PipelineStage } from '../../types';
@@ -29,6 +30,9 @@ import {
   PanelRightClose,
   PanelRightOpen,
   ArrowLeft,
+  RefreshCw,
+  Settings,
+  Check,
   X
 } from 'lucide-react';
 
@@ -60,7 +64,10 @@ export const SalesMessengerInbox: React.FC = () => {
     currentUser,
     setActiveTab,
     setSelectedCustomerId,
-    customers
+    customers,
+    isSyncingFacebook,
+    syncFacebookLiveConversations,
+    facebookPageName
   } = useApp();
 
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
@@ -70,6 +77,10 @@ export const SalesMessengerInbox: React.FC = () => {
   const [noteText, setNoteText] = useState('');
   const [showSimulateMenu, setShowSimulateMenu] = useState(false);
   const [showCrmPanel, setShowCrmPanel] = useState(false);
+  const [showFbConfigModal, setShowFbConfigModal] = useState(false);
+  const [fbTokenInput, setFbTokenInput] = useState(FacebookApiService.getPageToken());
+  const [fbPageIdInput, setFbPageIdInput] = useState(FacebookApiService.getPageId());
+  const [fbConfigStatus, setFbConfigStatus] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConv = messengerConversations.find(c => c.id === activeConversationId) || messengerConversations[0];
@@ -163,22 +174,41 @@ export const SalesMessengerInbox: React.FC = () => {
         {/* Header danh sách */}
         <div className="p-4 border-b border-black/[0.06] bg-white space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#0078FF] via-[#00C6FF] to-[#A824FB] flex items-center justify-center text-white shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#0078FF] via-[#00C6FF] to-[#A824FB] flex items-center justify-center text-white shadow-xs shrink-0">
                 <MessengerIcon size={20} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h2 className="text-sm font-black text-neutral-900 leading-tight">Facebook Messenger</h2>
-                <p className="text-[11px] text-neutral-500 flex items-center gap-1 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Xoăn Media Fanpage Live
+                <p className="text-[11px] text-neutral-500 flex items-center gap-1 font-medium truncate">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span className="truncate max-w-[125px] sm:max-w-[150px]">{facebookPageName}</span>
                 </p>
               </div>
             </div>
 
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-              {messengerConversations.filter(c => c.unreadCount > 0).length} mới
-            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => syncFacebookLiveConversations()}
+                disabled={isSyncingFacebook}
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                title="Đồng bộ tin nhắn mới từ Fanpage qua Facebook Graph API"
+              >
+                <RefreshCw className={`w-4 h-4 ${isSyncingFacebook ? 'animate-spin text-blue-600' : ''}`} />
+              </button>
+
+              <button
+                onClick={() => setShowFbConfigModal(true)}
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+                title="Cấu hình Token Facebook Page API"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 ml-0.5">
+                {messengerConversations.filter(c => c.unreadCount > 0).length} mới
+              </span>
+            </div>
           </div>
 
           {/* Ô tìm kiếm khách hàng */}
@@ -309,10 +339,16 @@ export const SalesMessengerInbox: React.FC = () => {
                       >
                         {conv.pipelineStage}
                       </span>
-                      {conv.tags[0] && (
-                        <span className="text-[9px] text-neutral-500 bg-neutral-200/60 px-1.5 py-0.5 rounded truncate max-w-[100px]">
-                          {conv.tags[0]}
+                      {conv.isLiveFacebook ? (
+                        <span className="text-[9px] font-bold text-blue-700 bg-blue-100/90 px-1.5 py-0.5 rounded flex items-center gap-1 border border-blue-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" /> Live FB
                         </span>
+                      ) : (
+                        conv.tags[0] && (
+                          <span className="text-[9px] text-neutral-500 bg-neutral-200/60 px-1.5 py-0.5 rounded truncate max-w-[100px]">
+                            {conv.tags[0]}
+                          </span>
+                        )
                       )}
                     </div>
                   </div>
@@ -459,8 +495,15 @@ export const SalesMessengerInbox: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
             {/* Hộp thông báo bắt đầu cuộc trò chuyện Fanpage */}
             <div className="text-center my-3">
-              <span className="text-[11px] font-semibold text-neutral-400 bg-white/80 px-3 py-1 rounded-full border border-black/[0.04]">
-                💬 Cuộc trò chuyện được đồng bộ từ Fanpage Xoăn Media
+              <span className="text-[11px] font-semibold text-neutral-500 bg-white/90 px-3.5 py-1.5 rounded-full border border-black/[0.06] shadow-2xs inline-flex items-center gap-2">
+                {activeConv.isLiveFacebook ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                    <span>Hội thoại Live Facebook API — Page: <strong className="text-neutral-800">{facebookPageName}</strong></span>
+                  </>
+                ) : (
+                  <>💬 Cuộc trò chuyện được đồng bộ từ Fanpage Xoăn Media</>
+                )}
               </span>
             </div>
 
@@ -871,6 +914,118 @@ export const SalesMessengerInbox: React.FC = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* ========================================================
+          MODAL CẤU HÌNH FACEBOOK GRAPH API FANPAGE
+          ======================================================== */}
+      {showFbConfigModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-black/[0.08] space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0078FF] to-[#A824FB] flex items-center justify-center text-white">
+                  <MessengerIcon size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-neutral-900">Cấu Hình Kết Nối Facebook Page API</h3>
+                  <p className="text-[11px] text-neutral-500 font-medium">Nhập Page Access Token để đồng bộ tin nhắn trực tiếp</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowFbConfigModal(false);
+                  setFbConfigStatus(null);
+                }}
+                className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-xl transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5 text-xs">
+              <div>
+                <label className="block text-neutral-700 font-bold mb-1">Fanpage Hiện Tại</label>
+                <div className="p-2.5 bg-neutral-50 border border-black/[0.06] rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-bold text-neutral-900">{facebookPageName}</span>
+                  </div>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    Đã Kết Nối
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-neutral-700 font-bold mb-1">Facebook Page ID</label>
+                <input
+                  type="text"
+                  value={fbPageIdInput}
+                  onChange={e => setFbPageIdInput(e.target.value)}
+                  placeholder="Ví dụ: 411200738737677"
+                  className="w-full px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-neutral-800 text-xs focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-neutral-700 font-bold mb-1">Page Access Token</label>
+                <textarea
+                  rows={4}
+                  value={fbTokenInput}
+                  onChange={e => setFbTokenInput(e.target.value)}
+                  placeholder="Dán mã Page Access Token (EAAU...)"
+                  className="w-full p-2.5 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-800 focus:outline-none focus:border-blue-500 resize-none break-all"
+                />
+                <p className="text-[10px] text-neutral-400 mt-1">
+                  💡 Token được lưu an toàn trong trình duyệt (LocalStorage).
+                </p>
+              </div>
+
+              {fbConfigStatus && (
+                <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{fbConfigStatus}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-black/[0.06]">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFbConfigModal(false);
+                  setFbConfigStatus(null);
+                }}
+                className="px-3.5 py-2 text-xs font-bold text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  FacebookApiService.setPageToken(fbTokenInput);
+                  FacebookApiService.setPageId(fbPageIdInput);
+                  setFbConfigStatus('Đang xác thực và đồng bộ tin nhắn...');
+                  try {
+                    await syncFacebookLiveConversations();
+                    setFbConfigStatus('Kết nối thành công! Đã đồng bộ hội thoại.');
+                    setTimeout(() => {
+                      setShowFbConfigModal(false);
+                      setFbConfigStatus(null);
+                    }, 1200);
+                  } catch (err: any) {
+                    setFbConfigStatus('Lỗi: ' + (err.message || 'Không thể kết nối Facebook API'));
+                  }
+                }}
+                className="px-4 py-2 text-xs font-black text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-xs flex items-center gap-1.5"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Lưu & Đồng Bộ Ngay
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
