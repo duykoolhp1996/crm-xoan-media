@@ -169,7 +169,7 @@ interface AppContextType {
   updateMessengerNotes: (convId: string, notes: string) => void;
   unreadMessengerCount: number;
   isSyncingFacebook: boolean;
-  syncFacebookLiveConversations: () => Promise<void>;
+  syncFacebookLiveConversations: (silent?: boolean) => Promise<void>;
   facebookPageName: string;
 }
 
@@ -1068,9 +1068,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isSyncingFacebook, setIsSyncingFacebook] = useState(false);
   const [facebookPageName, setFacebookPageName] = useState('Duy Hiền Digital Marketing');
 
-  // Hàm đồng bộ hội thoại thực tế từ Fanpage Facebook qua Graph API
-  const syncFacebookLiveConversations = async () => {
-    setIsSyncingFacebook(true);
+  // Hàm phát âm thanh thông báo nhẹ nhàng khi có tin nhắn mới từ khách
+  const playMessageChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.25);
+    } catch (e) {
+      // Bỏ qua nếu trình duyệt chưa kích hoạt audio
+    }
+  };
+
+  // Hàm đồng bộ hội thoại thực tế từ Fanpage Facebook qua Graph API (Hỗ trợ chạy ngầm silent)
+  const syncFacebookLiveConversations = async (silent: boolean = false) => {
+    if (!silent) setIsSyncingFacebook(true);
     try {
       const fbConvs = await FacebookApiService.getConversations();
       const pageId = FacebookApiService.getPageId();
@@ -1122,7 +1144,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       if (mappedList.length > 0) {
-        setMessengerConversations(mappedList);
+        setMessengerConversations(prev => {
+          // Kiểm tra xem có tin nhắn mới từ khách hàng không để phát chuông & thông báo
+          let hasNewCustomerMsg = false;
+          let newCustomerName = '';
+          let newCustomerText = '';
+
+          mappedList.forEach(m => {
+            const oldConv = prev.find(p => p.id === m.id);
+            if (oldConv && oldConv.messages.length > 0 && m.messages.length > 0) {
+              const lastOldMsg = oldConv.messages[oldConv.messages.length - 1];
+              const lastNewMsg = m.messages[m.messages.length - 1];
+              if (lastNewMsg.id !== lastOldMsg.id && lastNewMsg.sender === 'customer') {
+                hasNewCustomerMsg = true;
+                newCustomerName = m.customerName;
+                newCustomerText = lastNewMsg.text;
+              }
+            } else if (!oldConv && m.messages.length > 0 && m.messages[m.messages.length - 1].sender === 'customer') {
+              hasNewCustomerMsg = true;
+              newCustomerName = m.customerName;
+              newCustomerText = m.messages[m.messages.length - 1].text;
+            }
+          });
+
+          if (hasNewCustomerMsg) {
+            playMessageChime();
+            addNotification({
+              title: `Tin nhắn Facebook mới từ ${newCustomerName}`,
+              message: newCustomerText || 'Khách vừa gửi tin nhắn vào Fanpage',
+              type: 'new_lead',
+              severity: 'info'
+            });
+          }
+
+          return mappedList;
+        });
 
         setActiveConversationId(prev => {
           if (!prev || prev.startsWith('conv-fb-') || !mappedList.some(m => m.id === prev)) {
@@ -1132,15 +1188,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
     } catch (error) {
-      console.error('Lỗi đồng bộ Facebook:', error);
+      if (!silent) console.error('Lỗi đồng bộ Facebook:', error);
     } finally {
-      setIsSyncingFacebook(false);
+      if (!silent) setIsSyncingFacebook(false);
     }
   };
 
-  // Tự động kéo tin nhắn thực tế từ Fanpage khi khởi động ứng dụng
+  // Tự động kiểm tra và cập nhật tin nhắn mới từ Fanpage mỗi 5 giây (Auto-polling nền)
   useEffect(() => {
-    syncFacebookLiveConversations();
+    syncFacebookLiveConversations(false);
+
+    const pollingTimer = setInterval(() => {
+      // Chỉ tự động kiểm tra khi tab đang mở và hiển thị
+      if (document.visibilityState === 'visible') {
+        syncFacebookLiveConversations(true);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollingTimer);
   }, []);
 
   const sendMessengerMessage = (convId: string, text: string, sender: 'sales' | 'customer' = 'sales', attachments?: any[]) => {

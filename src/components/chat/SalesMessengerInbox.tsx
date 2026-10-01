@@ -163,9 +163,13 @@ export const SalesMessengerInbox: React.FC = () => {
                 <MessengerIcon size={20} />
               </div>
               <div className="min-w-0">
-                <h2 className="text-sm font-black text-neutral-900 leading-tight">Facebook Messenger</h2>
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-sm font-black text-neutral-900 leading-tight">Messenger</h2>
+                  <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Tự động 5s
+                  </span>
+                </div>
                 <p className="text-[11px] text-neutral-500 flex items-center gap-1 font-medium truncate">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                   <span className="truncate max-w-[125px] sm:max-w-[150px]">{facebookPageName}</span>
                 </p>
               </div>
