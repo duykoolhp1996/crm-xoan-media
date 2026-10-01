@@ -140,19 +140,19 @@ export const Header: React.FC = () => {
           </select>
         </div>
 
-        {/* User Role Badge (Cố định theo tài khoản đăng nhập) */}
-        <div className="flex items-center gap-2 bg-neutral-100/90 border border-black/[0.06] rounded-2xl px-3 py-1.5 text-xs shadow-2xs">
+        {/* User Role Badge (Chỉ hiện trên desktop) */}
+        <div className="hidden md:flex items-center gap-2 bg-neutral-100/90 border border-black/[0.06] rounded-2xl px-3 py-1.5 text-xs shadow-2xs">
           <div className="w-2 h-2 rounded-full bg-[#79ba07]"></div>
-          <span className="font-bold text-neutral-800 hidden sm:inline">
+          <span className="font-bold text-neutral-800">
             {roleLabels[currentRole]?.label.split(' ')[0] || 'User'}
           </span>
         </div>
 
-        {/* Nút Hộp Thư Chat Khách Hàng (Tách riêng trên Header) */}
+        {/* Nút Hộp Thư Chat Khách Hàng (Desktop Header - trên Mobile đã có ở Bottom Nav) */}
         {(currentRole === 'sales' || currentRole === 'admin' || currentRole === 'manager') && (
           <button
             onClick={() => setActiveTab('chat-messenger')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-bold transition-all shadow-xs border ${
+            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-bold transition-all shadow-xs border ${
               activeTab === 'chat-messenger'
                 ? 'bg-gradient-to-r from-[#0084FF] to-[#A824FB] text-white border-transparent shadow-md'
                 : 'bg-white hover:bg-blue-50 text-neutral-800 hover:text-blue-700 border-black/[0.06]'
@@ -160,7 +160,7 @@ export const Header: React.FC = () => {
             title="Mở Hộp Thư Chat Khách Hàng (Facebook Messenger)"
           >
             <MessengerIcon size={16} />
-            <span className="hidden sm:inline">Chat Khách</span>
+            <span>Chat Khách</span>
             {unreadMessengerCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black animate-pulse">
                 {unreadMessengerCount}
@@ -195,14 +195,14 @@ export const Header: React.FC = () => {
           />
         </div>
 
-        {/* Logout Button */}
+        {/* Logout Button (Desktop only - mobile dùng trong menu drawer) */}
         <button
           onClick={logout}
-          className="p-2 bg-white/90 hover:bg-rose-50 text-neutral-500 hover:text-rose-600 border border-black/[0.06] rounded-2xl flex items-center gap-1.5 text-xs font-bold transition-colors shadow-xs"
+          className="hidden md:flex p-2 bg-white/90 hover:bg-rose-50 text-neutral-500 hover:text-rose-600 border border-black/[0.06] rounded-2xl items-center gap-1.5 text-xs font-bold transition-colors shadow-xs"
           title="Đăng xuất khỏi hệ thống"
         >
           <LogOut className="w-4 h-4 text-rose-500" />
-          <span className="hidden md:inline">Đăng Xuất</span>
+          <span>Đăng Xuất</span>
         </button>
       </div>
 

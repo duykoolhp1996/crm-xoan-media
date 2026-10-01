@@ -170,8 +170,79 @@ export const CustomerList: React.FC = () => {
         </div>
       </div>
 
-      {/* Customer Data Table */}
-      <div className="glass-panel rounded-3xl overflow-hidden shadow-sm">
+      {/* Mobile Card View (Chuyên dụng cho màn hình điện thoại - Tuyệt đối không bị vỡ/tràn) */}
+      <div className="md:hidden space-y-3">
+        {filteredCustomers.length === 0 ? (
+          <div className="p-8 text-center text-neutral-500 bg-white rounded-3xl border border-black/[0.06]">
+            <p className="font-semibold text-sm">Chưa có khách hàng hoặc lớp học nào trong hệ thống</p>
+          </div>
+        ) : (
+          filteredCustomers.map(cust => (
+            <div
+              key={cust.id}
+              onClick={() => setSelectedCustomerId(cust.id)}
+              className="bg-white p-4 rounded-3xl border border-black/[0.06] shadow-xs space-y-3 cursor-pointer active:scale-[0.99] transition-all"
+            >
+              {/* Header card: Lớp + Badge Stage */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-10 h-10 rounded-2xl bg-[#B8F23D]/30 border border-[#B8F23D]/60 text-neutral-950 font-black flex items-center justify-center text-xs shrink-0 shadow-2xs">
+                    {cust.className.slice(0, 3)}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-black text-sm text-neutral-900 truncate">{cust.className}</h3>
+                    <p className="text-[11px] text-neutral-500 truncate flex items-center gap-1">
+                      <School className="w-3 h-3 shrink-0" /> {cust.schoolName}
+                    </p>
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border shrink-0 ${
+                  stageBadges[cust.pipelineStage] || 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                }`}>
+                  {cust.pipelineStage}
+                </span>
+              </div>
+
+              {/* Thông tin đại diện & SĐT */}
+              <div className="p-2.5 bg-neutral-50 rounded-2xl flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-bold text-neutral-900 block">{cust.name} ({cust.representativeRole})</span>
+                  <span className="text-[11px] text-neutral-500 flex items-center gap-1 mt-0.5">
+                    <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full">
+                    {cust.assignedSalesName || 'Chưa gán'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Gói & Concept + Tài chính */}
+              <div className="flex items-center justify-between pt-1 text-xs">
+                <div>
+                  <span className="text-[10px] text-neutral-400 font-medium uppercase block">Gói & Concept</span>
+                  <span className="font-bold text-[#79ba07] text-[11px]">
+                    {cust.servicePackageName || 'Kỷ yếu Concept'} • {cust.concept}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-neutral-400 font-medium uppercase block">Doanh Thu</span>
+                  <span className="font-black text-neutral-900 text-xs">
+                    {(cust.totalRevenue || cust.expectedBudget).toLocaleString('vi-VN')}đ
+                  </span>
+                  <span className="text-[10px] text-emerald-700 block font-semibold">
+                    Cọc: {(cust.paidAmount || 0).toLocaleString('vi-VN')}đ
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Customer Data Table (Chỉ hiện trên Desktop/Tablet lớn) */}
+      <div className="hidden md:block glass-panel rounded-3xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>

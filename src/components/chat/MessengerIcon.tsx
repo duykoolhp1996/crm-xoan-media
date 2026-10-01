@@ -5,7 +5,7 @@ interface MessengerIconProps {
   size?: number;
 }
 
-export const MessengerIcon: React.FC<MessengerIconProps> = ({ className = 'w-6 h-6', size }) => {
+export const MessengerIcon: React.FC<MessengerIconProps> = ({ className = 'w-6 h-6', size = 24 }) => {
   return (
     <svg
       viewBox="0 0 36 36"
@@ -14,6 +14,7 @@ export const MessengerIcon: React.FC<MessengerIconProps> = ({ className = 'w-6 h
       className={className}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      style={{ minWidth: size, minHeight: size, display: 'inline-block' }}
     >
       <defs>
         <linearGradient id="messenger-gradient" x1="0%" y1="100%" x2="100%" y2="0%">

@@ -80,7 +80,7 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-20 lg:bottom-5 right-3 sm:right-5 z-40 flex flex-col items-end select-none">
+    <div className="hidden lg:flex fixed bottom-5 right-5 z-40 flex-col items-end select-none">
       {/* ========================================================
           CỬA SỔ KHUNG CHAT NỔI (FLOATING CHAT WINDOW)
           ======================================================== */}

@@ -27,36 +27,8 @@ export const MobileBottomNav: React.FC = () => {
   const tab2 = isPhotoRole ? 'calendar' : 'pipeline';
   const tab4 = isPhotoRole ? 'feedbacks' : 'calendar';
 
-  const navItems = [
-    {
-      id: 'dashboard',
-      label: 'Tổng Quan',
-      icon: LayoutDashboard,
-      badge: undefined
-    },
-    {
-      id: tab2,
-      label: isPhotoRole ? 'Lịch Ca' : 'Pipeline',
-      icon: isPhotoRole ? CalendarDays : Kanban,
-      badge: !isPhotoRole && newLeadsCount > 0 ? newLeadsCount : undefined
-    },
-    {
-      id: 'chat-messenger',
-      label: 'Messenger',
-      icon: MessengerIcon,
-      badge: unreadMessengerCount > 0 ? unreadMessengerCount : undefined,
-      isSpecial: true
-    },
-    {
-      id: tab4,
-      label: isPhotoRole ? 'Feedback' : 'Lịch Chụp',
-      icon: CalendarDays,
-      badge: undefined
-    }
-  ];
-
   return (
-    <div className="lg:hidden fixed bottom-3 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 select-none">
+    <div className="lg:hidden fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-0 right-0 z-40 flex justify-center pointer-events-none px-4 select-none">
       {/* Floating Island Dock (Paytin Fintech Style) */}
       <div className="pointer-events-auto bg-[#121316]/95 backdrop-blur-2xl text-white rounded-full p-2 px-3 sm:px-4 shadow-[0_12px_36px_rgba(0,0,0,0.35)] border border-white/10 flex items-center gap-2 sm:gap-4 max-w-sm w-full justify-around">
         {/* Nút 1: Tổng Quan (Dashboard) */}
