@@ -17,3 +17,13 @@
   1. **Nhắc việc & Quản trị Task**: Thông báo các task công việc cần xử lý, nhắc deadline hợp đồng hoặc công việc quá hạn.
   2. **Bắn lịch ca chụp cho Ekip**: Báo lịch chụp mới, ngày chụp, trường lớp, địa điểm và phân công trưởng nháy/thợ phụ.
   3. **Thông báo vận hành cho Quản lý / Admin**: Bắn thông báo chốt cọc VietQR, cập nhật tình trạng booking cho anh Tạ Duy và ban điều phối.
+
+## 4. Phân Định Môi Trường Hoạt Động (Environment Strategy)
+- **Server Ubuntu (`192.168.2.47` / Cloudflare Tunnel / Public)**:
+  - **Môi trường PRODUCTION (Chính thức / Public cho người dùng thật)**: Dành riêng cho toàn bộ nhân sự studio (Admin, Sales, Photographer/Ekip) và vận hành thực tế.
+  - Yêu cầu ổn định cao, dữ liệu thực tế, chỉ cập nhật khi tính năng đã được kiểm thử hoàn tất.
+  - Lệnh triển khai: `npm run deploy:server`.
+- **GitHub Pages (`duykoolhp1996.github.io/crm-xoan-media/`)**:
+  - **Môi trường STAGING / TESTING / DEVELOPMENT (Nơi test & phát triển app)**: Dành cho Admin thử nghiệm tính năng mới, kiểm tra layout/giao diện, debug lỗi và tinh chỉnh trước khi phát hành lên Server Production.
+  - Lệnh triển khai: `npm run deploy`.
+
