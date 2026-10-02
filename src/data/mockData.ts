@@ -351,551 +351,14 @@ export const mockSchoolClasses: SchoolClass[] = [];
 // Danh sách 38 thợ chụp chính thức năm 2026 từ Google Sheets của Xoăn Media
 export const mockPhotographers: Photographer[] = photographersJson as Photographer[];
 
-export const mockCustomers: Customer[] = [
-  {
-    id: 'cust-demo-consulting-01',
-    name: 'Nguyễn Thùy Linh',
-    phone: '0988776655',
-    email: 'thuylinh.12a1@gmail.com',
-    facebook: 'https://facebook.com/thuylinh.tranphu',
-    zalo: '0988776655',
-    schoolId: 'sch-1',
-    schoolName: 'THPT Chuyên Trần Phú (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12A1 Chuyên Anh',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    city: 'Hải Phòng',
-    district: 'Lê Chân',
-    representativeRole: 'Lớp trưởng',
-    studentCount: 38,
-    serviceType: 'Kỷ yếu Concept & Dạ tiệc',
-    servicePackageId: 'pkg-2',
-    servicePackageName: 'Gói Kỷ Yếu STANDARD (Bán Chạy Nhất)',
-    concept: 'Thanh xuân vườn trường & Retro 90s',
-    expectedShootDate: '2026-11-20',
-    shootingLocations: ['Trường THPT Chuyên Trần Phú', 'Nhà Hát Lớn Hải Phòng', 'Bãi biển Đồ Sơn'],
-    expectedBudget: 12500000,
-    specialRequests: 'Lớp muốn chụp thêm concept Retro 90s và đốt pháo sáng / bột màu Party Night buổi tối.',
-    notes: 'Khách hàng có nhu cầu cao, đang phân vân giữa gói Standard và gói Premium. Đang tư vấn thêm về trang phục và chi phí đưa đón ngoại cảnh.',
-    source: 'Facebook Organic',
-    campaignName: 'Kỷ Yếu Mùa 2026',
-    pipelineStage: 'Đang tư vấn',
-    assignedSalesId: 'user-2',
-    assignedSalesName: 'Lê Hoàng Sơn (Sales Lead)',
-    assignedCareStaffId: 'user-3',
-    assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)',
-    totalRevenue: 12500000,
-    paidAmount: 0,
-    createdAt: '2026-09-20T08:30:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-quote-02',
-    name: 'Trần Tuấn Kiệt',
-    phone: '0977123456',
-    email: 'tuankiet.12toan@gmail.com',
-    facebook: 'https://facebook.com/kiet.toan1',
-    zalo: '0977123456',
-    schoolId: 'sch-2',
-    schoolName: 'THPT Chuyên Thái Bình',
-    grade: 'Khối 12',
-    className: '12 Toán 1',
-    academicYear: '2025 - 2026',
-    region: 'Thái Bình',
-    city: 'Thái Bình',
-    district: 'TP Thái Bình',
-    representativeRole: 'Bí thư lớp',
-    studentCount: 35,
-    serviceType: 'Kỷ yếu Cổ Phục & Party Night',
-    servicePackageId: 'pkg-3',
-    servicePackageName: 'Gói Kỷ Yếu PREMIUM CONCEPT & DẠ TIỆC',
-    concept: 'Cổ phục Việt Nam & Party Night',
-    expectedShootDate: '2026-11-28',
-    shootingLocations: ['Trường THPT Chuyên Thái Bình', 'Chùa Keo'],
-    expectedBudget: 11800000,
-    specialRequests: 'Đã gửi file PDF báo giá gói Premium 11.8M, lớp đang họp để biểu quyết.',
-    notes: 'Đã gửi bảng báo giá chi tiết, chờ lớp phản hồi để chuyển sang thương lượng cọc giữ lịch.',
-    source: 'TikTok',
-    campaignName: 'TikTok Viral Kỷ Yếu 2026',
-    pipelineStage: 'Đã gửi báo giá',
-    assignedSalesId: 'user-sales-1',
-    assignedSalesName: 'Nguyễn Thu Hương (Sales)',
-    assignedCareStaffId: 'user-3',
-    assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)',
-    totalRevenue: 11800000,
-    paidAmount: 0,
-    createdAt: '2026-09-21T09:15:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-03',
-    name: 'Vũ Minh Đức',
-    phone: '0912345678',
-    email: 'minhduc.hoa@gmail.com',
-    schoolName: 'THPT Chuyên Trần Phú (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12 Chuyên Hóa',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Lớp trưởng',
-    studentCount: 36,
-    serviceType: 'Kỷ yếu Concept & Dạ tiệc',
-    servicePackageName: 'Gói Kỷ Yếu PREMIUM CONCEPT',
-    concept: 'Cổ phục Việt Nam & Vintage 90s',
-    expectedBudget: 16800000,
-    source: 'Facebook Organic',
-    pipelineStage: 'Đã đặt cọc',
-    assignedSalesId: 'user-2',
-    assignedSalesName: 'Lê Hoàng Sơn (Sales Lead)',
-    totalRevenue: 16800000,
-    paidAmount: 5000000,
-    shootingLocations: ['Trường Trần Phú', 'Hoàng Thành'],
-    createdAt: '2026-09-15T10:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-04',
-    name: 'Hoàng Bảo Châu',
-    phone: '0989112233',
-    email: 'baochau.ftu@gmail.com',
-    schoolName: 'Đại Học Ngoại Thương (FTU)',
-    grade: 'Năm cuối',
-    className: 'K62 Kinh Tế Đối Ngoại',
-    academicYear: '2025 - 2026',
-    region: 'Hà Nội',
-    representativeRole: 'Trưởng ban kỷ yếu',
-    studentCount: 42,
-    serviceType: 'Kỷ yếu VIP Cinematic',
-    servicePackageName: 'Gói Kỷ Yếu VIP - CINEMATIC MEMORY',
-    concept: 'Dạ tiệc Prom & Black Tie',
-    expectedBudget: 18900000,
-    source: 'Referral',
-    pipelineStage: 'Đã Booking',
-    assignedSalesId: 'user-2',
-    assignedSalesName: 'Lê Hoàng Sơn (Sales Lead)',
-    totalRevenue: 18900000,
-    paidAmount: 6000000,
-    shootingLocations: ['Khuôn viên FTU', 'Khách sạn Melia'],
-    createdAt: '2026-09-12T14:20:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-05',
-    name: 'Lê Phương Thảo',
-    phone: '0934567890',
-    email: 'thaole.d1@gmail.com',
-    schoolName: 'THPT Thái Phiên (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12D1',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Lớp phó phong trào',
-    studentCount: 37,
-    serviceType: 'Kỷ yếu Standard',
-    servicePackageName: 'Gói Kỷ Yếu STANDARD',
-    concept: 'Học đường Hàn Quốc',
-    expectedBudget: 13500000,
-    source: 'TikTok',
-    pipelineStage: 'Đã đặt cọc',
-    assignedSalesId: 'user-sales-1',
-    assignedSalesName: 'Nguyễn Thu Hương (Sales)',
-    totalRevenue: 13500000,
-    paidAmount: 4500000,
-    shootingLocations: ['Trường Thái Phiên', 'Nhà Hát Lớn'],
-    createdAt: '2026-09-14T08:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-06',
-    name: 'Đỗ Mạnh Hùng',
-    phone: '0945678901',
-    email: 'manhhung.12a5@gmail.com',
-    schoolName: 'THPT Lê Quý Đôn (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12A5',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Lớp trưởng',
-    studentCount: 35,
-    serviceType: 'Kỷ yếu Standard',
-    servicePackageName: 'Gói Kỷ Yếu STANDARD',
-    concept: 'Thanh xuân vườn trường',
-    expectedBudget: 12000000,
-    source: 'Facebook Ads',
-    pipelineStage: 'Đã bàn giao',
-    assignedSalesId: 'user-sales-1',
-    assignedSalesName: 'Nguyễn Thu Hương (Sales)',
-    totalRevenue: 12000000,
-    paidAmount: 5000000,
-    shootingLocations: ['Trường Lê Quý Đôn'],
-    notes: 'Đã hoàn tất in ấn và bàn giao đầy đủ photobook, ảnh gỗ và link file gốc cho lớp 12A5. Chờ thanh toán đợt cuối tất toán hợp đồng.',
-    createdAt: '2026-09-08T11:30:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-07',
-    name: 'Bùi Gia Huy',
-    phone: '0967890123',
-    email: 'giahuy.12tin@gmail.com',
-    schoolName: 'THPT Chuyên Trần Phú (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12 Tin',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Bí thư lớp',
-    studentCount: 32,
-    serviceType: 'Kỷ yếu Concept',
-    servicePackageName: 'Gói Kỷ Yếu BASIC',
-    concept: 'Retro Hongkong 90s',
-    expectedBudget: 10500000,
-    specialRequests: 'Lớp 12 Tin đang thương lượng số tiền cọc 3.000.000đ giữ ekip chụp ngoại cảnh Hải Phòng.',
-    notes: 'Đã thống nhất concept Retro Hongkong, đang thương lượng phương thức chuyển khoản cọc.',
-    source: 'Zalo',
-    pipelineStage: 'Đang thương lượng',
-    assignedSalesId: 'user-sales-2',
-    assignedSalesName: 'Trần Hải Đăng (Sales)',
-    totalRevenue: 10500000,
-    paidAmount: 0,
-    shootingLocations: ['Trường Trần Phú'],
-    createdAt: '2026-09-22T16:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-08',
-    name: 'Phạm Khánh Linh',
-    phone: '0978901234',
-    email: 'khanhlinh.hb@gmail.com',
-    schoolName: 'THPT Hồng Bàng (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12A8',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Lớp trưởng',
-    studentCount: 38,
-    serviceType: 'Kỷ yếu Concept & Dạ tiệc',
-    servicePackageName: 'Gói Kỷ Yếu STANDARD',
-    concept: 'Party Night & Pháo Sáng',
-    expectedBudget: 12800000,
-    source: 'Facebook Organic',
-    pipelineStage: 'Đã Booking',
-    assignedSalesId: 'user-sales-2',
-    assignedSalesName: 'Trần Hải Đăng (Sales)',
-    totalRevenue: 12800000,
-    paidAmount: 4000000,
-    shootingLocations: ['Trường Hồng Bàng', 'Đồ Sơn'],
-    createdAt: '2026-09-10T15:45:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-09',
-    name: 'Trịnh Đức Anh',
-    phone: '0989012345',
-    email: 'ducanh.12van@gmail.com',
-    schoolName: 'THPT Chuyên Trần Phú (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12 Chuyên Văn',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Lớp trưởng',
-    studentCount: 34,
-    serviceType: 'Kỷ yếu Cổ phục',
-    servicePackageName: 'Gói Kỷ Yếu PREMIUM CONCEPT',
-    concept: 'Việt Phục Nhật Bình',
-    expectedBudget: 15000000,
-    source: 'Website',
-    pipelineStage: 'Hoàn thành',
-    assignedSalesId: 'user-sales-2',
-    assignedSalesName: 'Trần Hải Đăng (Sales)',
-    totalRevenue: 15000000,
-    paidAmount: 15000000,
-    shootingLocations: ['Văn Miếu Mao Điền'],
-    createdAt: '2026-08-25T09:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-10',
-    name: 'Mai Phương Thảo',
-    phone: '0901234567',
-    email: 'phuongthao.ad@gmail.com',
-    schoolName: 'THPT An Dương (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12A4',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Lớp trưởng',
-    studentCount: 38,
-    serviceType: 'Kỷ yếu Standard',
-    servicePackageName: 'Gói Kỷ Yếu STANDARD',
-    concept: 'Áo dài trắng & Cử nhân',
-    expectedBudget: 11500000,
-    source: 'Referral',
-    pipelineStage: 'Đã đặt cọc',
-    assignedSalesId: 'user-sales-3',
-    assignedSalesName: 'Vũ Mai Phương (CTV Sales)',
-    totalRevenue: 11500000,
-    paidAmount: 3500000,
-    shootingLocations: ['Trường An Dương'],
-    createdAt: '2026-09-16T13:30:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cust-demo-11',
-    name: 'Nguyễn Hoàng Nam',
-    phone: '0912345670',
-    email: 'hoangnam.tnh@gmail.com',
-    schoolName: 'THPT Trần Nguyên Hãn (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '12A2',
-    academicYear: '2025 - 2026',
-    region: 'Hải Phòng',
-    representativeRole: 'Bí thư lớp',
-    studentCount: 36,
-    serviceType: 'Kỷ yếu Basic',
-    servicePackageName: 'Gói Kỷ Yếu BASIC',
-    concept: 'Thanh xuân vườn trường',
-    expectedBudget: 9800000,
-    source: 'TikTok',
-    pipelineStage: 'Đang tư vấn',
-    assignedSalesId: 'user-sales-3',
-    assignedSalesName: 'Vũ Mai Phương (CTV Sales)',
-    totalRevenue: 9800000,
-    paidAmount: 0,
-    shootingLocations: ['Trường Trần Nguyên Hãn'],
-    createdAt: '2026-09-23T10:15:00.000Z',
-    updatedAt: new Date().toISOString()
-  }
-];
+// Đã xóa toàn bộ dữ liệu demo - Khởi tạo danh sách khách hàng / leads rỗng
+export const mockCustomers: Customer[] = [];
 
-export const mockBookings: Booking[] = [
-  {
-    id: 'bk-1',
-    code: 'BK-12HOA-0926',
-    customerId: 'cust-demo-03',
-    customerName: 'Vũ Minh Đức',
-    schoolName: 'THPT Chuyên Trần Phú (Hải Phòng)',
-    className: '12 Chuyên Hóa',
-    studentCount: 36,
-    shootDate: '2026-11-10',
-    startTime: '07:30',
-    endTime: '18:00',
-    location: 'Trường THPT Chuyên Trần Phú & Hoàng Thành',
-    city: 'Hải Phòng',
-    packageId: 'pkg-3',
-    packageName: 'Gói Kỷ Yếu PREMIUM CONCEPT',
-    totalAmount: 16800000,
-    depositAmount: 5000000,
-    remainingAmount: 11800000,
-    paymentStatus: 'Đã cọc',
-    bookingStatus: 'Đã xác nhận',
-    assignments: {
-      leadPhotographerId: 'photo-1',
-      leadPhotographerName: 'Doanh',
-      assistantPhotographerIds: ['photo-3'],
-      assistantNames: ['Thắng']
-    },
-    notes: 'Concept Cổ phục Việt Nam & Vintage 90s',
-    createdAt: '2026-09-15T10:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'bk-2',
-    code: 'BK-K62FTU-0926',
-    customerId: 'cust-demo-04',
-    customerName: 'Hoàng Bảo Châu',
-    schoolName: 'Đại Học Ngoại Thương (FTU)',
-    className: 'K62 Kinh Tế Đối Ngoại',
-    studentCount: 42,
-    shootDate: '2026-11-15',
-    startTime: '13:30',
-    endTime: '21:30',
-    location: 'Khuôn viên FTU & Khách sạn Melia',
-    city: 'Hà Nội',
-    packageId: 'pkg-4',
-    packageName: 'Gói Kỷ Yếu VIP - CINEMATIC MEMORY',
-    totalAmount: 18900000,
-    depositAmount: 6000000,
-    remainingAmount: 12900000,
-    paymentStatus: 'Đã cọc',
-    bookingStatus: 'Đã xác nhận',
-    assignments: {
-      leadPhotographerId: 'photo-2',
-      leadPhotographerName: 'Thành To',
-      assistantPhotographerIds: ['photo-4'],
-      assistantNames: ['Thành Con'],
-      videographerId: 'photo-7',
-      videographerName: 'Thắng Quay Phim'
-    },
-    notes: 'Concept Dạ tiệc Prom & Black Tie',
-    createdAt: '2026-09-12T14:20:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'bk-3',
-    code: 'BK-12A5-LQD',
-    customerId: 'cust-demo-06',
-    customerName: 'Đỗ Mạnh Hùng',
-    schoolName: 'THPT Lê Quý Đôn (Hải Phòng)',
-    className: '12A5',
-    studentCount: 35,
-    shootDate: '2026-09-18',
-    startTime: '08:00',
-    endTime: '17:00',
-    location: 'Trường THPT Lê Quý Đôn & Đồ Sơn',
-    city: 'Hải Phòng',
-    packageId: 'pkg-2',
-    packageName: 'Gói Kỷ Yếu STANDARD',
-    totalAmount: 12000000,
-    depositAmount: 5000000,
-    remainingAmount: 7000000,
-    paymentStatus: 'Đã cọc',
-    bookingStatus: 'Hoàn thành',
-    assignments: {
-      leadPhotographerId: 'photo-1',
-      leadPhotographerName: 'Doanh',
-      assistantPhotographerIds: ['photo-3'],
-      assistantNames: ['Thắng']
-    },
-    notes: 'Đã chụp hoàn thành và bàn giao file gốc cho lớp',
-    createdAt: '2026-09-08T11:30:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'bk-4',
-    code: 'BK-12D1-TP',
-    customerId: 'cust-demo-05',
-    customerName: 'Lê Phương Thảo',
-    schoolName: 'THPT Thái Phiên (Hải Phòng)',
-    className: '12D1',
-    studentCount: 37,
-    shootDate: '2026-09-20',
-    startTime: '07:30',
-    endTime: '17:30',
-    location: 'Trường Thái Phiên & Nhà Hát Lớn',
-    city: 'Hải Phòng',
-    packageId: 'pkg-2',
-    packageName: 'Gói Kỷ Yếu STANDARD',
-    totalAmount: 13500000,
-    depositAmount: 4500000,
-    remainingAmount: 9000000,
-    paymentStatus: 'Đã cọc',
-    bookingStatus: 'Hoàn thành',
-    assignments: {
-      leadPhotographerId: 'photo-3',
-      leadPhotographerName: 'Thắng',
-      assistantPhotographerIds: ['photo-11'],
-      assistantNames: ['Từ Voi']
-    },
-    notes: 'Chụp concept học đường Hàn Quốc',
-    createdAt: '2026-09-14T08:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'bk-5',
-    code: 'BK-12TOAN-CVA',
-    customerId: 'cust-demo-cva',
-    customerName: 'Nguyễn Đức Thắng',
-    schoolName: 'THPT Chu Văn An (Hà Nội)',
-    className: '12 Chuyên Toán',
-    studentCount: 40,
-    shootDate: '2026-09-22',
-    startTime: '08:00',
-    endTime: '18:00',
-    location: 'Trường Chu Văn An & Hoàng Thành Thăng Long',
-    city: 'Hà Nội',
-    packageId: 'pkg-3',
-    packageName: 'Gói Kỷ Yếu PREMIUM CONCEPT',
-    totalAmount: 15500000,
-    depositAmount: 5000000,
-    remainingAmount: 10500000,
-    paymentStatus: 'Đã cọc',
-    bookingStatus: 'Hoàn thành',
-    assignments: {
-      leadPhotographerId: 'photo-2',
-      leadPhotographerName: 'Thành To',
-      assistantPhotographerIds: ['photo-5'],
-      assistantNames: ['Văn'],
-      videographerId: 'photo-7',
-      videographerName: 'Thắng Quay Phim'
-    },
-    notes: 'Concept Vintage Hà Nội xưa và vest thanh xuân',
-    createdAt: '2026-09-10T09:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'bk-6',
-    code: 'BK-12A1-TRANPHU',
-    customerId: 'cust-demo-01',
-    customerName: 'Nguyễn Thùy Linh',
-    schoolName: 'THPT Chuyên Trần Phú (Hải Phòng)',
-    className: '12A1 Chuyên Anh',
-    studentCount: 38,
-    shootDate: '2026-11-20',
-    startTime: '08:00',
-    endTime: '17:30',
-    location: 'THPT Chuyên Trần Phú & Bãi biển Đồ Sơn',
-    city: 'Hải Phòng',
-    packageId: 'pkg-2',
-    packageName: 'Gói Kỷ Yếu STANDARD (Bán Chạy Nhất)',
-    totalAmount: 12500000,
-    depositAmount: 4000000,
-    remainingAmount: 8500000,
-    paymentStatus: 'Đã cọc',
-    bookingStatus: 'Đã xác nhận',
-    assignments: {
-      leadPhotographerId: 'photo-1',
-      leadPhotographerName: 'Doanh',
-      assistantPhotographerIds: ['photo-9'],
-      assistantNames: ['Quách Văn Huyên']
-    },
-    notes: 'Thanh xuân vườn trường & Retro 90s',
-    createdAt: '2026-09-20T08:30:00.000Z',
-    updatedAt: new Date().toISOString()
-  }
-];
+// Đã xóa toàn bộ dữ liệu demo - Khởi tạo danh sách booking lịch chụp rỗng
+export const mockBookings: Booking[] = [];
 
-export const mockRemarketingSegments: RemarketingSegment[] = [
-  {
-    id: 'seg-1',
-    name: 'Lead > 3 ngày chưa Booking',
-    description: 'Khách hàng mới tiếp cận nhưng sau 72h chưa chốt gói hoặc chưa chuyển cọc.',
-    targetCriteria: 'created_at <= NOW() - INTERVAL 3 DAYS AND status NOT IN (Đã cọc, Đã Booking)',
-    customerCount: 18,
-    createdAt: '2024-10-01'
-  },
-  {
-    id: 'seg-2',
-    name: 'Đã báo giá nhưng chưa cọc',
-    description: 'Các lớp đã nhận bảng báo giá chi tiết, cần kích thích ra quyết định bằng quà tặng/ưu đãi.',
-    targetCriteria: 'pipeline_stage = Đã gửi báo giá AND deposit = 0',
-    customerCount: 12,
-    createdAt: '2024-10-05'
-  },
-  {
-    id: 'seg-3',
-    name: 'Khách hàng cũ (Đã hoàn thành)',
-    description: 'Các lớp đã chụp xong, chăm sóc để bán thêm dịch vụ ảnh tốt nghiệp gia đình hoặc giới thiệu khóa dưới.',
-    targetCriteria: 'pipeline_stage = Hoàn thành',
-    customerCount: 45,
-    createdAt: '2024-09-15'
-  },
-  {
-    id: 'seg-4',
-    name: 'Khách hàng Lost > 30 ngày',
-    description: 'Những lead từng từ chối, gửi khảo sát và coupon giảm giá mùa kỷ yếu sau.',
-    targetCriteria: 'pipeline_stage = Lost AND updated_at <= NOW() - 30 DAYS',
-    customerCount: 8,
-    createdAt: '2024-10-10'
-  },
-  {
-    id: 'seg-5',
-    name: 'Khách VIP Giá trị cao (>15 Triệu)',
-    description: 'Các khối đại học & trường quốc tế chi tiêu lớn, gửi quà tri ân photobook mini.',
-    targetCriteria: 'total_revenue >= 15000000',
-    customerCount: 14,
-    createdAt: '2024-10-12'
-  }
-];
+// Đã xóa toàn bộ dữ liệu demo - Khởi tạo danh sách phân khúc remarketing rỗng
+export const mockRemarketingSegments: RemarketingSegment[] = [];
 
 export const mockRemarketingCampaigns: RemarketingCampaign[] = [];
 
@@ -910,11 +373,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
     steps: [],
     createdAt: '2024-10-15',
     updatedAt: '2026-09-23',
-    stats: {
-      totalTriggered: 142,
-      convertedCount: 48,
-      revenueSaved: 288000000
-    },
+    stats: { totalTriggered: 0, convertedCount: 0, revenueSaved: 0 },
     nodes: [
       {
         id: 'wf1-n1',
@@ -929,7 +388,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 50, y: 180 },
         next: 'wf1-n2',
-        stats: { processedCount: 142, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n2',
@@ -942,7 +401,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 340, y: 180 },
         next: 'wf1-n3',
-        stats: { processedCount: 142, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n3',
@@ -956,7 +415,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 630, y: 180 },
         next: 'wf1-n4',
-        stats: { processedCount: 142, successRate: 98 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n4',
@@ -969,7 +428,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 920, y: 180 },
         next: 'wf1-n5',
-        stats: { processedCount: 139, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n5',
@@ -984,7 +443,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         position: { x: 1210, y: 180 },
         yesNext: 'wf1-n6',
         noNext: 'wf1-n7',
-        stats: { processedCount: 139, successRate: 46 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n6',
@@ -999,7 +458,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 1530, y: 80 },
         next: 'wf1-n8',
-        stats: { processedCount: 64, successRate: 75 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n7',
@@ -1013,7 +472,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 1530, y: 300 },
         next: 'wf1-n9',
-        stats: { processedCount: 75, successRate: 28 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n8',
@@ -1022,7 +481,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         subtitle: 'Mục tiêu hoàn thành',
         description: 'Khách hàng chuyển cọc thành công và chuyển sang giai đoạn Đã cọc trên Pipeline',
         position: { x: 1840, y: 80 },
-        stats: { processedCount: 48, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf1-n9',
@@ -1031,7 +490,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         subtitle: 'Theo dõi lần cuối',
         description: 'Nhắc Sales kiểm tra lần cuối sau 48h gửi voucher, nếu không phản hồi thì chuyển Lost',
         position: { x: 1840, y: 300 },
-        stats: { processedCount: 75, successRate: 60 }
+        stats: { processedCount: 0, successRate: 0 }
       }
     ]
   },
@@ -1045,11 +504,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
     steps: [],
     createdAt: '2024-10-20',
     updatedAt: '2026-09-23',
-    stats: {
-      totalTriggered: 98,
-      convertedCount: 41,
-      revenueSaved: 246000000
-    },
+    stats: { totalTriggered: 0, convertedCount: 0, revenueSaved: 0 },
     nodes: [
       {
         id: 'wf2-n1',
@@ -1059,7 +514,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Khi Sales gửi bảng báo giá chi tiết cho đại diện ban cán sự lớp',
         position: { x: 50, y: 180 },
         next: 'wf2-n2',
-        stats: { processedCount: 98, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf2-n2',
@@ -1070,7 +525,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         config: { delayHours: 24 },
         position: { x: 340, y: 180 },
         next: 'wf2-n3',
-        stats: { processedCount: 98, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf2-n3',
@@ -1084,7 +539,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 630, y: 180 },
         next: 'wf2-n4',
-        stats: { processedCount: 98, successRate: 95 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf2-n4',
@@ -1100,7 +555,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         position: { x: 920, y: 180 },
         yesNext: 'wf2-n5',
         noNext: 'wf2-n6',
-        stats: { processedCount: 93, successRate: 44 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf2-n5',
@@ -1110,7 +565,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Tự động tạo mã Booking, thông báo Admin và gửi email xác nhận cho khách',
         position: { x: 1220, y: 80 },
         next: 'wf2-n7',
-        stats: { processedCount: 41, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf2-n6',
@@ -1123,7 +578,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         },
         position: { x: 1220, y: 300 },
         next: 'wf2-n8',
-        stats: { processedCount: 52, successRate: 35 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf2-n7',
@@ -1132,7 +587,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         subtitle: 'Doanh thu ghi nhận',
         description: 'Hợp đồng chính thức được kích hoạt, chuyển sang phân hệ Điều phối thợ chụp',
         position: { x: 1530, y: 80 },
-        stats: { processedCount: 41, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf2-n8',
@@ -1141,7 +596,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         subtitle: 'Đẩy mạnh chốt hợp đồng',
         description: 'Sales trực tiếp gọi thông báo phần quà đặc biệt từ ban giám đốc dành riêng cho lớp',
         position: { x: 1530, y: 300 },
-        stats: { processedCount: 52, successRate: 65 }
+        stats: { processedCount: 0, successRate: 0 }
       }
     ]
   },
@@ -1155,11 +610,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
     steps: [],
     createdAt: '2024-11-01',
     updatedAt: '2026-09-23',
-    stats: {
-      totalTriggered: 67,
-      convertedCount: 16,
-      revenueSaved: 96000000
-    },
+    stats: { totalTriggered: 0, convertedCount: 0, revenueSaved: 0 },
     nodes: [
       {
         id: 'wf3-n1',
@@ -1169,7 +620,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Khi Sales bấm nút Khách từ chối (Lost) trên Hồ sơ 360° kèm lý do từ chối',
         position: { x: 50, y: 180 },
         next: 'wf3-n2',
-        stats: { processedCount: 67, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf3-n2',
@@ -1180,7 +631,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         config: { delayDays: 7 },
         position: { x: 340, y: 180 },
         next: 'wf3-n3',
-        stats: { processedCount: 67, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf3-n3',
@@ -1190,7 +641,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Gửi form khảo sát ngắn xin ý kiến cải thiện dịch vụ, tặng kèm Voucher 1.000.000đ',
         position: { x: 630, y: 180 },
         next: 'wf3-n4',
-        stats: { processedCount: 67, successRate: 85 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf3-n4',
@@ -1201,7 +652,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         position: { x: 920, y: 180 },
         yesNext: 'wf3-n5',
         noNext: 'wf3-n6',
-        stats: { processedCount: 57, successRate: 28 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf3-n5',
@@ -1211,7 +662,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Tự động mở lại thẻ khách hàng trên Pipeline, gắn nhãn Cứu vãn thành công',
         position: { x: 1220, y: 80 },
         next: 'wf3-n7',
-        stats: { processedCount: 16, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf3-n6',
@@ -1220,7 +671,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         subtitle: 'Nhánh Sai (NO)',
         description: 'Đưa vào danh sách lưu trữ hàng năm, không làm phiền khách thêm',
         position: { x: 1220, y: 300 },
-        stats: { processedCount: 41, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf3-n7',
@@ -1229,7 +680,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         subtitle: 'Cứu vãn đơn hàng',
         description: 'Quản lý kinh doanh trực tiếp gọi hỗ trợ phương án gói phù hợp với ngân sách lớp',
         position: { x: 1530, y: 80 },
-        stats: { processedCount: 16, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       }
     ]
   },
@@ -1243,11 +694,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
     steps: [],
     createdAt: '2024-11-10',
     updatedAt: '2026-09-23',
-    stats: {
-      totalTriggered: 85,
-      convertedCount: 29,
-      revenueSaved: 174000000
-    },
+    stats: { totalTriggered: 0, convertedCount: 0, revenueSaved: 0 },
     nodes: [
       {
         id: 'wf4-n1',
@@ -1257,7 +704,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Khi lớp đã nhận đủ album ảnh và kỷ niệm 6 tháng ngày chụp tốt nghiệp',
         position: { x: 50, y: 180 },
         next: 'wf4-n2',
-        stats: { processedCount: 85, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf4-n2',
@@ -1267,7 +714,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Gửi video recap kỷ yếu và lời chúc mừng bước vào cánh cửa đại học / công việc',
         position: { x: 340, y: 180 },
         next: 'wf4-n3',
-        stats: { processedCount: 85, successRate: 98 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf4-n3',
@@ -1277,7 +724,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         description: 'Tặng mã giới thiệu: Khóa dưới áp mã sẽ được giảm 15%, người giới thiệu nhận hoa hồng 500.000đ',
         position: { x: 630, y: 180 },
         next: 'wf4-n4',
-        stats: { processedCount: 85, successRate: 34 }
+        stats: { processedCount: 0, successRate: 0 }
       },
       {
         id: 'wf4-n4',
@@ -1286,7 +733,7 @@ export const mockWorkflows: RemarketingWorkflow[] = [
         subtitle: 'Vòng đời khách hàng hoàn tất',
         description: 'Lưu trữ thông tin đại sứ thương hiệu để liên hệ kết nối các mùa kỷ yếu tiếp theo',
         position: { x: 920, y: 180 },
-        stats: { processedCount: 29, successRate: 100 }
+        stats: { processedCount: 0, successRate: 0 }
       }
     ]
   }

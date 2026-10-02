@@ -531,49 +531,60 @@ export const ExecutiveDashboard: React.FC = () => {
               Xem tất cả &gt;
             </button>
           </div>
-          {/* Lưới 2 cột các ô vuông bo góc chuẩn Paytin (aspect-square) */}
-          <div className="grid grid-cols-2 gap-2.5">
-            {upcomingBookings.map(bk => (
-              <div
-                key={bk.id}
-                onClick={() => {
-                  setSelectedBookingId(bk.id);
-                  setActiveTab('bookings');
-                }}
-                className="bg-white hover:bg-neutral-50 p-3 sm:p-3.5 rounded-3xl border border-black/[0.06] shadow-xs aspect-square flex flex-col justify-between cursor-pointer transition-all active:scale-95 group"
-              >
-                {/* Top: Icon máy ảnh + Huy hiệu trạng thái */}
-                <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black shadow-2xs group-hover:scale-105 transition-transform">
-                    <Camera className="w-4 h-4" />
+          {/* Lưới 2 cột các ô vuông bo góc chuẩn Paytin (aspect-square) hoặc Thông báo trống */}
+          {upcomingBookings.length === 0 ? (
+            <div
+              onClick={() => setActiveTab('bookings')}
+              className="p-6 text-center bg-white rounded-3xl border border-dashed border-neutral-200 cursor-pointer active:scale-98 transition-all shadow-xs"
+            >
+              <Calendar className="w-8 h-8 mx-auto mb-2 text-neutral-300" />
+              <p className="text-xs font-bold text-neutral-800">Chưa có lịch chụp nào</p>
+              <p className="text-[10px] text-neutral-400 mt-0.5">Chạm vào đây để lập booking lịch chụp mới</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2.5">
+              {upcomingBookings.map(bk => (
+                <div
+                  key={bk.id}
+                  onClick={() => {
+                    setSelectedBookingId(bk.id);
+                    setActiveTab('bookings');
+                  }}
+                  className="bg-white hover:bg-neutral-50 p-3 sm:p-3.5 rounded-3xl border border-black/[0.06] shadow-xs aspect-square flex flex-col justify-between cursor-pointer transition-all active:scale-95 group"
+                >
+                  {/* Top: Icon máy ảnh + Huy hiệu trạng thái */}
+                  <div className="flex items-center justify-between">
+                    <div className="w-8 h-8 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black shadow-2xs group-hover:scale-105 transition-transform">
+                      <Camera className="w-4 h-4" />
+                    </div>
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {bk.bookingStatus}
+                    </span>
                   </div>
-                  <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    {bk.bookingStatus}
-                  </span>
-                </div>
 
-                {/* Middle: Tên lớp & Trường */}
-                <div className="my-1">
-                  <h4 className="text-xs font-black text-neutral-900 line-clamp-2 leading-tight">
-                    {bk.className}
-                  </h4>
-                  <p className="text-[10px] text-neutral-500 truncate mt-0.5">
-                    {bk.schoolName}
-                  </p>
-                </div>
+                  {/* Middle: Tên lớp & Trường */}
+                  <div className="my-1">
+                    <h4 className="text-xs font-black text-neutral-900 line-clamp-2 leading-tight">
+                      {bk.className}
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 truncate mt-0.5">
+                      {bk.schoolName}
+                    </p>
+                  </div>
 
-                {/* Bottom: Ngày chụp + Số tiền */}
-                <div className="pt-2 border-t border-black/[0.04] flex items-center justify-between">
-                  <span className="text-[10px] text-neutral-400 font-semibold flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-neutral-400" /> {bk.shootDate.slice(5)}
-                  </span>
-                  <span className="text-xs font-black text-neutral-900">
-                    {(bk.totalAmount / 1000000).toFixed(1)} Tr
-                  </span>
+                  {/* Bottom: Ngày chụp + Số tiền */}
+                  <div className="pt-2 border-t border-black/[0.04] flex items-center justify-between">
+                    <span className="text-[10px] text-neutral-400 font-semibold flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-neutral-400" /> {bk.shootDate.slice(5)}
+                    </span>
+                    <span className="text-xs font-black text-neutral-900">
+                      {(bk.totalAmount / 1000000).toFixed(1)} Tr
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
