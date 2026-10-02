@@ -20,7 +20,6 @@ import { RemarketingModule } from './components/remarketing/RemarketingModule';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
-import { SalesMessengerFloatingWidget } from './components/chat/SalesMessengerFloatingWidget';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { initGA4, trackPageView } from './lib/analytics';
 
@@ -80,9 +79,6 @@ const CrmAppShell: React.FC = () => {
 
       {/* Global Search Modal (Cmd+K) */}
       <GlobalSearchModal />
-
-      {/* Floating Facebook Messenger Chat Widget cho Tài Khoản Sales */}
-      <SalesMessengerFloatingWidget />
 
       {/* Mobile Bottom Navigation Bar (iOS / Android App Style) */}
       <MobileBottomNav />
