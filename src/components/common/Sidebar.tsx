@@ -18,7 +18,6 @@ import {
   LogOut,
   X
 } from 'lucide-react';
-import { MessengerIcon } from '../chat/MessengerIcon';
 
 export const Sidebar: React.FC = () => {
   const {
@@ -31,7 +30,6 @@ export const Sidebar: React.FC = () => {
     currentUser,
     logout,
     photographers,
-    unreadMessengerCount,
     isMobileSidebarOpen,
     setIsMobileSidebarOpen
   } = useApp();
@@ -77,18 +75,6 @@ export const Sidebar: React.FC = () => {
             : (currentRole === 'sales' ? 'Dashboard Doanh Số' : 'Dashboard Điều Hành'),
           icon: LayoutDashboard,
           roles: ['admin', 'manager', 'sales', 'marketing', 'photographer']
-        }
-      ]
-    },
-    {
-      groupTitle: 'HỘP THƯ & CHAT KHÁCH HÀNG',
-      items: [
-        {
-          id: 'chat-messenger',
-          label: 'Hộp Thư Messenger (Fanpage)',
-          icon: MessengerIcon,
-          badge: unreadMessengerCount > 0 ? `${unreadMessengerCount} tin mới` : undefined,
-          roles: ['admin', 'manager', 'sales']
         }
       ]
     },

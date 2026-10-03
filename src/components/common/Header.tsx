@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { NotificationDrawer } from './NotificationDrawer';
 import { ProfileModal } from './ProfileModal';
-import { MessengerIcon } from '../chat/MessengerIcon';
 
 export const Header: React.FC = () => {
   const {
@@ -25,7 +24,6 @@ export const Header: React.FC = () => {
     logout,
     activeTab,
     setActiveTab,
-    unreadMessengerCount,
     setIsMobileSidebarOpen
   } = useApp();
 
@@ -147,27 +145,6 @@ export const Header: React.FC = () => {
             {roleLabels[currentRole]?.label.split(' ')[0] || 'User'}
           </span>
         </div>
-
-        {/* Nút Hộp Thư Chat Khách Hàng (Desktop Header - trên Mobile đã có ở Bottom Nav) */}
-        {(currentRole === 'sales' || currentRole === 'admin' || currentRole === 'manager') && (
-          <button
-            onClick={() => setActiveTab('chat-messenger')}
-            className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-bold transition-all shadow-xs border ${
-              activeTab === 'chat-messenger'
-                ? 'bg-gradient-to-r from-[#0084FF] to-[#A824FB] text-white border-transparent shadow-md'
-                : 'bg-white hover:bg-blue-50 text-neutral-800 hover:text-blue-700 border-black/[0.06]'
-            }`}
-            title="Mở Hộp Thư Chat Khách Hàng (Facebook Messenger)"
-          >
-            <MessengerIcon size={16} />
-            <span>Chat Khách</span>
-            {unreadMessengerCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black animate-pulse">
-                {unreadMessengerCount}
-              </span>
-            )}
-          </button>
-        )}
 
         {/* Notifications Icon Button */}
         <button

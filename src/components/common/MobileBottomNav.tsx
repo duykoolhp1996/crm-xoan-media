@@ -1,12 +1,11 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { MessengerIcon } from '../chat/MessengerIcon';
 import {
   LayoutDashboard,
+  Users,
   Kanban,
   CalendarDays,
-  Menu,
-  Sparkles
+  Menu
 } from 'lucide-react';
 
 export const MobileBottomNav: React.FC = () => {
@@ -16,7 +15,6 @@ export const MobileBottomNav: React.FC = () => {
     currentRole,
     currentUser,
     customers,
-    unreadMessengerCount,
     isMobileSidebarOpen,
     setIsMobileSidebarOpen
   } = useApp();
@@ -24,7 +22,7 @@ export const MobileBottomNav: React.FC = () => {
   const isPhotoRole = currentRole === 'photographer' || currentUser?.role === 'photographer';
   const newLeadsCount = customers.filter(c => c.pipelineStage === 'New Lead').length;
 
-  const tab2 = isPhotoRole ? 'calendar' : 'pipeline';
+  const centerTab = isPhotoRole ? 'calendar' : 'pipeline';
   const tab4 = isPhotoRole ? 'feedbacks' : 'calendar';
 
   return (
@@ -48,39 +46,36 @@ export const MobileBottomNav: React.FC = () => {
           <span className="text-[9px] mt-0.5 tracking-tight">Tổng Quan</span>
         </button>
 
-        {/* Nút 2: Pipeline / Lịch Ca */}
+        {/* Nút 2: Khách Hàng (Customers) */}
         <button
           onClick={() => {
-            setActiveTab(tab2 as any);
+            setActiveTab('customers');
             setIsMobileSidebarOpen(false);
           }}
           className={`flex flex-col items-center justify-center p-2 rounded-full transition-all relative ${
-            activeTab === tab2
+            activeTab === 'customers' || activeTab === 'leads'
               ? 'text-[#B8F23D] font-extrabold scale-110'
               : 'text-neutral-400 hover:text-white'
           }`}
-          title={isPhotoRole ? 'Lịch Ca' : 'Pipeline'}
+          title="Khách Hàng"
         >
-          {isPhotoRole ? <CalendarDays className="w-5 h-5" /> : <Kanban className="w-5 h-5" />}
-          {newLeadsCount > 0 && !isPhotoRole && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-          )}
-          <span className="text-[9px] mt-0.5 tracking-tight">{isPhotoRole ? 'Lịch Ca' : 'Pipeline'}</span>
+          <Users className="w-5 h-5" />
+          <span className="text-[9px] mt-0.5 tracking-tight">Khách Hàng</span>
         </button>
 
-        {/* Nút 3 (Trung Tâm - Hero Neon Button): Facebook Messenger Chat */}
+        {/* Nút 3 (Trung Tâm - Hero Neon Button): Pipeline / Lịch Ca */}
         <button
           onClick={() => {
-            setActiveTab('chat-messenger');
+            setActiveTab(centerTab as any);
             setIsMobileSidebarOpen(false);
           }}
           className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-[#B8F23D] text-neutral-950 font-black shadow-[0_4px_20px_rgba(184,242,61,0.45)] hover:scale-105 active:scale-95 transition-all -translate-y-2 border-2 border-[#121316]"
-          title="Hộp Thư Facebook Messenger Khách Hàng"
+          title={isPhotoRole ? 'Lịch Ca Ekip' : 'Pipeline Bán Hàng'}
         >
-          <MessengerIcon size={24} />
-          {unreadMessengerCount > 0 && (
+          {isPhotoRole ? <CalendarDays className="w-6 h-6" /> : <Kanban className="w-6 h-6" />}
+          {newLeadsCount > 0 && !isPhotoRole && (
             <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center border-2 border-[#121316] shadow-sm animate-bounce">
-              {unreadMessengerCount}
+              {newLeadsCount}
             </span>
           )}
         </button>

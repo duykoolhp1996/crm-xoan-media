@@ -1037,20 +1037,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMoments(prev => [newMoment, ...prev]);
   };
 
-  // Quản lý tin nhắn Facebook Messenger Live Chat cho Sales (Dữ liệu Live thật 100%, không dùng demo)
+  // Quản lý tin nhắn Facebook Messenger Live Chat cho Sales
   const [messengerConversations, setMessengerConversations] = useState<FacebookChatConversation[]>(() => {
     try {
-      const saved = localStorage.getItem('crm_xoan_messenger_chats');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Lọc bỏ triệt để mọi dữ liệu demo (conv-fb-1..5 hoặc dữ liệu mẫu không phải live Facebook)
-          const liveOnly = parsed.filter(c => c.isLiveFacebook === true || (c.id && !c.id.startsWith('conv-fb-')));
-          return liveOnly;
-        }
-      }
+      localStorage.removeItem('crm_xoan_messenger_chats');
     } catch (e) {
-      console.error('Failed to load messenger chats from localStorage', e);
+      console.error(e);
     }
     return [];
   });
@@ -1059,7 +1051,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem('crm_xoan_messenger_chats', JSON.stringify(messengerConversations));
+      if (messengerConversations.length === 0) {
+        localStorage.removeItem('crm_xoan_messenger_chats');
+      } else {
+        localStorage.setItem('crm_xoan_messenger_chats', JSON.stringify(messengerConversations));
+      }
     } catch (e) {
       console.error('Failed to save messenger chats to localStorage', e);
     }
@@ -1193,20 +1189,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!silent) setIsSyncingFacebook(false);
     }
   };
-
-  // Tự động kiểm tra và cập nhật tin nhắn mới từ Fanpage mỗi 5 giây (Auto-polling nền)
-  useEffect(() => {
-    syncFacebookLiveConversations(false);
-
-    const pollingTimer = setInterval(() => {
-      // Chỉ tự động kiểm tra khi tab đang mở và hiển thị
-      if (document.visibilityState === 'visible') {
-        syncFacebookLiveConversations(true);
-      }
-    }, 5000);
-
-    return () => clearInterval(pollingTimer);
-  }, []);
 
   const sendMessengerMessage = (convId: string, text: string, sender: 'sales' | 'customer' = 'sales', attachments?: any[]) => {
     if (!text.trim() && (!attachments || attachments.length === 0)) return;
