@@ -441,27 +441,31 @@ export const ExecutiveDashboard: React.FC = () => {
             </button>
           </div>
           <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
-            {salesStaff.slice(0, 6).map(staff => (
-              <div
-                key={staff.id}
-                onClick={() => {
-                  if (!isSalesUser) setSelectedStaffId(staff.id);
-                }}
-                className="flex flex-col items-center gap-1 shrink-0 cursor-pointer group"
-              >
-                <div className={`relative p-0.5 rounded-full ${selectedStaffId === staff.id ? 'ring-2 ring-[#B8F23D]' : ''}`}>
-                  <img
-                    src={staff.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
-                    alt={staff.name}
-                    className="w-11 h-11 rounded-full object-cover border border-black/[0.08] group-hover:scale-105 transition-transform"
-                  />
-                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+            {salesStaff.length === 0 ? (
+              <p className="text-[11px] text-neutral-400 py-1.5 italic">Chưa có tài khoản Sales nào (Thêm tại Cài Đặt &gt; Quản Lý Nhân Sự)</p>
+            ) : (
+              salesStaff.slice(0, 6).map(staff => (
+                <div
+                  key={staff.id}
+                  onClick={() => {
+                    if (!isSalesUser) setSelectedStaffId(staff.id);
+                  }}
+                  className="flex flex-col items-center gap-1 shrink-0 cursor-pointer group"
+                >
+                  <div className={`relative p-0.5 rounded-full ${selectedStaffId === staff.id ? 'ring-2 ring-[#B8F23D]' : ''}`}>
+                    <img
+                      src={staff.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                      alt={staff.name}
+                      className="w-11 h-11 rounded-full object-cover border border-black/[0.08] group-hover:scale-105 transition-transform"
+                    />
+                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                  </div>
+                  <span className="text-[10px] font-bold text-neutral-700 truncate max-w-[60px]">
+                    {staff.name.split(' ')[0]}
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold text-neutral-700 truncate max-w-[60px]">
-                  {staff.name.split(' ')[0]}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

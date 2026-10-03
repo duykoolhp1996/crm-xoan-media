@@ -187,7 +187,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   const [photographers, setPhotographers] = useState<Photographer[]>(mockPhotographers);
-  const [salesStaff, setSalesStaff] = useState<SalesStaff[]>(mockSalesStaff);
+  const [salesStaff, setSalesStaff] = useState<SalesStaff[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_sales_staff');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load sales staff from localStorage', e);
+    }
+    return mockSalesStaff;
+  });
   const [schools, setSchools] = useState<School[]>(mockSchools);
   const [classes, setClasses] = useState<SchoolClass[]>(mockSchoolClasses);
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>(mockServicePackages);
@@ -280,7 +291,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 1. Kiểm tra tài khoản Admin
     if (
-      (u === 'admin@xoanmedia.vn' || u === 'admin') &&
+      (u === 'admin@xoanmedia.vn' || u === 'admin' || u === '0981108601' || u === 'taduy') &&
       (p === 'XoanAdmin@2026' || p === 'admin123' || p === '123456')
     ) {
       const adminUser = mockUsers[0];
@@ -388,6 +399,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } else if (role === 'sales') {
       const s = (staffId ? salesStaff.find(item => item.id === staffId) : null) || salesStaff[0];
+      if (!s) return;
       const salesUser: User = {
         id: s.id,
         name: s.name,
@@ -891,7 +903,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `sales-${Date.now()}`,
       createdAt: new Date().toISOString()
     };
-    setSalesStaff(prev => [newStaff, ...prev]);
+    setSalesStaff(prev => {
+      const updated = [newStaff, ...prev];
+      try {
+        localStorage.setItem('crm_xoan_sales_staff', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
 
     addActivityLog({
       customerId: 'system',
@@ -903,11 +923,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateSalesStaff = (updated: SalesStaff) => {
-    setSalesStaff(prev => prev.map(s => s.id === updated.id ? updated : s));
+    setSalesStaff(prev => {
+      const newList = prev.map(s => s.id === updated.id ? updated : s);
+      try {
+        localStorage.setItem('crm_xoan_sales_staff', JSON.stringify(newList));
+      } catch (e) {
+        console.error(e);
+      }
+      return newList;
+    });
   };
 
   const deleteSalesStaff = (id: string) => {
-    setSalesStaff(prev => prev.filter(s => s.id !== id));
+    setSalesStaff(prev => {
+      const newList = prev.filter(s => s.id !== id);
+      try {
+        localStorage.setItem('crm_xoan_sales_staff', JSON.stringify(newList));
+      } catch (e) {
+        console.error(e);
+      }
+      return newList;
+    });
   };
 
   const addClass = (newClass: SchoolClass) => {
