@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'CRM Xoăn Media',
   webDir: 'dist',
   server: {
-    // Ưu tiên chạy URL trực tuyến để tự động cập nhật tính năng mới mà không cần cài lại app
-    url: 'https://duykoolhp1996.github.io/crm-xoan-media/',
+    // Tự động nạp trực tiếp CRM Production mới nhất, không cần cài lại app khi có tính năng mới
+    url: 'https://crm.xoanmedia.com',
     cleartext: true
   },
   plugins: {
