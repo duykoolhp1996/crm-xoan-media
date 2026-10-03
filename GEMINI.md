@@ -18,12 +18,14 @@
   2. **Bắn lịch ca chụp cho Ekip**: Báo lịch chụp mới, ngày chụp, trường lớp, địa điểm và phân công trưởng nháy/thợ phụ.
   3. **Thông báo vận hành cho Quản lý / Admin**: Bắn thông báo chốt cọc VietQR, cập nhật tình trạng booking cho anh Tạ Duy và ban điều phối.
 
-## 4. Phân Định Môi Trường Hoạt Động (Environment Strategy)
-- **Server Ubuntu (`192.168.2.47` / Cloudflare Tunnel / Public)**:
-  - **Môi trường PRODUCTION (Chính thức / Public cho người dùng thật)**: Dành riêng cho toàn bộ nhân sự studio (Admin, Sales, Photographer/Ekip) và vận hành thực tế.
-  - Yêu cầu ổn định cao, dữ liệu thực tế, chỉ cập nhật khi tính năng đã được kiểm thử hoàn tất.
-  - Lệnh triển khai: `npm run deploy:server`.
-- **GitHub Pages (`duykoolhp1996.github.io/crm-xoan-media/`)**:
-  - **Môi trường STAGING / TESTING / DEVELOPMENT (Nơi test & phát triển app)**: Dành cho Admin thử nghiệm tính năng mới, kiểm tra layout/giao diện, debug lỗi và tinh chỉnh trước khi phát hành lên Server Production.
-  - Lệnh triển khai: `npm run deploy`.
+## 4. Quy Trình Phát Triển & Quản Lý Phiên Bản (Release & Versioning Strategy)
+- **Quy tắc phát triển trên GitHub trước (Testing & Staging)**:
+  - Mọi chỉnh sửa, cập nhật code, tính năng mới và fix lỗi **BẮT BUỘC** phải được triển khai và kiểm thử trên **GitHub Pages** trước (`npm run deploy`).
+  - GitHub Pages: `duykoolhp1996.github.io/crm-xoan-media/`.
+- **Quy tắc phát hành lên Server Production (`crm.xoanmedia.com`)**:
+  - **CHỈ KHI NÀO** người dùng yêu cầu "up bản mới nhất" hoặc phê duyệt deploy, hệ thống mới được phép chạy lệnh deploy lên Server Ubuntu (`npm run deploy:server`).
+  - **Bắt buộc thể hiện Version**:
+    - Mỗi lần phát hành lên Server Production, hệ thống phải tăng và thể hiện rõ **Số Phiên Bản (Version)** (ví dụ: `v1.0.0`, `v1.0.1`, `v1.1.0`...).
+    - Số phiên bản phải được hiển thị trực tiếp trên giao diện UI (chân Sidebar / Footer / Cài đặt) và trong commit log + thông báo phản hồi để người dùng kiểm tra ngay lập tức.
+
 

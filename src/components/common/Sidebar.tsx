@@ -253,10 +253,10 @@ export const Sidebar: React.FC = () => {
       <div className="flex items-center justify-between px-3 py-1.5 bg-neutral-50/50 rounded-xl border border-black/[0.03] text-[11px]">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#79ba07] shadow-[0_0_8px_#B8F23D] animate-pulse"></span>
-          <span className="text-[10px] font-medium text-neutral-500">Vận hành CRM</span>
+          <span className="text-[10px] font-medium text-neutral-500">Mùa 2026</span>
         </div>
-        <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-full">
-          Mùa 2026
+        <span className="text-[10px] font-bold font-mono text-neutral-900 bg-[#B8F23D]/50 border border-[#B8F23D] px-2 py-0.5 rounded-full shadow-sm" title="Phiên bản CRM">
+          v1.0.0
         </span>
       </div>
     </div>
