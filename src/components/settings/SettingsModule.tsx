@@ -39,7 +39,20 @@ import {
   Bot,
   Send,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  FileSpreadsheet,
+  FileCode,
+  HardDrive,
+  Cloud,
+  RefreshCw,
+  AlertTriangle,
+  Code,
+  CheckCircle,
+  XCircle,
+  HelpCircle,
+  Share2,
+  ArrowRight,
+  Table
 } from 'lucide-react';
 import { getGA4Id, setGA4Id } from '../../lib/analytics';
 import {
@@ -49,6 +62,23 @@ import {
   getZaloBotLogs,
   ZaloBotLog
 } from '../../lib/zaloBotService';
+import {
+  getGoogleSheetsConfig,
+  saveGoogleSheetsConfig,
+  exportToGoogleSheetsCsv,
+  syncAllToGoogleSheet,
+  GOOGLE_APPS_SCRIPT_TEMPLATE,
+  GoogleSheetsConfig
+} from '../../services/googleSheetsService';
+import {
+  downloadSqlDumpFile,
+  exportJsonBackup,
+  getSqlStorageStats
+} from '../../services/localSqlStorageService';
+import {
+  syncAllThreeZones,
+  MultiZoneSyncReport
+} from '../../services/multiZoneSyncService';
 
 export const SettingsModule: React.FC = () => {
   const {
@@ -58,6 +88,7 @@ export const SettingsModule: React.FC = () => {
     salesStaff,
     deleteSalesStaff,
     customers,
+    bookings,
     loginAsStaff,
     currentUser,
     currentRole
@@ -196,6 +227,78 @@ export const SettingsModule: React.FC = () => {
       alert('🐱 Xu Xu: Bạn có thể mở trực tiếp file tại: supabase/migrations/20260925_create_xoan_crm_tables.sql');
     }
   };
+
+  // --- 3-ZONE DATA STORAGE HUB STATE & HANDLERS ---
+  const [gsConfig, setGsConfig] = useState<GoogleSheetsConfig>(() => getGoogleSheetsConfig());
+  const [gsSaved, setGsSaved] = useState(false);
+  const [isSyncingThreeZones, setIsSyncingThreeZones] = useState(false);
+  const [syncReport, setSyncReport] = useState<MultiZoneSyncReport | null>(null);
+  const [showAppsScriptModal, setShowAppsScriptModal] = useState(false);
+  const [copiedScript, setCopiedScript] = useState(false);
+  const [gsTestStatus, setGsTestStatus] = useState<{ loading: boolean; message: string; success?: boolean } | null>(null);
+
+  const handleSaveGsConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    const updated = saveGoogleSheetsConfig(gsConfig);
+    setGsConfig(updated);
+    setGsSaved(true);
+    setTimeout(() => setGsSaved(false), 2500);
+  };
+
+  const handleTestGsSync = async () => {
+    if (!gsConfig.webhookUrl) {
+      alert('Vui lòng nhập Webhook URL của Google Apps Script trước khi gửi thử nghiệm!');
+      return;
+    }
+    setGsTestStatus({ loading: true, message: 'Đang gửi bản ghi dữ liệu tới Google Sheets...' });
+    try {
+      const res = await syncAllToGoogleSheet(customers, bookings);
+      setGsTestStatus({
+        loading: false,
+        message: res.message,
+        success: res.success
+      });
+      if (res.success) {
+        setGsConfig(getGoogleSheetsConfig());
+      }
+    } catch (e: any) {
+      setGsTestStatus({
+        loading: false,
+        message: `Lỗi kết nối: ${e.message}`,
+        success: false
+      });
+    }
+  };
+
+  const handleSyncAllThreeZones = async () => {
+    setIsSyncingThreeZones(true);
+    try {
+      const report = await syncAllThreeZones({
+        customers,
+        bookings,
+        photographers,
+        salesStaff
+      });
+      setSyncReport(report);
+      setGsConfig(getGoogleSheetsConfig());
+    } catch (err: any) {
+      alert(`Lỗi đồng bộ 3 vùng: ${err.message}`);
+    } finally {
+      setIsSyncingThreeZones(false);
+    }
+  };
+
+  const handleCopyAppsScript = async () => {
+    try {
+      await navigator.clipboard.writeText(GOOGLE_APPS_SCRIPT_TEMPLATE);
+      setCopiedScript(true);
+      setTimeout(() => setCopiedScript(false), 3000);
+    } catch {
+      alert('Không thể sao chép tự động, vui lòng chọn và sao chép thủ công.');
+    }
+  };
+
+  const sqlStats = getSqlStorageStats({ customers, bookings, photographers, salesStaff });
 
   // Crew Filter & Search
   const [searchCrew, setSearchCrew] = useState('');
@@ -952,120 +1055,410 @@ export const SettingsModule: React.FC = () => {
 
       {/* SUBTAB 3: DATABASE SUPABASE & WEBHOOKS */}
       {activeSubTab === 'database' && (
-        <div className="space-y-5 animate-in fade-in duration-200">
-          {/* Section: Supabase Ready */}
-          <div className="bg-white border border-black/[0.08] p-6 rounded-3xl space-y-4 shadow-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
-                <Database className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-sm font-bold text-neutral-900">Cơ Sở Dữ Liệu PostgreSQL / Supabase</h2>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Hệ thống đã chuẩn bị sẵn Schema SQL 22+ bảng quan hệ (Customers, Bookings, Photographers, Workflows, RLS)
-                </p>
-              </div>
-            </div>
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* ============================================================== */}
+          {/* BANNER ĐIỀU KHIỂN TRUNG TÂM: HỆ THỐNG LƯU TRỮ DỮ LIỆU 3 VÙNG */}
+          {/* ============================================================== */}
+          <div className="bg-gradient-to-r from-neutral-900 via-neutral-950 to-neutral-900 border border-neutral-800 text-white p-6 sm:p-7 rounded-3xl space-y-5 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#B8F23D]/10 via-emerald-500/5 to-transparent pointer-events-none rounded-full blur-3xl -mr-20 -mt-20" />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="font-semibold text-neutral-700">Supabase Project URL</label>
-                <input
-                  type="text"
-                  value={supabaseUrl}
-                  onChange={e => setSupabaseUrl(e.target.value)}
-                  placeholder="https://etvbrbdysphrfzvnwvbk.supabase.co"
-                  className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-                />
-                <p className="text-[10px] text-neutral-400 mt-1">Project Ref: <code>etvbrbdysphrfzvnwvbk</code></p>
-              </div>
-              <div>
-                <label className="font-semibold text-neutral-700">Supabase Anon Public API Key</label>
-                <input
-                  type="password"
-                  value={supabaseKey}
-                  onChange={e => setSupabaseKey(e.target.value)}
-                  placeholder="Dán anon key (eyJhbGciOi...)"
-                  className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-                />
-                <p className="text-[10px] text-neutral-400 mt-1">Lấy tại: Supabase Dashboard &gt; Settings &gt; API &gt; anon public</p>
-              </div>
-            </div>
-
-            {/* Trạng thái kết nối & Nút Test */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleTestConnection}
-                disabled={connectionStatus === 'testing'}
-                className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer disabled:opacity-50"
-              >
-                {connectionStatus === 'testing' ? (
-                  <>
-                    <span className="w-3.5 h-3.5 border-2 border-[#B8F23D] border-t-transparent rounded-full animate-spin" />
-                    Đang Kiểm Tra Kết Nối...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-3.5 h-3.5 fill-current" />
-                    Lưu & Kiểm Tra Kết Nối Supabase
-                  </>
-                )}
-              </button>
-
-              {connectionStatus === 'success' && (
-                <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-semibold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>{connectionMessage}</span>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 relative z-10">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#B8F23D] text-neutral-950 flex items-center gap-1.5 shadow-sm">
+                    <Database className="w-3.5 h-3.5" /> Kiến Trúc Lưu Trữ Dữ Liệu 3 Vùng
+                  </span>
+                  <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white/10 text-neutral-300 border border-white/10">
+                    Bảo toàn dữ liệu 100%
+                  </span>
                 </div>
-              )}
-
-              {connectionStatus === 'error' && (
-                <div className="flex items-center gap-2 text-rose-800 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
-                  <span>{connectionMessage}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 bg-neutral-50 border border-black/[0.06] rounded-2xl text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-neutral-900 font-bold flex items-center gap-2">
-                  <Server className="w-4 h-4 text-emerald-600" />
-                  Khởi Tạo Cơ Sở Dữ Liệu: <code>src/database/schema.sql</code>
-                </p>
-                <p className="text-neutral-500 text-[11px]">
-                  Bao gồm đầy đủ 22+ bảng: Users, Roles, Customers, Bookings, Photographers, Assignments, Services, RLS...
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  Trung Tâm Đồng Bộ: Google Sheets • Supabase • SQL CRM App
+                </h2>
+                <p className="text-xs sm:text-sm text-neutral-400 max-w-2xl leading-relaxed">
+                  Dữ liệu CRM được phân phối độc lập qua 3 vùng: <strong className="text-emerald-400">Vùng 1 (Google Sheets)</strong> phục vụ báo cáo kinh doanh, <strong className="text-sky-400">Vùng 2 (Supabase)</strong> quản trị CSDL đám mây thời gian thực, và <strong className="text-amber-300">Vùng 3 (SQL App)</strong> lưu trữ cục bộ, tải file <code className="text-white bg-white/10 px-1 py-0.5 rounded">.sql dump</code> & sao lưu JSON.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Master Sync Action Button */}
+              <div className="flex flex-col sm:flex-row lg:flex-col items-stretch gap-2.5 shrink-0 w-full sm:w-auto">
                 <button
                   type="button"
-                  onClick={handleCopySchemaSql}
-                  className="px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-800 border border-black/[0.1] rounded-xl font-semibold flex items-center gap-1.5 transition-all text-xs shadow-2xs cursor-pointer"
+                  onClick={handleSyncAllThreeZones}
+                  disabled={isSyncingThreeZones}
+                  className="px-6 py-3.5 bg-[#B8F23D] hover:bg-[#a5db32] text-neutral-950 font-black rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all shadow-lg hover:shadow-xl cursor-pointer disabled:opacity-50"
                 >
-                  {copiedSql ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-700 font-bold">Đã Sao Chép SQL!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-neutral-600" />
-                      <span>Sao Chép Mã SQL</span>
-                    </>
-                  )}
+                  <RefreshCw className={`w-4 h-4 text-neutral-950 ${isSyncingThreeZones ? 'animate-spin' : ''}`} />
+                  {isSyncingThreeZones ? 'Đang Đồng Bộ Cả 3 Vùng...' : '🚀 ĐỒNG BỘ CẢ 3 VÙNG NGAY BÂY GIỜ'}
+                </button>
+                <p className="text-[11px] text-neutral-400 text-center">
+                  Cập nhật song song {customers.length} khách hàng & {bookings.length} lịch chụp
+                </p>
+              </div>
+            </div>
+
+            {/* Báo Cáo Trạng Thái Đồng Bộ Gần Nhất */}
+            {syncReport && (
+              <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-neutral-200 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#B8F23D]" />
+                    Kết quả đồng bộ lúc {new Date(syncReport.timestamp).toLocaleTimeString('vi-VN')}: ({syncReport.successfulZones}/{syncReport.totalZones} vùng hoàn tất)
+                  </span>
+                  <span className="text-[11px] text-neutral-400">
+                    {new Date(syncReport.timestamp).toLocaleDateString('vi-VN')}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+                  <div className={`p-3 rounded-xl border ${
+                    syncReport.details.zone1.status === 'success'
+                      ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-200'
+                      : syncReport.details.zone1.status === 'warning'
+                      ? 'bg-amber-950/40 border-amber-500/30 text-amber-200'
+                      : 'bg-rose-950/40 border-rose-500/30 text-rose-200'
+                  }`}>
+                    <p className="font-bold text-[11px]">📊 {syncReport.details.zone1.zone}</p>
+                    <p className="text-[11px] mt-0.5 opacity-90">{syncReport.details.zone1.message}</p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl border ${
+                    syncReport.details.zone2.status === 'success'
+                      ? 'bg-sky-950/40 border-sky-500/30 text-sky-200'
+                      : syncReport.details.zone2.status === 'warning'
+                      ? 'bg-amber-950/40 border-amber-500/30 text-amber-200'
+                      : 'bg-rose-950/40 border-rose-500/30 text-rose-200'
+                  }`}>
+                    <p className="font-bold text-[11px]">☁️ {syncReport.details.zone2.zone}</p>
+                    <p className="text-[11px] mt-0.5 opacity-90">{syncReport.details.zone2.message}</p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl border ${
+                    syncReport.details.zone3.status === 'success'
+                      ? 'bg-purple-950/40 border-purple-500/30 text-purple-200'
+                      : 'bg-rose-950/40 border-rose-500/30 text-rose-200'
+                  }`}>
+                    <p className="font-bold text-[11px]">💾 {syncReport.details.zone3.zone}</p>
+                    <p className="text-[11px] mt-0.5 opacity-90">{syncReport.details.zone3.message}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ============================================================== */}
+          {/* LƯỚI 3 THẺ ĐỘC LẬP: VÙNG 1 • VÙNG 2 • VÙNG 3                   */}
+          {/* ============================================================== */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {/* THẺ VÙNG 1: GOOGLE SHEETS */}
+            <div className="bg-white border border-emerald-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                      <FileSpreadsheet className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        VÙNG 1
+                      </span>
+                      <h3 className="text-sm font-bold text-neutral-900 mt-0.5">Google Sheets</h3>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    gsConfig.webhookUrl
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-neutral-100 text-neutral-600 border-neutral-200'
+                  }`}>
+                    {gsConfig.webhookUrl ? '🟢 Đã cấu hình' : '⚪ Chưa có URL'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                  Đồng bộ tức thì khách hàng & lịch chụp vào Google Sheets qua Apps Script Webhook. Phù hợp cho báo cáo Marketing và quản trị kinh doanh.
+                </p>
+
+                <form onSubmit={handleSaveGsConfig} className="space-y-3 text-xs pt-1">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label className="font-semibold text-neutral-700">Webhook Google Apps Script URL</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowAppsScriptModal(true)}
+                        className="text-[10px] text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <Code className="w-3 h-3" /> Lấy Mã Script
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      value={gsConfig.webhookUrl}
+                      onChange={e => setGsConfig({ ...gsConfig, webhookUrl: e.target.value })}
+                      placeholder="https://script.google.com/macros/s/.../exec"
+                      className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="font-semibold text-neutral-700 text-[11px]">Sheet Khách Hàng</label>
+                      <input
+                        type="text"
+                        value={gsConfig.sheetNameCustomers}
+                        onChange={e => setGsConfig({ ...gsConfig, sheetNameCustomers: e.target.value })}
+                        placeholder="Khách Hàng"
+                        className="w-full mt-1 px-2.5 py-1.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="font-semibold text-neutral-700 text-[11px]">Sheet Lịch Chụp</label>
+                      <input
+                        type="text"
+                        value={gsConfig.sheetNameBookings}
+                        onChange={e => setGsConfig({ ...gsConfig, sheetNameBookings: e.target.value })}
+                        placeholder="Lịch Chụp"
+                        className="w-full mt-1 px-2.5 py-1.5 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer bg-neutral-50 p-2.5 rounded-xl border border-black/[0.04]">
+                    <input
+                      type="checkbox"
+                      checked={gsConfig.autoSync}
+                      onChange={e => setGsConfig({ ...gsConfig, autoSync: e.target.checked })}
+                      className="rounded text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="text-[11px] text-neutral-700 font-medium">Tự động đồng bộ ngầm khi tạo khách & booking</span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    {gsSaved ? <Check className="w-3.5 h-3.5" /> : null}
+                    {gsSaved ? 'Đã Lưu Cấu Hình Google Sheets!' : 'Lưu Cấu Hình Vùng 1'}
+                  </button>
+                </form>
+
+                {gsTestStatus && (
+                  <div className={`p-2.5 rounded-xl text-[11px] flex items-center gap-2 ${
+                    gsTestStatus.loading
+                      ? 'bg-neutral-100 text-neutral-700'
+                      : gsTestStatus.success
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border border-rose-200'
+                  }`}>
+                    {gsTestStatus.loading ? (
+                      <span className="w-3 h-3 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin shrink-0" />
+                    ) : gsTestStatus.success ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    )}
+                    <span>{gsTestStatus.message}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons Vùng 1 */}
+              <div className="pt-3 border-t border-black/[0.06] space-y-2">
+                <button
+                  type="button"
+                  onClick={handleTestGsSync}
+                  className="w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                >
+                  <Send className="w-3.5 h-3.5" /> Gửi Thử Nghiệm Tới Sheet
                 </button>
 
-                <a
-                  href="/init_supabase.sql"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-semibold flex items-center gap-1.5 transition-all text-xs shadow-xs"
+                <button
+                  type="button"
+                  onClick={() => exportToGoogleSheetsCsv(customers)}
+                  className="w-full py-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-black/[0.1] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                 >
-                  <Download className="w-3.5 h-3.5" /> Xem Schema SQL (Full Seed)
-                </a>
+                  <Download className="w-3.5 h-3.5 text-emerald-600" /> Tải CSV Khách Hàng (UTF-8 BOM)
+                </button>
+              </div>
+            </div>
+
+            {/* THẺ VÙNG 2: SUPABASE POSTGRESQL */}
+            <div className="bg-white border border-sky-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-700 border border-sky-200 flex items-center justify-center shrink-0">
+                      <Cloud className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200">
+                        VÙNG 2
+                      </span>
+                      <h3 className="text-sm font-bold text-neutral-900 mt-0.5">Supabase PostgreSQL</h3>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    connectionStatus === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                  }`}>
+                    {connectionStatus === 'success' ? '🟢 Đã kết nối' : '🟡 Chế độ Local'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                  Cơ sở dữ liệu đám mây PostgreSQL thời gian thực với phân quyền RLS, đồng bộ dữ liệu hai chiều và bảo mật doanh nghiệp.
+                </p>
+
+                <div className="space-y-3 text-xs pt-1">
+                  <div>
+                    <label className="font-semibold text-neutral-700">Supabase Project URL</label>
+                    <input
+                      type="text"
+                      value={supabaseUrl}
+                      onChange={e => setSupabaseUrl(e.target.value)}
+                      placeholder="https://etvbrbdysphrfzvnwvbk.supabase.co"
+                      className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-neutral-700">Anon Public API Key</label>
+                    <input
+                      type="password"
+                      value={supabaseKey}
+                      onChange={e => setSupabaseKey(e.target.value)}
+                      placeholder="Dán anon key (eyJhbGciOi...)"
+                      className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-[11px] text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+
+                  {connectionMessage && (
+                    <div className={`p-2.5 rounded-xl text-[11px] flex items-center gap-2 ${
+                      connectionStatus === 'success'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : connectionStatus === 'error'
+                        ? 'bg-rose-50 text-rose-800 border border-rose-200'
+                        : 'bg-neutral-100 text-neutral-700'
+                    }`}>
+                      {connectionStatus === 'testing' ? (
+                        <span className="w-3 h-3 border-2 border-sky-600 border-t-transparent rounded-full animate-spin shrink-0" />
+                      ) : connectionStatus === 'success' ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      )}
+                      <span>{connectionMessage}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons Vùng 2 */}
+              <div className="pt-3 border-t border-black/[0.06] space-y-2">
+                <button
+                  type="button"
+                  onClick={handleTestConnection}
+                  disabled={connectionStatus === 'testing'}
+                  className="w-full py-2 bg-sky-700 hover:bg-sky-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  {connectionStatus === 'testing' ? 'Đang Kiểm Tra...' : 'Lưu & Kiểm Tra Supabase'}
+                </button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopySchemaSql}
+                    className="py-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-black/[0.1] font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedSql ? 'Đã Sao Chép!' : 'Mã SQL 22 Bảng'}</span>
+                  </button>
+
+                  <a
+                    href="/init_supabase.sql"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-black/[0.1] font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors shadow-2xs text-center"
+                  >
+                    <Download className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Tải File .sql</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* THẺ VÙNG 3: SQL CỦA CRM APP */}
+            <div className="bg-white border border-purple-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs flex flex-col justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center shrink-0">
+                      <HardDrive className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                        VÙNG 3
+                      </span>
+                      <h3 className="text-sm font-bold text-neutral-900 mt-0.5">SQL Của CRM App</h3>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-purple-50 text-purple-800 border-purple-200">
+                    🟢 Sẵn sàng Offline
+                  </span>
+                </div>
+
+                <p className="text-xs text-neutral-500 leading-relaxed">
+                  Lưu trữ dữ liệu trong bộ nhớ CRM của máy client. Cho phép trích xuất toàn bộ dữ liệu thành file script SQL Dump chuẩn hoặc JSON backup.
+                </p>
+
+                {/* Bảng Chỉ Số Dữ Liệu SQL Nội Bộ */}
+                <div className="p-3 bg-neutral-50 rounded-2xl border border-black/[0.06] space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-neutral-700">
+                    <span>Khách hàng & Leads:</span>
+                    <strong className="text-neutral-900 font-mono">{sqlStats.customersCount} bản ghi</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-neutral-700">
+                    <span>Lịch chụp (Bookings):</span>
+                    <strong className="text-neutral-900 font-mono">{sqlStats.bookingsCount} lịch</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-neutral-700">
+                    <span>Ekip Thợ Chụp:</span>
+                    <strong className="text-neutral-900 font-mono">{sqlStats.photographersCount} nhân sự</strong>
+                  </div>
+                  <div className="flex justify-between items-center text-neutral-700">
+                    <span>Chuyên viên Sales:</span>
+                    <strong className="text-neutral-900 font-mono">{sqlStats.salesStaffCount} nhân sự</strong>
+                  </div>
+                  <div className="pt-1.5 border-t border-black/[0.06] flex justify-between items-center text-[11px] text-neutral-500">
+                    <span>Dung lượng bộ nhớ ước tính:</span>
+                    <span className="font-bold text-purple-700 font-mono">
+                      {(sqlStats.estimatedSizeBytes / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-neutral-400 italic">
+                  💡 Tệp SQL Dump sinh mã <code>CREATE TABLE</code> &amp; <code>INSERT</code> tương thích PostgreSQL, MySQL, SQLite để import vào bất kỳ server CSDL nào.
+                </p>
+              </div>
+
+              {/* Action Buttons Vùng 3 */}
+              <div className="pt-3 border-t border-black/[0.06] space-y-2">
+                <button
+                  type="button"
+                  onClick={() => downloadSqlDumpFile({ customers, bookings, photographers, salesStaff })}
+                  className="w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                >
+                  <FileCode className="w-4 h-4" /> Tải Tệp SQL Dump (.sql)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => exportJsonBackup({ customers, bookings, photographers, salesStaff })}
+                  className="w-full py-2 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                >
+                  <Download className="w-3.5 h-3.5" /> Tải Bản Sao Lưu JSON (.json)
+                </button>
               </div>
             </div>
           </div>
@@ -1389,6 +1782,69 @@ export const SettingsModule: React.FC = () => {
         onClose={() => setIsSalesModalOpen(false)}
         staffToEdit={editingSalesStaff}
       />
+
+      {/* Modal Hướng Dẫn & Mã Webhook Google Apps Script */}
+      {showAppsScriptModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-black/[0.08] space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-900">Mã Webhook Google Apps Script (Vùng 1)</h3>
+                  <p className="text-xs text-neutral-500">Dán mã này vào Google Sheets để tự động nhận Lead &amp; Lịch Chụp</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAppsScriptModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-neutral-700 overflow-y-auto flex-1 pr-1">
+              <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-1.5">
+                <p className="font-bold text-emerald-950 text-xs">📋 Hướng Dẫn Kích Hoạt 4 Bước (Chưa đến 1 phút):</p>
+                <ol className="list-decimal pl-4 space-y-1 text-[11px] text-emerald-900">
+                  <li>Mở file Google Sheets &gt; menu <strong>Tiện ích mở rộng (Extensions)</strong> &gt; chọn <strong>Apps Script</strong>.</li>
+                  <li>Xóa hết mã có sẵn trong trình soạn thảo, dán toàn bộ đoạn mã bên dưới vào.</li>
+                  <li>Nhấn nút <strong>Triển khai (Deploy)</strong> ở góc trên bên phải &gt; chọn <strong>Triển khai mới (New deployment)</strong> &gt; chọn loại <strong>Ứng dụng web (Web app)</strong>.</li>
+                  <li>Mục <em>"Ai có quyền truy cập" (Who has access)</em>: chọn <strong>Bất kỳ ai (Anyone)</strong> &gt; nhấn Triển khai và sao chép <strong>URL Ứng dụng web</strong> dán vào ô Webhook URL trên CRM.</li>
+                </ol>
+              </div>
+
+              <div className="relative">
+                <pre className="bg-neutral-950 text-neutral-100 p-4 rounded-2xl text-[11px] font-mono overflow-x-auto max-h-72 leading-relaxed">
+                  {GOOGLE_APPS_SCRIPT_TEMPLATE}
+                </pre>
+                <button
+                  type="button"
+                  onClick={handleCopyAppsScript}
+                  className="absolute top-3 right-3 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  {copiedScript ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedScript ? 'Đã Sao Chép!' : 'Sao Chép Mã Script'}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-black/[0.06] flex items-center justify-between">
+              <span className="text-[11px] text-neutral-400">Tự động tạo cột tiêu đề tiếng Việt chuẩn và không ghi đè dữ liệu cũ</span>
+              <button
+                type="button"
+                onClick={() => setShowAppsScriptModal(false)}
+                className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl text-xs font-semibold cursor-pointer"
+              >
+                Đóng Cửa Sổ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

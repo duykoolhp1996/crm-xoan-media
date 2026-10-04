@@ -43,6 +43,8 @@ import { mockMessengerConversations } from '../data/mockMessengerData';
 import { crmSupabaseService } from '../services/crmSupabaseService';
 import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup, notifyCustomerDepositToZaloGroup } from '../lib/zaloBotService';
 import { FacebookApiService } from '../services/facebookApiService';
+import { dispatchCustomerSyncToZones, dispatchBookingSyncToZones } from '../services/multiZoneSyncService';
+
 
 export type NavigationTab = 
   | 'dashboard'
@@ -606,6 +608,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setCustomers(prev => [newCustomer, ...prev]);
     crmSupabaseService.saveCustomer(newCustomer).catch(() => {});
+    dispatchCustomerSyncToZones(newCustomer, {
+      customers: [newCustomer, ...customers],
+      bookings,
+      photographers,
+      salesStaff
+    }).catch(() => {});
 
     // Thêm activity log
     addActivityLog({
@@ -758,6 +766,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
     crmSupabaseService.saveCustomer(updated).catch(() => {});
+    dispatchCustomerSyncToZones(updated, {
+      customers: customers.map(c => c.id === updated.id ? updated : c),
+      bookings,
+      photographers,
+      salesStaff
+    }).catch(() => {});
 
     if (isNewDeposit) {
       notifyCustomerDepositToZaloGroup({
@@ -814,10 +828,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       content: `Mã booking: ${bookingData.code} | Ngày chụp: ${bookingData.shootDate} | Đặt cọc: ${(bookingData.depositAmount || 0).toLocaleString('vi-VN')} VNĐ.`,
       recipient: 'Nhóm Quản Lý Booking & Sales'
     }).catch(() => {});
+
+    // Đồng bộ đa vùng (Multi-Zone Sync)
+    dispatchBookingSyncToZones(newBooking, {
+      customers,
+      bookings: [newBooking, ...bookings],
+      photographers,
+      salesStaff
+    }).catch(() => {});
   };
 
   const updateBooking = (updated: Booking) => {
     setBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
+    dispatchBookingSyncToZones(updated, {
+      customers,
+      bookings: bookings.map(b => b.id === updated.id ? updated : b),
+      photographers,
+      salesStaff
+    }).catch(() => {});
   };
 
   // Kiểm tra tính sẵn sàng & xung đột lịch thợ
