@@ -17,8 +17,8 @@ export interface GoogleSheetsConfig {
 const STORAGE_KEY = 'crm_xoan_google_sheets_config';
 
 const DEFAULT_CONFIG: GoogleSheetsConfig = {
-  webhookUrl: '',
-  spreadsheetId: '',
+  webhookUrl: import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL || '',
+  spreadsheetId: import.meta.env.VITE_GOOGLE_SPREADSHEET_ID || '',
   sheetNameCustomers: 'Khách Hàng',
   sheetNameBookings: 'Lịch Chụp',
   autoSync: true,
@@ -28,12 +28,59 @@ const DEFAULT_CONFIG: GoogleSheetsConfig = {
 export const getGoogleSheetsConfig = (): GoogleSheetsConfig => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return { ...DEFAULT_CONFIG, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        ...DEFAULT_CONFIG,
+        ...parsed,
+        webhookUrl: parsed.webhookUrl || DEFAULT_CONFIG.webhookUrl
+      };
+    }
   } catch (e) {
     console.error('Lỗi đọc cấu hình Google Sheets:', e);
   }
   return DEFAULT_CONFIG;
 };
+
+/**
+ * Kiểm tra kết nối nhanh tới Webhook Google Apps Script
+ */
+export const testGoogleSheetsConnection = async (customUrl?: string): Promise<{ success: boolean; message: string }> => {
+  const config = getGoogleSheetsConfig();
+  const url = (customUrl || config.webhookUrl || '').trim();
+
+  if (!url) {
+    return {
+      success: false,
+      message: 'Chưa có URL Webhook Google Sheets. Vui lòng cấu hình URL Webhook trước.'
+    };
+  }
+
+  try {
+    const payload = {
+      action: 'PING',
+      data: { ping: true, timestamp: new Date().toISOString() }
+    };
+
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    return {
+      success: true,
+      message: 'Đã gửi tín hiệu kiểm tra tới Google Apps Script thành công! Kết nối hợp lệ.'
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      message: `Không thể kết nối tới Google Webhook: ${err.message || 'Lỗi mạng hoặc URL không tồn tại'}`
+    };
+  }
+};
+
 
 export const saveGoogleSheetsConfig = (config: Partial<GoogleSheetsConfig>): GoogleSheetsConfig => {
   const current = getGoogleSheetsConfig();
