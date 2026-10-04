@@ -1270,15 +1270,28 @@ export const SettingsModule: React.FC = () => {
                   <Send className="w-3.5 h-3.5" /> Gửi Thử Nghiệm Tới Sheet
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => exportToGoogleSheetsCsv(customers)}
-                  className="w-full py-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-black/[0.1] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-                >
-                  <Download className="w-3.5 h-3.5 text-emerald-600" /> Tải CSV Khách Hàng (UTF-8 BOM)
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href="/danh_sach_khach_hang_xoan_media.xlsx"
+                    download="danh_sach_khach_hang_xoan_media.xlsx"
+                    className="py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer shadow-2xs text-center"
+                    title="Tải Mẫu Bảng Tính Excel Chuẩn"
+                  >
+                    <FileSpreadsheet className="w-3.5 h-3.5" /> Tải Excel (.xlsx)
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => exportToGoogleSheetsCsv(customers)}
+                    className="py-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-black/[0.1] font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                    title="Tải File CSV Chuẩn UTF-8 BOM"
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-600" /> Tải CSV
+                  </button>
+                </div>
               </div>
             </div>
+
 
             {/* THẺ VÙNG 2: SUPABASE POSTGRESQL */}
             <div className="bg-white border border-sky-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs flex flex-col justify-between">

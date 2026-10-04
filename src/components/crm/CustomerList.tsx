@@ -108,7 +108,16 @@ export const CustomerList: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <a
+            href="/danh_sach_khach_hang_xoan_media.xlsx"
+            download="danh_sach_khach_hang_xoan_media.xlsx"
+            className="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all active:scale-95"
+            title="Tải Mẫu Bảng Tính Khách Hàng Excel / Google Sheets"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Tải File Sheet (.xlsx)
+          </a>
           <button
             onClick={() => setIsModalOpen(true)}
             className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-2xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95"
@@ -118,6 +127,7 @@ export const CustomerList: React.FC = () => {
           </button>
         </div>
       </div>
+
 
       {/* Filters Bar */}
       <div className="glass-panel-subtle p-3.5 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center gap-3">
