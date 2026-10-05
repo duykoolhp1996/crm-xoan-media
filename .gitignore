@@ -30,3 +30,8 @@ dist-ssr
 API/*.json
 API/*/*.json
 API/token.json
+
+# Server SQLite Database & Excel Backups
+server/data/*.db*
+server/backups/
+*.lock

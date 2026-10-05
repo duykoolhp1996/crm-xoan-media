@@ -8,6 +8,7 @@
  */
 
 import { Customer, Booking, Photographer, SalesStaff } from '../types';
+import ExcelJS from 'exceljs';
 
 export interface SqlStorageStats {
   customersCount: number;
@@ -297,4 +298,279 @@ export const syncToLocalSqlCache = (data: {
     console.error('Lỗi lưu cache SQL nội bộ:', e);
     return false;
   }
+};
+
+/**
+ * Xuất file Excel (.xlsx thực) trực tiếp trên Client trình duyệt bằng ExcelJS
+ * Hỗ trợ Unicode UTF-8 tiếng Việt, ép chuỗi giữ số 0 đầu, chống Formula Injection
+ */
+export const exportClientExcelXlsx = async (data: {
+  customers?: Customer[];
+  bookings?: Booking[];
+  photographers?: Photographer[];
+  salesStaff?: SalesStaff[];
+  mode?: 'full' | 'delta';
+  periodLabel?: string;
+}): Promise<{ success: boolean; filename: string; totalRecords: number }> => {
+  const customers = data.customers || [];
+  const bookings = data.bookings || [];
+  const photographers = data.photographers || [];
+  const salesStaff = data.salesStaff || [];
+  const mode = data.mode || 'full';
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const period = data.periodLabel || `${year}-${month}`;
+
+  const sanitize = (val: any): string => {
+    if (val === null || val === undefined) return '';
+    const str = String(val).trim();
+    if (str.startsWith('=') || str.startsWith('+') || str.startsWith('-') || str.startsWith('@')) {
+      return `'${str}`;
+    }
+    return str;
+  };
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'CRM Xoăn Media';
+  workbook.created = now;
+
+  const BRAND_FILL: ExcelJS.Fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'B8F23D' }
+  };
+
+  const HEADER_FONT = {
+    name: 'Segoe UI',
+    size: 11,
+    bold: true,
+    color: { argb: '000000' }
+  };
+
+  const BORDER: Partial<ExcelJS.Borders> = {
+    top: { style: 'thin', color: { argb: 'E5E5E5' } },
+    left: { style: 'thin', color: { argb: 'E5E5E5' } },
+    bottom: { style: 'thin', color: { argb: 'E5E5E5' } },
+    right: { style: 'thin', color: { argb: 'E5E5E5' } }
+  };
+
+  // 1. SHEET KHÁCH HÀNG
+  const sheetCustomers = workbook.addWorksheet('Khách Hàng', { views: [{ state: 'frozen', ySplit: 1 }] });
+  sheetCustomers.columns = [
+    { header: 'Mã Khách Hàng', key: 'id', width: 22 },
+    { header: 'Họ Và Tên', key: 'name', width: 26 },
+    { header: 'Số Điện Thoại', key: 'phone', width: 16 },
+    { header: 'Email', key: 'email', width: 24 },
+    { header: 'Trường Học', key: 'schoolName', width: 28 },
+    { header: 'Lớp', key: 'className', width: 14 },
+    { header: 'Tỉnh / Thành', key: 'province', width: 20 },
+    { header: 'Nguồn Khách', key: 'leadSource', width: 20 },
+    { header: 'Giai Đoạn', key: 'pipelineStage', width: 20 },
+    { header: 'Sales Phụ Trách', key: 'assignedSalesName', width: 22 },
+    { header: 'Giá Trị HĐ (VNĐ)', key: 'contractValue', width: 22 },
+    { header: 'Tiền Cọc (VNĐ)', key: 'depositAmount', width: 18 },
+    { header: 'Ngày Dự Kiến Chụp', key: 'shootDate', width: 18 },
+    { header: 'Ghi Chú', key: 'notes', width: 35 },
+    { header: 'Ngày Tạo', key: 'createdAt', width: 20 }
+  ];
+
+  sheetCustomers.getRow(1).eachCell(cell => {
+    cell.fill = BRAND_FILL;
+    cell.font = HEADER_FONT;
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = BORDER;
+  });
+  sheetCustomers.getRow(1).height = 28;
+
+  customers.forEach(c => {
+    const row = sheetCustomers.addRow({
+      id: sanitize(c.id),
+      name: sanitize(c.name),
+      phone: sanitize(c.phone),
+      email: sanitize(c.email),
+      schoolName: sanitize(c.schoolName),
+      className: sanitize(c.className),
+      province: sanitize(c.city || c.region),
+      leadSource: sanitize(c.source),
+      pipelineStage: sanitize(c.pipelineStage),
+      assignedSalesName: sanitize(c.assignedSalesName),
+      contractValue: Number(c.totalRevenue) || 0,
+      depositAmount: Number(c.paidAmount) || 0,
+      shootDate: sanitize(c.expectedShootDate || c.shotDate),
+      notes: sanitize(c.notes),
+      createdAt: sanitize(c.createdAt)
+    });
+    row.eachCell((cell, col) => {
+      cell.border = BORDER;
+      cell.font = { name: 'Segoe UI', size: 10 };
+      if (col === 3) {
+        cell.numFmt = '@';
+        cell.alignment = { horizontal: 'center' };
+      } else if (col === 11 || col === 12) {
+        cell.numFmt = '#,##0 "₫"';
+        cell.alignment = { horizontal: 'right' };
+      }
+    });
+  });
+
+  // 2. SHEET LỊCH CHỤP
+  const sheetBookings = workbook.addWorksheet('Lịch Chụp', { views: [{ state: 'frozen', ySplit: 1 }] });
+  sheetBookings.columns = [
+    { header: 'Mã Booking', key: 'code', width: 18 },
+    { header: 'Tên Gói Chụp', key: 'packageName', width: 30 },
+    { header: 'Tên Khách Hàng', key: 'customerName', width: 24 },
+    { header: 'Trường - Lớp', key: 'schoolClass', width: 26 },
+    { header: 'Ngày Chụp', key: 'shootDate', width: 16 },
+    { header: 'Giờ Bắt Đầu', key: 'startTime', width: 14 },
+    { header: 'Địa Điểm', key: 'location', width: 30 },
+    { header: 'Trưởng Nháy (Photo)', key: 'leadPhoto', width: 24 },
+    { header: 'Trạng Thái', key: 'bookingStatus', width: 18 },
+    { header: 'Thanh Toán', key: 'paymentStatus', width: 16 },
+    { header: 'Tổng Giá Trị (VNĐ)', key: 'totalAmount', width: 20 }
+  ];
+
+  sheetBookings.getRow(1).eachCell(cell => {
+    cell.fill = BRAND_FILL;
+    cell.font = HEADER_FONT;
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = BORDER;
+  });
+  sheetBookings.getRow(1).height = 28;
+
+  bookings.forEach(b => {
+    const row = sheetBookings.addRow({
+      code: sanitize(b.code || b.id),
+      packageName: sanitize(b.packageName),
+      customerName: sanitize(b.customerName),
+      schoolClass: sanitize(`${b.schoolName} - ${b.className}`),
+      shootDate: sanitize(b.shootDate),
+      startTime: sanitize(b.startTime),
+      location: sanitize(b.location),
+      leadPhoto: sanitize(b.assignments?.leadPhotographerName || 'Chưa phân công'),
+      bookingStatus: sanitize(b.bookingStatus),
+      paymentStatus: sanitize(b.paymentStatus),
+      totalAmount: Number(b.totalAmount) || 0
+    });
+    row.eachCell((cell, col) => {
+      cell.border = BORDER;
+      cell.font = { name: 'Segoe UI', size: 10 };
+      if (col === 11) {
+        cell.numFmt = '#,##0 "₫"';
+        cell.alignment = { horizontal: 'right' };
+      }
+    });
+  });
+
+  // 3. SHEET THỢ CHỤP
+  const sheetPhoto = workbook.addWorksheet('Ekip Thợ Chụp', { views: [{ state: 'frozen', ySplit: 1 }] });
+  sheetPhoto.columns = [
+    { header: 'Mã Thợ', key: 'id', width: 18 },
+    { header: 'Họ Và Tên', key: 'fullName', width: 26 },
+    { header: 'Số Điện Thoại', key: 'phone', width: 16 },
+    { header: 'Phân Loại Thợ', key: 'photographerType', width: 20 },
+    { header: 'Đánh Giá', key: 'rating', width: 14 },
+    { header: 'Số Ca Hoàn Thành', key: 'completedShootsCount', width: 18 },
+    { header: 'Đơn Giá / Ca (VNĐ)', key: 'ratePerShoot', width: 20 },
+    { header: 'Trạng Thái', key: 'status', width: 16 }
+  ];
+
+  sheetPhoto.getRow(1).eachCell(cell => {
+    cell.fill = BRAND_FILL;
+    cell.font = HEADER_FONT;
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = BORDER;
+  });
+  sheetPhoto.getRow(1).height = 28;
+
+  photographers.forEach(p => {
+    const row = sheetPhoto.addRow({
+      id: sanitize(p.id),
+      fullName: sanitize(p.fullName),
+      phone: sanitize(p.phone),
+      photographerType: sanitize(p.photographerType),
+      rating: Number(p.rating) || 5.0,
+      completedShootsCount: Number(p.completedShootsCount) || 0,
+      ratePerShoot: Number(p.ratePerShoot) || 0,
+      status: sanitize(p.status)
+    });
+    row.eachCell((cell, col) => {
+      cell.border = BORDER;
+      cell.font = { name: 'Segoe UI', size: 10 };
+      if (col === 3) {
+        cell.numFmt = '@';
+        cell.alignment = { horizontal: 'center' };
+      } else if (col === 7) {
+        cell.numFmt = '#,##0 "₫"';
+        cell.alignment = { horizontal: 'right' };
+      }
+    });
+  });
+
+  // 4. SHEET SALES
+  const sheetSales = workbook.addWorksheet('Nhân Sự Sales', { views: [{ state: 'frozen', ySplit: 1 }] });
+  sheetSales.columns = [
+    { header: 'Mã Sales', key: 'id', width: 18 },
+    { header: 'Họ Và Tên', key: 'name', width: 26 },
+    { header: 'Số Điện Thoại', key: 'phone', width: 16 },
+    { header: 'Chức Danh', key: 'roleTitle', width: 22 },
+    { header: 'Loại Hoa Hồng', key: 'commissionType', width: 18 },
+    { header: 'Tỷ Lệ (%)', key: 'commissionRate', width: 14 },
+    { header: 'Mức Cố Định (VNĐ)', key: 'commissionFixedAmount', width: 20 },
+    { header: 'Trạng Thái', key: 'status', width: 16 }
+  ];
+
+  sheetSales.getRow(1).eachCell(cell => {
+    cell.fill = BRAND_FILL;
+    cell.font = HEADER_FONT;
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = BORDER;
+  });
+  sheetSales.getRow(1).height = 28;
+
+  salesStaff.forEach(s => {
+    const row = sheetSales.addRow({
+      id: sanitize(s.id),
+      name: sanitize(s.name),
+      phone: sanitize(s.phone),
+      roleTitle: sanitize(s.roleTitle),
+      commissionType: sanitize(s.commissionType),
+      commissionRate: Number(s.commissionRate) || 0,
+      commissionFixedAmount: Number(s.commissionFixedAmount) || 0,
+      status: sanitize(s.status)
+    });
+    row.eachCell((cell, col) => {
+      cell.border = BORDER;
+      cell.font = { name: 'Segoe UI', size: 10 };
+      if (col === 3) {
+        cell.numFmt = '@';
+        cell.alignment = { horizontal: 'center' };
+      } else if (col === 6) {
+        cell.numFmt = '0.00"%"';
+        cell.alignment = { horizontal: 'right' };
+      } else if (col === 7) {
+        cell.numFmt = '#,##0 "₫"';
+        cell.alignment = { horizontal: 'right' };
+      }
+    });
+  });
+
+  const timestampStr = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const typeTag = mode === 'delta' ? 'Delta' : 'Snapshot_Toan_Bo';
+  const filename = `Bao_Cao_CRM_Xoan_Media_${period}_${typeTag}_${timestampStr}.xlsx`;
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  const totalRecords = customers.length + bookings.length + photographers.length + salesStaff.length;
+  return { success: true, filename, totalRecords };
 };
