@@ -23,7 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables & API Credentials
 .env
 .env.production
 .env.local
+API/*.json
+API/*/*.json
+API/token.json
