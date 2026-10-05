@@ -17,4 +17,4 @@ pm2 restart crm-xoan-server || pm2 start server/index.mjs --name crm-xoan-server
 pm2 save
 "
 
-echo "✅ Đã deploy thành công lên Server Production https://crm.xoanmedia.com! (Version v1.1.1)"
+echo "✅ Đã deploy thành công lên Server Production https://crm.xoanmedia.com! (Version v1.1.2)"

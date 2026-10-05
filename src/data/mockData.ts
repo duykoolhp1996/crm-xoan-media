@@ -29,8 +29,73 @@ export const mockUsers: User[] = [
   }
 ];
 
-// Khởi tạo danh sách Sales trống - Admin sẽ trực tiếp tạo và cấp tài khoản cho nhân sự trong phần Cài Đặt
-export const mockSalesStaff: SalesStaff[] = [];
+// Danh sách Sales mặc định được cấp quyền đăng nhập hệ thống
+export const mockSalesStaff: SalesStaff[] = [
+  {
+    id: 'user-2',
+    name: 'Lê Hoàng Sơn',
+    roleTitle: 'Trưởng Nhóm Sales Lead',
+    phone: '0912345678',
+    email: 'son.lh@xoanmedia.vn',
+    username: 'son.lh@xoanmedia.vn',
+    password: 'SonLead@2024',
+    activeRegions: ['Hải Phòng', 'Hà Nội'],
+    status: 'active',
+    canLogin: true,
+    commissionType: 'percentage',
+    commissionRate: 10,
+    commissionFixedAmount: 500000,
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'user-sales-1',
+    name: 'Nguyễn Thu Hương',
+    roleTitle: 'Chuyên viên Sales Tư Vấn',
+    phone: '0987654321',
+    email: 'huong.nt@xoanmedia.vn',
+    username: 'huong.nt@xoanmedia.vn',
+    password: 'HuongSales@2024',
+    activeRegions: ['Hải Phòng', 'Hà Nội'],
+    status: 'active',
+    canLogin: true,
+    commissionType: 'percentage',
+    commissionRate: 8,
+    commissionFixedAmount: 400000,
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'user-sales-2',
+    name: 'Trần Hải Đăng',
+    roleTitle: 'Chuyên viên Sales Tư Vấn',
+    phone: '0966554433',
+    email: 'dang.th@xoanmedia.vn',
+    username: 'dang.th@xoanmedia.vn',
+    password: 'DangSales@2024',
+    activeRegions: ['Hải Phòng', 'Thái Bình', 'Nam Định'],
+    status: 'active',
+    canLogin: true,
+    commissionType: 'percentage',
+    commissionRate: 8,
+    commissionFixedAmount: 400000,
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
+  },
+  {
+    id: 'user-sales-3',
+    name: 'Vũ Mai Phương',
+    roleTitle: 'Cộng Tác Viên (CTV) Sales',
+    phone: '0911223344',
+    email: 'phuong.vm@xoanmedia.vn',
+    username: 'phuong.vm@xoanmedia.vn',
+    password: 'PhuongCTV@2024',
+    activeRegions: ['Hải Phòng'],
+    status: 'active',
+    canLogin: true,
+    commissionType: 'fixed',
+    commissionRate: 5,
+    commissionFixedAmount: 300000,
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80'
+  }
+];
 
 export const SALES_STAFF_LIST = mockSalesStaff.map(s => ({ id: s.id, name: s.name }));
 

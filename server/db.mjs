@@ -157,4 +157,55 @@ const initSettings = () => {
 };
 initSettings();
 
+// Tự động khởi tạo dữ liệu nhân sự Sales & Thợ Chụp nếu bảng chưa có dữ liệu
+const initStaffAndPhotographers = () => {
+  try {
+    const salesCount = db.prepare('SELECT count(*) as c FROM sales_staff').get().c;
+    if (salesCount === 0) {
+      const insertSales = db.prepare(`
+        INSERT OR REPLACE INTO sales_staff (id, name, phone, email, role_title, commission_type, commission_rate, commission_fixed_amount, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      const defaultSales = [
+        ['user-2', 'Lê Hoàng Sơn', '0912345678', 'son.lh@xoanmedia.vn', 'Trưởng Nhóm Sales Lead', 'percentage', 10, 500000, 'active'],
+        ['user-sales-1', 'Nguyễn Thu Hương', '0987654321', 'huong.nt@xoanmedia.vn', 'Chuyên viên Sales Tư Vấn', 'percentage', 8, 400000, 'active'],
+        ['user-sales-2', 'Trần Hải Đăng', '0966554433', 'dang.th@xoanmedia.vn', 'Chuyên viên Sales Tư Vấn', 'percentage', 8, 400000, 'active'],
+        ['user-sales-3', 'Vũ Mai Phương', '0911223344', 'phuong.vm@xoanmedia.vn', 'Cộng Tác Viên (CTV) Sales', 'fixed', 5, 300000, 'active']
+      ];
+      for (const s of defaultSales) {
+        insertSales.run(...s);
+      }
+    }
+
+    const photoCount = db.prepare('SELECT count(*) as c FROM photographers').get().c;
+    if (photoCount === 0) {
+      const photosPath = path.resolve(__dirname, '..', 'src', 'data', 'photographersData.json');
+      if (fs.existsSync(photosPath)) {
+        const photos = JSON.parse(fs.readFileSync(photosPath, 'utf-8'));
+        const insertPhoto = db.prepare(`
+          INSERT OR REPLACE INTO photographers (id, name, phone, email, role_type, tier, rating, status, province, equipment)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        for (const p of photos) {
+          insertPhoto.run(
+            p.id,
+            p.fullName || '',
+            p.phone || '',
+            p.email || '',
+            p.skills ? p.skills.join(', ') : 'Thợ chính',
+            p.photographerType || 'Full-time',
+            p.rating || 5.0,
+            p.status || 'sẵn sàng',
+            p.activeRegions ? p.activeRegions.join(', ') : '',
+            p.equipmentList ? p.equipmentList.join(', ') : ''
+          );
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Lỗi seed dữ liệu nhân sự trên server:', e.message);
+  }
+};
+initStaffAndPhotographers();
+
 export { db, DATA_DIR, BACKUP_DIR, DB_PATH };

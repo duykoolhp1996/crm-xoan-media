@@ -194,7 +194,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('crm_xoan_sales_staff');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Luôn hợp nhất với danh sách Sales mặc định để đảm bảo tài khoản không bị thiếu
+          const existingIds = new Set(parsed.map(s => s.id));
+          const missingDefaults = mockSalesStaff.filter(s => !existingIds.has(s.id));
+          return [...parsed, ...missingDefaults];
+        }
       }
     } catch (e) {
       console.error('Failed to load sales staff from localStorage', e);
@@ -286,16 +291,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
-  // Xử lý đăng nhập bằng username & password
+  // Xử lý đăng nhập bằng username / ID / email / số điện thoại & password
   const login = (username: string, password: string): { success: boolean; message?: string } => {
-    const u = username.trim().toLowerCase();
+    const rawU = username.trim();
+    const u = rawU.toLowerCase();
+    const uCleanPhone = rawU.replace(/\D/g, '');
     const p = password.trim();
 
-    // 1. Kiểm tra tài khoản Admin
-    if (
-      (u === 'admin@xoanmedia.vn' || u === 'admin' || u === '0981108601' || u === 'taduy' || u === 'duonghaiminh' || u === 'haiminh' || u === 'duonghaiminh3@gmail.com') &&
-      (p === 'XoanAdmin@2026' || p === 'admin123' || p === '123456')
-    ) {
+    // 1. Kiểm tra tài khoản Admin (Dương Hải Minh)
+    const isAdminExplicit =
+      u === 'user-admin' ||
+      u === 'admin@xoanmedia.vn' ||
+      u === 'admin' ||
+      u === 'taduy' ||
+      u === 'duonghaiminh' ||
+      u === 'haiminh' ||
+      u === 'duonghaiminh3@gmail.com';
+
+    const isAdminPhone =
+      u === '0981108601' ||
+      (uCleanPhone.length >= 9 && (uCleanPhone === '0981108601' || uCleanPhone === '981108601' || uCleanPhone === '84981108601'));
+
+    const isAdminPassword = p === 'XoanAdmin@2026' || p === 'admin123' || p === '123456';
+
+    if (isAdminExplicit) {
+      if (isAdminPassword) {
+        const adminUser = mockUsers[0];
+        setCurrentUser(adminUser);
+        setCurrentRoleState('admin');
+        setIsAuthenticated(true);
+        setIsImpersonating(false);
+        setActiveTab('dashboard');
+        try {
+          localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: adminUser, role: 'admin' }));
+        } catch (e) {
+          console.error(e);
+        }
+        return { success: true };
+      } else {
+        return { success: false, message: 'Mật khẩu tài khoản Admin không chính xác!' };
+      }
+    }
+
+    if (isAdminPhone && isAdminPassword) {
       const adminUser = mockUsers[0];
       setCurrentUser(adminUser);
       setCurrentRoleState('admin');
@@ -310,10 +348,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: true };
     }
 
-    // 2. Kiểm tra tài khoản Sales Tư Vấn
-    const matchedSales = salesStaff.find(
-      s => (s.username?.toLowerCase() === u || s.email.toLowerCase() === u || s.phone === u) && s.canLogin
-    );
+    // 2. Kiểm tra tài khoản Sales Tư Vấn (Hỗ trợ: ID, Username, Email, Số Điện Thoại, Tên)
+    const matchedSales = salesStaff.find(s => {
+      const sId = (s.id || '').toLowerCase();
+      const sUsername = (s.username || '').toLowerCase();
+      const sEmail = (s.email || '').toLowerCase();
+      const sPhone = (s.phone || '').trim();
+      const sCleanPhone = sPhone.replace(/\D/g, '');
+      const sName = (s.name || '').toLowerCase();
+
+      const matchIdentifier =
+        sId === u ||
+        sUsername === u ||
+        sEmail === u ||
+        (sPhone && sPhone === rawU) ||
+        (uCleanPhone.length >= 9 && sCleanPhone && (sCleanPhone === uCleanPhone || sCleanPhone.endsWith(uCleanPhone) || uCleanPhone.endsWith(sCleanPhone))) ||
+        sName === u;
+
+      return matchIdentifier && (s.canLogin !== false);
+    });
+
     if (matchedSales) {
       const validPasswords = [
         matchedSales.password,
@@ -322,7 +376,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'DangSales@2024',
         'PhuongCTV@2024',
         '123456'
-      ];
+      ].filter(Boolean) as string[];
+
       if (validPasswords.includes(p)) {
         const salesUser: User = {
           id: matchedSales.id,
@@ -348,12 +403,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    // 3. Kiểm tra tài khoản Thợ Chụp (Ekip)
-    const matchedPhoto = photographers.find(
-      ph => (ph.username?.toLowerCase() === u || ph.email?.toLowerCase() === u || ph.phone === u) && ph.canLogin
-    );
+    // 3. Kiểm tra tài khoản Thợ Chụp (Ekip) (Hỗ trợ: ID như photo-1, Username, Email, Số Điện Thoại, Tên)
+    const matchedPhoto = photographers.find(ph => {
+      const pId = (ph.id || '').toLowerCase();
+      const pUsername = (ph.username || '').toLowerCase();
+      const pEmail = (ph.email || '').toLowerCase();
+      const pPhone = (ph.phone || '').trim();
+      const pCleanPhone = pPhone.replace(/\D/g, '');
+      const pName = (ph.fullName || '').toLowerCase();
+
+      const matchIdentifier =
+        pId === u ||
+        pUsername === u ||
+        pEmail === u ||
+        (pPhone && pPhone === rawU) ||
+        (uCleanPhone.length >= 9 && pCleanPhone && (pCleanPhone === uCleanPhone || pCleanPhone.endsWith(uCleanPhone) || uCleanPhone.endsWith(pCleanPhone))) ||
+        pName === u;
+
+      return matchIdentifier && (ph.canLogin !== false);
+    });
+
     if (matchedPhoto) {
-      const validPasswords = [matchedPhoto.password, 'XoanPhoto@2026', '123456'];
+      const validPasswords = [
+        matchedPhoto.password,
+        'XoanPhoto@2026',
+        '123456'
+      ].filter(Boolean) as string[];
+
       if (validPasswords.includes(p)) {
         const photoUser: User = {
           id: matchedPhoto.id,
@@ -613,7 +689,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       bookings,
       photographers,
       salesStaff
-    }).catch(() => {});
+    });
 
     // Thêm activity log
     addActivityLog({
@@ -771,7 +847,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       bookings,
       photographers,
       salesStaff
-    }).catch(() => {});
+    });
 
     if (isNewDeposit) {
       notifyCustomerDepositToZaloGroup({
@@ -835,7 +911,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       bookings: [newBooking, ...bookings],
       photographers,
       salesStaff
-    }).catch(() => {});
+    });
   };
 
   const updateBooking = (updated: Booking) => {
@@ -845,7 +921,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       bookings: bookings.map(b => b.id === updated.id ? updated : b),
       photographers,
       salesStaff
-    }).catch(() => {});
+    });
   };
 
   // Kiểm tra tính sẵn sàng & xung đột lịch thợ

@@ -3,6 +3,8 @@
  * Vùng 1: Google Sheets (ID: 1gbo1qA04CLJdaEsmxqudzPYdrtoAyLdVSk4AoDmo3nU) - Replica Báo Cáo
  * Vùng 2: Supabase (PostgreSQL Cloud thời gian thực) - Replica Đám Mây
  * Vùng 3: Server SQL Engine (SQLite Persistent trên server) - PRIMARY SOURCE
+ *
+ * ⚡ LƯU CẢ 3 VÙNG ĐỒNG THỜI (Promise.allSettled) — không tuần tự, không ưu tiên
  */
 
 import { Customer, Booking, Photographer, SalesStaff } from '../types';
@@ -200,7 +202,7 @@ export const retryServerFailedTasks = async (): Promise<{ success: boolean; mess
 };
 
 /**
- * Thực hiện đồng bộ toàn diện trên cả 3 vùng dữ liệu (ƯU TIÊN SUPABASE ĐẦU TIÊN)
+ * ⚡ LƯU CẢ 3 VÙNG CÙNG LÚC (Promise.allSettled — song song, không tuần tự)
  */
 export const syncAllThreeZones = async (data: {
   customers: Customer[];
@@ -211,105 +213,95 @@ export const syncAllThreeZones = async (data: {
   const timestamp = new Date().toISOString();
   const { customers, bookings, photographers, salesStaff } = data;
 
-  // 1. VÙNG 1: SUPABASE POSTGRESQL (ƯU TIÊN LƯU ĐẦU TIÊN)
-  let zoneSupabaseResult: ZoneSyncResult;
-  if (!isSupabaseConfigured()) {
-    zoneSupabaseResult = {
-      zone: 'Zone 2: Supabase PostgreSQL',
-      status: 'warning',
-      message: 'Chưa cấu hình API Key Supabase (hoặc đang dùng key mặc định). Vui lòng dán Anon Key trong Cài Đặt.',
-      timestamp
-    };
-  } else {
-    try {
-      let savedCustCount = 0;
-      let savedBookCount = 0;
-      for (const customer of customers) {
-        const ok = await crmSupabaseService.saveCustomer(customer);
-        if (ok) savedCustCount++;
-      }
-      for (const booking of bookings) {
-        const ok = await crmSupabaseService.saveBooking(booking);
-        if (ok) savedBookCount++;
-      }
-      zoneSupabaseResult = {
+  // ======= Khởi tạo 3 tác vụ ĐỒNG THỜI =======
+
+  // Tác vụ 1: Supabase Cloud
+  const supabaseTask = (async (): Promise<ZoneSyncResult> => {
+    if (!isSupabaseConfigured()) {
+      return {
         zone: 'Zone 2: Supabase PostgreSQL',
-        status: 'success',
-        message: `⭐ Đã lưu ưu tiên thành công ${savedCustCount}/${customers.length} khách hàng & ${savedBookCount}/${bookings.length} lịch chụp lên đám mây Supabase.`,
-        timestamp,
-        itemsProcessed: savedCustCount + savedBookCount
-      };
-    } catch (e: any) {
-      zoneSupabaseResult = {
-        zone: 'Zone 2: Supabase PostgreSQL',
-        status: 'error',
-        message: `Lỗi kết nối Supabase: ${e.message}`,
+        status: 'warning',
+        message: 'Chưa cấu hình API Key Supabase. Vui lòng dán Anon Key trong Cài Đặt → Lưu Trữ 3 Nơi.',
         timestamp
       };
     }
-  }
+    let savedCustCount = 0;
+    let savedBookCount = 0;
+    for (const customer of customers) {
+      const ok = await crmSupabaseService.saveCustomer(customer);
+      if (ok) savedCustCount++;
+    }
+    for (const booking of bookings) {
+      const ok = await crmSupabaseService.saveBooking(booking);
+      if (ok) savedBookCount++;
+    }
+    return {
+      zone: 'Zone 2: Supabase PostgreSQL',
+      status: 'success',
+      message: `☁️ Đã lưu ${savedCustCount}/${customers.length} khách hàng & ${savedBookCount}/${bookings.length} lịch chụp lên Supabase Cloud.`,
+      timestamp,
+      itemsProcessed: savedCustCount + savedBookCount
+    };
+  })();
 
-  // 2. VÙNG 2: SERVER SQL ENGINE (SQLITE PRIMARY SOURCE)
-  let zoneServerResult: ZoneSyncResult;
-  try {
+  // Tác vụ 2: Server SQLite
+  const serverSqlTask = (async (): Promise<ZoneSyncResult> => {
     const serverSaved = await saveDataToServerSql({ customers, bookings, photographers, salesStaff });
     syncToLocalSqlCache({ customers, bookings, photographers, salesStaff });
-
-    if (serverSaved) {
-      zoneServerResult = {
-        zone: 'Zone 3: Server SQL Engine',
-        status: 'success',
-        message: `Đã ghi nhận bền vững ${customers.length} khách hàng & ${bookings.length} lịch chụp vào Server SQLite và xếp hàng đợi Outbox.`,
-        timestamp,
-        itemsProcessed: customers.length + bookings.length
-      };
-    } else {
-      zoneServerResult = {
-        zone: 'Zone 3: Server SQL Engine',
-        status: 'success',
-        message: `Đã lưu an toàn vào bộ nhớ SQL Cache (${customers.length} khách hàng, ${bookings.length} lịch). Sẵn sàng đồng bộ khi kết nối Server API.`,
-        timestamp,
-        itemsProcessed: customers.length + bookings.length
-      };
-    }
-  } catch (e: any) {
-    zoneServerResult = {
+    return {
       zone: 'Zone 3: Server SQL Engine',
-      status: 'error',
-      message: `Lỗi ghi SQL: ${e.message}`,
-      timestamp
+      status: 'success',
+      message: serverSaved
+        ? `🖥️ Đã ghi bền vững ${customers.length} khách hàng & ${bookings.length} lịch chụp vào Server SQLite.`
+        : `🖥️ Đã lưu vào SQL Cache cục bộ (${customers.length} KH, ${bookings.length} lịch). Sẽ đồng bộ khi có mạng.`,
+      timestamp,
+      itemsProcessed: customers.length + bookings.length
     };
-  }
+  })();
 
-  // 3. VÙNG 3: GOOGLE SHEETS (ID: 1gbo1qA04CLJdaEsmxqudzPYdrtoAyLdVSk4AoDmo3nU)
-  let zoneSheetsResult: ZoneSyncResult;
+  // Tác vụ 3: Google Sheets
   const gsConfig = getGoogleSheetsConfig();
-  if (!gsConfig.webhookUrl) {
-    zoneSheetsResult = {
-      zone: 'Zone 1: Google Sheets',
-      status: 'warning',
-      message: 'Chưa cấu hình Webhook URL. Sheet ID: 1gbo1qA04CLJdaEsmxqudzPYdrtoAyLdVSk4AoDmo3nU sẵn sàng nhận dữ liệu.',
-      timestamp
-    };
-  } else {
-    try {
-      const res = await syncAllToGoogleSheet(customers, bookings);
-      zoneSheetsResult = {
+  const googleSheetsTask = (async (): Promise<ZoneSyncResult> => {
+    if (!gsConfig.webhookUrl) {
+      return {
         zone: 'Zone 1: Google Sheets',
-        status: res.success ? 'success' : 'error',
-        message: res.message,
-        timestamp,
-        itemsProcessed: customers.length + bookings.length
-      };
-    } catch (e: any) {
-      zoneSheetsResult = {
-        zone: 'Zone 1: Google Sheets',
-        status: 'error',
-        message: `Lỗi kết nối Google Sheets: ${e.message}`,
+        status: 'warning',
+        message: 'Chưa cấu hình Webhook URL. Sheet ID: 1gbo1qA04CLJdaEsmxqudzPYdrtoAyLdVSk4AoDmo3nU đã sẵn sàng nhận dữ liệu.',
         timestamp
       };
     }
-  }
+    const res = await syncAllToGoogleSheet(customers, bookings);
+    return {
+      zone: 'Zone 1: Google Sheets',
+      status: res.success ? 'success' : 'error',
+      message: res.success
+        ? `📊 Đã đồng bộ ${customers.length} khách hàng & ${bookings.length} lịch chụp lên Google Sheets.`
+        : res.message,
+      timestamp,
+      itemsProcessed: customers.length + bookings.length
+    };
+  })();
+
+  // ======= Chạy song song — chờ tất cả 3 vùng hoàn thành =======
+  const [supabaseSettled, serverSqlSettled, googleSheetsSettled] = await Promise.allSettled([
+    supabaseTask,
+    serverSqlTask,
+    googleSheetsTask
+  ]);
+
+  const resolveResult = (settled: PromiseSettledResult<ZoneSyncResult>, fallbackZone: ZoneSyncResult['zone']): ZoneSyncResult => {
+    if (settled.status === 'fulfilled') return settled.value;
+    return {
+      zone: fallbackZone,
+      status: 'error',
+      message: `Lỗi không xác định: ${settled.reason?.message || 'Unknown error'}`,
+      timestamp
+    };
+  };
+
+  const zoneSupabaseResult = resolveResult(supabaseSettled, 'Zone 2: Supabase PostgreSQL');
+  const zoneServerResult = resolveResult(serverSqlSettled, 'Zone 3: Server SQL Engine');
+  const zoneSheetsResult = resolveResult(googleSheetsSettled, 'Zone 1: Google Sheets');
 
   const successfulZones = [zoneSupabaseResult, zoneServerResult, zoneSheetsResult].filter(
     r => r.status === 'success'
@@ -328,63 +320,71 @@ export const syncAllThreeZones = async (data: {
 };
 
 /**
- * Tự động đồng bộ ngầm khi có thêm mới/cập nhật 1 khách hàng (LƯU VÀO SUPABASE TRƯỚC)
+ * ⚡ Đồng bộ ngầm khi có thêm mới/cập nhật 1 khách hàng — LƯU CẢ 3 VÙNG CÙNG LÚC
  */
-export const dispatchCustomerSyncToZones = async (
+export const dispatchCustomerSyncToZones = (
   customer: Customer,
   allData?: { customers: Customer[]; bookings: Booking[]; photographers?: Photographer[]; salesStaff?: SalesStaff[] }
 ) => {
-  // 1. ƯU TIÊN SỐ 1: LƯU VÀO SUPABASE CLOUD TRƯỚC TIÊN
+  // Supabase Cloud — song song
   if (isSupabaseConfigured()) {
-    crmSupabaseService.saveCustomer(customer).then(ok => {
-      if (ok) console.log(`[Sync-Supabase] ✅ Đã lưu khách hàng ${customer.name} vào Supabase trước tiên!`);
-    }).catch(err => {
-      console.warn('[Sync-Supabase] Lỗi lưu Supabase:', err);
-    });
+    crmSupabaseService.saveCustomer(customer)
+      .then(ok => {
+        if (ok) console.log(`[Sync-3Zones] ☁️ Supabase: Đã lưu khách hàng ${customer.name}`);
+      })
+      .catch(err => console.warn('[Sync-3Zones] ☁️ Supabase lỗi:', err));
   }
 
-  // 2. LƯU VÀO SERVER SQL (PRIMARY SERVER ENGINE) & LOCAL CACHE
+  // Server SQLite & Local Cache — song song
   if (allData) {
     syncToLocalSqlCache(allData);
-    saveDataToServerSql(allData).catch(() => {});
+    saveDataToServerSql(allData)
+      .then(ok => {
+        if (ok) console.log(`[Sync-3Zones] 🖥️ Server SQL: Đã lưu khách hàng ${customer.name}`);
+      })
+      .catch(() => {});
   }
 
-  // 3. ĐỒNG BỘ GOOGLE SHEETS
+  // Google Sheets — song song
   const gsConfig = getGoogleSheetsConfig();
   if (gsConfig.autoSync && gsConfig.webhookUrl) {
-    syncCustomerToGoogleSheet(customer).catch(err => {
-      console.warn('[Sync-Zone1] Lỗi đẩy ngầm Google Sheet:', err);
-    });
+    syncCustomerToGoogleSheet(customer)
+      .then(() => console.log(`[Sync-3Zones] 📊 Google Sheets: Đã lưu khách hàng ${customer.name}`))
+      .catch(err => console.warn('[Sync-3Zones] 📊 Google Sheets lỗi:', err));
   }
 };
 
 /**
- * Tự động đồng bộ ngầm khi có thêm mới/cập nhật 1 lịch chụp (LƯU VÀO SUPABASE TRƯỚC)
+ * ⚡ Đồng bộ ngầm khi có thêm mới/cập nhật 1 lịch chụp — LƯU CẢ 3 VÙNG CÙNG LÚC
  */
-export const dispatchBookingSyncToZones = async (
+export const dispatchBookingSyncToZones = (
   booking: Booking,
   allData?: { customers: Customer[]; bookings: Booking[]; photographers?: Photographer[]; salesStaff?: SalesStaff[] }
 ) => {
-  // 1. ƯU TIÊN SỐ 1: LƯU VÀO SUPABASE CLOUD TRƯỚC TIÊN
+  // Supabase Cloud — song song
   if (isSupabaseConfigured()) {
-    crmSupabaseService.saveBooking(booking).then(ok => {
-      if (ok) console.log(`[Sync-Supabase] ✅ Đã lưu lịch chụp ${booking.code || booking.id} vào Supabase trước tiên!`);
-    }).catch(err => {
-      console.warn('[Sync-Supabase] Lỗi lưu lịch chụp Supabase:', err);
-    });
+    crmSupabaseService.saveBooking(booking)
+      .then(ok => {
+        if (ok) console.log(`[Sync-3Zones] ☁️ Supabase: Đã lưu lịch chụp ${booking.code || booking.id}`);
+      })
+      .catch(err => console.warn('[Sync-3Zones] ☁️ Supabase lỗi:', err));
   }
 
-  // 2. LƯU VÀO SERVER SQL & LOCAL CACHE
+  // Server SQLite & Local Cache — song song
   if (allData) {
     syncToLocalSqlCache(allData);
-    saveDataToServerSql(allData).catch(() => {});
+    saveDataToServerSql(allData)
+      .then(ok => {
+        if (ok) console.log(`[Sync-3Zones] 🖥️ Server SQL: Đã lưu lịch chụp ${booking.code || booking.id}`);
+      })
+      .catch(() => {});
   }
 
-  // 3. ĐỒNG BỘ GOOGLE SHEETS
+  // Google Sheets — song song
   const gsConfig = getGoogleSheetsConfig();
   if (gsConfig.autoSync && gsConfig.webhookUrl) {
-    syncBookingToGoogleSheet(booking).catch(err => {
-      console.warn('[Sync-Zone1] Lỗi đẩy lịch chụp Google Sheet:', err);
-    });
+    syncBookingToGoogleSheet(booking)
+      .then(() => console.log(`[Sync-3Zones] 📊 Google Sheets: Đã lưu lịch chụp ${booking.code || booking.id}`))
+      .catch(err => console.warn('[Sync-3Zones] 📊 Google Sheets lỗi:', err));
   }
 };
