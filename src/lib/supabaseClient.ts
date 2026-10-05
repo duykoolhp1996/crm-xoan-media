@@ -1,27 +1,76 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const SUPABASE_PROJECT_URL = import.meta.env.VITE_SUPABASE_URL || 'https://etvbrbdysphrfzvnwvbk.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const DEFAULT_URL = 'https://etvbrbdysphrfzvnwvbk.supabase.co';
 
-// Kiểm tra xem Supabase đã được cung cấp API Key hợp lệ chưa
-export const isSupabaseConfigured = Boolean(
-  SUPABASE_PROJECT_URL &&
-  SUPABASE_ANON_KEY &&
-  SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY'
-);
+export const getStoredSupabaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('xoan_supabase_url');
+    if (saved && saved.trim()) return saved.trim();
+  }
+  return (import.meta as any).env?.VITE_SUPABASE_URL || DEFAULT_URL;
+};
 
-// Tạo instance client Supabase
-export const supabase = isSupabaseConfigured
-  ? createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-      },
-    })
-  : null;
+export const getStoredSupabaseKey = (): string => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('xoan_supabase_key');
+    if (saved && saved.trim()) return saved.trim();
+  }
+  return (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
+};
+
+let clientInstance: SupabaseClient | null = null;
+
+export const initSupabaseClient = (url?: string, key?: string): SupabaseClient | null => {
+  const targetUrl = url || getStoredSupabaseUrl();
+  const targetKey = key || getStoredSupabaseKey();
+
+  if (targetUrl && targetKey && targetKey !== 'YOUR_SUPABASE_ANON_KEY') {
+    try {
+      clientInstance = createClient(targetUrl, targetKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+        },
+      });
+      return clientInstance;
+    } catch (e) {
+      console.error('Lỗi khởi tạo Supabase Client:', e);
+      clientInstance = null;
+      return null;
+    }
+  }
+  clientInstance = null;
+  return null;
+};
+
+// Khởi tạo ban đầu
+initSupabaseClient();
+
+export const getSupabase = (): SupabaseClient | null => {
+  if (!clientInstance) {
+    return initSupabaseClient();
+  }
+  return clientInstance;
+};
+
+export const isSupabaseConfigured = (): boolean => {
+  const key = getStoredSupabaseKey();
+  const url = getStoredSupabaseUrl();
+  return Boolean(url && key && key !== 'YOUR_SUPABASE_ANON_KEY');
+};
+
+export const supabase = getSupabase();
+
+export const updateSupabaseCredentials = (url: string, key: string): SupabaseClient | null => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('xoan_supabase_url', url.trim());
+    localStorage.setItem('xoan_supabase_key', key.trim());
+  }
+  return initSupabaseClient(url.trim(), key.trim());
+};
 
 export const getSupabaseConfig = () => ({
-  projectUrl: SUPABASE_PROJECT_URL,
-  isConfigured: isSupabaseConfigured,
-  hasKey: Boolean(SUPABASE_ANON_KEY),
+  projectUrl: getStoredSupabaseUrl(),
+  isConfigured: isSupabaseConfigured(),
+  hasKey: Boolean(getStoredSupabaseKey()),
 });

@@ -87,6 +87,7 @@ import {
   ExcelHistoryItem,
   getApiBaseUrl
 } from '../../services/multiZoneSyncService';
+import { updateSupabaseCredentials } from '../../lib/supabaseClient';
 
 export const SettingsModule: React.FC = () => {
   const {
@@ -199,9 +200,10 @@ export const SettingsModule: React.FC = () => {
     setConnectionMessage('Đang kết nối tới Supabase Cloud...');
 
     try {
-      // Lưu lại vào localStorage
+      // Lưu lại vào localStorage & cập nhật client runtime
       localStorage.setItem('xoan_supabase_url', supabaseUrl.trim());
       localStorage.setItem('xoan_supabase_key', supabaseKey.trim());
+      updateSupabaseCredentials(supabaseUrl.trim(), supabaseKey.trim());
 
       const res = await fetch(`${supabaseUrl.trim().replace(/\/$/, '')}/rest/v1/`, {
         headers: {

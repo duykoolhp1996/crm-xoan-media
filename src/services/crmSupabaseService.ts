@@ -1,15 +1,16 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { Customer, Photographer, SalesStaff } from '../types';
+import { getSupabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { Customer, Booking, Photographer, SalesStaff } from '../types';
 
 /**
- * Service giao tiếp giữa CRM Xoăn Media và Supabase PostgreSQL
- * Tự động chuyển đổi giữa Real Database & Local/Mock Data
+ * Service giao tiếp giữa CRM Xoăn Media và Supabase PostgreSQL Cloud
+ * Ưu tiên lưu trữ đám mây thời gian thực
  */
 
 export const crmSupabaseService = {
   // 1. KHÁCH HÀNG / LEADS (Bảng customers)
   async getCustomers(): Promise<Customer[] | null> {
-    if (!isSupabaseConfigured || !supabase) return null;
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return null;
 
     try {
       const { data, error } = await supabase
@@ -69,7 +70,8 @@ export const crmSupabaseService = {
   },
 
   async saveCustomer(customer: Customer): Promise<boolean> {
-    if (!isSupabaseConfigured || !supabase) return false;
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return false;
 
     try {
       const payload = {
@@ -119,7 +121,8 @@ export const crmSupabaseService = {
   },
 
   async deleteCustomer(id: string): Promise<boolean> {
-    if (!isSupabaseConfigured || !supabase) return false;
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return false;
 
     try {
       const { error } = await supabase
@@ -138,9 +141,71 @@ export const crmSupabaseService = {
     }
   },
 
-  // 2. NHÂN SỰ SALES (Bảng sales_staff)
+  // 2. LỊCH CHỤP / BOOKINGS (Bảng bookings)
+  async saveBooking(booking: Booking): Promise<boolean> {
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return false;
+
+    try {
+      const payload = {
+        id: booking.id,
+        code: booking.code || booking.id,
+        customer_id: booking.customerId,
+        customer_name: booking.customerName,
+        school_name: booking.schoolName,
+        class_name: booking.className,
+        shoot_date: booking.shootDate,
+        start_time: booking.startTime,
+        end_time: booking.endTime,
+        location: booking.location,
+        package_id: booking.packageId,
+        package_name: booking.packageName,
+        total_amount: booking.totalAmount,
+        deposit_amount: booking.depositAmount,
+        remaining_amount: booking.remainingAmount,
+        payment_status: booking.paymentStatus,
+        booking_status: booking.bookingStatus,
+        lead_photographer_id: booking.assignments?.leadPhotographerId,
+        lead_photographer_name: booking.assignments?.leadPhotographerName,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('bookings')
+        .upsert(payload, { onConflict: 'id' });
+
+      if (error) {
+        console.warn('[Supabase] Lỗi lưu booking:', error.message);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('[Supabase] Exception saveBooking:', err);
+      return false;
+    }
+  },
+
+  async deleteBooking(id: string): Promise<boolean> {
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return false;
+
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', id);
+
+      if (error) return false;
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  // 3. NHÂN SỰ SALES (Bảng sales_staff)
   async getSalesStaff(): Promise<SalesStaff[] | null> {
-    if (!isSupabaseConfigured || !supabase) return null;
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return null;
 
     try {
       const { data, error } = await supabase
@@ -171,9 +236,42 @@ export const crmSupabaseService = {
     }
   },
 
-  // 3. ĐỘI NGŨ THỢ CHỤP (Bảng photographers)
+  async saveSalesStaff(staff: SalesStaff): Promise<boolean> {
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return false;
+
+    try {
+      const payload = {
+        id: staff.id,
+        name: staff.name,
+        email: staff.email,
+        phone: staff.phone,
+        avatar: staff.avatar,
+        role_title: staff.roleTitle,
+        active_regions: staff.activeRegions,
+        status: staff.status,
+        can_login: staff.canLogin,
+        username: staff.username,
+        password: staff.password,
+        commission_type: staff.commissionType,
+        commission_rate: staff.commissionRate,
+        commission_fixed_amount: staff.commissionFixedAmount
+      };
+
+      const { error } = await supabase
+        .from('sales_staff')
+        .upsert(payload, { onConflict: 'id' });
+
+      return !error;
+    } catch {
+      return false;
+    }
+  },
+
+  // 4. ĐỘI NGŨ THỢ CHỤP (Bảng photographers)
   async getPhotographers(): Promise<Photographer[] | null> {
-    if (!isSupabaseConfigured || !supabase) return null;
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return null;
 
     try {
       const { data, error } = await supabase
@@ -205,6 +303,42 @@ export const crmSupabaseService = {
       })) || [];
     } catch {
       return null;
+    }
+  },
+
+  async savePhotographer(p: Photographer): Promise<boolean> {
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return false;
+
+    try {
+      const payload = {
+        id: p.id,
+        full_name: p.fullName,
+        phone: p.phone,
+        email: p.email,
+        avatar: p.avatar,
+        active_regions: p.activeRegions,
+        photographer_type: p.photographerType,
+        experience_years: p.experienceYears,
+        skills: p.skills,
+        equipment_list: p.equipmentList,
+        status: p.status,
+        rate_per_shoot: p.ratePerShoot,
+        rating: p.rating,
+        completed_shoots_count: p.completedShootsCount,
+        notes: p.notes,
+        username: p.username,
+        password: p.password,
+        can_login: p.canLogin
+      };
+
+      const { error } = await supabase
+        .from('photographers')
+        .upsert(payload, { onConflict: 'id' });
+
+      return !error;
+    } catch {
+      return false;
     }
   }
 };
