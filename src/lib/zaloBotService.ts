@@ -252,7 +252,7 @@ export const sendZaloBotTaskAssignment = async (params: {
 }): Promise<{ success: boolean; message: string; apiResponse?: any }> => {
   const { assigneeName, taskTitle, taskDetails, dueDate, assignerName } = params;
   const config = getZaloBotConfig();
-  const text = `📌 <b>[CRM XOĂN MEDIA - PHÂN CÔNG TASK MỚI]</b>\n━━━━━━━━━━━━━━━━━━━━\n👤 <b>Người phụ trách:</b> @${assigneeName}\n📋 <b>Nhiệm vụ:</b> <b>${taskTitle}</b>${taskDetails ? `\n📝 <b>Chi tiết:</b> ${taskDetails}` : ''}\n📅 <b>Hạn xử lý:</b> <b>${dueDate || 'Trong ngày hôm nay'}</b>\n🎯 <b>Người giao việc:</b> ${assignerName || 'Anh Tạ Duy (Admin)'}\n━━━━━━━━━━━━━━━━━━━━\n👉 <b>@${assigneeName}</b> vui lòng kiểm tra tiến độ và phản hồi tại nhóm nhé!`;
+  const text = `📌 <b>[CRM XOĂN MEDIA - PHÂN CÔNG TASK MỚI]</b>\n━━━━━━━━━━━━━━━━━━━━\n👤 <b>Người phụ trách:</b> @${assigneeName}\n📋 <b>Nhiệm vụ:</b> <b>${taskTitle}</b>${taskDetails ? `\n📝 <b>Chi tiết:</b> ${taskDetails}` : ''}\n📅 <b>Hạn xử lý:</b> <b>${dueDate || 'Trong ngày hôm nay'}</b>\n🎯 <b>Người giao việc:</b> ${assignerName || 'Anh Dương Hải Minh (Admin)'}\n━━━━━━━━━━━━━━━━━━━━\n👉 <b>@${assigneeName}</b> vui lòng kiểm tra tiến độ và phản hồi tại nhóm nhé!`;
 
   return sendZaloBotNotification({
     type: 'task',
@@ -290,7 +290,7 @@ export const notifyNewCustomerLeadToZaloGroup = async (customer: {
       ? `${customer.expectedBudget.toLocaleString('vi-VN')} VNĐ`
       : 'Chưa xác định';
 
-  const creatorStr = customer.createdByName || 'Tạ Duy (Admin)';
+  const creatorStr = customer.createdByName || 'Dương Hải Minh (Admin)';
   const salesStr =
     customer.assignedSalesName && customer.assignedSalesName !== 'Chưa gán'
       ? customer.assignedSalesName

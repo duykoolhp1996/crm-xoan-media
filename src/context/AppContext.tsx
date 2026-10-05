@@ -293,7 +293,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 1. Kiểm tra tài khoản Admin
     if (
-      (u === 'admin@xoanmedia.vn' || u === 'admin' || u === '0981108601' || u === 'taduy') &&
+      (u === 'admin@xoanmedia.vn' || u === 'admin' || u === '0981108601' || u === 'taduy' || u === 'duonghaiminh' || u === 'haiminh' || u === 'duonghaiminh3@gmail.com') &&
       (p === 'XoanAdmin@2026' || p === 'admin123' || p === '123456')
     ) {
       const adminUser = mockUsers[0];

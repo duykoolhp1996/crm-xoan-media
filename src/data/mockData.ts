@@ -21,7 +21,7 @@ import photographersJson from './photographersData.json';
 export const mockUsers: User[] = [
   {
     id: 'user-admin',
-    name: 'Tạ Duy (Admin)',
+    name: 'Dương Hải Minh (Admin)',
     email: 'admin@xoanmedia.vn',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     role: 'admin',
