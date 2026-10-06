@@ -348,25 +348,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: true };
     }
 
-    // 2. Kiểm tra tài khoản Sales Tư Vấn (Hỗ trợ: ID, Username, Email, Số Điện Thoại, Tên)
-    const matchedSales = salesStaff.find(s => {
+    // 2. Kiểm tra tài khoản Sales Tư Vấn (luôn gộp state + mockSalesStaff cứng để tránh localStorage cũ)
+    const allSalesPool = [
+      ...salesStaff,
+      // Thêm các account mặc định nếu chưa có trong state (tránh localStorage cũ ghi đè)
+      ...mockSalesStaff.filter(ms => !salesStaff.some(s => s.id === ms.id || s.email === ms.email))
+    ];
+
+    const matchSalesIdentifier = (s: SalesStaff) => {
       const sId = (s.id || '').toLowerCase();
       const sUsername = (s.username || '').toLowerCase();
       const sEmail = (s.email || '').toLowerCase();
       const sPhone = (s.phone || '').trim();
       const sCleanPhone = sPhone.replace(/\D/g, '');
       const sName = (s.name || '').toLowerCase();
-
-      const matchIdentifier =
+      return (
         sId === u ||
         sUsername === u ||
         sEmail === u ||
         (sPhone && sPhone === rawU) ||
         (uCleanPhone.length >= 9 && sCleanPhone && (sCleanPhone === uCleanPhone || sCleanPhone.endsWith(uCleanPhone) || uCleanPhone.endsWith(sCleanPhone))) ||
-        sName === u;
+        sName === u
+      ) && (s.canLogin !== false);
+    };
 
-      return matchIdentifier && (s.canLogin !== false);
-    });
+    const matchedSales = allSalesPool.find(matchSalesIdentifier);
 
     if (matchedSales) {
       const validPasswords = [
