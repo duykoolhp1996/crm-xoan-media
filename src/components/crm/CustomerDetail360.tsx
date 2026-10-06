@@ -413,8 +413,15 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
             <p className="font-bold text-neutral-900 mt-0.5">{customer.studentCount} học sinh</p>
           </div>
           <div>
-            <p className="text-[11px] text-neutral-500 font-medium">Ngân sách dự kiến</p>
-            <p className="font-bold text-neutral-900 mt-0.5">{customer.expectedBudget.toLocaleString('vi-VN')}đ</p>
+            <p className="text-[11px] text-neutral-500 font-medium">Giá 1 bạn & Tổng đơn</p>
+            <p className="font-bold text-neutral-900 mt-0.5">
+              {(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ
+              {customer.unitPrice !== undefined && (
+                <span className="text-[10px] text-neutral-500 font-normal ml-1">
+                  ({customer.unitPrice.toLocaleString('vi-VN')}đ/bạn)
+                </span>
+              )}
+            </p>
           </div>
           <div>
             <p className="text-[11px] text-neutral-500 font-medium flex items-center gap-1">
@@ -645,15 +652,15 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                     <DollarSign className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] text-neutral-500 font-medium">Gói dịch vụ & Dự toán</p>
+                    <p className="text-[10px] text-neutral-500 font-medium">Gói dịch vụ & Giá đơn</p>
                     <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
-                      {customer.servicePackageName || 'Kỷ yếu Concept'} • {customer.expectedBudget.toLocaleString('vi-VN')}đ
+                      {customer.servicePackageName || 'Kỷ yếu Concept'} • {(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleCopy(`${customer.servicePackageName || 'Kỷ yếu Concept'} - ${customer.expectedBudget.toLocaleString('vi-VN')}đ`, 'quick_pkg')}
+                  onClick={() => handleCopy(`${customer.servicePackageName || 'Kỷ yếu Concept'} - ${(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ`, 'quick_pkg')}
                   className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
                     copiedKey === 'quick_pkg'
                       ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
@@ -776,7 +783,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       </span>
                     </div>
                     <p className="text-xs text-neutral-600">
-                      Gói: <strong>{customer.servicePackageName || 'Kỷ Yếu Standard'}</strong> ({customer.studentCount} bạn) • Dự toán: <strong>{customer.expectedBudget.toLocaleString('vi-VN')}đ</strong> (~{Math.round(customer.expectedBudget / (customer.studentCount || 1)).toLocaleString('vi-VN')}đ/bạn)
+                      Gói: <strong>{customer.servicePackageName || 'Kỷ Yếu Standard'}</strong> ({customer.studentCount} bạn) • Giá 1 bạn: <strong>{(customer.unitPrice !== undefined ? customer.unitPrice : Math.round((customer.expectedBudget || 0) / (customer.studentCount || 1))).toLocaleString('vi-VN')}đ/bạn</strong> • Tổng đơn: <strong>{(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ</strong>
                     </p>
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -934,7 +941,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       </span>
                     </div>
                     <p className="text-xs text-neutral-600">
-                      Tổng bill: <strong>{(customer.totalRevenue || customer.expectedBudget || 0).toLocaleString('vi-VN')}đ</strong> • Đã cọc: <strong>{(customer.paidAmount || 0).toLocaleString('vi-VN')}đ</strong> • Còn lại cần thanh toán: <strong className="text-teal-700 font-extrabold">{Math.max(0, (customer.totalRevenue || customer.expectedBudget || 0) - (customer.paidAmount || 0)).toLocaleString('vi-VN')}đ</strong>
+                      Tổng bill: <strong>{(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ</strong> • Đã cọc: <strong>{(customer.paidAmount || customer.depositAmount || 0).toLocaleString('vi-VN')}đ</strong> • Còn lại cần thanh toán: <strong className="text-teal-700 font-extrabold">{Math.max(0, (customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0) - (customer.paidAmount || customer.depositAmount || 0)).toLocaleString('vi-VN')}đ</strong>
                     </p>
                   </div>
                   <button
@@ -1355,15 +1362,15 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       <DollarSign className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[11px] text-neutral-500 font-medium">Gói dịch vụ & Dự toán</p>
+                      <p className="text-[11px] text-neutral-500 font-medium">Gói dịch vụ & Giá đơn</p>
                       <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">
-                        {customer.servicePackageName || 'Kỷ yếu Concept'} • {customer.expectedBudget.toLocaleString('vi-VN')}đ
+                        {customer.servicePackageName || 'Kỷ yếu Concept'} • {(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCopy(`${customer.servicePackageName || 'Kỷ yếu Concept'} - ${customer.expectedBudget.toLocaleString('vi-VN')}đ`, 'tab_pkg')}
+                    onClick={() => handleCopy(`${customer.servicePackageName || 'Kỷ yếu Concept'} - ${(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ`, 'tab_pkg')}
                     className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
                       copiedKey === 'tab_pkg'
                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'

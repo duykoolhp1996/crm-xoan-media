@@ -259,7 +259,7 @@ export const CustomerList: React.FC = () => {
                 <div className="text-right">
                   <span className="text-[10px] text-neutral-400 font-medium uppercase block">Doanh Thu</span>
                   <span className="font-black text-neutral-900 text-xs">
-                    {(cust.totalRevenue || cust.expectedBudget).toLocaleString('vi-VN')}đ
+                    {(cust.totalAmount ?? cust.totalRevenue ?? cust.expectedBudget ?? 0).toLocaleString('vi-VN')}đ
                   </span>
                   <span className="text-[10px] text-emerald-700 block font-semibold">
                     Cọc: {(cust.paidAmount || 0).toLocaleString('vi-VN')}đ
@@ -361,7 +361,7 @@ export const CustomerList: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <div>
                         <p className="font-bold text-neutral-900">
-                          {(cust.totalRevenue || cust.expectedBudget).toLocaleString('vi-VN')}đ
+                          {(cust.totalAmount ?? cust.totalRevenue ?? cust.expectedBudget ?? 0).toLocaleString('vi-VN')}đ
                         </p>
                         <p className="text-[11px] text-emerald-700 font-semibold">
                           Đã cọc: {(cust.paidAmount || 0).toLocaleString('vi-VN')}đ

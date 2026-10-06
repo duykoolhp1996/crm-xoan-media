@@ -297,7 +297,9 @@ export const KanbanPipeline: React.FC = () => {
                       <h4 className="text-xs font-bold text-neutral-900 mt-1">{cust.name}</h4>
                     </div>
                     <span className="text-xs font-extrabold text-neutral-800">
-                      {((cust.totalAmount || cust.expectedBudget || 0) / 1000000).toFixed(1)}M đ
+                      {(cust.totalAmount ?? cust.totalRevenue ?? cust.expectedBudget ?? 0) > 0
+                        ? `${(((cust.totalAmount ?? cust.totalRevenue ?? cust.expectedBudget ?? 0)) / 1000000).toFixed(1)}M đ`
+                        : '0 đ'}
                     </span>
                   </div>
 
@@ -350,7 +352,7 @@ export const KanbanPipeline: React.FC = () => {
           {STAGES.map((stage) => {
             const stageCustomers = accessibleCustomers.filter(c => c.pipelineStage === stage);
             const stageTotalMoney = stageCustomers.reduce((acc, curr) => {
-              const money = curr.totalAmount || curr.totalRevenue || curr.expectedBudget || 0;
+              const money = curr.totalAmount ?? curr.totalRevenue ?? curr.expectedBudget ?? 0;
               return acc + money;
             }, 0);
 
@@ -384,7 +386,7 @@ export const KanbanPipeline: React.FC = () => {
                     </div>
                   ) : (
                     stageCustomers.map((cust) => {
-                      const displayAmount = (cust.totalAmount || cust.totalRevenue || cust.expectedBudget || 0);
+                      const displayAmount = (cust.totalAmount ?? cust.totalRevenue ?? cust.expectedBudget ?? 0);
 
                       return (
                         <div
@@ -479,7 +481,7 @@ export const KanbanPipeline: React.FC = () => {
                               {cust.phone ? cust.phone : <span className="text-neutral-400 italic">Chưa có SĐT</span>}
                             </span>
                             <span className="font-bold text-neutral-900">
-                              {(displayAmount / 1000000).toFixed(1)}M đ
+                              {displayAmount > 0 ? `${(displayAmount / 1000000).toFixed(1)}M đ` : '0 đ'}
                             </span>
                           </div>
 

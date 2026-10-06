@@ -48,14 +48,33 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
 
   const getInitialFormData = () => {
     if (customerToEdit) {
-      const studentCount = customerToEdit.studentCount || 35;
-      const unitPrice = customerToEdit.unitPrice || (customerToEdit.expectedBudget ? Math.round(customerToEdit.expectedBudget / studentCount) : 350000);
-      const extraFee = customerToEdit.extraFee || 0;
-      const discount = customerToEdit.discount || 0;
-      const subtotal = customerToEdit.subtotal || (studentCount * unitPrice);
-      const totalAmount = customerToEdit.totalAmount || (subtotal + extraFee - discount);
-      const depositAmount = customerToEdit.depositAmount || customerToEdit.paidAmount || 0;
-      const remainingAmount = customerToEdit.remainingAmount || (totalAmount - depositAmount);
+      const studentCount = customerToEdit.studentCount !== undefined && customerToEdit.studentCount !== null
+        ? Number(customerToEdit.studentCount)
+        : 35;
+      const unitPrice = (customerToEdit.unitPrice !== undefined && customerToEdit.unitPrice !== null)
+        ? Number(customerToEdit.unitPrice)
+        : (customerToEdit.expectedBudget !== undefined && customerToEdit.expectedBudget !== null && studentCount > 0
+            ? Math.round(Number(customerToEdit.expectedBudget) / studentCount)
+            : 350000);
+      const extraFee = (customerToEdit.extraFee !== undefined && customerToEdit.extraFee !== null) ? Number(customerToEdit.extraFee) : 0;
+      const discount = (customerToEdit.discount !== undefined && customerToEdit.discount !== null) ? Number(customerToEdit.discount) : 0;
+      const subtotal = (customerToEdit.subtotal !== undefined && customerToEdit.subtotal !== null)
+        ? Number(customerToEdit.subtotal)
+        : (studentCount * unitPrice);
+      const totalAmount = (customerToEdit.totalAmount !== undefined && customerToEdit.totalAmount !== null)
+        ? Number(customerToEdit.totalAmount)
+        : (customerToEdit.totalRevenue !== undefined && customerToEdit.totalRevenue !== null)
+          ? Number(customerToEdit.totalRevenue)
+          : (subtotal + extraFee - discount);
+      const depositAmount = (customerToEdit.depositAmount !== undefined && customerToEdit.depositAmount !== null)
+        ? Number(customerToEdit.depositAmount)
+        : ((customerToEdit.paidAmount !== undefined && customerToEdit.paidAmount !== null) ? Number(customerToEdit.paidAmount) : 0);
+      const remainingAmount = (customerToEdit.remainingAmount !== undefined && customerToEdit.remainingAmount !== null)
+        ? Number(customerToEdit.remainingAmount)
+        : Math.max(0, totalAmount - depositAmount);
+      const expectedBudget = (customerToEdit.expectedBudget !== undefined && customerToEdit.expectedBudget !== null)
+        ? Number(customerToEdit.expectedBudget)
+        : totalAmount;
 
       return {
         name: customerToEdit.name || '',
@@ -88,7 +107,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         totalAmount: totalAmount,
         depositAmount: depositAmount,
         remainingAmount: remainingAmount,
-        expectedBudget: customerToEdit.expectedBudget || totalAmount,
+        expectedBudget: expectedBudget,
 
         // Stage-specific fields
         depositDate: customerToEdit.depositDate || '',
@@ -315,7 +334,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         shootingLocations: formData.shootingLocations.split(',').map((s: string) => s.trim()).filter(Boolean),
         
         // Auto-Pricing calculated fields
-        unitPrice: Number(formData.unitPrice) || 350000,
+        unitPrice: formData.unitPrice !== undefined ? Number(formData.unitPrice) : 0,
         subtotal: calcSubtotal,
         extraFee: Number(formData.extraFee) || 0,
         discount: Number(formData.discount) || 0,
@@ -324,7 +343,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         remainingAmount: calcRemainingAmount,
         expectedBudget: calcTotalAmount,
         totalRevenue: calcTotalAmount,
-        paidAmount: Number(formData.depositAmount) || customerToEdit.paidAmount || 0,
+        paidAmount: formData.depositAmount !== undefined ? Number(formData.depositAmount) : (customerToEdit.paidAmount || 0),
 
         // Stage-specific fields
         depositDate: formData.depositDate,
@@ -382,7 +401,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       shootingLocations: formData.shootingLocations.split(',').map((s: string) => s.trim()).filter(Boolean),
       
       // Auto-Pricing calculated fields
-      unitPrice: Number(formData.unitPrice) || 350000,
+      unitPrice: formData.unitPrice !== undefined ? Number(formData.unitPrice) : 350000,
       subtotal: calcSubtotal,
       extraFee: Number(formData.extraFee) || 0,
       discount: Number(formData.discount) || 0,
@@ -698,12 +717,23 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
               </div>
 
               <div>
-                <label className="font-semibold text-neutral-700">Đơn giá / 1 bạn (đ) *</label>
+                <label className="font-semibold text-neutral-800 text-xs flex items-center justify-between">
+                  <span>Giá của 1 học sinh (đ/bạn) *</span>
+                  <span className="text-[10px] text-neutral-500 font-normal">0đ nếu miễn phí</span>
+                </label>
                 <input
                   type="text"
-                  value={formData.unitPrice.toLocaleString('vi-VN')}
-                  onChange={e => setFormData({ ...formData, unitPrice: parseMoneyInput(e.target.value) })}
-                  className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] font-bold text-neutral-900 rounded-xl focus:bg-white focus:outline-none"
+                  placeholder="0 (VD: 350.000)"
+                  value={formData.unitPrice ? formData.unitPrice.toLocaleString('vi-VN') : (formData.unitPrice === 0 ? '0' : '')}
+                  onChange={e => {
+                    const raw = e.target.value;
+                    if (raw === '' || raw === '0') {
+                      setFormData({ ...formData, unitPrice: 0 });
+                    } else {
+                      setFormData({ ...formData, unitPrice: parseMoneyInput(raw) });
+                    }
+                  }}
+                  className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.12] font-bold text-neutral-950 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 />
               </div>
 

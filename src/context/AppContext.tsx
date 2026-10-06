@@ -728,8 +728,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdById: creatorId,
       createdByName: creatorName,
       assignedSalesName: salesName,
-      totalRevenue: customerData.expectedBudget || 0,
-      paidAmount: 0,
+      totalRevenue: customerData.totalAmount ?? customerData.expectedBudget ?? 0,
+      paidAmount: customerData.depositAmount ?? 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

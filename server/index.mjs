@@ -13,7 +13,7 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.1.8';
+const VERSION = '1.1.9';
 
 // Helper đọc body request JSON
 const readJsonBody = (req) => {
@@ -72,13 +72,33 @@ const mapDbRowToCustomer = (row) => {
   } catch {}
 
   const studentCount = Number(row.student_count) || 0;
-  const unitPrice = Number(row.unit_price) || 0;
-  const subtotal = Number(row.subtotal) || (studentCount * unitPrice);
-  const extraFee = Number(row.extra_fee) || 0;
-  const discount = Number(row.discount) || 0;
-  const totalAmount = Number(row.total_amount) || Number(row.total_revenue) || Number(row.contract_value) || (subtotal + extraFee - discount) || Number(row.expected_budget) || 0;
-  const depositAmount = Number(row.deposit_amount) || Number(row.paid_amount) || 0;
-  const remainingAmount = Number(row.remaining_amount) || Math.max(0, totalAmount - depositAmount);
+  const unitPrice = (row.unit_price !== null && row.unit_price !== undefined) ? Number(row.unit_price) : 0;
+  const extraFee = (row.extra_fee !== null && row.extra_fee !== undefined) ? Number(row.extra_fee) : 0;
+  const discount = (row.discount !== null && row.discount !== undefined) ? Number(row.discount) : 0;
+  const subtotal = (row.subtotal !== null && row.subtotal !== undefined) ? Number(row.subtotal) : Math.max(0, studentCount * unitPrice);
+
+  let totalAmount = 0;
+  if (row.total_amount !== null && row.total_amount !== undefined) {
+    totalAmount = Number(row.total_amount);
+  } else if (row.total_revenue !== null && row.total_revenue !== undefined) {
+    totalAmount = Number(row.total_revenue);
+  } else if (row.contract_value !== null && row.contract_value !== undefined) {
+    totalAmount = Number(row.contract_value);
+  } else if (row.expected_budget !== null && row.expected_budget !== undefined) {
+    totalAmount = Number(row.expected_budget);
+  } else {
+    totalAmount = Math.max(0, subtotal + extraFee - discount);
+  }
+
+  const depositAmount = (row.deposit_amount !== null && row.deposit_amount !== undefined)
+    ? Number(row.deposit_amount)
+    : ((row.paid_amount !== null && row.paid_amount !== undefined) ? Number(row.paid_amount) : 0);
+  const remainingAmount = (row.remaining_amount !== null && row.remaining_amount !== undefined)
+    ? Number(row.remaining_amount)
+    : Math.max(0, totalAmount - depositAmount);
+  const expectedBudget = (row.expected_budget !== null && row.expected_budget !== undefined)
+    ? Number(row.expected_budget)
+    : totalAmount;
 
   return {
     id: row.id,
@@ -104,7 +124,7 @@ const mapDbRowToCustomer = (row) => {
     concept: row.concept || '',
     expectedShootDate: row.expected_shoot_date || '',
     shootingLocations,
-    expectedBudget: Number(row.expected_budget) || totalAmount,
+    expectedBudget,
     specialRequests: row.special_requests || '',
     notes: row.notes || '',
     rawDriveUrl: row.raw_drive_url || '',
@@ -430,18 +450,22 @@ const server = http.createServer(async (req, res) => {
       const utmStr = body.utm ? JSON.stringify(body.utm) : null;
 
       // BACKEND PRICING ENGINE: Tính toán tự động chuẩn xác
-      const studentCount = parseInt(body.studentCount || body.student_count || 0, 10);
-      const unitPrice = parseNumericAmount(body.unitPrice || body.unit_price || 0);
-      const extraFee = parseNumericAmount(body.extraFee || body.extra_fee || 0);
-      const discount = parseNumericAmount(body.discount || 0);
-      const depositAmount = parseNumericAmount(body.depositAmount || body.deposit_amount || body.paidAmount || 0);
+      const studentCount = parseInt(body.studentCount ?? body.student_count ?? 0, 10);
+      const unitPrice = parseNumericAmount(body.unitPrice ?? body.unit_price ?? 0);
+      const extraFee = parseNumericAmount(body.extraFee ?? body.extra_fee ?? 0);
+      const discount = parseNumericAmount(body.discount ?? 0);
+      const depositAmount = parseNumericAmount(body.depositAmount ?? body.deposit_amount ?? body.paidAmount ?? 0);
 
       const subtotal = Math.max(0, studentCount * unitPrice);
-      let totalAmount = parseNumericAmount(body.totalAmount || body.total_amount || body.totalRevenue || 0);
-      if (subtotal > 0 || extraFee > 0 || discount > 0) {
+      let totalAmount = 0;
+      if (body.unitPrice !== undefined || body.unit_price !== undefined) {
         totalAmount = Math.max(0, subtotal + extraFee - discount);
-      } else if (!totalAmount) {
-        totalAmount = parseNumericAmount(body.expectedBudget || 0);
+      } else if (body.totalAmount !== undefined || body.total_amount !== undefined || body.totalRevenue !== undefined) {
+        totalAmount = parseNumericAmount(body.totalAmount ?? body.total_amount ?? body.totalRevenue);
+      } else if (body.expectedBudget !== undefined) {
+        totalAmount = parseNumericAmount(body.expectedBudget);
+      } else {
+        totalAmount = Math.max(0, subtotal + extraFee - discount);
       }
       const remainingAmount = Math.max(0, totalAmount - depositAmount);
 
@@ -491,7 +515,7 @@ const server = http.createServer(async (req, res) => {
           body.schoolId || '', body.schoolName || '', body.grade || 'Khối 12', body.className || '', body.academicYear || '2025-2026',
           body.region || '', body.city || '', body.district || '', body.representativeRole || 'Lớp trưởng', studentCount,
           body.serviceType || 'Kỷ yếu Concept', body.servicePackageId || '', body.servicePackageName || '', body.concept || '',
-          body.expectedShootDate || '', shootingLocationsStr, totalAmount || Number(body.expectedBudget) || 0, body.specialRequests || '', body.notes || '',
+          body.expectedShootDate || '', shootingLocationsStr, totalAmount, body.specialRequests || '', body.notes || '',
           body.rawDriveUrl || '', body.driveUrl || '', body.photoNotes || '', body.shotDate || '', Number(body.photoCount) || 0,
           body.source || 'Facebook Ads', body.campaignName || '', utmStr,
           body.pipelineStage || 'New Lead', body.assignedSalesId || '', body.assignedSalesName || 'Chưa gán',
@@ -545,17 +569,30 @@ const server = http.createServer(async (req, res) => {
 
       // BACKEND PRICING ENGINE: Tính toán lại giá tự động
       const studentCount = parseInt(body.studentCount ?? body.student_count ?? existing.student_count ?? 0, 10);
-      const unitPrice = parseNumericAmount(body.unitPrice ?? body.unit_price ?? existing.unit_price ?? 0);
-      const extraFee = parseNumericAmount(body.extraFee ?? body.extra_fee ?? existing.extra_fee ?? 0);
-      const discount = parseNumericAmount(body.discount ?? existing.discount ?? 0);
-      const depositAmount = parseNumericAmount(body.depositAmount ?? body.deposit_amount ?? body.paidAmount ?? existing.deposit_amount ?? existing.paid_amount ?? 0);
+      const hasUnitPriceProvided = (body.unitPrice !== undefined || body.unit_price !== undefined);
+      const unitPrice = hasUnitPriceProvided
+        ? parseNumericAmount(body.unitPrice ?? body.unit_price)
+        : parseNumericAmount(existing.unit_price ?? 0);
+      const extraFee = (body.extraFee !== undefined || body.extra_fee !== undefined)
+        ? parseNumericAmount(body.extraFee ?? body.extra_fee)
+        : parseNumericAmount(existing.extra_fee ?? 0);
+      const discount = body.discount !== undefined
+        ? parseNumericAmount(body.discount)
+        : parseNumericAmount(existing.discount ?? 0);
+      const depositAmount = (body.depositAmount !== undefined || body.deposit_amount !== undefined || body.paidAmount !== undefined)
+        ? parseNumericAmount(body.depositAmount ?? body.deposit_amount ?? body.paidAmount)
+        : parseNumericAmount(existing.deposit_amount ?? existing.paid_amount ?? 0);
 
       const subtotal = Math.max(0, studentCount * unitPrice);
-      let totalAmount = parseNumericAmount(body.totalAmount ?? body.total_amount ?? body.totalRevenue ?? 0);
-      if (subtotal > 0 || extraFee > 0 || discount > 0) {
+      let totalAmount = 0;
+      if (hasUnitPriceProvided) {
         totalAmount = Math.max(0, subtotal + extraFee - discount);
-      } else if (!totalAmount) {
-        totalAmount = parseNumericAmount(body.expectedBudget ?? existing.expected_budget ?? existing.total_amount ?? 0);
+      } else if (body.totalAmount !== undefined || body.total_amount !== undefined || body.totalRevenue !== undefined) {
+        totalAmount = parseNumericAmount(body.totalAmount ?? body.total_amount ?? body.totalRevenue);
+      } else if (body.expectedBudget !== undefined) {
+        totalAmount = parseNumericAmount(body.expectedBudget);
+      } else {
+        totalAmount = Math.max(0, subtotal + extraFee - discount);
       }
       const remainingAmount = Math.max(0, totalAmount - depositAmount);
 
@@ -638,7 +675,7 @@ const server = http.createServer(async (req, res) => {
           studentCount,
           toSql(body.serviceType), toSql(body.servicePackageId), toSql(body.servicePackageName), toSql(body.concept),
           toSql(body.expectedShootDate), toSql(shootingLocationsStr),
-          totalAmount || Number(body.expectedBudget) || 0,
+          totalAmount,
           toSql(body.specialRequests), toSql(body.notes),
           toSql(body.rawDriveUrl), toSql(body.driveUrl), toSql(body.photoNotes), toSql(body.shotDate), body.photoCount !== undefined ? Number(body.photoCount) : null,
           toSql(body.source), toSql(body.campaignName), toSql(utmStr),
