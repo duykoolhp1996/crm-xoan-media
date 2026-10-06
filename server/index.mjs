@@ -322,6 +322,7 @@ const server = http.createServer(async (req, res) => {
   const currentUserId = req.headers['x-user-id'] || 'system';
   const currentUserName = req.headers['x-user-name'] || 'Người dùng CRM';
 
+  try {
     // -------------------------------------------------------------
     // STATIC FILE SERVING CHO UPLOADS (Avatar, Media)
     // -------------------------------------------------------------
