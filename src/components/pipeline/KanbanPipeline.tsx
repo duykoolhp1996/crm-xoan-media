@@ -257,9 +257,15 @@ export const KanbanPipeline: React.FC = () => {
                       {/* Class & School */}
                       <div className="flex items-start justify-between gap-1">
                         <div>
-                          <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-lg">
-                            {cust.className}
-                          </span>
+                          {cust.className ? (
+                            <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-lg">
+                              {cust.className}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-medium text-neutral-500 bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-lg italic">
+                              Chưa rõ lớp
+                            </span>
+                          )}
                           <h4 className="text-xs font-bold text-neutral-900 mt-1.5 group-hover:text-neutral-700 transition-colors">
                             {cust.name}
                           </h4>
@@ -330,7 +336,7 @@ export const KanbanPipeline: React.FC = () => {
                       <div className="mt-2.5 pt-2 border-t border-black/[0.04] flex items-center justify-between text-[11px]">
                         <span className="text-neutral-500 flex items-center gap-1">
                           <Phone className="w-3 h-3 text-neutral-400" />
-                          {cust.phone}
+                          {cust.phone ? cust.phone : <span className="text-neutral-400 italic">Chưa có SĐT</span>}
                         </span>
                         <span className="font-bold text-neutral-900">
                           {(cust.expectedBudget / 1000000).toFixed(1)}M đ

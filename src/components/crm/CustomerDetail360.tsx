@@ -88,16 +88,28 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
     customer.city || customer.region
   ].filter(Boolean).join(', ');
 
+  // Trợ giúp kiểm tra số điện thoại & Zalo hợp lệ
+  const cleanPhoneDigits = (customer.phone || '').replace(/\D/g, '');
+  const cleanZaloDigits = (customer.zalo || '').replace(/\D/g, '');
+  const hasPhone = Boolean(customer.phone && customer.phone.trim() && customer.phone.trim() !== '0' && cleanPhoneDigits.length >= 4);
+  const rawZalo = customer.zalo && customer.zalo.trim() && customer.zalo.trim() !== '0' ? customer.zalo.trim() : '';
+  const zaloTarget = rawZalo ? cleanZaloDigits : (hasPhone ? cleanPhoneDigits : '');
+  const hasZalo = Boolean(zaloTarget && zaloTarget.length >= 4);
+
+  // Chuỗi lớp & trường học (loại bỏ dấu '-' thừa nếu chưa có tên lớp)
+  const classAndSchool = customer.className ? `${customer.className} - ${customer.schoolName}` : customer.schoolName;
+  const avatarInitials = (customer.className || customer.name || 'CRM').slice(0, 3).toUpperCase();
+
   const fullSummaryText = `📸 THÔNG TIN KHÁCH HÀNG - XOĂN MEDIA
 ━━━━━━━━━━━━━━━━━━━━
 👤 Khách hàng: ${customer.name} (${customer.representativeRole})
-📞 Số điện thoại: ${customer.phone}
-🏫 Lớp & Trường: ${customer.className} - ${customer.schoolName}
-📍 Địa chỉ / Khu vực: ${fullAddress}
-👥 Sĩ số: ${customer.studentCount} bạn (${customer.academicYear})
+📞 Số điện thoại: ${hasPhone ? customer.phone : '(Chưa có số điện thoại)'}
+🏫 Lớp & Trường: ${classAndSchool}
+📍 Địa chỉ / Khu vực: ${fullAddress || 'Chưa cập nhật'}
+👥 Sĩ số: ${customer.studentCount ? `${customer.studentCount} bạn` : 'Chưa rõ'} (${customer.academicYear})
 📦 Gói dịch vụ: ${customer.servicePackageName || customer.serviceType || 'Kỷ yếu Concept'}
 ✨ Concept: ${customer.concept || 'Chưa chọn'}
-💰 Ngân sách dự kiến: ${customer.expectedBudget?.toLocaleString('vi-VN')}đ
+💰 Ngân sách dự kiến: ${customer.expectedBudget ? `${customer.expectedBudget.toLocaleString('vi-VN')}đ` : 'Chưa có'}
 📍 Địa điểm chụp: ${customer.shootingLocations?.join(', ') || 'Chưa xác định'}
 👨‍💼 Sales phụ trách: ${customer.assignedSalesName || 'Chưa gán'}
 ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
@@ -135,7 +147,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
         <div className="p-6 bg-neutral-50/70 border-b border-black/[0.06] flex items-start justify-between shrink-0">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-[#B8F23D] flex items-center justify-center font-black text-xl shadow-sm shrink-0">
-              {customer.className.slice(0, 3)}
+              {avatarInitials}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -164,7 +176,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
               <div className="text-xs text-neutral-500 mt-1 flex items-center gap-2 flex-wrap">
                 <span className="flex items-center gap-1 font-medium text-neutral-700">
                   <School className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>{customer.className} - {customer.schoolName}</span>
+                  <span>{classAndSchool}</span>
                 </span>
                 <span>•</span>
                 <span>{customer.academicYear}</span>
@@ -193,18 +205,30 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                 </button>
 
                 {/* Nút Copy SĐT Nhanh */}
-                <button
-                  type="button"
-                  onClick={() => handleCopy(customer.phone, 'header_phone')}
-                  className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1 cursor-pointer transition-colors"
-                  title={`Sao chép SĐT: ${customer.phone}`}
-                >
-                  {copiedKey === 'header_phone' ? (
-                    <span className="text-emerald-700 font-bold flex items-center gap-0.5"><Check className="w-3 h-3 text-emerald-600" /> Đã copy SĐT</span>
-                  ) : (
-                    <span className="flex items-center gap-0.5"><Phone className="w-3 h-3 text-blue-600" /> Copy SĐT</span>
-                  )}
-                </button>
+                {hasPhone ? (
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(customer.phone, 'header_phone')}
+                    className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1 cursor-pointer transition-colors"
+                    title={`Sao chép SĐT: ${customer.phone}`}
+                  >
+                    {copiedKey === 'header_phone' ? (
+                      <span className="text-emerald-700 font-bold flex items-center gap-0.5"><Check className="w-3 h-3 text-emerald-600" /> Đã copy SĐT</span>
+                    ) : (
+                      <span className="flex items-center gap-0.5"><Phone className="w-3 h-3 text-blue-600" /> Copy SĐT</span>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-neutral-100 text-neutral-400 border border-black/[0.06] flex items-center gap-1 cursor-not-allowed opacity-60 pointer-events-none"
+                    title="Chưa có số điện thoại"
+                  >
+                    <Phone className="w-3 h-3 text-neutral-400" />
+                    <span>Chưa có SĐT</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -480,29 +504,48 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
               {/* 1. Số điện thoại */}
               <div className="p-3 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-2.5 hover:border-black/[0.14] transition-all">
                 <div className="flex items-start gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                    hasPhone
+                      ? 'bg-blue-50 text-blue-600 border border-blue-200/60'
+                      : 'bg-neutral-100 text-neutral-400 border border-neutral-200'
+                  }`}>
                     <Phone className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-[10px] text-neutral-500 font-medium">Số điện thoại / Zalo</p>
-                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">{customer.phone}</p>
+                    {hasPhone ? (
+                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5">{customer.phone}</p>
+                    ) : (
+                      <p className="text-xs italic text-neutral-400 truncate mt-0.5">(Chưa có số điện thoại)</p>
+                    )}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(customer.phone, 'quick_phone')}
-                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
-                    copiedKey === 'quick_phone'
-                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
-                  }`}
-                >
-                  {copiedKey === 'quick_phone' ? (
-                    <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
-                  ) : (
-                    <><Copy className="w-3 h-3" /> Copy SĐT</>
-                  )}
-                </button>
+                {hasPhone ? (
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(customer.phone, 'quick_phone')}
+                    className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
+                      copiedKey === 'quick_phone'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                    }`}
+                  >
+                    {copiedKey === 'quick_phone' ? (
+                      <><Check className="w-3 h-3 text-emerald-600" /> Đã copy</>
+                    ) : (
+                      <><Copy className="w-3 h-3" /> Copy SĐT</>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 text-[11px] shrink-0 bg-neutral-100 text-neutral-400 border border-black/[0.06] cursor-not-allowed opacity-60"
+                    title="Chưa có số điện thoại"
+                  >
+                    <Copy className="w-3 h-3" /> Copy SĐT
+                  </button>
+                )}
               </div>
 
               {/* 2. Địa chỉ đầy đủ */}
@@ -543,14 +586,14 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                   </div>
                   <div className="min-w-0">
                     <p className="text-[10px] text-neutral-500 font-medium">Lớp & Trường</p>
-                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={`${customer.className} - ${customer.schoolName}`}>
-                      {customer.className} - {customer.schoolName}
+                    <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={classAndSchool}>
+                      {classAndSchool}
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleCopy(`${customer.className} - ${customer.schoolName}`, 'quick_school')}
+                  onClick={() => handleCopy(classAndSchool, 'quick_school')}
                   className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all text-[11px] shrink-0 cursor-pointer ${
                     copiedKey === 'quick_school'
                       ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
@@ -729,7 +772,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                       <span className="text-xs font-bold text-neutral-900 uppercase tracking-wide">
-                        Giai Đoạn: {customer.pipelineStage} (Lớp {customer.className})
+                        Giai Đoạn: {customer.pipelineStage} {customer.className ? `(Lớp ${customer.className})` : ''}
                       </span>
                     </div>
                     <p className="text-xs text-neutral-600">
@@ -770,7 +813,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                       <span className="text-xs font-bold text-emerald-950 uppercase tracking-wide">
-                        Đã Đặt Cọc Thành Công (Lớp {customer.className})
+                        Đã Đặt Cọc Thành Công {customer.className ? `(Lớp ${customer.className})` : ''}
                       </span>
                     </div>
                     <p className="text-xs text-neutral-700">
@@ -830,7 +873,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0" />
                       <span className="text-xs font-bold text-blue-950 uppercase tracking-wide">
-                        {customer.pipelineStage === 'Đã chụp' ? 'Đã Hoàn Thành Buổi Chụp – Đã Có Link Drive' : 'Đang Hậu Kỳ & Blend Màu'} (Lớp {customer.className})
+                        {customer.pipelineStage === 'Đã chụp' ? 'Đã Hoàn Thành Buổi Chụp – Đã Có Link Drive' : 'Đang Hậu Kỳ & Blend Màu'} {customer.className ? `(Lớp ${customer.className})` : ''}
                       </span>
                     </div>
                     <p className="text-xs text-neutral-700 flex items-center gap-1 flex-wrap">
@@ -887,7 +930,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse shrink-0" />
                       <span className="text-xs font-bold text-teal-950 uppercase tracking-wide">
-                        Đã Bàn Giao Sản Phẩm (Lớp {customer.className})
+                        Đã Bàn Giao Sản Phẩm {customer.className ? `(Lớp ${customer.className})` : ''}
                       </span>
                     </div>
                     <p className="text-xs text-neutral-600">
@@ -915,7 +958,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
                       <span className="text-xs font-bold text-emerald-950 uppercase tracking-wide">
-                        Dự Án Kỷ Yếu Đã Hoàn Thành Trọn Gói (Lớp {customer.className})
+                        Dự Án Kỷ Yếu Đã Hoàn Thành Trọn Gói {customer.className ? `(Lớp ${customer.className})` : ''}
                       </span>
                     </div>
                     <p className="text-xs text-neutral-700">
@@ -1171,29 +1214,48 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                 {/* 1. Số điện thoại */}
                 <div className="p-4 bg-white rounded-2xl border border-black/[0.08] shadow-2xs flex items-center justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                      hasPhone
+                        ? 'bg-blue-50 text-blue-600 border border-blue-200/60'
+                        : 'bg-neutral-100 text-neutral-400 border border-neutral-200'
+                    }`}>
                       <Phone className="w-4 h-4" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-[11px] text-neutral-500 font-medium">Số điện thoại / Zalo</p>
-                      <p className="text-sm font-bold text-neutral-900 truncate mt-0.5">{customer.phone}</p>
+                      {hasPhone ? (
+                        <p className="text-sm font-bold text-neutral-900 truncate mt-0.5">{customer.phone}</p>
+                      ) : (
+                        <p className="text-xs italic text-neutral-400 truncate mt-0.5">(Chưa có số điện thoại)</p>
+                      )}
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy(customer.phone, 'tab_phone')}
-                    className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
-                      copiedKey === 'tab_phone'
-                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                        : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
-                    }`}
-                  >
-                    {copiedKey === 'tab_phone' ? (
-                      <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
-                    ) : (
-                      <><Copy className="w-3.5 h-3.5" /> Copy SĐT</>
-                    )}
-                  </button>
+                  {hasPhone ? (
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(customer.phone, 'tab_phone')}
+                      className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
+                        copiedKey === 'tab_phone'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-black/[0.08]'
+                      }`}
+                    >
+                      {copiedKey === 'tab_phone' ? (
+                        <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy</>
+                      ) : (
+                        <><Copy className="w-3.5 h-3.5" /> Copy SĐT</>
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 text-xs shrink-0 bg-neutral-100 text-neutral-400 border border-black/[0.06] cursor-not-allowed opacity-60"
+                      title="Chưa có số điện thoại"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Copy SĐT
+                    </button>
+                  )}
                 </div>
 
                 {/* 2. Địa chỉ đầy đủ */}
@@ -1234,14 +1296,14 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                     </div>
                     <div className="min-w-0">
                       <p className="text-[11px] text-neutral-500 font-medium">Lớp & Trường học</p>
-                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={`${customer.className} - ${customer.schoolName}`}>
-                        {customer.className} - {customer.schoolName}
+                      <p className="text-xs font-bold text-neutral-900 truncate mt-0.5" title={classAndSchool}>
+                        {classAndSchool}
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCopy(`${customer.className} - ${customer.schoolName}`, 'tab_school')}
+                    onClick={() => handleCopy(classAndSchool, 'tab_school')}
                     className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shrink-0 cursor-pointer ${
                       copiedKey === 'tab_school'
                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
@@ -1352,41 +1414,79 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
 
         {/* Footer Quick Actions */}
         <div className="p-4 bg-neutral-50/70 border-t border-black/[0.06] flex items-center justify-between gap-2.5 flex-wrap sm:flex-nowrap">
-          <a
-            href={`tel:${customer.phone}`}
-            className="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 border border-black/[0.08] text-neutral-800 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <Phone className="w-3.5 h-3.5 text-neutral-700" />
-            Gọi {customer.phone}
-          </a>
+          {hasPhone ? (
+            <a
+              href={`tel:${customer.phone}`}
+              className="flex-1 py-2.5 bg-neutral-100 hover:bg-neutral-200 border border-black/[0.08] text-neutral-800 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <Phone className="w-3.5 h-3.5 text-neutral-700" />
+              Gọi {customer.phone}
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="flex-1 py-2.5 bg-neutral-100 border border-black/[0.06] text-neutral-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60 pointer-events-none"
+              title="Khách hàng chưa có số điện thoại"
+            >
+              <Phone className="w-3.5 h-3.5 text-neutral-400" />
+              Chưa có SĐT
+            </button>
+          )}
 
           {/* Nút Copy SĐT ở Footer */}
-          <button
-            type="button"
-            onClick={() => handleCopy(customer.phone, 'footer_phone')}
-            className={`px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
-              copiedKey === 'footer_phone'
-                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-black/[0.08]'
-            }`}
-            title={`Sao chép SĐT: ${customer.phone}`}
-          >
-            {copiedKey === 'footer_phone' ? (
-              <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy SĐT</>
-            ) : (
-              <><Copy className="w-3.5 h-3.5 text-neutral-600" /> Copy SĐT</>
-            )}
-          </button>
+          {hasPhone ? (
+            <button
+              type="button"
+              onClick={() => handleCopy(customer.phone, 'footer_phone')}
+              className={`px-3 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border cursor-pointer ${
+                copiedKey === 'footer_phone'
+                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border-black/[0.08]'
+              }`}
+              title={`Sao chép SĐT: ${customer.phone}`}
+            >
+              {copiedKey === 'footer_phone' ? (
+                <><Check className="w-3.5 h-3.5 text-emerald-600" /> Đã copy SĐT</>
+              ) : (
+                <><Copy className="w-3.5 h-3.5 text-neutral-600" /> Copy SĐT</>
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-black/[0.06] bg-neutral-100 text-neutral-400 cursor-not-allowed opacity-60"
+              title="Khách hàng chưa có số điện thoại"
+            >
+              <Copy className="w-3.5 h-3.5 text-neutral-400" />
+              Copy SĐT
+            </button>
+          )}
 
-          <a
-            href={`https://zalo.me/${customer.phone}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm"
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            Nhắn Zalo
-          </a>
+          {/* Nút Nhắn Zalo: CHỈ SÁNG XANH KHI CÓ SỐ ZALO/SĐT HỢP LỆ; NẾU KHÔNG CÓ THÌ TẮT SÁNG (MÀU XÁM MỜ DISABLED) */}
+          {hasZalo ? (
+            <a
+              href={`https://zalo.me/${zaloTarget}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+              title={`Nhắn Zalo tới: ${zaloTarget}`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              Nhắn Zalo
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="flex-1 py-2.5 bg-neutral-100 border border-black/[0.06] text-neutral-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60 pointer-events-none"
+              title="Khách hàng chưa có số điện thoại hoặc Zalo"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-neutral-400" />
+              Nhắn Zalo
+            </button>
+          )}
 
           {/* Nút Xem Thêm & Copy Ở Footer */}
           <button
@@ -1539,7 +1639,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
             </div>
 
             <p className="text-xs text-neutral-600 mb-3">
-              Bạn đang đánh dấu lớp <strong>{customer.className} ({customer.schoolName})</strong> từ chối hoặc hủy chụp. Vui lòng chọn lý do chính:
+              Bạn đang đánh dấu {customer.className ? <>lớp <strong>{customer.className} ({customer.schoolName})</strong></> : <>khách hàng <strong>{customer.name} ({customer.schoolName})</strong></>} từ chối hoặc hủy chụp. Vui lòng chọn lý do chính:
             </p>
 
             <div className="space-y-2 mb-4">

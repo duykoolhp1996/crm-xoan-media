@@ -215,12 +215,14 @@ export const CustomerList: React.FC = () => {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="w-10 h-10 rounded-2xl bg-[#B8F23D]/30 border border-[#B8F23D]/60 text-neutral-950 font-black flex items-center justify-center text-xs shrink-0 shadow-2xs">
-                    {cust.className.slice(0, 3)}
+                    {(cust.className || cust.name || 'CRM').slice(0, 3).toUpperCase()}
                   </span>
                   <div className="min-w-0">
-                    <h3 className="font-black text-sm text-neutral-900 truncate">{cust.className}</h3>
+                    <h3 className="font-black text-sm text-neutral-900 truncate">
+                      {cust.className || cust.schoolName}
+                    </h3>
                     <p className="text-[11px] text-neutral-500 truncate flex items-center gap-1">
-                      <School className="w-3 h-3 shrink-0" /> {cust.schoolName}
+                      <School className="w-3 h-3 shrink-0" /> {cust.className ? cust.schoolName : (cust.district || cust.city || 'Chưa rõ trường')}
                     </p>
                   </div>
                 </div>
@@ -236,7 +238,7 @@ export const CustomerList: React.FC = () => {
                 <div>
                   <span className="font-bold text-neutral-900 block">{cust.name} ({cust.representativeRole})</span>
                   <span className="text-[11px] text-neutral-500 flex items-center gap-1 mt-0.5">
-                    <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone}
+                    <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone ? cust.phone : <span className="italic text-neutral-400">Chưa có SĐT</span>}
                   </span>
                 </div>
                 <div className="text-right">
@@ -302,14 +304,14 @@ export const CustomerList: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
                         <span className="w-7 h-7 rounded-xl bg-[#B8F23D]/30 border border-[#B8F23D]/50 text-neutral-900 font-extrabold flex items-center justify-center text-xs shrink-0">
-                          {cust.className.slice(0, 3)}
+                          {(cust.className || cust.name || 'CRM').slice(0, 3).toUpperCase()}
                         </span>
                         <div>
                           <p className="font-bold text-neutral-900 group-hover:text-neutral-700 transition-colors">
-                            {cust.className}
+                            {cust.className || cust.schoolName}
                           </p>
                           <p className="text-[11px] text-neutral-500 flex items-center gap-1">
-                            <School className="w-3 h-3 text-neutral-400" /> {cust.schoolName}
+                            <School className="w-3 h-3 text-neutral-400" /> {cust.className ? cust.schoolName : (cust.district || cust.city || 'Chưa rõ trường')}
                           </p>
                           {(cust.district || cust.city || cust.region) && (
                             <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
@@ -324,7 +326,7 @@ export const CustomerList: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <p className="font-semibold text-neutral-900">{cust.name}</p>
                       <p className="text-[11px] text-neutral-500 flex items-center gap-1">
-                        <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone} ({cust.representativeRole})
+                        <Phone className="w-3 h-3 text-neutral-400" /> {cust.phone ? cust.phone : <span className="italic text-neutral-400">Chưa có SĐT</span>} ({cust.representativeRole})
                       </p>
                       <p className="text-[10px] text-neutral-500 flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span className="flex items-center gap-1 text-blue-700 font-semibold">
@@ -393,7 +395,7 @@ export const CustomerList: React.FC = () => {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm(`Bạn có chắc chắn muốn xóa khách hàng "${cust.name}" (${cust.className} - ${cust.phone}) khỏi hệ thống CRM không?`)) {
+                            if (window.confirm(`Bạn có chắc chắn muốn xóa khách hàng "${cust.name}" (${cust.className ? `${cust.className} - ` : ''}${cust.phone || 'Chưa có SĐT'}) khỏi hệ thống CRM không?`)) {
                               deleteCustomer(cust.id);
                             }
                           }}
