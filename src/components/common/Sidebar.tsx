@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Users,
   Kanban,
-  GraduationCap,
   CalendarDays,
   Camera,
   Layers,
@@ -101,12 +100,6 @@ export const Sidebar: React.FC = () => {
           label: 'Thùng Rác & Đã Xóa',
           icon: Trash2,
           badge: deletedCustomers.length > 0 ? deletedCustomers.length : undefined,
-          roles: ['admin', 'manager', 'sales']
-        },
-        {
-          id: 'schools',
-          label: 'Quản Lý Trường / Lớp',
-          icon: GraduationCap,
           roles: ['admin', 'manager', 'sales']
         }
       ]
