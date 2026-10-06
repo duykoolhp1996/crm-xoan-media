@@ -36,20 +36,24 @@ import {
   X
 } from 'lucide-react';
 
-const STAGE_COLORS: Record<PipelineStage, { bg: string; text: string; border: string }> = {
+const STAGE_COLORS: Partial<Record<PipelineStage, { bg: string; text: string; border: string }>> = {
   'New Lead': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
   'Đã liên hệ': { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
   'Đang tư vấn': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
   'Đã gửi báo giá': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
   'Đang thương lượng': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  'Đã cọc': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
   'Đã đặt cọc': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  'Book ngày': { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' },
   'Đã Booking': { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-200' },
   'Đã chụp': { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200' },
   'Đang hậu kỳ': { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
+  'Giao ảnh': { bg: 'bg-lime-50', text: 'text-lime-700', border: 'border-lime-200' },
   'Đã bàn giao': { bg: 'bg-lime-50', text: 'text-lime-700', border: 'border-lime-200' },
   'Hoàn thành': { bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-300' },
   'Lost': { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
-  'Chăm sóc lại': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' }
+  'Chăm sóc lại': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+  'Mới tiếp nhận': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' }
 };
 
 export const SalesMessengerInbox: React.FC = () => {

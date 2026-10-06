@@ -296,6 +296,66 @@ const runSafeMigrations = () => {
     db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
       .run('mig-4', 4, 'expand_booking_fields_and_soft_delete');
   }
+
+  // Migration 5: Chuẩn hóa 10 Stage Pipeline, bộ tính giá tự động & Lead Stage History
+  if (!existingMigrations.has(5)) {
+    // 1. Thêm các cột tài chính & nghiệp vụ chi tiết cho Lead/Customer
+    addColumnIfNotExists('customers', 'unit_price', 'NUMERIC DEFAULT 0');
+    addColumnIfNotExists('customers', 'subtotal', 'NUMERIC DEFAULT 0');
+    addColumnIfNotExists('customers', 'extra_fee', 'NUMERIC DEFAULT 0');
+    addColumnIfNotExists('customers', 'discount', 'NUMERIC DEFAULT 0');
+    addColumnIfNotExists('customers', 'total_amount', 'NUMERIC DEFAULT 0');
+    addColumnIfNotExists('customers', 'remaining_amount', 'NUMERIC DEFAULT 0');
+    addColumnIfNotExists('customers', 'deposit_date', 'TEXT');
+    addColumnIfNotExists('customers', 'payment_method', 'TEXT');
+    addColumnIfNotExists('customers', 'shoot_time', 'TEXT');
+    addColumnIfNotExists('customers', 'shoot_address', 'TEXT');
+    addColumnIfNotExists('customers', 'editor_name', 'TEXT');
+    addColumnIfNotExists('customers', 'edit_deadline', 'TEXT');
+    addColumnIfNotExists('customers', 'edit_progress', 'INTEGER DEFAULT 0');
+    addColumnIfNotExists('customers', 'delivered_date', 'TEXT');
+    addColumnIfNotExists('customers', 'delivered_drive_url', 'TEXT');
+    addColumnIfNotExists('customers', 'delivery_method', 'TEXT');
+    addColumnIfNotExists('customers', 'lost_reason', 'TEXT');
+    addColumnIfNotExists('customers', 'lost_note', 'TEXT');
+    addColumnIfNotExists('customers', 'delete_reason', 'TEXT');
+
+    // 2. Tạo bảng lưu trữ lịch sử thay đổi giai đoạn Lead (lead_stage_history)
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS lead_stage_history (
+        id TEXT PRIMARY KEY,
+        lead_id TEXT NOT NULL,
+        from_stage TEXT,
+        to_stage TEXT NOT NULL,
+        changed_by TEXT,
+        changed_by_id TEXT,
+        changed_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        note TEXT
+      );
+      CREATE INDEX IF NOT EXISTS idx_stage_hist_lead ON lead_stage_history(lead_id);
+      CREATE INDEX IF NOT EXISTS idx_stage_hist_date ON lead_stage_history(changed_at);
+    `);
+
+    // 3. Chuẩn hóa an toàn dữ liệu stage cũ sang 10 stage mới (Không mất dữ liệu)
+    db.exec(`
+      UPDATE customers SET pipeline_stage = 'New Lead' WHERE pipeline_stage IN ('Đã liên hệ', 'Chăm sóc lại');
+      UPDATE customers SET pipeline_stage = 'Đã gửi báo giá' WHERE pipeline_stage = 'Đang thương lượng';
+      UPDATE customers SET pipeline_stage = 'Đã cọc' WHERE pipeline_stage = 'Đã đặt cọc';
+      UPDATE customers SET pipeline_stage = 'Book ngày' WHERE pipeline_stage = 'Đã Booking';
+      UPDATE customers SET pipeline_stage = 'Giao ảnh' WHERE pipeline_stage = 'Đã bàn giao';
+
+      -- Đồng bộ giá trị tài chính ban đầu cho các bản ghi cũ
+      UPDATE customers 
+      SET 
+        total_amount = COALESCE(NULLIF(total_revenue, 0), NULLIF(contract_value, 0), expected_budget, 0),
+        remaining_amount = MAX(0, COALESCE(NULLIF(total_revenue, 0), NULLIF(contract_value, 0), expected_budget, 0) - COALESCE(paid_amount, deposit_amount, 0))
+      WHERE total_amount = 0 OR total_amount IS NULL;
+    `);
+
+    db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
+      .run('mig-5', 5, 'lead_pipeline_pricing_and_stage_history');
+    console.log('[Migration] ✅ Đã hoàn tất Migration 5: Chuẩn hóa 10 stage & bộ tính giá tự động');
+  }
 };
 
 runSafeMigrations();

@@ -20,11 +20,12 @@ import { RemarketingModule } from './components/remarketing/RemarketingModule';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
+import { TrashBinModal } from './components/crm/TrashBinModal';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { initGA4, trackPageView } from './lib/analytics';
 
 const MainContent: React.FC = () => {
-  const { activeTab, currentUser, currentRole } = useApp();
+  const { activeTab, setActiveTab, currentUser, currentRole } = useApp();
 
   const isPhotographer = currentRole === 'photographer' || currentUser?.role === 'photographer';
 
@@ -32,7 +33,7 @@ const MainContent: React.FC = () => {
     trackPageView(`/#${activeTab}`, `CRM Xoăn - ${activeTab}`);
   }, [activeTab]);
 
-  const isNoOuterScroll = activeTab === 'pipeline' || activeTab === 'chat-messenger';
+  const isNoOuterScroll = activeTab === 'pipeline' || activeTab === 'chat-messenger' || activeTab === 'trash';
 
   return (
     <main className={`flex-1 ${isNoOuterScroll ? 'overflow-hidden flex flex-col min-h-0 p-2 sm:p-4 lg:p-5 pb-20 lg:pb-5' : 'overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 lg:pb-8 custom-scrollbar overscroll-contain'}`}>
@@ -40,6 +41,12 @@ const MainContent: React.FC = () => {
         {activeTab === 'dashboard' && (isPhotographer ? <PhotographerDashboard /> : <ExecutiveDashboard />)}
         {(activeTab === 'customers' || activeTab === 'leads') && <CustomerList />}
         {activeTab === 'pipeline' && <KanbanPipeline />}
+        {activeTab === 'trash' && (
+          <>
+            <KanbanPipeline />
+            <TrashBinModal isOpen={true} onClose={() => setActiveTab('pipeline')} />
+          </>
+        )}
         {activeTab === 'chat-messenger' && <SalesMessengerInbox />}
         {activeTab === 'schools' && <SchoolClassModule />}
         {activeTab === 'bookings' && <BookingModule />}

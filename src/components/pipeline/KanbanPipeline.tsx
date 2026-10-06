@@ -8,12 +8,15 @@ import {
   School,
   Sparkles,
   UserCheck,
-  UserX,
   FileText,
   QrCode,
   Calendar,
   FolderOpen,
-  ExternalLink
+  ExternalLink,
+  Trash2,
+  RotateCcw,
+  UserX,
+  AlertCircle
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
@@ -21,13 +24,16 @@ import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
+import { TrashBinModal } from '../crm/TrashBinModal';
 
 export const KanbanPipeline: React.FC = () => {
   const {
     customers,
+    deletedCustomers,
     salesStaff,
     updateCustomerStage,
     updateCustomer,
+    deleteCustomer,
     currentUser,
     currentRole,
     selectedCustomerId,
@@ -36,6 +42,8 @@ export const KanbanPipeline: React.FC = () => {
 
   const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTrashOpen, setIsTrashOpen] = useState(false);
+  const [showLostView, setShowLostView] = useState(false);
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
   const [scheduleBookingCustomer, setScheduleBookingCustomer] = useState<Customer | null>(null);
@@ -87,38 +95,36 @@ export const KanbanPipeline: React.FC = () => {
     }
   };
 
-  // 13 Giai đoạn chuẩn của Xoăn Media
+  // 9 Giai đoạn chính chuẩn tuần tự của Lead Pipeline Xoăn Media (Lost tách thành tab nhánh riêng)
   const STAGES: PipelineStage[] = [
     'New Lead',
-    'Đã liên hệ',
     'Đang tư vấn',
     'Đã gửi báo giá',
-    'Đang thương lượng',
-    'Đã đặt cọc',
-    'Đã Booking',
+    'Đã cọc',
+    'Book ngày',
     'Đã chụp',
     'Đang hậu kỳ',
-    'Đã bàn giao',
-    'Hoàn thành',
-    'Lost',
-    'Chăm sóc lại'
+    'Giao ảnh',
+    'Hoàn thành'
   ];
 
   // Stage highlight accent colors (top borders)
-  const stageHeaderAccents: Record<PipelineStage, string> = {
+  const stageHeaderAccents: Partial<Record<PipelineStage, string>> = {
     'New Lead': 'border-t-slate-400',
-    'Đã liên hệ': 'border-t-cyan-500',
     'Đang tư vấn': 'border-t-sky-500',
     'Đã gửi báo giá': 'border-t-indigo-500',
-    'Đang thương lượng': 'border-t-purple-500',
-    'Đã đặt cọc': 'border-t-[#79ba07]',
-    'Đã Booking': 'border-t-amber-500',
+    'Đã cọc': 'border-t-[#79ba07]',
+    'Book ngày': 'border-t-purple-500',
     'Đã chụp': 'border-t-blue-500',
-    'Đang hậu kỳ': 'border-t-violet-500',
-    'Đã bàn giao': 'border-t-teal-500',
+    'Đang hậu kỳ': 'border-t-amber-500',
+    'Giao ảnh': 'border-t-teal-500',
     'Hoàn thành': 'border-t-emerald-500',
     'Lost': 'border-t-rose-500',
-    'Chăm sóc lại': 'border-t-pink-500'
+    'Đã liên hệ': 'border-t-cyan-500',
+    'Đang thương lượng': 'border-t-purple-500',
+    'Đã đặt cọc': 'border-t-[#79ba07]',
+    'Đã Booking': 'border-t-purple-500',
+    'Đã bàn giao': 'border-t-teal-500'
   };
 
   // Drag & drop handlers
@@ -135,44 +141,40 @@ export const KanbanPipeline: React.FC = () => {
     e.preventDefault();
     const customerId = e.dataTransfer.getData('text/plain') || draggedCustomerId;
     if (customerId) {
-      // BẮT BUỘC: Muốn chuyển sang "Đã đặt cọc" (từ Đang thương lượng hoặc các bước trước) PHẢI có số tiền cọc!
-      if (targetStage === 'Đã đặt cọc') {
+      // 1. Muốn chuyển sang "Đã cọc": Nếu chưa có số tiền cọc, mở modal tạo cọc
+      if (targetStage === 'Đã cọc' || targetStage === 'Đã đặt cọc') {
         const cust = customers.find(c => c.id === customerId);
-        if (cust) {
-          // Tự động mở modal cọc để nhập/chọn số tiền cọc và xác nhận thanh toán
+        if (cust && (!cust.paidAmount || cust.paidAmount <= 0) && (!cust.depositAmount || cust.depositAmount <= 0)) {
           setPaymentConfig({ customer: cust, mode: 'deposit' });
           setDraggedCustomerId(null);
           return;
         }
       }
 
-      // BẮT BUỘC: Muốn chuyển sang "Đã Booking" PHẢI chốt được ngày chụp!
-      if (targetStage === 'Đã Booking') {
+      // 2. Muốn chuyển sang "Book ngày": Nếu chưa có ngày chụp, mở modal lên booking
+      if (targetStage === 'Book ngày' || targetStage === 'Đã Booking') {
         const cust = customers.find(c => c.id === customerId);
-        if (cust) {
-          // Tự động mở modal chốt ngày chụp & lên booking
+        if (cust && !cust.expectedShootDate) {
           setScheduleBookingCustomer(cust);
           setDraggedCustomerId(null);
           return;
         }
       }
 
-      // BẮT BUỘC: Muốn chuyển sang "Đã chụp" PHẢI có Link Google Drive!
+      // 3. Muốn chuyển sang "Đã chụp": Nếu chưa có link Google Drive, mở modal nộp Drive
       if (targetStage === 'Đã chụp') {
         const cust = customers.find(c => c.id === customerId);
-        if (cust) {
-          // Tự động mở modal nộp Link Google Drive của Photo
+        if (cust && !cust.rawDriveUrl && !cust.driveUrl) {
           setUploadDriveCustomer(cust);
           setDraggedCustomerId(null);
           return;
         }
       }
 
-      // BẮT BUỘC: Muốn chuyển sang "Hoàn thành" PHẢI nhập và xác nhận toàn bộ số tiền!
+      // 4. Muốn chuyển sang "Hoàn thành": Bắt buộc mở modal quyết toán để xác nhận số tiền
       if (targetStage === 'Hoàn thành') {
         const cust = customers.find(c => c.id === customerId);
         if (cust) {
-          // Bắt buộc mở modal quyết toán để nhập toàn bộ số tiền
           setPaymentConfig({ customer: cust, mode: 'final' });
           setDraggedCustomerId(null);
           return;
@@ -184,355 +186,499 @@ export const KanbanPipeline: React.FC = () => {
     setDraggedCustomerId(null);
   };
 
+  const handleDeleteToTrash = (cust: Customer) => {
+    const reason = prompt(`Chuyển Lead "${cust.name}" vào thùng rác?\nNhập lý do xóa (tùy chọn):`, 'Khách hủy hoặc trùng dữ liệu');
+    if (reason !== null) {
+      deleteCustomer(cust.id, reason);
+    }
+  };
+
+  const lostCustomers = accessibleCustomers.filter(c => c.pipelineStage === 'Lost');
+
   return (
     <div className="space-y-3 animate-in fade-in duration-150 flex-1 flex flex-col min-h-0 h-full">
       {/* Top Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel p-4 sm:p-5 rounded-3xl shrink-0">
         <div>
-          <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
-            <KanbanIcon className="w-5 h-5 text-neutral-900" />
-            Customer Pipeline (13 Trạng Thái Kỷ Yếu)
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+              <KanbanIcon className="w-5 h-5 text-neutral-900" />
+              Lead Pipeline (10 Giai Đoạn Kỷ Yếu Chuẩn)
+            </h1>
+            <span className="text-[10px] font-bold bg-[#B8F23D] text-neutral-900 px-2 py-0.5 rounded-full">
+              {accessibleCustomers.length} Lead
+            </span>
+          </div>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Kéo thả để cập nhật tiến độ từ Lead mới đến khi bàn giao trọn gói kỷ yếu
+            Quy trình chuẩn hóa 9 bước tuần tự + nhánh Lost riêng. Tự động tính giá và bảo toàn Database.
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-sm transition-all active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm Lead Vào Pipeline
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Nút Chuyển Tab Xem Lost */}
+          <button
+            onClick={() => setShowLostView(!showLostView)}
+            className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 border ${
+              showLostView
+                ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-xs'
+                : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/[0.08]'
+            }`}
+          >
+            <UserX className="w-3.5 h-3.5 text-rose-600" />
+            <span>Khách Từ Chối (Lost)</span>
+            {lostCustomers.length > 0 && (
+              <span className="px-1.5 py-0.2 bg-rose-200/80 text-rose-900 rounded-full text-[10px] font-black">
+                {lostCustomers.length}
+              </span>
+            )}
+          </button>
+
+          {/* Nút Mở Thùng Rác */}
+          <button
+            onClick={() => setIsTrashOpen(true)}
+            className="px-3 py-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-black/[0.08] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
+            title="Xem danh sách Lead đã xóa mềm trong thùng rác"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-neutral-500" />
+            <span>Thùng Rác</span>
+            {deletedCustomers.length > 0 && (
+              <span className="px-1.5 py-0.2 bg-rose-100 text-rose-700 rounded-full text-[10px] font-black">
+                {deletedCustomers.length}
+              </span>
+            )}
+          </button>
+
+          {/* Nút Thêm Lead Mới */}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-sm transition-all active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Nhập Lead Mới</span>
+          </button>
+        </div>
       </div>
 
-      {/* Kanban Board Container (Horizontal Scrollable 13 Columns) */}
-      <div
-        ref={boardRef}
-        onWheel={handleBoardWheel}
-        className="flex gap-3.5 overflow-x-auto pb-3 pt-1 items-stretch custom-scrollbar flex-1 min-h-0 overscroll-x-contain"
-      >
-        {STAGES.map((stage) => {
-          const stageCustomers = accessibleCustomers.filter(c => c.pipelineStage === stage);
-          const stageTotalMoney = stageCustomers.reduce((acc, curr) => acc + curr.expectedBudget, 0);
-
-          return (
-            <div
-              key={stage}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, stage)}
-              className={`w-72 shrink-0 bg-white rounded-2xl border border-black/[0.08] shadow-xs flex flex-col h-full max-h-full min-h-0 border-t-4 ${stageHeaderAccents[stage]}`}
+      {/* VIEW RIÊNG: KHÁCH HÀNG TỪ CHỐI (LOST) */}
+      {showLostView ? (
+        <div className="bg-white rounded-2xl border border-black/[0.08] p-4 flex-1 overflow-y-auto custom-scrollbar space-y-3">
+          <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-rose-500" />
+              <h2 className="text-sm font-black text-neutral-900">
+                Danh Sách Khách Hàng Từ Chối / Dừng Tư Vấn (Lost - {lostCustomers.length} Khách)
+              </h2>
+            </div>
+            <button
+              onClick={() => setShowLostView(false)}
+              className="text-xs font-bold text-neutral-500 hover:text-neutral-900"
             >
-              {/* Column Header */}
-              <div className="p-3 border-b border-black/[0.05] bg-neutral-50/60 shrink-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-neutral-900 tracking-tight truncate" title={stage}>
-                    {stage}
-                  </h3>
-                  <span className="text-[10px] font-bold bg-neutral-200/70 text-neutral-800 px-2 py-0.5 rounded-full">
-                    {stageCustomers.length}
-                  </span>
-                </div>
-                <p className="text-[10px] text-neutral-400 mt-1 font-medium">
-                  Tổng: <strong className="text-neutral-700">{(stageTotalMoney / 1000000).toFixed(1)}M đ</strong>
-                </p>
-              </div>
+              ← Quay lại 9 Bước Pipeline
+            </button>
+          </div>
 
-              {/* Cards List */}
-              <div className="column-cards-scroll p-2 space-y-2 overflow-y-auto flex-1 custom-scrollbar min-h-0 bg-neutral-50/30 overscroll-y-contain">
-                {stageCustomers.length === 0 ? (
-                  <div className="py-8 text-center text-neutral-400 text-[11px] italic border border-dashed border-neutral-300 rounded-2xl m-1">
-                    Kéo thả lead vào đây
+          {lostCustomers.length === 0 ? (
+            <div className="py-16 text-center text-neutral-400 text-xs italic">
+              Hiện tại không có khách hàng nào ở trạng thái Lost.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {lostCustomers.map((cust) => (
+                <div
+                  key={cust.id}
+                  onClick={() => setSelectedCustomerId(cust.id)}
+                  className="bg-neutral-50/70 hover:bg-neutral-50 p-4 rounded-2xl border border-rose-200/60 shadow-2xs cursor-pointer space-y-2 relative group"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">
+                        {cust.className || 'Chưa rõ lớp'}
+                      </span>
+                      <h4 className="text-xs font-bold text-neutral-900 mt-1">{cust.name}</h4>
+                    </div>
+                    <span className="text-xs font-extrabold text-neutral-800">
+                      {((cust.totalAmount || cust.expectedBudget || 0) / 1000000).toFixed(1)}M đ
+                    </span>
                   </div>
-                ) : (
-                  stageCustomers.map((cust) => (
-                    <div
-                      key={cust.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, cust.id)}
-                      onClick={() => setSelectedCustomerId(cust.id)}
-                      className="bg-white hover:bg-neutral-50 p-3.5 rounded-2xl border border-black/[0.06] hover:border-black/[0.14] shadow-xs hover:shadow-sm transition-colors duration-150 cursor-grab active:cursor-grabbing group"
+
+                  <p className="text-[11px] text-neutral-500 flex items-center gap-1">
+                    <School className="w-3 h-3 text-neutral-400" />
+                    <span className="truncate">{cust.schoolName}</span>
+                  </p>
+
+                  <div className="bg-rose-50/80 p-2 rounded-xl border border-rose-200/50 text-[11px] text-rose-800">
+                    <strong>Lý do từ chối:</strong> {cust.lostReason || cust.notes || 'Không ghi nhận'}
+                  </div>
+
+                  <div className="pt-2 border-t border-black/[0.04] flex items-center justify-between text-xs">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateCustomerStage(cust.id, 'Đang tư vấn', 'Mở lại tư vấn từ Lost');
+                      }}
+                      className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1"
                     >
-                      {/* Class & School */}
-                      <div className="flex items-start justify-between gap-1">
-                        <div>
-                          {cust.className ? (
-                            <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-lg">
-                              {cust.className}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] font-medium text-neutral-500 bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-lg italic">
-                              Chưa rõ lớp
-                            </span>
-                          )}
-                          <h4 className="text-xs font-bold text-neutral-900 mt-1.5 group-hover:text-neutral-700 transition-colors">
-                            {cust.name}
-                          </h4>
-                        </div>
-                        <span className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded-md">
-                          {cust.studentCount} bạn
-                        </span>
-                      </div>
+                      <RotateCcw className="w-3 h-3" />
+                      Khôi phục tư vấn
+                    </button>
 
-                      <p className="text-[11px] text-neutral-500 flex items-center gap-1.5 mt-1.5 truncate">
-                        <School className="w-3 h-3 text-neutral-400 shrink-0" />
-                        <span className="truncate">{cust.schoolName}</span>
-                      </p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteToTrash(cust);
+                      }}
+                      className="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        /* KANBAN BOARD CONTAINER (9 CỘT CHUẨN TUẦN TỰ) */
+        <div
+          ref={boardRef}
+          onWheel={handleBoardWheel}
+          className="flex gap-3.5 overflow-x-auto pb-3 pt-1 items-stretch custom-scrollbar flex-1 min-h-0 overscroll-x-contain"
+        >
+          {STAGES.map((stage) => {
+            const stageCustomers = accessibleCustomers.filter(c => c.pipelineStage === stage);
+            const stageTotalMoney = stageCustomers.reduce((acc, curr) => {
+              const money = curr.totalAmount || curr.totalRevenue || curr.expectedBudget || 0;
+              return acc + money;
+            }, 0);
 
-                      {/* Concept & Package */}
-                      <div className="mt-2.5 text-[10px] bg-neutral-50 p-2 rounded-xl border border-black/[0.04]">
-                        <p className="text-neutral-700 truncate">
-                          ✨ <strong className="text-neutral-900">Concept:</strong> {cust.concept}
-                        </p>
-                        <p className="text-neutral-500 truncate mt-0.5">
-                          📦 {cust.servicePackageName || 'Gói tùy chọn'}
-                        </p>
-                      </div>
+            return (
+              <div
+                key={stage}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, stage)}
+                className={`w-72 shrink-0 bg-white rounded-2xl border border-black/[0.08] shadow-xs flex flex-col h-full max-h-full min-h-0 border-t-4 ${stageHeaderAccents[stage]}`}
+              >
+                {/* Column Header */}
+                <div className="p-3 border-b border-black/[0.05] bg-neutral-50/60 shrink-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-neutral-900 tracking-tight truncate" title={stage}>
+                      {stage}
+                    </h3>
+                    <span className="text-[10px] font-bold bg-neutral-200/70 text-neutral-800 px-2 py-0.5 rounded-full">
+                      {stageCustomers.length}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-neutral-400 mt-1 font-medium">
+                    Tổng: <strong className="text-neutral-700">{(stageTotalMoney / 1000000).toFixed(1)}M đ</strong>
+                  </p>
+                </div>
 
-                      {/* Nhân viên Sales phụ trách tư vấn */}
-                      <div
-                        onClick={(e) => e.stopPropagation()}
-                        className="mt-2"
-                      >
-                        <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border w-full text-[11px] transition-all ${
-                          cust.assignedSalesName && cust.assignedSalesName !== 'Chưa gán'
-                            ? 'bg-blue-50/90 border-blue-200/80 text-blue-900'
-                            : 'bg-neutral-100/70 border-neutral-200/60 text-neutral-500'
-                        }`}>
-                          <UserCheck className={`w-3.5 h-3.5 shrink-0 ${
-                            cust.assignedSalesName && cust.assignedSalesName !== 'Chưa gán' ? 'text-blue-600' : 'text-neutral-400'
-                          }`} />
-                          <span className="text-[10px] font-bold text-neutral-600 shrink-0">Sales:</span>
-                          <select
-                            value={cust.assignedSalesName || 'Chưa gán'}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              const matched = salesStaff.find(s => s.name === val);
-                              updateCustomer({
-                                ...cust,
-                                assignedSalesName: val,
-                                assignedSalesId: matched?.id || (val === currentUser.name ? currentUser.id : 'user-2'),
-                                updatedAt: new Date().toISOString()
-                              });
-                            }}
-                            className="bg-transparent text-[11px] font-bold text-neutral-900 focus:outline-none cursor-pointer truncate w-full"
-                            title="Đổi nhân viên Sales tư vấn"
-                          >
-                            <option value="Chưa gán">Chưa gán Sales</option>
-                            {salesStaff.map((staff) => (
-                              <option key={staff.id} value={staff.name}>
-                                {staff.name}
-                              </option>
-                            ))}
-                            {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
-                              <option value={currentUser.name}>{currentUser.name}</option>
-                            )}
-                          </select>
-                        </div>
-                      </div>
+                {/* Cards List */}
+                <div className="column-cards-scroll p-2 space-y-2 overflow-y-auto flex-1 custom-scrollbar min-h-0 bg-neutral-50/30 overscroll-y-contain">
+                  {stageCustomers.length === 0 ? (
+                    <div className="py-8 text-center text-neutral-400 text-[11px] italic border border-dashed border-neutral-300 rounded-2xl m-1">
+                      Kéo thả lead vào đây
+                    </div>
+                  ) : (
+                    stageCustomers.map((cust) => {
+                      const displayAmount = (cust.totalAmount || cust.totalRevenue || cust.expectedBudget || 0);
 
-                      {/* Footer: Phone & Budget */}
-                      <div className="mt-2.5 pt-2 border-t border-black/[0.04] flex items-center justify-between text-[11px]">
-                        <span className="text-neutral-500 flex items-center gap-1">
-                          <Phone className="w-3 h-3 text-neutral-400" />
-                          {cust.phone ? cust.phone : <span className="text-neutral-400 italic">Chưa có SĐT</span>}
-                        </span>
-                        <span className="font-bold text-neutral-900">
-                          {(cust.expectedBudget / 1000000).toFixed(1)}M đ
-                        </span>
-                      </div>
-
-                      {/* Badge Số Tiền Đã Cọc & Nút Chốt Ngày Chụp (Nếu đang ở Đã đặt cọc) */}
-                      {cust.pipelineStage === 'Đã đặt cọc' && (
-                        <>
-                          <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-lime-50 border border-emerald-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                            <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                              Đã nhận cọc:
-                            </span>
-                            <span className="font-extrabold text-emerald-950 text-xs">
-                              {cust.paidAmount && cust.paidAmount > 0
-                                ? `${cust.paidAmount.toLocaleString('vi-VN')} đ`
-                                : '2.000.000 đ'}
+                      return (
+                        <div
+                          key={cust.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, cust.id)}
+                          onClick={() => setSelectedCustomerId(cust.id)}
+                          className="bg-white hover:bg-neutral-50 p-3.5 rounded-2xl border border-black/[0.06] hover:border-black/[0.14] shadow-xs hover:shadow-sm transition-colors duration-150 cursor-grab active:cursor-grabbing group relative"
+                        >
+                          {/* Class & School */}
+                          <div className="flex items-start justify-between gap-1">
+                            <div>
+                              {cust.className ? (
+                                <span className="text-[10px] font-bold text-neutral-900 bg-[#B8F23D]/40 border border-[#B8F23D]/60 px-2 py-0.5 rounded-lg">
+                                  {cust.className}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-medium text-neutral-500 bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-lg italic">
+                                  Chưa rõ lớp
+                                </span>
+                              )}
+                              <h4 className="text-xs font-bold text-neutral-900 mt-1.5 group-hover:text-neutral-700 transition-colors">
+                                {cust.name}
+                              </h4>
+                            </div>
+                            <span className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded-md">
+                              {cust.studentCount || 35} bạn
                             </span>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setScheduleBookingCustomer(cust);
-                            }}
-                            className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-purple-600 hover:bg-purple-700 text-white border border-purple-700"
-                            title="Bắt buộc chốt ngày chụp để chuyển sang Đã Booking"
-                          >
-                            <Calendar className="w-3.5 h-3.5 text-white" />
-                            <span>📅 Chốt Ngày Chụp (Lên Booking)</span>
-                          </button>
-                        </>
-                      )}
+                          <p className="text-[11px] text-neutral-500 flex items-center gap-1.5 mt-1.5 truncate">
+                            <School className="w-3 h-3 text-neutral-400 shrink-0" />
+                            <span className="truncate">{cust.schoolName}</span>
+                          </p>
 
-                      {/* Badge Ngày Chụp Đã Chốt & Nút Bàn Giao Drive (Nếu đang ở Đã Booking) */}
-                      {cust.pipelineStage === 'Đã Booking' && (
-                        <>
-                          <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                            <span className="text-purple-900 font-semibold flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                              Lịch chụp:
+                          {/* Concept & Package */}
+                          <div className="mt-2.5 text-[10px] bg-neutral-50 p-2 rounded-xl border border-black/[0.04]">
+                            <p className="text-neutral-700 truncate">
+                              ✨ <strong className="text-neutral-900">Concept:</strong> {cust.concept || 'Tùy chọn'}
+                            </p>
+                            <p className="text-neutral-500 truncate mt-0.5">
+                              📦 {cust.servicePackageName || 'Gói tùy chọn'}
+                            </p>
+                          </div>
+
+                          {/* Nhân viên Sales phụ trách tư vấn */}
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="mt-2"
+                          >
+                            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border w-full text-[11px] transition-all ${
+                              cust.assignedSalesName && cust.assignedSalesName !== 'Chưa gán'
+                                ? 'bg-blue-50/90 border-blue-200/80 text-blue-900'
+                                : 'bg-neutral-100/70 border-neutral-200/60 text-neutral-500'
+                            }`}>
+                              <UserCheck className={`w-3.5 h-3.5 shrink-0 ${
+                                cust.assignedSalesName && cust.assignedSalesName !== 'Chưa gán' ? 'text-blue-600' : 'text-neutral-400'
+                              }`} />
+                              <span className="text-[10px] font-bold text-neutral-600 shrink-0">Sales:</span>
+                              <select
+                                value={cust.assignedSalesName || 'Chưa gán'}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const matched = salesStaff.find(s => s.name === val);
+                                  updateCustomer({
+                                    ...cust,
+                                    assignedSalesName: val,
+                                    assignedSalesId: matched?.id || (val === currentUser.name ? currentUser.id : 'user-2'),
+                                    updatedAt: new Date().toISOString()
+                                  });
+                                }}
+                                className="bg-transparent text-[11px] font-bold text-neutral-900 focus:outline-none cursor-pointer truncate w-full"
+                                title="Đổi nhân viên Sales tư vấn"
+                              >
+                                <option value="Chưa gán">Chưa gán Sales</option>
+                                {salesStaff.map((staff) => (
+                                  <option key={staff.id} value={staff.name}>
+                                    {staff.name}
+                                  </option>
+                                ))}
+                                {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
+                                  <option value={currentUser.name}>{currentUser.name}</option>
+                                )}
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Footer: Phone & Budget */}
+                          <div className="mt-2.5 pt-2 border-t border-black/[0.04] flex items-center justify-between text-[11px]">
+                            <span className="text-neutral-500 flex items-center gap-1">
+                              <Phone className="w-3 h-3 text-neutral-400" />
+                              {cust.phone ? cust.phone : <span className="text-neutral-400 italic">Chưa có SĐT</span>}
                             </span>
-                            <span className="font-extrabold text-purple-950 text-xs bg-white px-2 py-0.5 rounded-lg border border-purple-200">
-                              {cust.expectedShootDate
-                                ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN')
-                                : 'Chưa có ngày'}
+                            <span className="font-bold text-neutral-900">
+                              {(displayAmount / 1000000).toFixed(1)}M đ
                             </span>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setUploadDriveCustomer(cust);
-                            }}
-                            className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-blue-600 hover:bg-blue-700 text-white border border-blue-700"
-                            title="Bắt buộc nộp Link Google Drive ảnh gốc để chuyển sang Đã chụp"
-                          >
-                            <FolderOpen className="w-3.5 h-3.5 text-white" />
-                            <span>📸 Nộp Link Drive (Đã Chụp)</span>
-                          </button>
-                        </>
-                      )}
-
-                      {/* Badge Link Google Drive (Nếu đang ở Đã chụp hoặc Đang hậu kỳ) */}
-                      {(cust.pipelineStage === 'Đã chụp' || cust.pipelineStage === 'Đang hậu kỳ') && (
-                        (cust.rawDriveUrl || cust.driveUrl) ? (
-                          <div className="mt-2 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                            <a
-                              href={cust.rawDriveUrl || cust.driveUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 truncate hover:underline"
-                              title={cust.rawDriveUrl || cust.driveUrl}
-                            >
-                              <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                              <span className="truncate">Drive Ảnh Gốc</span>
-                              <ExternalLink className="w-3 h-3 shrink-0" />
-                            </a>
+                          {/* 1. NÚT TẠO / SỬA BÁO GIÁ (Đang tư vấn, Đã gửi báo giá) */}
+                          {(cust.pipelineStage === 'Đang tư vấn' || cust.pipelineStage === 'Đã gửi báo giá') && (
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setUploadDriveCustomer(cust);
+                                setQuoteCustomer(cust);
                               }}
-                              className="text-[10px] text-blue-700 hover:text-blue-900 font-bold px-2 py-0.5 rounded-lg bg-white border border-blue-200 shrink-0 cursor-pointer shadow-2xs ml-1"
-                              title="Cập nhật lại Link Google Drive"
+                              className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-gradient-to-r from-amber-50 to-emerald-50 hover:from-amber-100 hover:to-emerald-100 text-neutral-900 border border-amber-200/90"
+                              title="Lập bảng báo giá PDF chi tiết cho lớp"
                             >
-                              Đổi link
+                              <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{cust.pipelineStage === 'Đang tư vấn' ? '📄 Tạo Báo Giá PDF' : '✏️ Chỉnh Sửa Báo Giá'}</span>
+                            </button>
+                          )}
+
+                          {/* 2. NÚT XÁC NHẬN CỌC (Đã gửi báo giá -> chuyển Đã cọc) */}
+                          {cust.pipelineStage === 'Đã gửi báo giá' && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPaymentConfig({ customer: cust, mode: 'deposit' });
+                              }}
+                              className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08]"
+                              title="Nhập số tiền cọc & xác nhận chuyển sang Đã cọc"
+                            >
+                              <QrCode className="w-3.5 h-3.5 text-neutral-950" />
+                              <span>💰 Xác Nhận Cọc & Chuyển Đã Cọc</span>
+                            </button>
+                          )}
+
+                          {/* 3. BADGE ĐÃ CỌC & NÚT CHỐT NGÀY CHỤP (Đã cọc) */}
+                          {(cust.pipelineStage === 'Đã cọc' || cust.pipelineStage === 'Đã đặt cọc') && (
+                            <>
+                              <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-lime-50 border border-emerald-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                                <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                  Đã cọc:
+                                </span>
+                                <span className="font-extrabold text-emerald-950 text-xs">
+                                  {(cust.depositAmount || cust.paidAmount || 2000000).toLocaleString('vi-VN')} đ
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setScheduleBookingCustomer(cust);
+                                }}
+                                className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-purple-600 hover:bg-purple-700 text-white border border-purple-700"
+                                title="Bắt buộc chốt ngày chụp để chuyển sang Book ngày"
+                              >
+                                <Calendar className="w-3.5 h-3.5 text-white" />
+                                <span>📅 Chốt Ngày Chụp (Lên Booking)</span>
+                              </button>
+                            </>
+                          )}
+
+                          {/* 4. BADGE LỊCH CHỤP & NÚT NỘP DRIVE (Book ngày) */}
+                          {(cust.pipelineStage === 'Book ngày' || cust.pipelineStage === 'Đã Booking') && (
+                            <>
+                              <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                                <span className="text-purple-900 font-semibold flex items-center gap-1.5">
+                                  <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                  Lịch chụp:
+                                </span>
+                                <span className="font-extrabold text-purple-950 text-xs bg-white px-2 py-0.5 rounded-lg border border-purple-200">
+                                  {cust.expectedShootDate
+                                    ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN')
+                                    : 'Chưa có ngày'}
+                                </span>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setUploadDriveCustomer(cust);
+                                }}
+                                className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-blue-600 hover:bg-blue-700 text-white border border-blue-700"
+                                title="Nộp Link Google Drive ảnh gốc khi đã chụp xong"
+                              >
+                                <FolderOpen className="w-3.5 h-3.5 text-white" />
+                                <span>📸 Nộp Link Drive (Đã Chụp)</span>
+                              </button>
+                            </>
+                          )}
+
+                          {/* 5. BADGE DRIVE ẢNH GỐC (Đã chụp, Đang hậu kỳ) */}
+                          {(cust.pipelineStage === 'Đã chụp' || cust.pipelineStage === 'Đang hậu kỳ') && (
+                            (cust.rawDriveUrl || cust.driveUrl) ? (
+                              <div className="mt-2 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                                <a
+                                  href={cust.rawDriveUrl || cust.driveUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 truncate hover:underline"
+                                  title={cust.rawDriveUrl || cust.driveUrl}
+                                >
+                                  <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                                  <span className="truncate">Drive Ảnh Gốc</span>
+                                  <ExternalLink className="w-3 h-3 shrink-0" />
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setUploadDriveCustomer(cust);
+                                  }}
+                                  className="text-[10px] text-blue-700 hover:text-blue-900 font-bold px-2 py-0.5 rounded-lg bg-white border border-blue-200 shrink-0 cursor-pointer shadow-2xs ml-1"
+                                >
+                                  Đổi link
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setUploadDriveCustomer(cust);
+                                }}
+                                className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 animate-pulse"
+                              >
+                                <FolderOpen className="w-3.5 h-3.5 text-rose-600" />
+                                <span>⚠️ Thiếu Link Drive! Nộp Ngay</span>
+                              </button>
+                            )
+                          )}
+
+                          {/* 6. GIAO ẢNH: NÚT QUYẾT TOÁN & BÀN GIAO */}
+                          {(cust.pipelineStage === 'Giao ảnh' || cust.pipelineStage === 'Đã bàn giao') && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPaymentConfig({ customer: cust, mode: 'final' });
+                              }}
+                              className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-teal-600 hover:bg-teal-700 text-white border border-teal-700"
+                              title="Bắt buộc quyết toán toàn bộ số tiền để chuyển sang Hoàn thành"
+                            >
+                              <QrCode className="w-3.5 h-3.5 text-white" />
+                              <span>💰 Giao Ảnh & Quyết Toán Tiền</span>
+                            </button>
+                          )}
+
+                          {/* 7. HOÀN THÀNH: BADGE ĐÃ THU ĐỦ 100% */}
+                          {cust.pipelineStage === 'Hoàn thành' && (
+                            <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-300 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                              <span className="text-emerald-900 font-semibold flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                Đã thu đủ:
+                              </span>
+                              <span className="font-extrabold text-emerald-950 text-xs">
+                                {(cust.totalAmount || cust.totalRevenue || cust.paidAmount || 0).toLocaleString('vi-VN')} đ
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Card Sub-actions: Xóa vào thùng rác & Xem chi tiết */}
+                          <div className="mt-2 pt-1.5 border-t border-black/[0.04] flex items-center justify-between text-[10px] text-neutral-400">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteToTrash(cust);
+                              }}
+                              className="text-neutral-400 hover:text-rose-600 flex items-center gap-1 transition-colors"
+                              title="Chuyển lead vào thùng rác"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>Xóa</span>
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedCustomerId(cust.id);
+                              }}
+                              className="text-[#79ba07] hover:text-neutral-900 font-bold cursor-pointer"
+                            >
+                              Hồ sơ 360° →
                             </button>
                           </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setUploadDriveCustomer(cust);
-                            }}
-                            className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 animate-pulse"
-                            title="CẢNH BÁO: Chưa có Link Google Drive ảnh gốc! Nhấn để nộp ngay"
-                          >
-                            <FolderOpen className="w-3.5 h-3.5 text-rose-600" />
-                            <span>⚠️ Thiếu Link Drive! Nộp Ngay</span>
-                          </button>
-                        )
-                      )}
-
-                      {/* 1. Nút Tạo / Chỉnh Sửa Báo Giá: CHỈ hiển thị ở Đang tư vấn, Đã gửi báo giá, Đang thương lượng */}
-                      {(cust.pipelineStage === 'Đang tư vấn' || cust.pipelineStage === 'Đã gửi báo giá' || cust.pipelineStage === 'Đang thương lượng') && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setQuoteCustomer(cust);
-                          }}
-                          className={`w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 ${
-                            cust.pipelineStage === 'Đang tư vấn'
-                              ? 'bg-gradient-to-r from-amber-50 to-emerald-50 hover:from-amber-100 hover:to-emerald-100 text-neutral-900 border border-amber-200/90'
-                              : 'bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-900 border border-indigo-200/90'
-                          }`}
-                          title={cust.pipelineStage === 'Đang tư vấn' ? 'Lập bảng báo giá PDF chi tiết cho lớp' : 'Chỉnh sửa lại bảng báo giá'}
-                        >
-                          <FileText className={`w-3.5 h-3.5 ${cust.pipelineStage === 'Đang tư vấn' ? 'text-emerald-600' : 'text-indigo-600'}`} />
-                          <span>{cust.pipelineStage === 'Đang tư vấn' ? 'Tạo Báo Giá PDF' : 'Chỉnh Sửa Báo Giá'}</span>
-                        </button>
-                      )}
-
-                      {/* 2. Nút Tạo Cọc & Mã QR: CHỈ hiển thị ở Đang thương lượng */}
-                      {cust.pipelineStage === 'Đang thương lượng' && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPaymentConfig({ customer: cust, mode: 'deposit' });
-                          }}
-                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08]"
-                          title="Bắt buộc nhập số tiền cọc & xác nhận chuyển sang Đã đặt cọc"
-                        >
-                          <QrCode className="w-3.5 h-3.5 text-neutral-950" />
-                          <span>💰 Xác Nhận Cọc & Chuyển Đã Cọc</span>
-                        </button>
-                      )}
-
-                      {/* 3. Nút Nhập Toàn Bộ Tiền & Quyết Toán: CHỈ hiển thị ở Đã bàn giao */}
-                      {cust.pipelineStage === 'Đã bàn giao' && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPaymentConfig({ customer: cust, mode: 'final' });
-                          }}
-                          className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-teal-600 hover:bg-teal-700 text-white border border-teal-700"
-                          title="Bắt buộc nhập toàn bộ số tiền hợp đồng để chuyển sang Hoàn thành"
-                        >
-                          <QrCode className="w-3.5 h-3.5 text-white" />
-                          <span>💰 Nhập Toàn Bộ Tiền & Hoàn Thành</span>
-                        </button>
-                      )}
-
-                      {/* 4. Badge Đã Thu Đủ 100% Tiền: CHỈ hiển thị ở Hoàn thành */}
-                      {cust.pipelineStage === 'Hoàn thành' && (
-                        <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-300 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                          <span className="text-emerald-900 font-semibold flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            Đã thu đủ 100%:
-                          </span>
-                          <span className="font-extrabold text-emerald-950 text-xs">
-                            {(cust.totalRevenue || cust.paidAmount || 0).toLocaleString('vi-VN')} đ
-                          </span>
                         </div>
-                      )}
-
-                      {/* Nhanh: chuyển stage */}
-                      <div className="mt-2 pt-1.5 border-t border-black/[0.04] flex items-center justify-between text-[10px] text-neutral-400">
-                        <span>Nguồn: {cust.source}</span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedCustomerId(cust.id);
-                          }}
-                          className="text-[#79ba07] hover:text-neutral-900 font-bold cursor-pointer"
-                        >
-                          Chi tiết →
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
+                      );
+                    })
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Detail Drawer */}
       {selectedCustomerId && (
@@ -563,7 +709,7 @@ export const KanbanPipeline: React.FC = () => {
         onClose={() => setPaymentConfig(null)}
       />
 
-      {/* Modal Chốt Ngày Chụp Bắt Buộc Khi Sang Đã Booking */}
+      {/* Modal Chốt Ngày Chụp Bắt Buộc Khi Sang Book Ngày */}
       <ScheduleBookingModal
         customer={scheduleBookingCustomer}
         isOpen={Boolean(scheduleBookingCustomer)}
@@ -575,6 +721,12 @@ export const KanbanPipeline: React.FC = () => {
         customer={uploadDriveCustomer}
         isOpen={Boolean(uploadDriveCustomer)}
         onClose={() => setUploadDriveCustomer(null)}
+      />
+
+      {/* Modal Quản Lý Thùng Rác / Leads Đã Xóa */}
+      <TrashBinModal
+        isOpen={isTrashOpen}
+        onClose={() => setIsTrashOpen(false)}
       />
     </div>
   );

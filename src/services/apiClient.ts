@@ -138,16 +138,89 @@ export const apiClient = {
     }
   },
 
-  async deleteCustomer(id: string): Promise<boolean> {
+  async deleteCustomer(id: string, reason?: string): Promise<boolean> {
     try {
       const res = await fetch(`${getApiBaseUrl()}/customers/${encodeURIComponent(id)}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ reason }),
+        signal: AbortSignal.timeout(6000)
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async getDeletedCustomers(): Promise<Customer[]> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/customers/deleted`, {
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.data || [];
+    } catch (err) {
+      console.warn('[ApiClient] Lỗi tải danh sách thùng rác:', err);
+      return [];
+    }
+  },
+
+  async restoreCustomer(id: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/customers/${encodeURIComponent(id)}/restore`, {
+        method: 'POST',
         headers: getAuthHeaders(),
         signal: AbortSignal.timeout(6000)
       });
       return res.ok;
     } catch {
       return false;
+    }
+  },
+
+  async permanentDeleteCustomer(id: string, reason?: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/customers/${encodeURIComponent(id)}/permanent`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ reason }),
+        signal: AbortSignal.timeout(6000)
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async changeCustomerStage(id: string, newStage: string, note?: string): Promise<Customer | null> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/customers/${encodeURIComponent(id)}/change-stage`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ newStage, note }),
+        signal: AbortSignal.timeout(6000)
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data || null;
+    } catch {
+      return null;
+    }
+  },
+
+  async getStageHistory(id: string): Promise<any[]> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/customers/${encodeURIComponent(id)}/stage-history`, {
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(5000)
+      });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.data || [];
+    } catch {
+      return [];
     }
   },
 

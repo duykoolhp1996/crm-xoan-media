@@ -16,7 +16,8 @@ import {
   CalendarCheck,
   Heart,
   LogOut,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -26,6 +27,7 @@ export const Sidebar: React.FC = () => {
     currentRole,
     notifications,
     customers,
+    deletedCustomers,
     feedbacks,
     currentUser,
     logout,
@@ -90,8 +92,15 @@ export const Sidebar: React.FC = () => {
         },
         {
           id: 'pipeline',
-          label: 'Customer Pipeline (13 Bước)',
+          label: 'Lead Pipeline (10 Bước)',
           icon: Kanban,
+          roles: ['admin', 'manager', 'sales']
+        },
+        {
+          id: 'trash',
+          label: 'Thùng Rác & Đã Xóa',
+          icon: Trash2,
+          badge: deletedCustomers.length > 0 ? deletedCustomers.length : undefined,
           roles: ['admin', 'manager', 'sales']
         },
         {
@@ -256,7 +265,7 @@ export const Sidebar: React.FC = () => {
           <span className="text-[10px] font-medium text-neutral-500">Mùa 2026</span>
         </div>
         <span className="text-[10px] font-bold font-mono text-neutral-900 bg-[#B8F23D]/50 border border-[#B8F23D] px-2 py-0.5 rounded-full shadow-sm" title="Phiên bản CRM">
-          v1.1.7
+          v1.1.8
         </span>
       </div>
     </div>

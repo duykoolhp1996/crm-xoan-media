@@ -13,7 +13,7 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.1.7';
+const VERSION = '1.1.8';
 
 // Helper đọc body request JSON
 const readJsonBody = (req) => {
@@ -42,6 +42,15 @@ const sendJson = (res, statusCode, data) => {
   res.end(JSON.stringify(data));
 };
 
+// Helper chuẩn hóa số tiền từ chuỗi linh hoạt (100000, 100.000, 1,500,000, 1.500.000đ -> 1500000)
+const parseNumericAmount = (val) => {
+  if (typeof val === 'number') return isNaN(val) ? 0 : Math.max(0, val);
+  if (!val) return 0;
+  const cleaned = String(val).replace(/[^\d.-]/g, '').replace(/(\..*)\./g, '$1');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : Math.max(0, parsed);
+};
+
 // ==========================================
 // DATA MAPPERS (SQLite Row <-> CRM Entity)
 // ==========================================
@@ -62,6 +71,15 @@ const mapDbRowToCustomer = (row) => {
     if (row.utm_json) utm = JSON.parse(row.utm_json);
   } catch {}
 
+  const studentCount = Number(row.student_count) || 0;
+  const unitPrice = Number(row.unit_price) || 0;
+  const subtotal = Number(row.subtotal) || (studentCount * unitPrice);
+  const extraFee = Number(row.extra_fee) || 0;
+  const discount = Number(row.discount) || 0;
+  const totalAmount = Number(row.total_amount) || Number(row.total_revenue) || Number(row.contract_value) || (subtotal + extraFee - discount) || Number(row.expected_budget) || 0;
+  const depositAmount = Number(row.deposit_amount) || Number(row.paid_amount) || 0;
+  const remainingAmount = Number(row.remaining_amount) || Math.max(0, totalAmount - depositAmount);
+
   return {
     id: row.id,
     name: row.name || '',
@@ -79,14 +97,14 @@ const mapDbRowToCustomer = (row) => {
     city: row.city || '',
     district: row.district || '',
     representativeRole: row.representative_role || 'Lớp trưởng',
-    studentCount: Number(row.student_count) || 0,
+    studentCount,
     serviceType: row.service_type || 'Kỷ yếu Concept',
     servicePackageId: row.service_package_id || '',
     servicePackageName: row.service_package_name || '',
     concept: row.concept || '',
     expectedShootDate: row.expected_shoot_date || '',
     shootingLocations,
-    expectedBudget: Number(row.expected_budget) || 0,
+    expectedBudget: Number(row.expected_budget) || totalAmount,
     specialRequests: row.special_requests || '',
     notes: row.notes || '',
     rawDriveUrl: row.raw_drive_url || '',
@@ -104,10 +122,39 @@ const mapDbRowToCustomer = (row) => {
     assignedCareStaffName: row.assigned_care_staff_name || '',
     createdById: row.created_by_id || '',
     createdByName: row.created_by_name || '',
-    totalRevenue: Number(row.total_revenue) || Number(row.contract_value) || 0,
-    paidAmount: Number(row.paid_amount) || Number(row.deposit_amount) || 0,
-    contractValue: Number(row.contract_value) || 0,
-    depositAmount: Number(row.deposit_amount) || 0,
+
+    // Hệ thống Tài chính & Bộ Tính Giá Tự Động
+    unitPrice,
+    subtotal,
+    extraFee,
+    discount,
+    totalAmount,
+    totalRevenue: totalAmount,
+    depositAmount,
+    paidAmount: depositAmount,
+    contractValue: totalAmount,
+    remainingAmount,
+
+    // Giai đoạn cụ thể (Stage-specific)
+    depositDate: row.deposit_date || '',
+    paymentMethod: row.payment_method || '',
+    shootTime: row.shoot_time || '',
+    shootAddress: row.shoot_address || '',
+    editorName: row.editor_name || '',
+    editDeadline: row.edit_deadline || '',
+    editProgress: Number(row.edit_progress) || 0,
+    deliveredDate: row.delivered_date || '',
+    deliveredDriveUrl: row.delivered_drive_url || '',
+    deliveryMethod: row.delivery_method || '',
+    lostReason: row.lost_reason || '',
+    lostNote: row.lost_note || '',
+
+    // Soft delete & Thùng rác
+    isDeleted: Boolean(row.is_deleted),
+    deletedAt: row.deleted_at || undefined,
+    deletedBy: row.deleted_by || undefined,
+    deleteReason: row.delete_reason || '',
+
     createdAt: row.created_at || new Date().toISOString(),
     updatedAt: row.updated_at || new Date().toISOString(),
     lastContactedAt: row.last_contacted_at || undefined,
@@ -289,6 +336,76 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // GET /api/customers/deleted - Lấy danh sách khách hàng trong thùng rác (Đã xóa / Soft Delete)
+    if (pathname === '/api/customers/deleted' && req.method === 'GET') {
+      const rows = db.prepare(`
+        SELECT * FROM customers 
+        WHERE is_deleted = 1 
+        ORDER BY deleted_at DESC, updated_at DESC
+      `).all();
+      return sendJson(res, 200, {
+        success: true,
+        data: rows.map(mapDbRowToCustomer),
+        total: rows.length
+      });
+    }
+
+    // GET /api/customers/:id/stage-history - Lấy lịch sử thay đổi giai đoạn Lead
+    if (pathname.match(/^\/api\/customers\/[^/]+\/stage-history$/) && req.method === 'GET') {
+      const id = pathname.split('/')[3];
+      const rows = db.prepare(`
+        SELECT * FROM lead_stage_history 
+        WHERE lead_id = ? 
+        ORDER BY changed_at ASC
+      `).all(id);
+      return sendJson(res, 200, { success: true, data: rows });
+    }
+
+    // POST /api/customers/:id/change-stage - Đổi giai đoạn Lead & Ghi nhận lịch sử
+    if (pathname.match(/^\/api\/customers\/[^/]+\/change-stage$/) && req.method === 'POST') {
+      const id = pathname.split('/')[3];
+      const existing = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
+      if (!existing) {
+        return sendJson(res, 404, { success: false, message: 'Khách hàng không tồn tại' });
+      }
+
+      const body = await readJsonBody(req);
+      const newStage = body.newStage || body.stage;
+      if (!newStage) {
+        return sendJson(res, 400, { success: false, message: 'newStage là bắt buộc' });
+      }
+
+      const prevStage = existing.pipeline_stage;
+      runTransaction(() => {
+        db.prepare(`
+          UPDATE customers SET 
+            pipeline_stage = ?,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run(newStage, id);
+
+        const histId = `hist-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        db.prepare(`
+          INSERT INTO lead_stage_history (id, lead_id, from_stage, to_stage, changed_by, changed_by_id, changed_at, note)
+          VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+        `).run(histId, id, prevStage, newStage, currentUserName, currentUserId, body.note || null);
+
+        logAudit({
+          userId: currentUserId,
+          userName: currentUserName,
+          action: 'CHANGE_STAGE',
+          tableName: 'customers',
+          recordId: id,
+          oldData: { pipelineStage: prevStage },
+          newData: { pipelineStage: newStage, note: body.note },
+          ipAddress
+        });
+      });
+
+      const updated = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
+      return sendJson(res, 200, { success: true, data: mapDbRowToCustomer(updated) });
+    }
+
     // GET /api/customers/:id - Chi tiết 1 khách hàng
     if (pathname.startsWith('/api/customers/') && req.method === 'GET') {
       const id = pathname.replace('/api/customers/', '').trim();
@@ -299,7 +416,7 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { success: true, data: mapDbRowToCustomer(row) });
     }
 
-    // POST /api/customers - Tạo mới khách hàng
+    // POST /api/customers - Tạo mới khách hàng (Kèm bộ tính giá tự động Backend)
     if (pathname === '/api/customers' && req.method === 'POST') {
       const body = await readJsonBody(req);
       if (!body.name) {
@@ -311,6 +428,22 @@ const server = http.createServer(async (req, res) => {
         ? JSON.stringify(body.shootingLocations)
         : (body.shootingLocations || '');
       const utmStr = body.utm ? JSON.stringify(body.utm) : null;
+
+      // BACKEND PRICING ENGINE: Tính toán tự động chuẩn xác
+      const studentCount = parseInt(body.studentCount || body.student_count || 0, 10);
+      const unitPrice = parseNumericAmount(body.unitPrice || body.unit_price || 0);
+      const extraFee = parseNumericAmount(body.extraFee || body.extra_fee || 0);
+      const discount = parseNumericAmount(body.discount || 0);
+      const depositAmount = parseNumericAmount(body.depositAmount || body.deposit_amount || body.paidAmount || 0);
+
+      const subtotal = Math.max(0, studentCount * unitPrice);
+      let totalAmount = parseNumericAmount(body.totalAmount || body.total_amount || body.totalRevenue || 0);
+      if (subtotal > 0 || extraFee > 0 || discount > 0) {
+        totalAmount = Math.max(0, subtotal + extraFee - discount);
+      } else if (!totalAmount) {
+        totalAmount = parseNumericAmount(body.expectedBudget || 0);
+      }
+      const remainingAmount = Math.max(0, totalAmount - depositAmount);
 
       runTransaction(() => {
         const stmt = db.prepare(`
@@ -326,6 +459,11 @@ const server = http.createServer(async (req, res) => {
             assigned_care_staff_id, assigned_care_staff_name,
             created_by_id, created_by_name,
             contract_value, deposit_amount, total_revenue, paid_amount,
+            unit_price, subtotal, extra_fee, discount, total_amount, remaining_amount,
+            deposit_date, payment_method, shoot_time, shoot_address,
+            editor_name, edit_deadline, edit_progress,
+            delivered_date, delivered_drive_url, delivery_method,
+            lost_reason, lost_note,
             version, is_deleted, created_at, updated_at
           ) VALUES (
             ?, ?, ?, ?, ?, ?, ?,
@@ -339,6 +477,11 @@ const server = http.createServer(async (req, res) => {
             ?, ?,
             ?, ?,
             ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, ?,
+            ?, ?,
             1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
           )
         `);
@@ -346,22 +489,33 @@ const server = http.createServer(async (req, res) => {
         stmt.run(
           id, body.name, body.phone || '', body.email || '', body.facebook || '', body.tiktok || '', body.zalo || '',
           body.schoolId || '', body.schoolName || '', body.grade || 'Khối 12', body.className || '', body.academicYear || '2025-2026',
-          body.region || '', body.city || '', body.district || '', body.representativeRole || 'Lớp trưởng', Number(body.studentCount) || 0,
+          body.region || '', body.city || '', body.district || '', body.representativeRole || 'Lớp trưởng', studentCount,
           body.serviceType || 'Kỷ yếu Concept', body.servicePackageId || '', body.servicePackageName || '', body.concept || '',
-          body.expectedShootDate || '', shootingLocationsStr, Number(body.expectedBudget) || 0, body.specialRequests || '', body.notes || '',
+          body.expectedShootDate || '', shootingLocationsStr, totalAmount || Number(body.expectedBudget) || 0, body.specialRequests || '', body.notes || '',
           body.rawDriveUrl || '', body.driveUrl || '', body.photoNotes || '', body.shotDate || '', Number(body.photoCount) || 0,
           body.source || 'Facebook Ads', body.campaignName || '', utmStr,
           body.pipelineStage || 'New Lead', body.assignedSalesId || '', body.assignedSalesName || 'Chưa gán',
           body.assignedCareStaffId || '', body.assignedCareStaffName || '',
           currentUserId, currentUserName,
-          Number(body.contractValue || body.totalRevenue) || 0, Number(body.depositAmount || body.paidAmount) || 0,
-          Number(body.totalRevenue) || 0, Number(body.paidAmount) || 0
+          totalAmount, depositAmount, totalAmount, depositAmount,
+          unitPrice, subtotal, extraFee, discount, totalAmount, remainingAmount,
+          body.depositDate || null, body.paymentMethod || null, body.shootTime || null, body.shootAddress || null,
+          body.editorName || null, body.editDeadline || null, Number(body.editProgress) || 0,
+          body.deliveredDate || null, body.deliveredDriveUrl || null, body.deliveryMethod || null,
+          body.lostReason || null, body.lostNote || null
         );
+
+        // Ghi nhận stage đầu tiên vào history
+        const histId = `hist-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        db.prepare(`
+          INSERT INTO lead_stage_history (id, lead_id, from_stage, to_stage, changed_by, changed_by_id, changed_at, note)
+          VALUES (?, ?, NULL, ?, ?, ?, CURRENT_TIMESTAMP, 'Tạo mới Lead')
+        `).run(histId, id, body.pipelineStage || 'New Lead', currentUserName, currentUserId);
 
         logAudit({
           userId: currentUserId,
           userName: currentUserName,
-          action: 'CREATE',
+          action: 'CREATE_LEAD',
           tableName: 'customers',
           recordId: id,
           newData: body,
@@ -373,7 +527,7 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 201, { success: true, data: mapDbRowToCustomer(created) });
     }
 
-    // PUT /api/customers/:id - Sửa thông tin khách hàng (Cung cấp chức năng sửa thông tin an toàn)
+    // PUT /api/customers/:id - Sửa thông tin khách hàng (Cập nhật và tính lại giá tự động)
     if (pathname.startsWith('/api/customers/') && req.method === 'PUT') {
       const id = pathname.replace('/api/customers/', '').trim();
       const existing = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
@@ -388,6 +542,22 @@ const server = http.createServer(async (req, res) => {
         ? JSON.stringify(body.shootingLocations)
         : (body.shootingLocations ?? existing.shooting_locations);
       const utmStr = body.utm ? JSON.stringify(body.utm) : (existing.utm_json || null);
+
+      // BACKEND PRICING ENGINE: Tính toán lại giá tự động
+      const studentCount = parseInt(body.studentCount ?? body.student_count ?? existing.student_count ?? 0, 10);
+      const unitPrice = parseNumericAmount(body.unitPrice ?? body.unit_price ?? existing.unit_price ?? 0);
+      const extraFee = parseNumericAmount(body.extraFee ?? body.extra_fee ?? existing.extra_fee ?? 0);
+      const discount = parseNumericAmount(body.discount ?? existing.discount ?? 0);
+      const depositAmount = parseNumericAmount(body.depositAmount ?? body.deposit_amount ?? body.paidAmount ?? existing.deposit_amount ?? existing.paid_amount ?? 0);
+
+      const subtotal = Math.max(0, studentCount * unitPrice);
+      let totalAmount = parseNumericAmount(body.totalAmount ?? body.total_amount ?? body.totalRevenue ?? 0);
+      if (subtotal > 0 || extraFee > 0 || discount > 0) {
+        totalAmount = Math.max(0, subtotal + extraFee - discount);
+      } else if (!totalAmount) {
+        totalAmount = parseNumericAmount(body.expectedBudget ?? existing.expected_budget ?? existing.total_amount ?? 0);
+      }
+      const remainingAmount = Math.max(0, totalAmount - depositAmount);
 
       runTransaction(() => {
         const stmt = db.prepare(`
@@ -407,14 +577,14 @@ const server = http.createServer(async (req, res) => {
             city = COALESCE(?, city),
             district = COALESCE(?, district),
             representative_role = COALESCE(?, representative_role),
-            student_count = COALESCE(?, student_count),
+            student_count = ?,
             service_type = COALESCE(?, service_type),
             service_package_id = COALESCE(?, service_package_id),
             service_package_name = COALESCE(?, service_package_name),
             concept = COALESCE(?, concept),
             expected_shoot_date = COALESCE(?, expected_shoot_date),
             shooting_locations = COALESCE(?, shooting_locations),
-            expected_budget = COALESCE(?, expected_budget),
+            expected_budget = ?,
             special_requests = COALESCE(?, special_requests),
             notes = COALESCE(?, notes),
             raw_drive_url = COALESCE(?, raw_drive_url),
@@ -430,39 +600,73 @@ const server = http.createServer(async (req, res) => {
             assigned_sales_name = COALESCE(?, assigned_sales_name),
             assigned_care_staff_id = COALESCE(?, assigned_care_staff_id),
             assigned_care_staff_name = COALESCE(?, assigned_care_staff_name),
-            contract_value = COALESCE(?, contract_value),
-            deposit_amount = COALESCE(?, deposit_amount),
-            total_revenue = COALESCE(?, total_revenue),
-            paid_amount = COALESCE(?, paid_amount),
+            contract_value = ?,
+            deposit_amount = ?,
+            total_revenue = ?,
+            paid_amount = ?,
+            unit_price = ?,
+            subtotal = ?,
+            extra_fee = ?,
+            discount = ?,
+            total_amount = ?,
+            remaining_amount = ?,
+            deposit_date = COALESCE(?, deposit_date),
+            payment_method = COALESCE(?, payment_method),
+            shoot_time = COALESCE(?, shoot_time),
+            shoot_address = COALESCE(?, shoot_address),
+            editor_name = COALESCE(?, editor_name),
+            edit_deadline = COALESCE(?, edit_deadline),
+            edit_progress = COALESCE(?, edit_progress),
+            delivered_date = COALESCE(?, delivered_date),
+            delivered_drive_url = COALESCE(?, delivered_drive_url),
+            delivery_method = COALESCE(?, delivery_method),
+            lost_reason = COALESCE(?, lost_reason),
+            lost_note = COALESCE(?, lost_note),
             last_contacted_at = COALESCE(?, last_contacted_at),
             version = version + 1,
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
         `);
 
-// Helper chuyển undefined sang null để SQLite không bị lỗi parameter binding
-const toSql = (val) => (val === undefined ? null : val);
+        // Helper chuyển undefined sang null để SQLite không bị lỗi parameter binding
+        const toSql = (val) => (val === undefined ? null : val);
 
         stmt.run(
           toSql(body.name), toSql(body.phone), toSql(body.email), toSql(body.facebook), toSql(body.tiktok), toSql(body.zalo),
           toSql(body.schoolId), toSql(body.schoolName), toSql(body.grade), toSql(body.className), toSql(body.academicYear),
-          toSql(body.region), toSql(body.city), toSql(body.district), toSql(body.representativeRole), body.studentCount !== undefined ? Number(body.studentCount) : null,
+          toSql(body.region), toSql(body.city), toSql(body.district), toSql(body.representativeRole),
+          studentCount,
           toSql(body.serviceType), toSql(body.servicePackageId), toSql(body.servicePackageName), toSql(body.concept),
-          toSql(body.expectedShootDate), toSql(shootingLocationsStr), body.expectedBudget !== undefined ? Number(body.expectedBudget) : null, toSql(body.specialRequests), toSql(body.notes),
+          toSql(body.expectedShootDate), toSql(shootingLocationsStr),
+          totalAmount || Number(body.expectedBudget) || 0,
+          toSql(body.specialRequests), toSql(body.notes),
           toSql(body.rawDriveUrl), toSql(body.driveUrl), toSql(body.photoNotes), toSql(body.shotDate), body.photoCount !== undefined ? Number(body.photoCount) : null,
           toSql(body.source), toSql(body.campaignName), toSql(utmStr),
           toSql(body.pipelineStage), toSql(body.assignedSalesId), toSql(body.assignedSalesName),
           toSql(body.assignedCareStaffId), toSql(body.assignedCareStaffName),
-          body.contractValue !== undefined ? Number(body.contractValue) : null, body.depositAmount !== undefined ? Number(body.depositAmount) : null,
-          body.totalRevenue !== undefined ? Number(body.totalRevenue) : null, body.paidAmount !== undefined ? Number(body.paidAmount) : null,
+          totalAmount, depositAmount, totalAmount, depositAmount,
+          unitPrice, subtotal, extraFee, discount, totalAmount, remainingAmount,
+          toSql(body.depositDate), toSql(body.paymentMethod), toSql(body.shootTime), toSql(body.shootAddress),
+          toSql(body.editorName), toSql(body.editDeadline), body.editProgress !== undefined ? Number(body.editProgress) : null,
+          toSql(body.deliveredDate), toSql(body.deliveredDriveUrl), toSql(body.deliveryMethod),
+          toSql(body.lostReason), toSql(body.lostNote),
           toSql(body.lastContactedAt),
           id
         );
 
+        // Nếu stage thay đổi, ghi vào lead_stage_history
+        if (body.pipelineStage && body.pipelineStage !== existing.pipeline_stage) {
+          const histId = `hist-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+          db.prepare(`
+            INSERT INTO lead_stage_history (id, lead_id, from_stage, to_stage, changed_by, changed_by_id, changed_at, note)
+            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+          `).run(histId, id, existing.pipeline_stage, body.pipelineStage, currentUserName, currentUserId, body.stageNote || null);
+        }
+
         logAudit({
           userId: currentUserId,
           userName: currentUserName,
-          action: 'UPDATE',
+          action: 'UPDATE_LEAD',
           tableName: 'customers',
           recordId: id,
           oldData: oldMapped,
@@ -475,7 +679,41 @@ const toSql = (val) => (val === undefined ? null : val);
       return sendJson(res, 200, { success: true, data: mapDbRowToCustomer(updated) });
     }
 
-    // DELETE /api/customers/:id - Soft Delete an toàn
+    // DELETE /api/customers/:id/permanent - Xóa vĩnh viễn (Chỉ Admin / Super Admin)
+    if (pathname.match(/^\/api\/customers\/[^/]+\/permanent$/) && req.method === 'DELETE') {
+      const id = pathname.split('/')[3];
+      const existing = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
+      if (!existing) {
+        return sendJson(res, 404, { success: false, message: 'Khách hàng không tồn tại' });
+      }
+
+      const body = await readJsonBody(req).catch(() => ({}));
+      const reason = body.reason || 'Xóa vĩnh viễn bởi Quản trị viên';
+
+      runTransaction(() => {
+        // Ghi audit log trước khi xóa
+        logAudit({
+          userId: currentUserId,
+          userName: currentUserName,
+          action: 'PERMANENT_DELETE_LEAD',
+          tableName: 'customers',
+          recordId: id,
+          oldData: mapDbRowToCustomer(existing),
+          newData: { reason },
+          ipAddress
+        });
+
+        // Xóa các stage history liên quan
+        db.prepare('DELETE FROM lead_stage_history WHERE lead_id = ?').run(id);
+
+        // Xóa vật lý khỏi SQLite
+        db.prepare('DELETE FROM customers WHERE id = ?').run(id);
+      });
+
+      return sendJson(res, 200, { success: true, message: 'Đã xóa vĩnh viễn Lead khỏi cơ sở dữ liệu' });
+    }
+
+    // DELETE /api/customers/:id - Soft Delete an toàn (Chuyển vào thùng rác)
     if (pathname.startsWith('/api/customers/') && req.method === 'DELETE') {
       const id = pathname.replace('/api/customers/', '').trim();
       const existing = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
@@ -483,23 +721,28 @@ const toSql = (val) => (val === undefined ? null : val);
         return sendJson(res, 404, { success: false, message: 'Khách hàng không tồn tại' });
       }
 
+      const body = await readJsonBody(req).catch(() => ({}));
+      const reason = body.reason || '';
+
       runTransaction(() => {
         db.prepare(`
           UPDATE customers SET 
             is_deleted = 1, 
             deleted_at = CURRENT_TIMESTAMP, 
             deleted_by = ?,
+            delete_reason = ?,
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
-        `).run(currentUserName, id);
+        `).run(currentUserName, reason, id);
 
         logAudit({
           userId: currentUserId,
           userName: currentUserName,
-          action: 'DELETE',
+          action: 'DELETE_LEAD',
           tableName: 'customers',
           recordId: id,
           oldData: mapDbRowToCustomer(existing),
+          newData: { reason },
           ipAddress
         });
       });
@@ -510,12 +753,18 @@ const toSql = (val) => (val === undefined ? null : val);
     // POST /api/customers/:id/restore - Khôi phục từ thùng rác
     if (pathname.match(/^\/api\/customers\/[^/]+\/restore$/) && req.method === 'POST') {
       const id = pathname.split('/')[3];
+      const existing = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
+      if (!existing) {
+        return sendJson(res, 404, { success: false, message: 'Khách hàng không tồn tại' });
+      }
+
       runTransaction(() => {
         db.prepare(`
           UPDATE customers SET 
             is_deleted = 0, 
             deleted_at = NULL, 
             deleted_by = NULL,
+            delete_reason = NULL,
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
         `).run(id);
@@ -523,7 +772,7 @@ const toSql = (val) => (val === undefined ? null : val);
         logAudit({
           userId: currentUserId,
           userName: currentUserName,
-          action: 'RESTORE',
+          action: 'RESTORE_LEAD',
           tableName: 'customers',
           recordId: id,
           ipAddress

@@ -24,18 +24,23 @@ export type LeadSource =
 
 export type PipelineStage = 
   | 'New Lead'
-  | 'Đã liên hệ'
   | 'Đang tư vấn'
   | 'Đã gửi báo giá'
+  | 'Đã cọc'
+  | 'Book ngày'
+  | 'Đã chụp'
+  | 'Đang hậu kỳ'
+  | 'Giao ảnh'
+  | 'Hoàn thành'
+  | 'Lost'
+  // Tương thích ngược với các bản ghi & component cũ:
+  | 'Đã liên hệ'
   | 'Đang thương lượng'
   | 'Đã đặt cọc'
   | 'Đã Booking'
-  | 'Đã chụp'
-  | 'Đang hậu kỳ'
   | 'Đã bàn giao'
-  | 'Hoàn thành'
-  | 'Lost'
-  | 'Chăm sóc lại';
+  | 'Chăm sóc lại'
+  | 'Mới tiếp nhận';
 
 export interface UtmDetails {
   source?: string;
@@ -45,6 +50,17 @@ export interface UtmDetails {
   term?: string;
   adSet?: string;
   adId?: string;
+}
+
+export interface LeadStageHistory {
+  id: string;
+  leadId: string;
+  fromStage?: string;
+  toStage: string;
+  changedBy: string;
+  changedById?: string;
+  changedAt: string;
+  note?: string;
 }
 
 export interface Customer {
@@ -100,9 +116,37 @@ export interface Customer {
   createdById?: string;
   createdByName?: string;
   
-  // Tài chính tổng hợp
-  totalRevenue: number;
-  paidAmount: number;
+  // Hệ thống Tài chính & Bộ Tính Giá Tự Động
+  unitPrice?: number;        // Đơn giá / học sinh
+  subtotal?: number;         // Tạm tính = studentCount * unitPrice
+  extraFee?: number;         // Phụ phí
+  discount?: number;         // Giảm giá
+  totalAmount?: number;      // Tổng giá trị đơn = subtotal + extraFee - discount
+  totalRevenue: number;      // Đồng bộ với totalAmount
+  contractValue?: number;
+  depositAmount?: number;    // Tiền cọc đã nhận
+  paidAmount: number;        // Tổng tiền đã thanh toán (cọc + tất toán)
+  remainingAmount?: number;  // Còn lại cần thanh toán = totalAmount - depositAmount
+
+  // Thông tin cụ thể từng giai đoạn (Stage-Specific Fields)
+  depositDate?: string;      // Ngày nhận cọc
+  paymentMethod?: string;    // VietQR, Tiền mặt, Chuyển khoản
+  shootTime?: string;        // Giờ chụp (07:30 - 17:00)
+  shootAddress?: string;     // Địa điểm chụp chính thức
+  editorName?: string;       // Editor phụ trách hậu kỳ
+  editDeadline?: string;     // Hạn chót trả ảnh
+  editProgress?: number;     // Tiến độ hậu kỳ (0 - 100%)
+  deliveredDate?: string;    // Ngày bàn giao ảnh
+  deliveredDriveUrl?: string;// Link Drive bàn giao hoàn thiện
+  deliveryMethod?: string;   // Link Drive, USB, In ảnh album
+  lostReason?: string;       // Lý do khách từ chối
+  lostNote?: string;         // Ghi chú chi tiết khi Lost
+
+  // Quản lý Soft Delete & Thùng Rác
+  isDeleted?: boolean;
+  deletedAt?: string;
+  deletedBy?: string;
+  deleteReason?: string;
   
   // Timestamps
   createdAt: string;
@@ -375,8 +419,9 @@ export interface Task {
 // 8. Timeline & Activity Log cho Customer 360
 export interface ActivityLog {
   id: string;
-  customerId: string;
-  type: 'lead_created' | 'call' | 'message' | 'quote_sent' | 'deposit_paid' | 'booking_scheduled' | 'photographer_assigned' | 'shooting_done' | 'delivered' | 'remarketing_sent' | 'note';
+  customerId?: string;
+  bookingId?: string;
+  type: 'lead_created' | 'lead_deleted' | 'call' | 'message' | 'quote_sent' | 'deposit_paid' | 'booking_scheduled' | 'photographer_assigned' | 'shooting_done' | 'delivered' | 'remarketing_sent' | 'note';
   title: string;
   description: string;
   performedByName: string;

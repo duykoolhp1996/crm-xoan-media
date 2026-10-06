@@ -62,7 +62,8 @@ export type NavigationTab =
   | 'tasks'
   | 'reports-photographer'
   | 'settings'
-  | 'chat-messenger';
+  | 'chat-messenger'
+  | 'trash';
 
 interface AppContextType {
   currentUser: User;
@@ -83,11 +84,16 @@ interface AppContextType {
   
   // Customers & Leads
   customers: Customer[];
+  deletedCustomers: Customer[];
+  isLoadingDeleted: boolean;
+  loadDeletedCustomers: () => Promise<void>;
   selectedCustomerId: string | null;
   setSelectedCustomerId: (id: string | null) => void;
   addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>) => boolean;
-  deleteCustomer: (id: string) => void;
-  updateCustomerStage: (customerId: string, newStage: PipelineStage) => void;
+  deleteCustomer: (id: string, reason?: string) => void;
+  restoreCustomer: (id: string) => Promise<boolean>;
+  permanentDeleteCustomer: (id: string, reason?: string) => Promise<boolean>;
+  updateCustomerStage: (customerId: string, newStage: PipelineStage, note?: string) => void;
   updateCustomer: (customer: Customer) => void;
 
   // Bookings & Calendar
@@ -184,6 +190,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
   
   const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const [deletedCustomers, setDeletedCustomers] = useState<Customer[]>([]);
+  const [isLoadingDeleted, setIsLoadingDeleted] = useState<boolean>(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
   const [bookings, setBookings] = useState<Booking[]>(mockBookings);
@@ -262,13 +270,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  const loadDeletedCustomers = async () => {
+    try {
+      setIsLoadingDeleted(true);
+      const res = await apiClient.getDeletedCustomers();
+      if (Array.isArray(res)) {
+        setDeletedCustomers(res);
+        console.log(`[SQL Database] 🗑️ Đã nạp ${res.length} lead trong thùng rác từ SQL Server.`);
+      }
+    } catch (e) {
+      console.warn('[SQL Database] Lỗi nạp dữ liệu thùng rác:', e);
+    } finally {
+      setIsLoadingDeleted(false);
+    }
+  };
+
   // 1. NẠP DỮ LIỆU TỪ SQL SERVER (PRIMARY SINGLE SOURCE OF TRUTH)
   useEffect(() => {
     const loadFromSqlDatabase = async () => {
       try {
-        const [custRes, bookRes] = await Promise.allSettled([
+        const [custRes, bookRes, delRes] = await Promise.allSettled([
           apiClient.getCustomers({ limit: 500 }),
-          apiClient.getBookings({ limit: 500 })
+          apiClient.getBookings({ limit: 500 }),
+          apiClient.getDeletedCustomers()
         ]);
 
         if (custRes.status === 'fulfilled' && custRes.value && custRes.value.customers) {
@@ -285,6 +309,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             setBookings(sqlBooks);
             console.log(`[SQL Database] 🖥️ Đã nạp thành công ${sqlBooks.length} lịch booking từ SQL Server.`);
           }
+        }
+
+        if (delRes.status === 'fulfilled' && Array.isArray(delRes.value)) {
+          setDeletedCustomers(delRes.value);
         }
       } catch (e) {
         console.warn('[SQL Database] Lỗi nạp dữ liệu từ server:', e);
@@ -740,15 +768,135 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const deleteCustomer = (id: string) => {
+  const deleteCustomer = (id: string, reason?: string) => {
+    const target = customers.find(c => c.id === id);
+    const deleteReasonText = reason || 'Xóa thủ công từ giao diện';
+
     setCustomers(prev => prev.filter(c => c.id !== id));
-    apiClient.deleteCustomer(id).catch(err => {
+    if (target) {
+      const softDeletedCust: Customer = {
+        ...target,
+        isDeleted: true,
+        deletedAt: new Date().toISOString(),
+        deletedBy: currentUser.name,
+        deleteReason: deleteReasonText
+      };
+      setDeletedCustomers(prev => [softDeletedCust, ...prev.filter(c => c.id !== id)]);
+    }
+
+    apiClient.deleteCustomer(id, deleteReasonText).catch(err => {
       console.warn('[SQL Database] Lỗi gọi API deleteCustomer:', err);
     });
     crmSupabaseService.deleteCustomer(id).catch(() => {});
+
+    if (target) {
+      addActivityLog({
+        customerId: id,
+        type: 'lead_deleted',
+        title: 'Chuyển Lead vào thùng rác',
+        description: `Khách hàng ${target.name} (${target.className || 'Chưa rõ lớp'} - ${target.schoolName}) đã được chuyển vào thùng rác. Lý do: ${deleteReasonText}`,
+        performedByName: currentUser.name
+      });
+
+      const notif: SystemNotification = {
+        id: `notif-${Date.now()}`,
+        type: 'unassigned',
+        title: '🗑️ ĐÃ CHUYỂN LEAD VÀO THÙNG RÁC',
+        message: `Lead ${target.name} đã được đưa vào thùng rác. Lý do: ${deleteReasonText}`,
+        severity: 'warning',
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      setNotifications(prev => [notif, ...prev]);
+    }
   };
 
-  const updateCustomerStage = (customerId: string, newStage: PipelineStage) => {
+  const restoreCustomer = async (id: string): Promise<boolean> => {
+    try {
+      const target = deletedCustomers.find(c => c.id === id);
+      await apiClient.restoreCustomer(id);
+
+      setDeletedCustomers(prev => prev.filter(c => c.id !== id));
+      if (target) {
+        const restored: Customer = {
+          ...target,
+          isDeleted: false,
+          deletedAt: undefined,
+          deletedBy: undefined,
+          deleteReason: undefined,
+          updatedAt: new Date().toISOString()
+        };
+        setCustomers(prev => [restored, ...prev]);
+
+        addActivityLog({
+          customerId: id,
+          type: 'lead_created',
+          title: 'Khôi phục Lead từ thùng rác',
+          description: `Khách hàng ${target.name} (${target.className || 'Chưa rõ lớp'}) đã được khôi phục thành công về Pipeline.`,
+          performedByName: currentUser.name
+        });
+
+        const notif: SystemNotification = {
+          id: `notif-${Date.now()}`,
+          type: 'new_lead',
+          title: '♻️ ĐÃ KHÔI PHỤC LEAD',
+          message: `Khách hàng ${target.name} đã được khôi phục về Pipeline.`,
+          severity: 'info',
+          timestamp: new Date().toISOString(),
+          read: false
+        };
+        setNotifications(prev => [notif, ...prev]);
+      }
+      return true;
+    } catch (e: any) {
+      console.error('[SQL Database] Lỗi khôi phục lead:', e);
+      alert('Lỗi khôi phục lead: ' + (e.message || 'Không xác định'));
+      return false;
+    }
+  };
+
+  const permanentDeleteCustomer = async (id: string, reason?: string): Promise<boolean> => {
+    const isAdmin = currentUser.role === 'admin' || currentRole === 'admin';
+    if (!isAdmin) {
+      alert('Chỉ tài khoản Admin mới có quyền xóa vĩnh viễn Lead khỏi cơ sở dữ liệu!');
+      return false;
+    }
+
+    try {
+      const target = deletedCustomers.find(c => c.id === id);
+      await apiClient.permanentDeleteCustomer(id, reason);
+
+      setDeletedCustomers(prev => prev.filter(c => c.id !== id));
+
+      if (target) {
+        addActivityLog({
+          customerId: id,
+          type: 'lead_deleted',
+          title: 'Xóa vĩnh viễn Lead',
+          description: `Khách hàng ${target.name} (${target.className || 'Chưa rõ lớp'}) đã bị xóa vĩnh viễn khỏi Database bởi Admin ${currentUser.name}. Lý do: ${reason || 'Không cung cấp'}`,
+          performedByName: currentUser.name
+        });
+
+        const notif: SystemNotification = {
+          id: `notif-${Date.now()}`,
+          type: 'unassigned',
+          title: '⚠️ ĐÃ XÓA VĨNH VIỄN LEAD',
+          message: `Lead ${target.name} đã bị xóa hoàn toàn khỏi cơ sở dữ liệu.`,
+          severity: 'warning',
+          timestamp: new Date().toISOString(),
+          read: false
+        };
+        setNotifications(prev => [notif, ...prev]);
+      }
+      return true;
+    } catch (e: any) {
+      console.error('[SQL Database] Lỗi xóa vĩnh viễn lead:', e);
+      alert('Lỗi xóa vĩnh viễn: ' + (e.message || 'Không xác định'));
+      return false;
+    }
+  };
+
+  const updateCustomerStage = (customerId: string, newStage: PipelineStage, note?: string) => {
     const targetCustomer = customers.find(c => c.id === customerId);
     if (!targetCustomer) return;
 
@@ -756,16 +904,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let newSalesName = targetCustomer.assignedSalesName;
     let newSalesId = targetCustomer.assignedSalesId;
 
-    // Tự động gán nhân viên Sales tư vấn khi chuyển từ "New Lead" sang "Đã liên hệ" (hoặc nếu chuyển vào "Đã liên hệ" mà chưa có Sales)
-    const isMovingToContacted =
+    // Tự động gán nhân viên Sales tư vấn khi chuyển từ "New Lead" sang "Đang tư vấn" / "Đã liên hệ" (hoặc nếu chưa có Sales)
+    const isMovingToConsulting =
       (prevStage === 'New Lead' || !newSalesName || newSalesName === 'Chưa gán') &&
-      newStage === 'Đã liên hệ';
+      (newStage === 'Đang tư vấn' || newStage === 'Đã liên hệ');
 
-    // Tự động hóa: Chốt cọc thành công (từ Đang thương lượng hoặc các bước trước sang Đã đặt cọc)
-    const isDepositWon = prevStage !== 'Đã đặt cọc' && newStage === 'Đã đặt cọc';
+    // Tự động hóa: Chốt cọc thành công (từ báo giá/tư vấn sang Đã cọc)
+    const isDepositWon = (prevStage !== 'Đã cọc' && prevStage !== 'Đã đặt cọc') && (newStage === 'Đã cọc' || newStage === 'Đã đặt cọc');
     const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (newSalesName || targetCustomer.assignedSalesName || 'Lê Hoàng Sơn (Sales Lead)');
 
-    if (isMovingToContacted) {
+    if (isMovingToConsulting) {
       if (currentUser.role === 'sales') {
         newSalesName = currentUser.name;
         newSalesId = currentUser.id;
@@ -792,27 +940,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return c;
       })
     );
+
+    // Lưu vào SQL Server REST API & Lịch sử Stage History
+    apiClient.changeCustomerStage(customerId, newStage, note).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API changeCustomerStage:', err);
+    });
+
     if (updatedCustObj) {
       crmSupabaseService.saveCustomer(updatedCustObj).catch(() => {});
     }
 
     addActivityLog({
       customerId,
-      type: isMovingToContacted ? 'call' : isDepositWon ? 'deposit_paid' : 'quote_sent',
-      title: isMovingToContacted
+      type: isMovingToConsulting ? 'call' : isDepositWon ? 'deposit_paid' : 'quote_sent',
+      title: isMovingToConsulting
         ? `Tự động gán Sales tư vấn: ${newSalesName}`
         : isDepositWon
           ? `🎉 Chốt cọc thành công: ${closerSalesName}`
           : newStage === 'Lost'
             ? 'Khách hàng từ chối (Lost)'
             : `Chuyển giai đoạn: ${newStage}`,
-      description: isMovingToContacted
-        ? `Khách hàng ${targetCustomer.name} (${targetCustomer.className} - ${targetCustomer.schoolName}) được chuyển từ "${prevStage}" sang "Đã liên hệ". Hệ thống tự động gán nhân viên Sales "${newSalesName}" phụ trách tư vấn.`
+      description: isMovingToConsulting
+        ? `Khách hàng ${targetCustomer.name} (${targetCustomer.className || 'Chưa rõ lớp'} - ${targetCustomer.schoolName}) được chuyển từ "${prevStage}" sang "${newStage}". Hệ thống tự động gán Sales "${newSalesName}".`
         : isDepositWon
-          ? `Nhân sự Sales "${closerSalesName}" đã chốt cọc thành công cho lớp ${targetCustomer.className} (${targetCustomer.schoolName}). Tiến trình chuyển từ "${prevStage}" sang "Đã đặt cọc".`
+          ? `Nhân sự Sales "${closerSalesName}" đã chốt cọc thành công cho lớp ${targetCustomer.className || 'Lớp'} (${targetCustomer.schoolName}). Tiến trình chuyển sang "${newStage}".`
           : newStage === 'Lost'
-            ? `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) được chuyển sang trạng thái Lost (Khách từ chối / Dừng tư vấn).`
-            : `Khách hàng ${targetCustomer.name} được chuyển từ "${prevStage}" sang "${newStage}".`,
+            ? `Lớp ${targetCustomer.className || 'Lớp'} (${targetCustomer.schoolName}) được chuyển sang trạng thái Lost (Khách từ chối / Dừng tư vấn). ${note ? `Lý do: ${note}` : ''}`
+            : `Khách hàng ${targetCustomer.name} được chuyển từ "${prevStage}" sang "${newStage}". ${note ? `Ghi chú: ${note}` : ''}`,
       performedByName: currentUser.name
     });
 
@@ -821,10 +975,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       notifyCustomerDepositToZaloGroup({
         customer: {
           ...targetCustomer,
-          pipelineStage: 'Đã đặt cọc',
+          pipelineStage: 'Đã cọc',
           assignedSalesName: closerSalesName
         },
-        depositAmount: targetCustomer.paidAmount || 2000000,
+        depositAmount: targetCustomer.depositAmount || targetCustomer.paidAmount || 2000000,
         closedByName: closerSalesName
       }).catch(err => {
         console.warn('[Zalo Bot] Lỗi gửi thông báo chốt cọc:', err);
@@ -834,19 +988,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const depositNotif: SystemNotification = {
         id: `notif-${Date.now()}`,
         type: 'deposit',
-        title: `🎉 CHỐT CỌC THÀNH CÔNG: ${targetCustomer.className}`,
-        message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${targetCustomer.className} (${targetCustomer.schoolName}).`,
+        title: `🎉 CHỐT CỌC THÀNH CÔNG: ${targetCustomer.className || targetCustomer.name}`,
+        message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}).`,
         severity: 'success',
         timestamp: new Date().toISOString(),
         read: false
       };
       setNotifications(prev => [depositNotif, ...prev]);
-    } else if (isMovingToContacted) {
+    } else if (isMovingToConsulting) {
       const newNotif: SystemNotification = {
         id: `notif-${Date.now()}`,
         type: 'new_lead',
         title: `🎯 ĐÃ GÁN SALES TƯ VẤN: ${newSalesName}`,
-        message: `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) đã chuyển sang "Đã liên hệ". Phụ trách tư vấn: ${newSalesName}.`,
+        message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đã chuyển sang "${newStage}". Phụ trách tư vấn: ${newSalesName}.`,
         severity: 'info',
         timestamp: new Date().toISOString(),
         read: false
@@ -857,7 +1011,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         id: `notif-${Date.now()}`,
         type: 'unassigned',
         title: '⚠️ KHÁCH HÀNG TỪ CHỐI (LOST)',
-        message: `Lớp ${targetCustomer.className} (${targetCustomer.schoolName}) đã chuyển sang trạng thái Lost.`,
+        message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đã chuyển sang trạng thái Lost.`,
         severity: 'warning',
         timestamp: new Date().toISOString(),
         read: false
@@ -1466,10 +1620,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         returnToAdmin,
         updateProfile,
         customers,
+        deletedCustomers,
+        isLoadingDeleted,
+        loadDeletedCustomers,
         selectedCustomerId,
         setSelectedCustomerId,
         addCustomer,
         deleteCustomer,
+        restoreCustomer,
+        permanentDeleteCustomer,
         updateCustomerStage,
         updateCustomer,
         bookings,

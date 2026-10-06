@@ -109,29 +109,59 @@ export const ExecutiveDashboard: React.FC = () => {
   const shootingLeads = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao'].includes(c.pipelineStage)).length;
   const completedCustomers = filteredCustomers.filter(c => c.pipelineStage === 'Hoàn thành').length;
 
-  // 2. Tính toán KPIs Doanh thu & Hợp đồng thực tế
-  const totalContractRevenue = useMemo(() => {
-    return filteredCustomers.reduce((sum, c) => sum + (c.totalRevenue || c.expectedBudget || 0), 0);
+  // 2. Định nghĩa các giai đoạn đã chốt hợp đồng (phát sinh cọc trở đi)
+  const CLOSED_STAGES = [
+    'Đã cọc',
+    'Book ngày',
+    'Đã chụp',
+    'Đang hậu kỳ',
+    'Giao ảnh',
+    'Hoàn thành',
+    'Đã đặt cọc',
+    'Đã Booking',
+    'Đã bàn giao'
+  ];
+
+  // Danh sách các đơn đã chốt thành công (phát sinh cọc thực tế)
+  const closedDeals = useMemo(() => {
+    return filteredCustomers.filter(c => 
+      CLOSED_STAGES.includes(c.pipelineStage) || 
+      (c.paidAmount && c.paidAmount > 0) ||
+      (c.depositAmount && c.depositAmount > 0)
+    );
   }, [filteredCustomers]);
 
+  // DOANH THU ĐƠN ĐÃ CHỐT ĐƯỢC (FULL GIÁ TRỊ HỢP ĐỒNG CỦA CÁC ĐƠN ĐÃ PHÁT SINH CỌC)
+  const closedDealsRevenue = useMemo(() => {
+    return closedDeals.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
+  }, [closedDeals]);
+
+  // TỔNG TIỀN THỰC THU (TIỀN THỰC TẾ ĐÃ THU ĐƯỢC VÀO TÀI KHOẢN TỪ CÁC ĐƠN ĐÃ CHỐT)
   const totalCollectedRevenue = useMemo(() => {
-    return filteredCustomers.reduce((sum, c) => sum + (c.paidAmount || 0), 0);
-  }, [filteredCustomers]);
+    return closedDeals.reduce((sum, c) => sum + (c.paidAmount || c.depositAmount || 0), 0);
+  }, [closedDeals]);
 
-  const totalRemainingDebt = totalContractRevenue - totalCollectedRevenue;
+  // CÔNG NỢ CÒN LẠI CẦN THU
+  const totalRemainingDebt = Math.max(0, closedDealsRevenue - totalCollectedRevenue);
+
+  // TỔNG TIỀM NĂNG PIPELINE (TOÀN BỘ NGÂN SÁCH DỰ KIẾN KỂ CẢ LEAD MỚI TIẾP NHẬN)
+  const pipelinePotentialRevenue = useMemo(() => {
+    return filteredCustomers.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
+  }, [filteredCustomers]);
 
   // 3. Tính toán hoa hồng chi tiết cho từng nhân viên Sales
   const staffPerformanceList = useMemo(() => {
     return salesStaff.map(staff => {
       const staffCustomers = customers.filter(c => c.assignedSalesId === staff.id);
-      const totalRev = staffCustomers.reduce((sum, c) => sum + (c.totalRevenue || c.expectedBudget || 0), 0);
-      const collectedRev = staffCustomers.reduce((sum, c) => sum + (c.paidAmount || 0), 0);
+      const totalRev = staffCustomers.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
       const closedList = staffCustomers.filter(c => 
-        ['Đã đặt cọc', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao', 'Hoàn thành'].includes(c.pipelineStage) || 
-        (c.paidAmount && c.paidAmount > 0)
+        CLOSED_STAGES.includes(c.pipelineStage) || 
+        (c.paidAmount && c.paidAmount > 0) ||
+        (c.depositAmount && c.depositAmount > 0)
       );
       const closedCount = closedList.length;
-      const closedRev = closedList.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
+      const closedRev = closedList.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
+      const collectedRev = closedList.reduce((sum, c) => sum + (c.paidAmount || c.depositAmount || 0), 0);
       
       // Tính hoa hồng theo cơ chế chính sách từng tài khoản
       let commission = 0;
@@ -152,11 +182,11 @@ export const ExecutiveDashboard: React.FC = () => {
       return {
         staff,
         totalCustomers: staffCustomers.length,
-        consultingCount: staffCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ', 'Mới tiếp nhận'].includes(c.pipelineStage)).length,
+        consultingCount: staffCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ', 'Mới tiếp nhận', 'New Lead'].includes(c.pipelineStage)).length,
         closedCount,
         totalRev,
         collectedRev,
-        debtRev: totalRev - collectedRev,
+        debtRev: Math.max(0, closedRev - collectedRev),
         closedRev,
         commission,
         conversionRate
@@ -341,16 +371,16 @@ export const ExecutiveDashboard: React.FC = () => {
 
             <div className="my-2">
               <span className="text-[10px] text-neutral-400 font-medium uppercase tracking-wider block mb-0.5">
-                Tổng Doanh Thu Hợp Đồng
+                Doanh Thu Đơn Đã Chốt (Đã Cọc)
               </span>
               <div className="text-3xl font-black text-white tracking-tight">
-                ₫ {(totalContractRevenue).toLocaleString('vi-VN')}
+                ₫ {(closedDealsRevenue).toLocaleString('vi-VN')}
               </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-neutral-400">
               <span className="font-mono tracking-widest text-[11px] text-neutral-300">
-                •••• •••• {filteredCustomers.length} LỚP
+                •••• •••• {closedDeals.length} ĐƠN ĐÃ CHỐT
               </span>
               <span className="text-[11px] font-bold text-[#B8F23D]">
                 {totalStudents.toLocaleString('vi-VN')} Học sinh
@@ -369,10 +399,13 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider block opacity-75">
-                  Thực Thu Đã Thu Cọc
+                  Thực Thu Đã Nhận (Cọc + Thanh Toán)
                 </span>
-                <span className="text-sm font-black leading-tight">
-                  ₫ {(totalCollectedRevenue).toLocaleString('vi-VN')} ({((totalCollectedRevenue / (totalContractRevenue || 1)) * 100).toFixed(0)}%)
+                <span className="text-sm font-black leading-tight block">
+                  ₫ {(totalCollectedRevenue).toLocaleString('vi-VN')} ({((totalCollectedRevenue / (closedDealsRevenue || 1)) * 100).toFixed(0)}%)
+                </span>
+                <span className="text-[10px] text-neutral-800 font-semibold">
+                  Nợ còn lại: ₫ {(totalRemainingDebt).toLocaleString('vi-VN')}
                 </span>
               </div>
             </div>
@@ -516,7 +549,7 @@ export const ExecutiveDashboard: React.FC = () => {
             <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-400 font-bold">
               <span>Đạt tiến độ:</span>
               <span className="text-[#B8F23D]">
-                {totalContractRevenue > 0 ? Math.round((totalCollectedRevenue / totalContractRevenue) * 100) : 0}%
+                {closedDealsRevenue > 0 ? Math.round((totalCollectedRevenue / closedDealsRevenue) * 100) : 0}%
               </span>
             </div>
           </div>
@@ -733,16 +766,16 @@ export const ExecutiveDashboard: React.FC = () => {
 
       {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Doanh thu hợp đồng & thực tế */}
+        {/* Card 1: Doanh thu đơn đã chốt (đã phát sinh cọc) */}
         <div
           onClick={() => setActiveTab('bookings')}
           className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
         >
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU HỢP ĐỒNG</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU ĐƠN ĐÃ CHỐT</span>
               <p className="text-[10px] text-neutral-500 font-medium truncate max-w-[130px]">
-                {activeStaff ? activeStaff.name.split('(')[0] : 'Toàn Studio'}
+                {activeStaff ? activeStaff.name.split('(')[0] : `${closedDeals.length} HĐ Đã Cọc`}
               </p>
             </div>
             <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
@@ -751,16 +784,16 @@ export const ExecutiveDashboard: React.FC = () => {
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
-              {(totalContractRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+              {(closedDealsRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
             </span>
             <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
               <ArrowUpRight className="w-3.5 h-3.5" /> Thu: {(totalCollectedRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
             </span>
           </div>
           <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-            <span>Công nợ chưa thu:</span>
+            <span>Công nợ còn lại:</span>
             <strong className="text-rose-600 font-bold">
-              {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr ({((totalRemainingDebt / (totalContractRevenue || 1)) * 100).toFixed(0)}%)
+              {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr ({((totalRemainingDebt / (closedDealsRevenue || 1)) * 100).toFixed(0)}%)
             </strong>
           </div>
         </div>
