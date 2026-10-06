@@ -28,4 +28,14 @@
     - Mỗi lần phát hành lên Server Production, hệ thống phải tăng và thể hiện rõ **Số Phiên Bản (Version)** (ví dụ: `v1.0.0`, `v1.0.1`, `v1.1.0`...).
     - Số phiên bản phải được hiển thị trực tiếp trên giao diện UI (chân Sidebar / Footer / Cài đặt) và trong commit log + thông báo phản hồi để người dùng kiểm tra ngay lập tức.
 
-
+## 5. Nguyên Tắc Sống Còn: Bảo Toàn Dữ Liệu 100% (Zero Data Loss Policy)
+- **Cấm Tuyệt Đối**:
+  - Không bao giờ chạy các lệnh `DROP DATABASE`, `DROP TABLE`, `TRUNCATE TABLE`, xóa database production hoặc ghi đè file database.
+  - Không re-seed lại dữ liệu mặc định/demo đè lên dữ liệu thật của người dùng.
+- **Bảo Vệ Khi Deploy & Update Version**:
+  - Thư mục chứa dữ liệu `server/data/` và `server/backups/` **bắt buộc loại trừ khỏi `rsync`** và không bao giờ bị ghi đè khi đồng bộ code mới.
+  - **Auto-Backup bắt buộc**: Trước mỗi lần deploy lên Production, script deploy BẮT BUỘC tự động tạo 1 bản snapshot backup DB (`server/backup.mjs pre-deploy`).
+  - **Schema Migrations An Toàn**: Mọi cập nhật cấu trúc database phải luôn sử dụng cú pháp idempotent (ví dụ: `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`), giữ nguyên 100% các hàng dữ liệu cũ.
+- **Frontend & Cầu Nối API**:
+  - Luôn kết nối trực tiếp Single Source of Truth về SQL Server API (`https://crm.xoanmedia.com/api`).
+  - Khi khởi động app hay update frontend, tuyệt đối không ghi đè mảng rỗng hay mock data lên dữ liệu đang có của người dùng.
