@@ -348,12 +348,12 @@ export const notifyCustomerDepositToZaloGroup = async (params: {
   const config = getZaloBotConfig();
 
   const salesName = closedByName || customer.assignedSalesName || 'Trần Hải Đăng';
-  const amount = depositAmount || customer.paidAmount || 2000000;
-  const totalContract = customer.totalRevenue || customer.expectedBudget || 10500000;
+  const amount = depositAmount !== undefined ? depositAmount : (customer.depositAmount !== undefined ? customer.depositAmount : (customer.paidAmount || 0));
+  const totalContract = customer.totalRevenue || customer.expectedBudget || customer.totalAmount || 0;
   const remaining = Math.max(0, totalContract - amount);
 
-  const depositStr = amount > 0 ? `${amount.toLocaleString('vi-VN')} VNĐ` : '2.000.000 VNĐ';
-  const contractStr = totalContract > 0 ? `${totalContract.toLocaleString('vi-VN')} VNĐ` : '10.500.000 VNĐ';
+  const depositStr = `${amount.toLocaleString('vi-VN')} VNĐ`;
+  const contractStr = totalContract > 0 ? `${totalContract.toLocaleString('vi-VN')} VNĐ` : 'Chưa định mức';
   const remainingStr = `${remaining.toLocaleString('vi-VN')} VNĐ`;
 
   const now = new Date();

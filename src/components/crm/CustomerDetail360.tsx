@@ -795,7 +795,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       <FileText className="w-3.5 h-3.5" />
                       <span>{customer.pipelineStage === 'Đang tư vấn' ? 'Lập Báo Giá PDF' : 'Chỉnh Sửa Báo Giá'}</span>
                     </button>
-                    {customer.pipelineStage === 'Đang thương lượng' && (
+                    {['Đã gửi báo giá', 'Đang thương lượng'].includes(customer.pipelineStage) && (
                       <button
                         type="button"
                         onClick={() => {
@@ -803,18 +803,18 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                           setShowDepositModal(true);
                         }}
                         className="flex-1 sm:flex-initial px-4 py-2 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
-                        title="Bắt buộc nhập số tiền cọc & xác nhận chuyển sang Đã đặt cọc"
+                        title="Setup số tiền cọc & xác nhận chuyển sang Đã cọc"
                       >
                         <QrCode className="w-3.5 h-3.5 text-neutral-950" />
-                        <span>💰 Xác Nhận Đặt Cọc & Giữ Lịch</span>
+                        <span>💰 Setup Cọc & Giữ Lịch (VietQR)</span>
                       </button>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Banner Giai Đoạn Đã Đặt Cọc: Bắt buộc chốt ngày chụp để lên Booking */}
-              {customer.pipelineStage === 'Đã đặt cọc' && (
+              {/* Banner Giai Đoạn Đã Đặt Cọc / Đã cọc: Bắt buộc chốt ngày chụp để lên Booking */}
+              {['Đã cọc', 'Đã đặt cọc'].includes(customer.pipelineStage) && (
                 <div className="p-4 bg-gradient-to-r from-emerald-50 via-lime-50/70 to-purple-50/70 border border-emerald-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -824,17 +824,31 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       </span>
                     </div>
                     <p className="text-xs text-neutral-700">
-                      Đã nhận cọc: <strong className="text-emerald-900 font-extrabold">{(customer.paidAmount || 2000000).toLocaleString('vi-VN')}đ</strong> • Bước tiếp theo: <strong>Bắt buộc chốt ngày chụp</strong> để chuyển sang <em>Đã Booking</em> và xếp ekip.
+                      Đã nhận cọc: <strong className="text-emerald-900 font-extrabold">{((customer.depositAmount !== undefined ? customer.depositAmount : customer.paidAmount) || 0).toLocaleString('vi-VN')}đ</strong> • Bước tiếp theo: <strong>Bắt buộc chốt ngày chụp</strong> để chuyển sang <em>Đã Booking</em> và xếp ekip.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowScheduleModal(true)}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
-                  >
-                    <Calendar className="w-4 h-4" />
-                    <span>📅 Chốt Ngày Chụp & Lên Đơn Booking</span>
-                  </button>
+                  <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaymentMode('deposit');
+                        setShowDepositModal(true);
+                      }}
+                      className="flex-1 sm:flex-initial px-3.5 py-2.5 bg-white hover:bg-neutral-50 text-neutral-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+                      title="Sửa mức tiền cọc hoặc tạo lại mã VietQR chuyển khoản"
+                    >
+                      <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Sửa Mức Cọc / QR</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowScheduleModal(true)}
+                      className="flex-1 sm:flex-initial px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      <span>📅 Chốt Ngày Chụp & Lên Đơn Booking</span>
+                    </button>
+                  </div>
                 </div>
               )}
 

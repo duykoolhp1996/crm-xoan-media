@@ -1023,7 +1023,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           pipelineStage: 'Đã cọc',
           assignedSalesName: closerSalesName
         },
-        depositAmount: targetCustomer.depositAmount || targetCustomer.paidAmount || 2000000,
+        depositAmount: targetCustomer.depositAmount !== undefined ? targetCustomer.depositAmount : (targetCustomer.paidAmount || 0),
         closedByName: closerSalesName
       }).catch(err => {
         console.warn('[Zalo Bot] Lỗi gửi thông báo chốt cọc:', err);
@@ -1067,7 +1067,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateCustomer = (updated: Customer) => {
     const prevCust = customers.find(c => c.id === updated.id);
-    const isNewDeposit = prevCust && prevCust.pipelineStage !== 'Đã đặt cọc' && updated.pipelineStage === 'Đã đặt cọc';
+    const isNewDeposit = prevCust && !['Đã cọc', 'Đã đặt cọc'].includes(prevCust.pipelineStage) && ['Đã cọc', 'Đã đặt cọc'].includes(updated.pipelineStage);
     const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (updated.assignedSalesName || currentUser.name);
 
     setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
@@ -1087,7 +1087,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isNewDeposit) {
       notifyCustomerDepositToZaloGroup({
         customer: updated,
-        depositAmount: updated.paidAmount || 2000000,
+        depositAmount: updated.depositAmount !== undefined ? updated.depositAmount : (updated.paidAmount || 0),
         closedByName: closerSalesName
       }).catch(err => {
         console.warn('[Zalo Bot] Lỗi gửi thông báo chốt cọc:', err);

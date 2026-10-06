@@ -517,24 +517,36 @@ export const KanbanPipeline: React.FC = () => {
                                 setPaymentConfig({ customer: cust, mode: 'deposit' });
                               }}
                               className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 border border-black/[0.08]"
-                              title="Nhập số tiền cọc & xác nhận chuyển sang Đã cọc"
+                              title="Setup giá cọc & xác nhận chuyển sang Đã cọc"
                             >
                               <QrCode className="w-3.5 h-3.5 text-neutral-950" />
-                              <span>💰 Xác Nhận Cọc & Chuyển Đã Cọc</span>
+                              <span>💰 Setup & Chốt Cọc (VietQR)</span>
                             </button>
                           )}
 
                           {/* 3. BADGE ĐÃ CỌC & NÚT CHỐT NGÀY CHỤP (Đã cọc) */}
                           {(cust.pipelineStage === 'Đã cọc' || cust.pipelineStage === 'Đã đặt cọc') && (
                             <>
-                              <div className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-lime-50 border border-emerald-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPaymentConfig({ customer: cust, mode: 'deposit' });
+                                }}
+                                className="mt-2 p-2 bg-gradient-to-r from-emerald-50 to-lime-50 hover:from-emerald-100 hover:to-lime-100 border border-emerald-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs cursor-pointer transition-all group"
+                                title="Nhấp để xem/sửa mức cọc & tạo QR chuyển khoản"
+                              >
                                 <span className="text-emerald-800 font-semibold flex items-center gap-1.5">
                                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                   Đã cọc:
                                 </span>
-                                <span className="font-extrabold text-emerald-950 text-xs">
-                                  {(cust.depositAmount || cust.paidAmount || 2000000).toLocaleString('vi-VN')} đ
-                                </span>
+                                <div className="flex items-center gap-1">
+                                  <span className="font-extrabold text-emerald-950 text-xs">
+                                    {((cust.depositAmount !== undefined ? cust.depositAmount : cust.paidAmount) || 0).toLocaleString('vi-VN')} đ
+                                  </span>
+                                  <span className="text-[10px] text-emerald-800 bg-emerald-200/70 px-1.5 py-0.5 rounded font-bold group-hover:bg-emerald-300">
+                                    Sửa
+                                  </span>
+                                </div>
                               </div>
 
                               <button

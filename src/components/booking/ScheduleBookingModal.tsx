@@ -15,6 +15,7 @@ import {
   Phone
 } from 'lucide-react';
 import { notifyShootDateScheduledToZaloGroup } from '../../lib/zaloBotService';
+import { getCustomerTotalOrderValue } from '../../lib/revenueUtils';
 
 interface ScheduleBookingModalProps {
   customer: Customer | null;
@@ -123,8 +124,8 @@ export const ScheduleBookingModal: React.FC<ScheduleBookingModalProps> = ({
 
     const startTime = timeSlot === 'Ca Sáng' ? '07:30' : timeSlot === 'Ca Chiều' ? '13:30' : '07:30';
     const endTime = timeSlot === 'Ca Sáng' ? '11:30' : timeSlot === 'Ca Chiều' ? '17:30' : '17:30';
-    const totalAmount = customer.totalRevenue || customer.expectedBudget || 10000000;
-    const depositAmount = customer.paidAmount || 2000000;
+    const totalAmount = getCustomerTotalOrderValue(customer);
+    const depositAmount = customer.depositAmount !== undefined ? customer.depositAmount : (customer.paidAmount || 0);
     const remainingAmount = Math.max(0, totalAmount - depositAmount);
 
     // 1. Cập nhật khách hàng sang giai đoạn "Đã Booking"

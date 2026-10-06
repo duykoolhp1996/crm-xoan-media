@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 import { notifyFinalPaymentCompletedToZaloGroup } from '../../lib/zaloBotService';
+import { getCustomerTotalOrderValue } from '../../lib/revenueUtils';
 
 interface DepositQrModalProps {
   customer: Customer | null;
@@ -52,20 +53,31 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
   const isFinalPayment = mode ? mode === 'final' : (customer?.pipelineStage === 'Đã bàn giao');
 
   // Tổng kinh phí hợp đồng & số tiền đã thanh toán trước đó
-  const initialBudget = customer ? (customer.totalRevenue || customer.expectedBudget || 10000000) : 10000000;
+  const initialBudget = customer ? getCustomerTotalOrderValue(customer) : 0;
   const [finalContractBudget, setFinalContractBudget] = useState<number>(initialBudget);
-  const paidSoFar = customer?.paidAmount || 0;
+  const paidSoFar = Number(customer?.depositAmount ?? customer?.paidAmount ?? 0);
   const totalBudget = isFinalPayment ? finalContractBudget : initialBudget;
   const remainingAmount = Math.max(0, totalBudget - paidSoFar);
 
-  // Khởi tạo số tiền thanh toán
+  // Khởi tạo số tiền thanh toán (Ưu tiên lấy đúng giá cọc đã setup của khách hàng)
   const defaultAmount = useMemo(() => {
-    if (!customer) return 3000000;
+    if (!customer) return 2000000;
     if (isFinalPayment) {
       return remainingAmount;
     }
-    const total = customer.totalRevenue || customer.expectedBudget || 10000000;
-    return Math.round((total * 0.3) / 10000) * 10000;
+    // Ưu tiên 1: Giá cọc đã setup trước đó của khách hàng
+    if (customer.depositAmount !== undefined && customer.depositAmount !== null) {
+      return Number(customer.depositAmount);
+    }
+    if (customer.paidAmount !== undefined && customer.paidAmount !== null) {
+      return Number(customer.paidAmount);
+    }
+    // Ưu tiên 2: Mức cọc mặc định theo đơn: nếu có tổng bill thì gợi ý 2 triệu hoặc 30%
+    const total = getCustomerTotalOrderValue(customer);
+    if (total > 0) {
+      return Math.min(total, 2000000);
+    }
+    return 2000000;
   }, [customer, isFinalPayment, remainingAmount]);
 
   const [paymentAmount, setPaymentAmount] = useState<number>(defaultAmount);
@@ -77,13 +89,20 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
   // Cập nhật lại số tiền thanh toán khi customer hoặc mode thay đổi
   useEffect(() => {
     if (customer) {
-      const initTotal = customer.totalRevenue || customer.expectedBudget || 10000000;
+      const initTotal = getCustomerTotalOrderValue(customer);
       setFinalContractBudget(initTotal);
       if (isFinalPayment) {
-        const remaining = Math.max(0, initTotal - (customer.paidAmount || 0));
+        const remaining = Math.max(0, initTotal - (customer.paidAmount || customer.depositAmount || 0));
         setPaymentAmount(remaining);
       } else {
-        setPaymentAmount(Math.round((initTotal * 0.3) / 10000) * 10000);
+        if (customer.depositAmount !== undefined && customer.depositAmount !== null) {
+          setPaymentAmount(Number(customer.depositAmount));
+        } else if (customer.paidAmount !== undefined && customer.paidAmount !== null) {
+          setPaymentAmount(Number(customer.paidAmount));
+        } else {
+          const suggested = initTotal > 0 ? Math.min(initTotal, 2000000) : 2000000;
+          setPaymentAmount(suggested);
+        }
       }
       setIsSuccess(false);
     }
@@ -253,13 +272,18 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
         severity: 'info'
       });
     } else {
-      const newPaidAmount = (customer.paidAmount || 0) + paymentAmount;
+      const newDepositAmount = paymentAmount;
+      const orderValue = getCustomerTotalOrderValue(customer);
+      const remainingDebt = Math.max(0, orderValue - newDepositAmount);
 
       updateCustomer({
         ...customer,
-        paidAmount: newPaidAmount,
-        pipelineStage: 'Đã đặt cọc',
-        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã đặt cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua QR MB Bank. ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
+        depositAmount: newDepositAmount,
+        paidAmount: newDepositAmount,
+        remainingAmount: remainingDebt,
+        depositDate: new Date().toISOString().split('T')[0],
+        pipelineStage: 'Đã cọc',
+        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã setup giá cọc & xác nhận nhận cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank. ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
         updatedAt: new Date().toISOString()
       });
 
@@ -267,7 +291,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
         customerId: customer.id,
         type: 'deposit_paid',
         title: 'Xác nhận đặt cọc thành công',
-        description: `Khách đã thanh toán cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Tiến trình chuyển sang 'Đã đặt cọc'.`,
+        description: `Khách đã thanh toán cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Tiến trình chuyển sang 'Đã cọc'.`,
         performedByName: currentUser.name
       });
     }
@@ -484,11 +508,19 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
                   </>
                 ) : (
                   [
-                    { label: '30%', value: Math.round((totalBudget * 0.3) / 10000) * 10000 || 3000000 },
-                    { label: '40%', value: Math.round((totalBudget * 0.4) / 10000) * 10000 || 4000000 },
-                    { label: '50%', value: Math.round((totalBudget * 0.5) / 10000) * 10000 || 5000000 },
+                    ...(customer?.depositAmount !== undefined && customer?.depositAmount !== null ? [
+                      { label: `Mức cọc đã setup (${customer.depositAmount.toLocaleString('vi-VN')}đ)`, value: Number(customer.depositAmount) }
+                    ] : []),
+                    { label: '0 đ (Miễn cọc)', value: 0 },
+                    { label: '1.000.000đ', value: 1000000 },
+                    { label: '2.000.000đ (Chuẩn)', value: 2000000 },
                     { label: '3.000.000đ', value: 3000000 },
-                    { label: '5.000.000đ', value: 5000000 }
+                    { label: '5.000.000đ', value: 5000000 },
+                    ...(totalBudget > 0 ? [
+                      { label: '20% Tổng bill', value: Math.round((totalBudget * 0.2) / 10000) * 10000 },
+                      { label: '30% Tổng bill', value: Math.round((totalBudget * 0.3) / 10000) * 10000 },
+                      { label: '50% Tổng bill', value: Math.round((totalBudget * 0.5) / 10000) * 10000 }
+                    ] : [])
                   ].map((chip, idx) => (
                     <button
                       key={idx}
