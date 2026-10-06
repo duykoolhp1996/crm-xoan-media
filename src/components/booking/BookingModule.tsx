@@ -7,13 +7,14 @@ import {
   Search,
   Clock,
   MapPin,
-  Camera
+  Camera,
+  Eye
 } from 'lucide-react';
 import { BookingModal } from './BookingModal';
 import { BookingDetailModal } from './BookingDetailModal';
 
 export const BookingModule: React.FC = () => {
-  const { bookings, updateBooking, currentUser, currentRole, photographers } = useApp();
+  const { bookings, updateBooking, currentUser, currentRole, photographers, setSelectedCustomerId } = useApp();
 
   const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
   const currentPhotographer = useMemo(() => {
@@ -209,7 +210,9 @@ export const BookingModule: React.FC = () => {
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-neutral-500">
                     <p className="font-semibold text-sm text-neutral-800">Chưa có đơn booking lịch chụp nào trong hệ thống</p>
-                    <p className="text-xs text-neutral-400 mt-1">Bấm nút "+ Tạo Booking Mới" ở góc trên bên phải để lên lịch chụp cho lớp!</p>
+                    <p className="text-xs text-neutral-400 mt-1 max-w-md mx-auto">
+                      Đơn booking chỉ được tạo cho các lớp đã chốt cọc trong CRM. Bấm nút "+ Tạo Đơn Booking Mới" ở góc trên bên phải để chọn lớp đã cọc và lên lịch!
+                    </p>
                   </td>
                 </tr>
               ) : (
@@ -231,9 +234,23 @@ export const BookingModule: React.FC = () => {
                           </span>
                           <div>
                             <p className="font-bold text-neutral-900 group-hover:text-neutral-700 transition-colors">
-                              {bk.className}
+                              {bk.className ? `Lớp ${bk.className}` : ''}
                             </p>
                             <p className="text-[11px] text-neutral-500">{bk.schoolName}</p>
+                            {bk.customerId && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedCustomerId(bk.customerId);
+                                }}
+                                className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 bg-neutral-100 hover:bg-neutral-900 text-neutral-700 hover:text-[#B8F23D] rounded-md text-[10px] font-bold border border-black/[0.08] transition-colors"
+                                title="Mở Hồ Sơ Khách Hàng CRM 360°"
+                              >
+                                <Eye className="w-3 h-3" />
+                                <span>Hồ sơ CRM</span>
+                              </button>
+                            )}
                           </div>
                         </div>
                       </td>

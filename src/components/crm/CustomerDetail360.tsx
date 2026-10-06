@@ -1050,18 +1050,41 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
           {activeTab === 'bookings' && (
             <div className="space-y-4">
               {customerBookings.length === 0 ? (
-                <div className="text-center py-12 text-neutral-400 text-xs">
+                <div className="text-center py-10 px-4 text-neutral-400 text-xs bg-neutral-50/50 rounded-2xl border border-black/[0.04]">
                   <Calendar className="w-8 h-8 mx-auto text-neutral-300 mb-2" />
-                  <p>Khách hàng này chưa có đơn Booking chính thức nào.</p>
-                  <button
-                    onClick={() => {
-                      onClose();
-                      setActiveTab('bookings');
-                    }}
-                    className="mt-3 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold text-xs shadow-sm transition-all active:scale-95"
-                  >
-                    + Tạo Booking cho lớp ngay
-                  </button>
+                  <p className="font-semibold text-neutral-700">Khách hàng này chưa có đơn Booking lịch chụp chính thức nào.</p>
+                  
+                  {isCustomerInStage(customer.pipelineStage, 'Đã cọc') || isCustomerInStage(customer.pipelineStage, 'Book ngày') || (Number(customer.depositAmount ?? customer.paidAmount ?? 0) > 0) ? (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-[11px] text-emerald-700 font-medium">
+                        ✅ Lớp đã cọc {(Number(customer.depositAmount ?? customer.paidAmount ?? 0)).toLocaleString('vi-VN')}đ. Đủ điều kiện lên lịch chụp!
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowScheduleModal(true)}
+                        className="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold text-xs shadow-sm transition-all active:scale-95 inline-flex items-center gap-1.5"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>📅 Chốt Ngày Chụp & Lên Đơn Booking</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-3 space-y-2 max-w-sm mx-auto">
+                      <p className="text-[11px] text-amber-700 font-medium">
+                        ⚠️ Khách hàng đang ở giai đoạn <strong>"{customer.pipelineStage}"</strong> và chưa hoàn tất cọc tiền. Quy chuẩn Xoăn Media yêu cầu chốt cọc trước khi xếp lịch chụp!
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPaymentMode('deposit');
+                          setShowDepositModal(true);
+                        }}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all active:scale-95 inline-flex items-center gap-1.5"
+                      >
+                        <span>💵 Xác Nhận Chốt Cọc (VietQR)</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 customerBookings.map((bk) => (

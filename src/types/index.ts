@@ -253,6 +253,7 @@ export interface Booking {
   studentCount: number;
   packageId: string;
   packageName: string;
+  concept?: string;
   
   // Tài chính
   totalAmount: number;

@@ -21,11 +21,12 @@ import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
 import { TrashBinModal } from './components/crm/TrashBinModal';
+import { CustomerDetail360 } from './components/crm/CustomerDetail360';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { initGA4, trackPageView } from './lib/analytics';
 
 const MainContent: React.FC = () => {
-  const { activeTab, setActiveTab, currentUser, currentRole } = useApp();
+  const { activeTab, setActiveTab, currentUser, currentRole, selectedCustomerId, setSelectedCustomerId } = useApp();
 
   const isPhotographer = currentRole === 'photographer' || currentUser?.role === 'photographer';
 
@@ -57,6 +58,14 @@ const MainContent: React.FC = () => {
         {activeTab === 'remarketing' && <RemarketingModule />}
         {activeTab === 'reports-photographer' && <PhotographerReports />}
         {activeTab === 'settings' && <SettingsModule />}
+
+        {/* Global Customer 360 Detail Modal: Hiển thị khi đang ở Calendar, Bookings hoặc Dashboard */}
+        {!['customers', 'leads', 'pipeline', 'schools'].includes(activeTab) && selectedCustomerId && (
+          <CustomerDetail360
+            customerId={selectedCustomerId}
+            onClose={() => setSelectedCustomerId(null)}
+          />
+        )}
       </div>
     </main>
   );

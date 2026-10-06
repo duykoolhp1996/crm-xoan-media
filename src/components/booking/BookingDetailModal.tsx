@@ -15,7 +15,8 @@ import {
   Layers,
   Video,
   Sparkles,
-  FileText
+  FileText,
+  Eye
 } from 'lucide-react';
 
 interface BookingDetailModalProps {
@@ -248,9 +249,10 @@ export const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
                     setSelectedCustomerId(customer.id);
                     onClose();
                   }}
-                  className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold transition-all text-xs"
+                  className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-xs"
                 >
-                  Xem Hồ Sơ Khách Hàng 360°
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Xem Hồ Sơ Khách Hàng 360°</span>
                 </button>
               )}
             </div>

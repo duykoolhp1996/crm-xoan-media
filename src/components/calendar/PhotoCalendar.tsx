@@ -13,12 +13,17 @@ import {
   Layers,
   CheckCircle2,
   X,
-  UserCheck
+  UserCheck,
+  Eye,
+  FileText
 } from 'lucide-react';
 import { BookingModal } from '../booking/BookingModal';
+import { BookingDetailModal } from '../booking/BookingDetailModal';
 
 export const PhotoCalendar: React.FC = () => {
-  const { bookings, currentUser, currentRole, photographers } = useApp();
+  const { bookings, currentUser, currentRole, photographers, setSelectedCustomerId, setActiveTab } = useApp();
+
+  const [selectedBookingForDetail, setSelectedBookingForDetail] = useState<Booking | null>(null);
 
   const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
   const currentPhotographer = React.useMemo(() => {
@@ -454,13 +459,20 @@ export const PhotoCalendar: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedDateBookings.map((bk) => (
-                  <div key={bk.id} className="p-4 bg-neutral-50 rounded-2xl border border-black/[0.06] space-y-2.5">
+                  <div
+                    key={bk.id}
+                    onClick={() => setSelectedBookingForDetail(bk)}
+                    className="p-4 bg-neutral-50 hover:bg-neutral-100/80 transition-colors rounded-2xl border border-black/[0.06] space-y-2.5 cursor-pointer group"
+                    title="Nhấp để xem chi tiết ca chụp & cập nhật tiến độ"
+                  >
                     <div className="flex justify-between items-start">
                       <div>
                         <span className="font-mono text-neutral-900 font-bold bg-white border border-black/[0.08] px-2 py-0.5 rounded text-[10px] shadow-2xs">
                           {bk.code}
                         </span>
-                        <h4 className="font-bold text-neutral-900 text-sm mt-1">{bk.className} - {bk.schoolName}</h4>
+                        <h4 className="font-bold text-neutral-900 text-sm mt-1 group-hover:text-neutral-700 transition-colors">
+                          {bk.className ? `Lớp ${bk.className}` : ''} - {bk.schoolName}
+                        </h4>
                       </div>
                       {!isPhotographerUser && (
                         <span className="text-xs font-bold text-neutral-900 bg-white px-2.5 py-1 rounded-full border border-black/[0.06]">
@@ -490,6 +502,36 @@ export const PhotoCalendar: React.FC = () => {
                         Cảnh báo: Thợ chụp này bị trùng giờ chụp với đơn khác!
                       </div>
                     )}
+
+                    {/* Action buttons: CRM 360 & Chi tiết đơn */}
+                    <div className="pt-2 border-t border-black/[0.06] flex items-center justify-between gap-2">
+                      {bk.customerId ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCustomerId(bk.customerId);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-[11px] font-bold transition-all shadow-xs"
+                          title="Mở hồ sơ khách hàng 360° trong CRM"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Hồ Sơ CRM 360°</span>
+                        </button>
+                      ) : <span />}
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedBookingForDetail(bk);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-neutral-200 text-neutral-800 rounded-xl text-[11px] font-semibold border border-black/[0.08] transition-all"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-neutral-500" />
+                        <span>Chi Tiết Đơn</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -629,6 +671,37 @@ export const PhotoCalendar: React.FC = () => {
                         Cảnh báo: Thợ chụp này đã được gán cho 2 lớp chụp cùng thời điểm! Cần điều phối lại gấp.
                       </div>
                     )}
+
+                    {/* Action buttons: CRM 360 & Chi tiết đơn */}
+                    <div className="pt-2 border-t border-black/[0.06] flex items-center justify-between gap-2">
+                      {bk.customerId ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsDayDetailsOpen(false);
+                            setSelectedCustomerId(bk.customerId);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold transition-all shadow-xs"
+                          title="Mở hồ sơ khách hàng 360° trong CRM"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Hồ Sơ CRM 360°</span>
+                        </button>
+                      ) : <span />}
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedBookingForDetail(bk);
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-semibold border border-black/[0.08] transition-all"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-neutral-500" />
+                        <span>Chi Tiết Đơn</span>
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
@@ -666,6 +739,13 @@ export const PhotoCalendar: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialDate={modalDate}
+      />
+
+      {/* Booking Detail Modal */}
+      <BookingDetailModal
+        booking={selectedBookingForDetail}
+        isOpen={Boolean(selectedBookingForDetail)}
+        onClose={() => setSelectedBookingForDetail(null)}
       />
     </div>
   );
