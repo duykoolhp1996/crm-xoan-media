@@ -13,7 +13,7 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.1.5';
+const VERSION = '1.1.6';
 
 // Helper đọc body request JSON
 const readJsonBody = (req) => {
@@ -440,19 +440,22 @@ const server = http.createServer(async (req, res) => {
           WHERE id = ?
         `);
 
+// Helper chuyển undefined sang null để SQLite không bị lỗi parameter binding
+const toSql = (val) => (val === undefined ? null : val);
+
         stmt.run(
-          body.name, body.phone, body.email, body.facebook, body.tiktok, body.zalo,
-          body.schoolId, body.schoolName, body.grade, body.className, body.academicYear,
-          body.region, body.city, body.district, body.representativeRole, body.studentCount !== undefined ? Number(body.studentCount) : null,
-          body.serviceType, body.servicePackageId, body.servicePackageName, body.concept,
-          body.expectedShootDate, shootingLocationsStr, body.expectedBudget !== undefined ? Number(body.expectedBudget) : null, body.specialRequests, body.notes,
-          body.rawDriveUrl, body.driveUrl, body.photoNotes, body.shotDate, body.photoCount !== undefined ? Number(body.photoCount) : null,
-          body.source, body.campaignName, utmStr,
-          body.pipelineStage, body.assignedSalesId, body.assignedSalesName,
-          body.assignedCareStaffId, body.assignedCareStaffName,
+          toSql(body.name), toSql(body.phone), toSql(body.email), toSql(body.facebook), toSql(body.tiktok), toSql(body.zalo),
+          toSql(body.schoolId), toSql(body.schoolName), toSql(body.grade), toSql(body.className), toSql(body.academicYear),
+          toSql(body.region), toSql(body.city), toSql(body.district), toSql(body.representativeRole), body.studentCount !== undefined ? Number(body.studentCount) : null,
+          toSql(body.serviceType), toSql(body.servicePackageId), toSql(body.servicePackageName), toSql(body.concept),
+          toSql(body.expectedShootDate), toSql(shootingLocationsStr), body.expectedBudget !== undefined ? Number(body.expectedBudget) : null, toSql(body.specialRequests), toSql(body.notes),
+          toSql(body.rawDriveUrl), toSql(body.driveUrl), toSql(body.photoNotes), toSql(body.shotDate), body.photoCount !== undefined ? Number(body.photoCount) : null,
+          toSql(body.source), toSql(body.campaignName), toSql(utmStr),
+          toSql(body.pipelineStage), toSql(body.assignedSalesId), toSql(body.assignedSalesName),
+          toSql(body.assignedCareStaffId), toSql(body.assignedCareStaffName),
           body.contractValue !== undefined ? Number(body.contractValue) : null, body.depositAmount !== undefined ? Number(body.depositAmount) : null,
           body.totalRevenue !== undefined ? Number(body.totalRevenue) : null, body.paidAmount !== undefined ? Number(body.paidAmount) : null,
-          body.lastContactedAt,
+          toSql(body.lastContactedAt),
           id
         );
 
@@ -658,14 +661,14 @@ const server = http.createServer(async (req, res) => {
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
         `).run(
-          body.title, body.shootDate, body.startTime, body.endTime, body.location, body.city, body.district,
+          toSql(body.title), toSql(body.shootDate), toSql(body.startTime), toSql(body.endTime), toSql(body.location), toSql(body.city), toSql(body.district),
           body.studentCount !== undefined ? Number(body.studentCount) : null,
-          body.packageId, body.packageName, body.concept,
-          body.assignments?.leadPhotographerId, body.assignments?.leadPhotographerName, assignmentsStr,
+          toSql(body.packageId), toSql(body.packageName), toSql(body.concept),
+          toSql(body.assignments?.leadPhotographerId), toSql(body.assignments?.leadPhotographerName), toSql(assignmentsStr),
           body.totalAmount !== undefined ? Number(body.totalAmount) : null,
           body.depositAmount !== undefined ? Number(body.depositAmount) : null,
           body.remainingAmount !== undefined ? Number(body.remainingAmount) : null,
-          body.paymentStatus, body.bookingStatus, body.notes,
+          toSql(body.paymentStatus), toSql(body.bookingStatus), toSql(body.notes),
           id
         );
 

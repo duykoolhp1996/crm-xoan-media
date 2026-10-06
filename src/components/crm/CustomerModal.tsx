@@ -1,61 +1,100 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { LeadSource, PipelineStage } from '../../types';
+import { Customer, LeadSource, PipelineStage } from '../../types';
 import { VIETNAM_LOCATIONS, getDistrictsByCity } from '../../data/vietnamLocations';
 import { X, Sparkles, User, School, Calendar, DollarSign, Tag, MapPin, Headphones, UserCheck, Globe, Layers, AlertTriangle, AlertCircle } from 'lucide-react';
 
 interface CustomerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  customerToEdit?: Customer | null;
 }
 
-export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose }) => {
-  const { addCustomer, schools, servicePackages, salesStaff, currentUser, customers } = useApp();
+export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, customerToEdit }) => {
+  const { addCustomer, updateCustomer, schools, servicePackages, salesStaff, currentUser, customers } = useApp();
 
   // Tự động gán Sales là chính mình nếu user đang đăng nhập có vai trò Sales
   const initialSalesName = currentUser.role === 'sales' ? currentUser.name : 'Chưa gán';
 
-  const getInitialFormData = () => ({
-    name: '',
-    phone: '',
-    email: '',
-    facebook: '',
-    zalo: '',
-    schoolName: schools[0]?.name || 'THPT Chuyên Trần Phú (Hải Phòng)',
-    grade: 'Khối 12',
-    className: '',
-    academicYear: '2025-2026',
-    city: 'Hải Phòng',
-    district: 'Lê Chân',
-    region: 'Lê Chân, Hải Phòng',
-    representativeRole: 'Lớp trưởng',
-    studentCount: 35,
-    serviceType: 'Kỷ yếu Concept',
-    servicePackageId: servicePackages[1]?.id || '',
-    concept: 'Thanh xuân vườn trường',
-    expectedShootDate: '',
-    shootingLocations: 'Trường học & Nhà Hát Lớn / Bãi biển Đồ Sơn',
-    expectedBudget: 7000000,
-    specialRequests: '',
-    notes: '',
-    source: 'Facebook Ads' as LeadSource,
-    campaignName: 'Mùa_Kỷ_Yếu_2026',
-    utmSource: 'facebook',
-    utmMedium: 'cpc',
-    utmCampaign: 'lead_form_kyyeu',
-    pipelineStage: 'New Lead' as PipelineStage,
-    assignedSalesName: initialSalesName,
-    assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)'
-  });
+  const getInitialFormData = () => {
+    if (customerToEdit) {
+      return {
+        name: customerToEdit.name || '',
+        phone: customerToEdit.phone || '',
+        email: customerToEdit.email || '',
+        facebook: customerToEdit.facebook || '',
+        zalo: customerToEdit.zalo || '',
+        schoolName: customerToEdit.schoolName || (schools[0]?.name || 'THPT Chuyên Trần Phú (Hải Phòng)'),
+        grade: customerToEdit.grade || 'Khối 12',
+        className: customerToEdit.className || '',
+        academicYear: customerToEdit.academicYear || '2025-2026',
+        city: customerToEdit.city || 'Hải Phòng',
+        district: customerToEdit.district || 'Lê Chân',
+        region: customerToEdit.region || 'Lê Chân, Hải Phòng',
+        representativeRole: customerToEdit.representativeRole || 'Lớp trưởng',
+        studentCount: customerToEdit.studentCount || 35,
+        serviceType: customerToEdit.serviceType || 'Kỷ yếu Concept',
+        servicePackageId: customerToEdit.servicePackageId || (servicePackages[1]?.id || ''),
+        concept: customerToEdit.concept || 'Thanh xuân vườn trường',
+        expectedShootDate: customerToEdit.expectedShootDate || '',
+        shootingLocations: Array.isArray(customerToEdit.shootingLocations)
+          ? customerToEdit.shootingLocations.join(', ')
+          : (customerToEdit.shootingLocations || 'Trường học & Nhà Hát Lớn / Bãi biển Đồ Sơn'),
+        expectedBudget: customerToEdit.expectedBudget || 7000000,
+        specialRequests: customerToEdit.specialRequests || '',
+        notes: customerToEdit.notes || '',
+        source: (customerToEdit.source || 'Facebook Ads') as LeadSource,
+        campaignName: customerToEdit.campaignName || 'Mùa_Kỷ_Yếu_2026',
+        utmSource: customerToEdit.utm?.source || 'facebook',
+        utmMedium: customerToEdit.utm?.medium || 'cpc',
+        utmCampaign: customerToEdit.utm?.campaign || 'lead_form_kyyeu',
+        pipelineStage: (customerToEdit.pipelineStage || 'New Lead') as PipelineStage,
+        assignedSalesName: customerToEdit.assignedSalesName || initialSalesName,
+        assignedCareStaffName: customerToEdit.assignedCareStaffName || 'Phạm Quỳnh Nga (CSKH)'
+      };
+    }
+    return {
+      name: '',
+      phone: '',
+      email: '',
+      facebook: '',
+      zalo: '',
+      schoolName: schools[0]?.name || 'THPT Chuyên Trần Phú (Hải Phòng)',
+      grade: 'Khối 12',
+      className: '',
+      academicYear: '2025-2026',
+      city: 'Hải Phòng',
+      district: 'Lê Chân',
+      region: 'Lê Chân, Hải Phòng',
+      representativeRole: 'Lớp trưởng',
+      studentCount: 35,
+      serviceType: 'Kỷ yếu Concept',
+      servicePackageId: servicePackages[1]?.id || '',
+      concept: 'Thanh xuân vườn trường',
+      expectedShootDate: '',
+      shootingLocations: 'Trường học & Nhà Hát Lớn / Bãi biển Đồ Sơn',
+      expectedBudget: 7000000,
+      specialRequests: '',
+      notes: '',
+      source: 'Facebook Ads' as LeadSource,
+      campaignName: 'Mùa_Kỷ_Yếu_2026',
+      utmSource: 'facebook',
+      utmMedium: 'cpc',
+      utmCampaign: 'lead_form_kyyeu',
+      pipelineStage: 'New Lead' as PipelineStage,
+      assignedSalesName: initialSalesName,
+      assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)'
+    };
+  };
 
   const [formData, setFormData] = useState(getInitialFormData);
 
-  // Tự động làm mới form mỗi khi mở modal
+  // Tự động làm mới form mỗi khi mở modal hoặc đổi khách hàng cần sửa
   React.useEffect(() => {
     if (isOpen) {
       setFormData(getInitialFormData());
     }
-  }, [isOpen]);
+  }, [isOpen, customerToEdit]);
 
   const availableDistricts = getDistrictsByCity(formData.city);
 
@@ -78,13 +117,14 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     }));
   };
 
-  // Chuẩn hóa số điện thoại để kiểm tra trùng
+  // Chuẩn hóa số điện thoại để kiểm tra trùng (loại trừ chính khách hàng đang chỉnh sửa)
   const cleanPhone = (p?: string) => (p || '').replace(/\D/g, '');
 
   const cleanInputPhone = cleanPhone(formData.phone);
   const cleanInputZalo = cleanPhone(formData.zalo);
   const duplicateCustomer = cleanInputPhone.length >= 4
     ? (customers || []).find(c => {
+        if (customerToEdit && c.id === customerToEdit.id) return false;
         const cPhone = cleanPhone(c.phone);
         const cZalo = cleanPhone(c.zalo);
         return (cPhone && (cPhone === cleanInputPhone || (cleanInputZalo && cPhone === cleanInputZalo))) ||
@@ -108,11 +148,12 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
       return;
     }
 
-    // Kiểm tra trùng số điện thoại (chỉ khi có nhập SĐT)
+    // Kiểm tra trùng số điện thoại (chỉ khi có nhập SĐT, loại trừ chính khách hàng đang sửa)
     const inputCleanPhone = cleanPhone(formData.phone);
     const inputCleanZalo = cleanPhone(formData.zalo);
     if (inputCleanPhone.length >= 4) {
       const directDup = (customers || []).find(c => {
+        if (customerToEdit && c.id === customerToEdit.id) return false;
         const cPhone = cleanPhone(c.phone);
         const cZalo = cleanPhone(c.zalo);
         return (cPhone && (cPhone === inputCleanPhone || (inputCleanZalo && cPhone === inputCleanZalo))) ||
@@ -144,6 +185,51 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
     const matchedSales = salesStaff.find(s => s.name === salesName);
     const salesId = matchedSales?.id || (salesName === currentUser.name ? currentUser.id : '');
 
+    // Nếu đang ở chế độ CHỈNH SỬA khách hàng đã có
+    if (customerToEdit) {
+      updateCustomer({
+        ...customerToEdit,
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        facebook: formData.facebook,
+        zalo: formData.zalo || formData.phone,
+        schoolName: formData.schoolName,
+        grade: formData.grade,
+        className: formData.className,
+        academicYear: formData.academicYear,
+        city: formData.city,
+        district: formData.district,
+        region: formData.region || (formData.district ? `${formData.district}, ${formData.city}` : formData.city),
+        representativeRole: formData.representativeRole,
+        studentCount: Number(formData.studentCount),
+        serviceType: formData.serviceType,
+        servicePackageId: formData.servicePackageId,
+        servicePackageName: selectedPkg?.name || customerToEdit.servicePackageName || 'Gói Tùy Chọn',
+        concept: formData.concept,
+        expectedShootDate: formData.expectedShootDate,
+        shootingLocations: formData.shootingLocations.split(',').map((s: string) => s.trim()).filter(Boolean),
+        expectedBudget: Number(formData.expectedBudget),
+        totalRevenue: Number(formData.expectedBudget) || customerToEdit.totalRevenue,
+        specialRequests: formData.specialRequests,
+        notes: formData.notes,
+        source: formData.source,
+        campaignName: formData.campaignName,
+        utm: {
+          source: formData.utmSource,
+          medium: formData.utmMedium,
+          campaign: formData.utmCampaign
+        },
+        pipelineStage: formData.pipelineStage,
+        assignedSalesId: salesId,
+        assignedSalesName: salesName,
+        assignedCareStaffName: formData.assignedCareStaffName
+      });
+      onClose();
+      return;
+    }
+
+    // Chế độ TẠO MỚI khách hàng
     const success = addCustomer({
       name: formData.name,
       phone: formData.phone,
@@ -164,7 +250,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
       servicePackageName: selectedPkg?.name || 'Gói Tùy Chọn',
       concept: formData.concept,
       expectedShootDate: formData.expectedShootDate,
-      shootingLocations: formData.shootingLocations.split(',').map(s => s.trim()),
+      shootingLocations: formData.shootingLocations.split(',').map((s: string) => s.trim()),
       expectedBudget: Number(formData.expectedBudget),
       specialRequests: formData.specialRequests,
       notes: formData.notes,
@@ -202,7 +288,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
               <Sparkles className="w-4 h-4" />
             </div>
             <h2 className="text-sm font-bold tracking-tight text-neutral-900">
-              Thêm Mới Lead / Khách Hàng Kỷ Yếu
+              {customerToEdit ? `Chỉnh Sửa Hồ Sơ: ${customerToEdit.name}` : 'Thêm Mới Lead / Khách Hàng Kỷ Yếu'}
             </h2>
           </div>
           <button
@@ -631,7 +717,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
                   : 'bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] active:scale-95'
               }`}
             >
-              {duplicateCustomer ? '⚠️ SĐT Đã Trùng - Không Thể Lưu' : 'Lưu Khách Hàng Vào Hệ Thống'}
+              {duplicateCustomer ? '⚠️ SĐT Đã Trùng - Không Thể Lưu' : (customerToEdit ? 'Lưu Thay Đổi Hồ Sơ' : 'Lưu Khách Hàng Vào Hệ Thống')}
             </button>
           </div>
         </form>

@@ -27,12 +27,14 @@ import {
   Sparkles,
   FolderOpen,
   ExternalLink,
-  CheckCircle2
+  CheckCircle2,
+  Edit3
 } from 'lucide-react';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
+import { CustomerModal } from './CustomerModal';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -64,6 +66,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showUploadDriveModal, setShowUploadDriveModal] = useState(false);
+  const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'deposit' | 'final'>('deposit');
   const [lostReason, setLostReason] = useState('Giá cao hơn ngân sách dự kiến của lớp');
   const [customLostNote, setCustomLostNote] = useState('');
@@ -207,6 +210,17 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            {/* Nút Chỉnh Sửa Hồ Sơ Khách Hàng */}
+            <button
+              type="button"
+              onClick={() => setShowEditCustomerModal(true)}
+              className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer"
+              title="Chỉnh sửa thông tin hồ sơ khách hàng này"
+            >
+              <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+              <span>Sửa Hồ Sơ</span>
+            </button>
+
             {customer.pipelineStage !== 'Lost' ? (
               <button
                 type="button"
@@ -1618,6 +1632,13 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
         customer={customer}
         isOpen={showUploadDriveModal}
         onClose={() => setShowUploadDriveModal(false)}
+      />
+
+      {/* Modal Chỉnh Sửa Hồ Sơ Khách Hàng */}
+      <CustomerModal
+        isOpen={showEditCustomerModal}
+        onClose={() => setShowEditCustomerModal(false)}
+        customerToEdit={customer}
       />
     </div>,
     document.body

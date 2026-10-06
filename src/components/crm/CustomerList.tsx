@@ -15,7 +15,8 @@ import {
   MapPin,
   Headphones,
   UserCheck,
-  Trash2
+  Trash2,
+  Edit3
 } from 'lucide-react';
 import { CustomerDetail360 } from './CustomerDetail360';
 import { CustomerModal } from './CustomerModal';
@@ -36,6 +37,23 @@ export const CustomerList: React.FC = () => {
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [selectedStage, setSelectedStage] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
+
+  const handleOpenCreate = () => {
+    setCustomerToEdit(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (cust: Customer, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setCustomerToEdit(cust);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCustomerToEdit(null);
+  };
 
   const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
   const mySalesStaff = useMemo(() => {
@@ -119,7 +137,7 @@ export const CustomerList: React.FC = () => {
             Tải File Sheet (.xlsx)
           </a>
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenCreate}
             className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-2xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
@@ -352,6 +370,16 @@ export const CustomerList: React.FC = () => {
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          type="button"
+                          onClick={(e) => handleOpenEdit(cust, e)}
+                          title="Chỉnh sửa thông tin khách hàng"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-[11px] font-bold transition-all shadow-2xs active:scale-95 cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                          Sửa
+                        </button>
+                        <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedCustomerId(cust.id);
@@ -362,6 +390,7 @@ export const CustomerList: React.FC = () => {
                           <ChevronRight className="w-3.5 h-3.5" />
                         </button>
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (window.confirm(`Bạn có chắc chắn muốn xóa khách hàng "${cust.name}" (${cust.className} - ${cust.phone}) khỏi hệ thống CRM không?`)) {
@@ -391,10 +420,11 @@ export const CustomerList: React.FC = () => {
         />
       )}
 
-      {/* Add Customer Modal */}
+      {/* Add / Edit Customer Modal */}
       <CustomerModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
+        customerToEdit={customerToEdit}
       />
     </div>
   );
