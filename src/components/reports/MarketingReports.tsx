@@ -23,6 +23,12 @@ import {
   CartesianGrid,
   Legend
 } from 'recharts';
+import {
+  isCustomerBookedOrDeposited,
+  getCustomerTotalOrderValue,
+  getCustomerPaidDeposit,
+  getCustomerRemainingDebt
+} from '../../lib/revenueUtils';
 
 export const MarketingReports: React.FC = () => {
   const { customers, bookings, campaigns, setActiveTab } = useApp();
@@ -80,16 +86,21 @@ export const MarketingReports: React.FC = () => {
       const channelCustomers = filteredCustomers.filter(c => (c.source || 'Khác') === sourceName);
       const leads = channelCustomers.length;
 
-      // Số booking chốt thành công từ kênh này
+      // Số booking chốt thành công từ kênh này (Chỉ các lớp đã cọc & book)
       const bookedCustomers = channelCustomers.filter(c =>
-        ['Đã đặt cọc', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao', 'Hoàn thành'].includes(c.pipelineStage) ||
-        bookings.some(b => b.customerId === c.id)
+        isCustomerBookedOrDeposited(c, bookings)
       );
       const bookingCount = bookedCustomers.length;
 
-      // Doanh thu thực tế (VNĐ & Triệu VNĐ)
-      const revenueRaw = channelCustomers.reduce((sum, c) => sum + (c.totalRevenue || c.paidAmount || c.expectedBudget || 0), 0);
+      // DOANH THU TOÀN BỘ ĐƠN CỦA CÁC LỚP ĐÃ BOOK & CỌC
+      const revenueRaw = bookedCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
       const revenueMillions = Number((revenueRaw / 1000000).toFixed(1));
+
+      // Tiền cọc thực thu & Công nợ theo kênh
+      const depositRaw = bookedCustomers.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
+      const depositMillions = Number((depositRaw / 1000000).toFixed(1));
+      const debtRaw = Math.max(0, revenueRaw - depositRaw);
+      const debtMillions = Number((debtRaw / 1000000).toFixed(1));
 
       // Chi phí Ads (VNĐ & Triệu VNĐ)
       const costRaw = adsSpendByChannel[sourceName] || 0;
@@ -101,7 +112,7 @@ export const MarketingReports: React.FC = () => {
       // Cost per Lead (CPL)
       const cpl = leads > 0 && costRaw > 0 ? Math.round(costRaw / leads) : 0;
 
-      // ROAS
+      // ROAS (Tính trên doanh thu đơn đã chốt / Chi phí Ads)
       const roas = costRaw > 0
         ? `${Number((revenueRaw / costRaw).toFixed(2))}x`
         : (revenueRaw > 0 ? 'Tự nhiên (0đ Ads)' : '0x');
@@ -112,6 +123,10 @@ export const MarketingReports: React.FC = () => {
         bookings: bookingCount,
         revenue: revenueMillions,
         revenueRaw,
+        depositMillions,
+        depositRaw,
+        debtMillions,
+        debtRaw,
         cost: costMillions,
         costRaw,
         cpl,
@@ -126,16 +141,24 @@ export const MarketingReports: React.FC = () => {
 
   // 4. Tổng hợp các chỉ số KPI Toàn Kênh từ dữ liệu thực tế
   const totalLeads = filteredCustomers.length;
-  const totalBookings = useMemo(() => {
-    return filteredCustomers.filter(c =>
-      ['Đã đặt cọc', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao', 'Hoàn thành'].includes(c.pipelineStage) ||
-      bookings.some(b => b.customerId === c.id)
-    ).length;
+  const bookedCustomers = useMemo(() => {
+    return filteredCustomers.filter(c => isCustomerBookedOrDeposited(c, bookings));
   }, [filteredCustomers, bookings]);
 
+  const totalBookings = bookedCustomers.length;
+
+  // TỔNG DOANH THU: CHỈ GHI NHẬN TOÀN BỘ GIÁ TRỊ ĐƠN CỦA CÁC LỚP ĐÃ BOOK VÀ CỌC
   const totalRevenue = useMemo(() => {
-    return filteredCustomers.reduce((sum, c) => sum + (c.totalRevenue || c.paidAmount || c.expectedBudget || 0), 0);
-  }, [filteredCustomers]);
+    return bookedCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
+  }, [bookedCustomers]);
+
+  // TỔNG CỌC ĐÃ THU THỰC TẾ
+  const totalDeposit = useMemo(() => {
+    return bookedCustomers.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
+  }, [bookedCustomers]);
+
+  // TỔNG CÔNG NỢ CÒN LẠI
+  const totalRemainingDebt = Math.max(0, totalRevenue - totalDeposit);
 
   const totalAdsCost = useMemo(() => {
     return Object.values(adsSpendByChannel).reduce((sum, val) => sum + val, 0);
@@ -154,13 +177,15 @@ export const MarketingReports: React.FC = () => {
       return;
     }
 
-    const headers = ['Kênh / Nguồn', 'Số Lead', 'Số Booking', 'Tỷ Lệ Chốt (%)', 'Doanh Thu (Tr Đ)', 'Chi Phí Ads (Tr Đ)', 'CPL (VNĐ)', 'ROAS'];
+    const headers = ['Kênh / Nguồn', 'Số Lead', 'Số Booking', 'Tỷ Lệ Chốt (%)', 'Doanh Thu HĐ (Tr Đ)', 'Đã Cọc (Tr Đ)', 'Còn Nợ (Tr Đ)', 'Chi Phí Ads (Tr Đ)', 'CPL (VNĐ)', 'ROAS'];
     const rows = sourcePerformance.map(s => [
       `"${s.source}"`,
       s.leads,
       s.bookings,
       `${s.conversionRate}%`,
       `${s.revenue.toFixed(1)} Tr`,
+      `${s.depositMillions.toFixed(1)} Tr`,
+      `${s.debtMillions.toFixed(1)} Tr`,
       `${s.cost.toFixed(1)} Tr`,
       s.cpl.toLocaleString('vi-VN'),
       `"${s.roas}"`
@@ -248,15 +273,20 @@ export const MarketingReports: React.FC = () => {
           </span>
         </div>
 
-        {/* Card 4: ROAS Toàn Mùa */}
+        {/* Card 4: ROAS & Doanh Thu Đơn Đã Chốt */}
         <div className="bg-white border border-black/[0.08] p-5 rounded-3xl shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">ROAS KINH DOANH</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">ROAS & DOANH THU ĐƠN CHỐT</span>
           <p className="text-2xl font-black text-orange-600 mt-2">
             {overallRoas}
           </p>
-          <span className="text-[11px] text-neutral-500 mt-1 block">
-            Doanh thu {(totalRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
-          </span>
+          <div className="text-[11px] text-neutral-500 mt-1 space-y-0.5">
+            <span className="block font-semibold text-neutral-800">
+              Doanh thu: {(totalRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ ({totalBookings} lớp)
+            </span>
+            <span className="block text-emerald-700 font-medium text-[10px]">
+              Đã cọc: {(totalDeposit / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M • Còn nợ: {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M
+            </span>
+          </div>
         </div>
       </div>
 
@@ -329,6 +359,12 @@ export const MarketingReports: React.FC = () => {
                     <span>{item.leads} Lead • {item.bookings} Chốt ({item.conversionRate}%)</span>
                     <span className="font-semibold text-emerald-700">ROAS: {item.roas}</span>
                   </div>
+                  {item.revenueRaw > 0 && (
+                    <div className="text-[10px] text-neutral-600 flex justify-between bg-white px-2 py-1 rounded-lg border border-black/[0.04]">
+                      <span>Đã cọc: <strong className="text-emerald-700">{item.depositMillions}M đ</strong></span>
+                      <span>Còn nợ: <strong className="text-rose-600">{item.debtMillions}M đ</strong></span>
+                    </div>
+                  )}
                   {item.cpl > 0 && (
                     <div className="text-[10px] text-neutral-400 pt-0.5 border-t border-black/[0.04] flex justify-between">
                       <span>CPL:</span>

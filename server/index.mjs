@@ -13,7 +13,7 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.2.0';
+const VERSION = '1.2.1';
 
 // Helper đọc body request JSON
 const readJsonBody = (req) => {

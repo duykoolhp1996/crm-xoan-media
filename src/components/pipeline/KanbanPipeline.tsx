@@ -25,6 +25,10 @@ import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 import { TrashBinModal } from '../crm/TrashBinModal';
+import {
+  CLOSED_BOOKED_STAGES,
+  isCustomerBookedOrDeposited
+} from '../../lib/revenueUtils';
 
 export const KanbanPipeline: React.FC = () => {
   const {
@@ -374,7 +378,10 @@ export const KanbanPipeline: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-[10px] text-neutral-400 mt-1 font-medium">
-                    Tổng: <strong className="text-neutral-700">{(stageTotalMoney / 1000000).toFixed(1)}M đ</strong>
+                    {CLOSED_BOOKED_STAGES.includes(stage) ? 'Doanh thu: ' : 'Dự toán: '}
+                    <strong className={CLOSED_BOOKED_STAGES.includes(stage) ? 'text-emerald-800 font-extrabold' : 'text-neutral-700'}>
+                      {(stageTotalMoney / 1000000).toFixed(1)}M đ
+                    </strong>
                   </p>
                 </div>
 

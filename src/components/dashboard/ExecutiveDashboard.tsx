@@ -35,6 +35,12 @@ import {
   Cell
 } from 'recharts';
 import { CRM_CTV_SALES } from '../../data/crmBusinessData';
+import {
+  isCustomerBookedOrDeposited,
+  getCustomerTotalOrderValue,
+  getCustomerPaidDeposit,
+  getCustomerRemainingDebt
+} from '../../lib/revenueUtils';
 
 export const ExecutiveDashboard: React.FC = () => {
   const {
@@ -122,46 +128,38 @@ export const ExecutiveDashboard: React.FC = () => {
     'Đã bàn giao'
   ];
 
-  // Danh sách các đơn đã chốt thành công (phát sinh cọc thực tế)
+  // Danh sách các đơn đã chốt thành công (đã book & cọc thực tế)
   const closedDeals = useMemo(() => {
-    return filteredCustomers.filter(c => 
-      CLOSED_STAGES.includes(c.pipelineStage) || 
-      (c.paidAmount && c.paidAmount > 0) ||
-      (c.depositAmount && c.depositAmount > 0)
-    );
-  }, [filteredCustomers]);
+    return filteredCustomers.filter(c => isCustomerBookedOrDeposited(c, bookings));
+  }, [filteredCustomers, bookings]);
 
-  // DOANH THU ĐƠN ĐÃ CHỐT ĐƯỢC (FULL GIÁ TRỊ HỢP ĐỒNG CỦA CÁC ĐƠN ĐÃ PHÁT SINH CỌC)
+  // DOANH THU ĐƠN ĐÃ CHỐT ĐƯỢC (FULL GIÁ TRỊ HỢP ĐỒNG CỦA CÁC ĐƠN ĐÃ BOOK VÀ CỌC)
   const closedDealsRevenue = useMemo(() => {
-    return closedDeals.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
+    return closedDeals.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
   }, [closedDeals]);
 
   // TỔNG TIỀN THỰC THU (TIỀN THỰC TẾ ĐÃ THU ĐƯỢC VÀO TÀI KHOẢN TỪ CÁC ĐƠN ĐÃ CHỐT)
   const totalCollectedRevenue = useMemo(() => {
-    return closedDeals.reduce((sum, c) => sum + (c.paidAmount || c.depositAmount || 0), 0);
+    return closedDeals.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
   }, [closedDeals]);
 
-  // CÔNG NỢ CÒN LẠI CẦN THU
+  // CÔNG NỢ CÒN LẠI CẦN THU (DOANH THU ĐÃ CHỐT - THỰC THU ĐÃ NHẬN)
   const totalRemainingDebt = Math.max(0, closedDealsRevenue - totalCollectedRevenue);
 
   // TỔNG TIỀM NĂNG PIPELINE (TOÀN BỘ NGÂN SÁCH DỰ KIẾN KỂ CẢ LEAD MỚI TIẾP NHẬN)
   const pipelinePotentialRevenue = useMemo(() => {
-    return filteredCustomers.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
+    return filteredCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
   }, [filteredCustomers]);
 
   // 3. Tính toán hoa hồng chi tiết cho từng nhân viên Sales
   const staffPerformanceList = useMemo(() => {
     return salesStaff.map(staff => {
       const staffCustomers = customers.filter(c => c.assignedSalesId === staff.id);
-      const totalRev = staffCustomers.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
-      const closedList = staffCustomers.filter(c => 
-        CLOSED_STAGES.includes(c.pipelineStage) || 
-        (c.paidAmount && c.paidAmount > 0) ||
-        (c.depositAmount && c.depositAmount > 0)
-      );
+      const totalRev = staffCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
+      const closedList = staffCustomers.filter(c => isCustomerBookedOrDeposited(c, bookings));
       const closedCount = closedList.length;
-      const closedRev = closedList.reduce((sum, c) => sum + (c.totalAmount || c.totalRevenue || c.expectedBudget || 0), 0);
-      const collectedRev = closedList.reduce((sum, c) => sum + (c.paidAmount || c.depositAmount || 0), 0);
+      const closedRev = closedList.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
+      const collectedRev = closedList.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
       
       // Tính hoa hồng theo cơ chế chính sách từng tài khoản
       let commission = 0;
@@ -755,7 +753,7 @@ export const ExecutiveDashboard: React.FC = () => {
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
                     isSelected ? 'bg-[#B8F23D] text-neutral-900' : 'bg-emerald-50 text-emerald-700'
                   }`}>
-                    {((staffPerf?.totalRev || 0) / 1000000).toFixed(1)} Tr
+                    {((staffPerf?.closedRev || 0) / 1000000).toFixed(1)} Tr
                   </span>
                 </button>
               );
@@ -1228,7 +1226,7 @@ export const ExecutiveDashboard: React.FC = () => {
                              item.staff.name.toLowerCase().includes(currentUser.name.toLowerCase()) ||
                              currentUser.name.toLowerCase().includes(item.staff.name.toLowerCase());
                     })
-                    .sort((a, b) => b.totalRev - a.totalRev)
+                    .sort((a, b) => b.closedRev - a.closedRev)
                     .map((item, index) => {
                       const isCurrentFiltered = selectedStaffId === item.staff.id;
                       return (
@@ -1283,8 +1281,13 @@ export const ExecutiveDashboard: React.FC = () => {
                           {/* Cột 3: Doanh thu HĐ */}
                           <td className="py-3.5 px-3 text-right">
                             <span className="font-extrabold text-neutral-900 text-sm">
-                              {(item.totalRev / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+                              {(item.closedRev / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
                             </span>
+                            {item.totalRev > item.closedRev && (
+                              <span className="block text-[10px] text-neutral-400 font-normal">
+                                Tiềm năng: {((item.totalRev) / 1000000).toFixed(1)} Tr
+                              </span>
+                            )}
                           </td>
 
                           {/* Cột 4: Thực thu */}

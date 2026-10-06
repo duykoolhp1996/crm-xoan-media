@@ -54,6 +54,10 @@ import {
   ArrowRight,
   Table
 } from 'lucide-react';
+import {
+  isCustomerBookedOrDeposited,
+  getCustomerTotalOrderValue
+} from '../../lib/revenueUtils';
 import { getGA4Id, setGA4Id } from '../../lib/analytics';
 import {
   getZaloBotConfig,
@@ -899,9 +903,9 @@ export const SettingsModule: React.FC = () => {
 
                 const closedCustomers = customers.filter(
                   c => (c.assignedSalesName === s.name || c.assignedSalesId === s.id) &&
-                       ['Đã đặt cọc', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao', 'Hoàn thành'].includes(c.pipelineStage)
+                       isCustomerBookedOrDeposited(c)
                 );
-                const closedRevenue = closedCustomers.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
+                const closedRevenue = closedCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
                 const commissionEarned = s.commissionType === 'fixed'
                   ? closedCustomers.length * (s.commissionFixedAmount ?? 500000)
                   : (closedRevenue * (s.commissionRate ?? 8)) / 100;

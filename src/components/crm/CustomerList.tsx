@@ -16,14 +16,26 @@ import {
   Headphones,
   UserCheck,
   Trash2,
-  Edit3
+  Edit3,
+  DollarSign,
+  Wallet,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { CustomerDetail360 } from './CustomerDetail360';
 import { CustomerModal } from './CustomerModal';
+import {
+  isCustomerBookedOrDeposited,
+  getCustomerTotalOrderValue,
+  getCustomerPaidDeposit,
+  getCustomerRemainingDebt,
+  calculateCrmFinancials
+} from '../../lib/revenueUtils';
 
 export const CustomerList: React.FC = () => {
   const {
     customers,
+    bookings,
     selectedCustomerId,
     setSelectedCustomerId,
     updateCustomerStage,
@@ -101,15 +113,26 @@ export const CustomerList: React.FC = () => {
     });
   }, [accessibleCustomers, searchTerm, selectedSource, selectedStage]);
 
+  // Thống kê tài chính thời gian thực: chỉ tính doanh thu với các lớp đã book & cọc, tách cọc và công nợ
+  const financialStats = useMemo(() => {
+    return calculateCrmFinancials(accessibleCustomers, bookings);
+  }, [accessibleCustomers, bookings]);
+
   // Stage badges colors on light glass
   const stageBadges: Record<string, string> = {
     'New Lead': 'bg-neutral-100 text-neutral-700 border-neutral-200',
     'Đang tư vấn': 'bg-sky-50 text-sky-700 border-sky-200',
     'Đã gửi báo giá': 'bg-purple-50 text-purple-700 border-purple-200',
-    'Đã đặt cọc': 'bg-amber-50 text-amber-800 border-amber-200',
-    'Đã Booking': 'bg-blue-50 text-blue-700 border-blue-200',
-    'Hoàn thành': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    'Lost': 'bg-rose-50 text-rose-700 border-rose-200'
+    'Đã cọc': 'bg-emerald-50 text-emerald-800 border-emerald-300 font-extrabold',
+    'Book ngày': 'bg-purple-50 text-purple-800 border-purple-300 font-extrabold',
+    'Đã chụp': 'bg-blue-50 text-blue-800 border-blue-300 font-extrabold',
+    'Đang hậu kỳ': 'bg-amber-50 text-amber-800 border-amber-300 font-extrabold',
+    'Giao ảnh': 'bg-teal-50 text-teal-800 border-teal-300 font-extrabold',
+    'Hoàn thành': 'bg-emerald-100 text-emerald-900 border-emerald-400 font-extrabold',
+    'Lost': 'bg-rose-50 text-rose-700 border-rose-200',
+    'Đã đặt cọc': 'bg-emerald-50 text-emerald-800 border-emerald-300',
+    'Đã Booking': 'bg-purple-50 text-purple-800 border-purple-300',
+    'Đã bàn giao': 'bg-teal-50 text-teal-800 border-teal-300'
   };
 
   return (
@@ -146,6 +169,72 @@ export const CustomerList: React.FC = () => {
         </div>
       </div>
 
+      {/* Financial Overview Summary Bar: Ghi nhận Tổng Doanh Thu với Lớp Đã Book & Cọc, tách riêng Thực Thu & Công Nợ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* Card 1: Doanh thu đơn đã book & cọc */}
+        <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU ĐÃ CHỐT</span>
+            <div className="w-7 h-7 rounded-xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900">
+              <DollarSign className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl font-black text-neutral-900 mt-1">
+            {(financialStats.totalRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
+          </p>
+          <span className="text-[10px] font-semibold text-emerald-700 mt-0.5 block">
+            {financialStats.bookedCount} lớp đã book & cọc
+          </span>
+        </div>
+
+        {/* Card 2: Thực thu cọc */}
+        <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">THỰC THU (CỌC ĐÃ NHẬN)</span>
+            <div className="w-7 h-7 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+              <Wallet className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl font-black text-emerald-700 mt-1">
+            {(financialStats.totalCollected / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
+          </p>
+          <span className="text-[10px] text-neutral-500 mt-0.5 block">
+            {((financialStats.totalCollected / (financialStats.totalRevenue || 1)) * 100).toFixed(0)}% giá trị đơn
+          </span>
+        </div>
+
+        {/* Card 3: Công nợ phải thu */}
+        <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">CÔNG NỢ CÒN LẠI</span>
+            <div className="w-7 h-7 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
+              <AlertCircle className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl font-black text-rose-600 mt-1">
+            {(financialStats.totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
+          </p>
+          <span className="text-[10px] text-neutral-500 mt-0.5 block">
+            Chờ thanh toán khi giao ảnh
+          </span>
+        </div>
+
+        {/* Card 4: Dự toán chào giá */}
+        <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">DỰ TOÁN CHƯA CỌC</span>
+            <div className="w-7 h-7 rounded-xl bg-purple-50 flex items-center justify-center text-purple-700">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl font-black text-neutral-700 mt-1">
+            {(financialStats.unbookedPotential / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
+          </p>
+          <span className="text-[10px] text-neutral-500 mt-0.5 block">
+            {financialStats.totalCount - financialStats.bookedCount} lead đang chăm sóc/báo giá
+          </span>
+        </div>
+      </div>
 
       {/* Filters Bar */}
       <div className="glass-panel-subtle p-3.5 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center gap-3">
@@ -190,10 +279,13 @@ export const CustomerList: React.FC = () => {
             <option value="New Lead">New Lead</option>
             <option value="Đang tư vấn">Đang tư vấn</option>
             <option value="Đã gửi báo giá">Đã gửi báo giá</option>
-            <option value="Đã đặt cọc">Đã đặt cọc</option>
-            <option value="Đã Booking">Đã Booking</option>
+            <option value="Đã cọc">Đã cọc (Đã chốt)</option>
+            <option value="Book ngày">Book ngày</option>
+            <option value="Đã chụp">Đã chụp</option>
+            <option value="Đang hậu kỳ">Đang hậu kỳ</option>
+            <option value="Giao ảnh">Giao ảnh</option>
             <option value="Hoàn thành">Hoàn thành</option>
-            <option value="Lost">Lost</option>
+            <option value="Lost">Khách từ chối (Lost)</option>
           </select>
         </div>
       </div>
@@ -257,13 +349,32 @@ export const CustomerList: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-neutral-400 font-medium uppercase block">Doanh Thu</span>
-                  <span className="font-black text-neutral-900 text-xs">
-                    {(cust.totalAmount ?? cust.totalRevenue ?? cust.expectedBudget ?? 0).toLocaleString('vi-VN')}đ
-                  </span>
-                  <span className="text-[10px] text-emerald-700 block font-semibold">
-                    Cọc: {(cust.paidAmount || 0).toLocaleString('vi-VN')}đ
-                  </span>
+                  {isCustomerBookedOrDeposited(cust, bookings) ? (
+                    <div>
+                      <span className="text-[10px] font-bold text-neutral-400 uppercase block">DOANH THU HĐ</span>
+                      <span className="font-black text-neutral-900 text-xs block">
+                        {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
+                      </span>
+                      <div className="text-[10px] font-semibold flex items-center justify-end gap-1 mt-0.5">
+                        <span className="text-emerald-700">Cọc: {getCustomerPaidDeposit(cust).toLocaleString('vi-VN')}đ</span>
+                        {getCustomerRemainingDebt(cust) > 0 ? (
+                          <span className="text-rose-600">• Nợ: {getCustomerRemainingDebt(cust).toLocaleString('vi-VN')}đ</span>
+                        ) : (
+                          <span className="text-emerald-600 font-bold">• Xong 100%</span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="text-[10px] text-neutral-400 font-medium uppercase block">DỰ TOÁN BÁO GIÁ</span>
+                      <span className="font-bold text-neutral-700 text-xs block">
+                        {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
+                      </span>
+                      <span className="text-[10px] text-neutral-400 italic block mt-0.5">
+                        Chưa chốt cọc
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -359,14 +470,30 @@ export const CustomerList: React.FC = () => {
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div>
-                        <p className="font-bold text-neutral-900">
-                          {(cust.totalAmount ?? cust.totalRevenue ?? cust.expectedBudget ?? 0).toLocaleString('vi-VN')}đ
-                        </p>
-                        <p className="text-[11px] text-emerald-700 font-semibold">
-                          Đã cọc: {(cust.paidAmount || 0).toLocaleString('vi-VN')}đ
-                        </p>
-                      </div>
+                      {isCustomerBookedOrDeposited(cust, bookings) ? (
+                        <div className="space-y-0.5">
+                          <p className="font-extrabold text-neutral-900 text-xs">
+                            {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
+                          </p>
+                          <p className="text-[11px] font-semibold flex items-center gap-1.5 flex-wrap">
+                            <span className="text-emerald-700">Đã cọc: {getCustomerPaidDeposit(cust).toLocaleString('vi-VN')}đ</span>
+                            {getCustomerRemainingDebt(cust) > 0 ? (
+                              <span className="text-rose-600 font-bold">• Nợ: {getCustomerRemainingDebt(cust).toLocaleString('vi-VN')}đ</span>
+                            ) : (
+                              <span className="text-emerald-600 font-bold">• Đủ 100%</span>
+                            )}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-0.5">
+                          <p className="font-bold text-neutral-700 text-xs">
+                            {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
+                          </p>
+                          <p className="text-[10px] text-neutral-400 italic">
+                            Chưa chốt cọc (Dự kiến)
+                          </p>
+                        </div>
+                      )}
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
