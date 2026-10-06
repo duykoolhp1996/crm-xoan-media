@@ -21,6 +21,7 @@ import {
   Percent,
   DollarSign
 } from 'lucide-react';
+import { AvatarUploader } from '../common/AvatarUploader';
 
 interface SalesStaffModalProps {
   isOpen: boolean;
@@ -277,22 +278,14 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
           </div>
 
           {/* Avatar Selector */}
-          <div className="space-y-2 pt-1">
-            <label className="text-xs font-semibold text-neutral-700">Chọn ảnh đại diện</label>
-            <div className="flex items-center gap-3 overflow-x-auto pb-1">
-              {PRESET_AVATARS.map((av, idx) => (
-                <button
-                  type="button"
-                  key={idx}
-                  onClick={() => setFormData({ ...formData, avatar: av })}
-                  className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all shrink-0 ${
-                    formData.avatar === av ? 'border-neutral-900 scale-110 shadow-sm' : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
-                >
-                  <img src={av} alt="Avatar" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+          <div className="pt-1">
+            <AvatarUploader
+              currentAvatar={formData.avatar}
+              onAvatarChange={(newUrl) => setFormData(prev => ({ ...prev, avatar: newUrl }))}
+              presetAvatars={PRESET_AVATARS}
+              userId={staffToEdit?.id}
+              label="Ảnh Đại Diện Sales"
+            />
           </div>
 
           {/* Section 2: Trạng thái & Địa bàn phụ trách */}

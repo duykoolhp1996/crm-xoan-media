@@ -15,6 +15,13 @@ import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 const PORT = process.env.PORT || 4321;
 const VERSION = '1.2.2';
 
+// Thư mục lưu trữ tĩnh bền vững (nằm trong server/data/ nên không bị rsync đè mất)
+const UPLOADS_DIR = path.resolve(path.dirname(DB_PATH), 'uploads');
+const AVATARS_DIR = path.resolve(UPLOADS_DIR, 'avatars');
+if (!fs.existsSync(AVATARS_DIR)) {
+  fs.mkdirSync(AVATARS_DIR, { recursive: true });
+}
+
 // Helper đọc body request JSON
 const readJsonBody = (req) => {
   return new Promise((resolve, reject) => {
@@ -315,7 +322,93 @@ const server = http.createServer(async (req, res) => {
   const currentUserId = req.headers['x-user-id'] || 'system';
   const currentUserName = req.headers['x-user-name'] || 'Người dùng CRM';
 
-  try {
+    // -------------------------------------------------------------
+    // STATIC FILE SERVING CHO UPLOADS (Avatar, Media)
+    // -------------------------------------------------------------
+    if (pathname.startsWith('/uploads/') && req.method === 'GET') {
+      const relativePath = pathname.replace('/uploads/', '').replace(/\.\./g, '');
+      const filePath = path.resolve(UPLOADS_DIR, relativePath);
+
+      if (!filePath.startsWith(UPLOADS_DIR)) {
+        return sendJson(res, 403, { success: false, message: 'Forbidden path' });
+      }
+
+      if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+        return sendJson(res, 404, { success: false, message: 'File không tồn tại trên hệ thống' });
+      }
+
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.webp': 'image/webp',
+        '.gif': 'image/gif',
+        '.svg': 'image/svg+xml'
+      };
+      const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
+        'Access-Control-Allow-Origin': '*'
+      });
+      return fs.createReadStream(filePath).pipe(res);
+    }
+
+    // -------------------------------------------------------------
+    // UPLOAD REST API
+    // -------------------------------------------------------------
+    if (pathname === '/api/upload/avatar' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const { base64Data, fileType = 'image/jpeg', fileName = 'avatar.jpg', userId = '' } = body;
+
+      if (!base64Data) {
+        return sendJson(res, 400, { success: false, message: 'Dữ liệu ảnh base64Data là bắt buộc' });
+      }
+
+      const base64Clean = String(base64Data).replace(/^data:image\/[a-zA-Z+]+;base64,/, '');
+      const buffer = Buffer.from(base64Clean, 'base64');
+
+      if (buffer.length > 5 * 1024 * 1024) {
+        return sendJson(res, 400, { success: false, message: 'Dung lượng ảnh vượt quá giới hạn 5MB' });
+      }
+
+      let ext = '.jpg';
+      if (fileType.includes('png') || fileName.endsWith('.png')) ext = '.png';
+      else if (fileType.includes('webp') || fileName.endsWith('.webp')) ext = '.webp';
+
+      const safeId = userId ? String(userId).replace(/[^a-zA-Z0-9_-]/g, '') : 'user';
+      const safeFileName = `avatar_${safeId}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}${ext}`;
+      const targetFilePath = path.join(AVATARS_DIR, safeFileName);
+
+      fs.writeFileSync(targetFilePath, buffer);
+
+      const avatarUrl = `/uploads/avatars/${safeFileName}`;
+      const fullUrl = `https://crm.xoanmedia.com${avatarUrl}`;
+
+      logAudit({
+        userId: currentUserId,
+        userName: currentUserName,
+        action: 'UPLOAD_AVATAR',
+        tableName: 'uploads',
+        recordId: safeFileName,
+        newData: JSON.stringify({ fileName: safeFileName, sizeBytes: buffer.length, userId }),
+        ipAddress
+      });
+
+      return sendJson(res, 200, {
+        success: true,
+        data: {
+          url: avatarUrl,
+          fullUrl,
+          fileName: safeFileName,
+          sizeBytes: buffer.length
+        },
+        message: 'Tải lên ảnh đại diện thành công!'
+      });
+    }
+
     // -------------------------------------------------------------
     // 1. HEALTH CHECKS
     // -------------------------------------------------------------

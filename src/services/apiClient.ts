@@ -475,5 +475,25 @@ export const apiClient = {
     } catch {
       return false;
     }
+  },
+
+  // -----------------------------------------------------------------
+  // 7. FILE & AVATAR UPLOADS
+  // -----------------------------------------------------------------
+  async uploadAvatar(payload: { base64Data: string; fileName?: string; fileType?: string; userId?: string }): Promise<{ success: boolean; url: string; fullUrl: string } | null> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/upload/avatar`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data || null;
+    } catch (err) {
+      console.warn('[ApiClient] Lỗi tải lên avatar lên server:', err);
+      return null;
+    }
   }
 };

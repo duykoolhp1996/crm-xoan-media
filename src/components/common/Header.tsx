@@ -161,16 +161,17 @@ export const Header: React.FC = () => {
         </button>
 
         {/* User Profile Avatar */}
-        <div
-          className="w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] shadow-xs"
-          title={currentUser.name}
+        <button
+          onClick={() => setIsProfileOpen(true)}
+          className="w-9 h-9 rounded-2xl bg-neutral-200 overflow-hidden border border-black/[0.08] shadow-xs hover:ring-2 hover:ring-[#B8F23D] transition-all cursor-pointer group"
+          title={`${currentUser.name} - Bấm để xem hồ sơ & đổi ảnh đại diện`}
         >
           <img
             src={currentUser.avatar}
             alt={currentUser.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
           />
-        </div>
+        </button>
 
         {/* Logout Button (Desktop only - mobile dùng trong menu drawer) */}
         <button
@@ -189,7 +190,7 @@ export const Header: React.FC = () => {
         onClose={() => setIsNotifOpen(false)}
       />
 
-      {/* Profile Modal — chỉ Sales & Photographer */}
+      {/* Profile Modal — Hỗ trợ tất cả người dùng (Admin, Sales, Photographer) */}
       <ProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}

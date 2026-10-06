@@ -21,6 +21,7 @@ import {
   EyeOff,
   RefreshCw
 } from 'lucide-react';
+import { AvatarUploader } from '../common/AvatarUploader';
 
 interface PhotographerModalProps {
   isOpen: boolean;
@@ -575,42 +576,13 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
           </div>
 
           {/* Avatar Selector */}
-          <div>
-            <label className="font-bold text-neutral-800 flex items-center gap-1.5 mb-2">
-              <Camera className="w-3.5 h-3.5 text-orange-500" />
-              Ảnh Đại Diện (Avatar)
-            </label>
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              <img
-                src={formData.avatar}
-                alt="Selected Avatar"
-                className="w-12 h-12 rounded-2xl object-cover border-2 border-neutral-900 shadow-sm shrink-0"
-              />
-              <div className="flex items-center gap-2">
-                {PRESET_AVATARS.map((url, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, avatar: url }))}
-                    className={`w-9 h-9 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
-                      formData.avatar === url
-                        ? 'border-[#B8F23D] ring-2 ring-neutral-900 scale-105'
-                        : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={url} alt={`Preset ${i}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <input
-              type="url"
-              placeholder="Hoặc nhập link URL ảnh tùy chỉnh..."
-              value={formData.avatar}
-              onChange={e => setFormData(prev => ({ ...prev, avatar: e.target.value }))}
-              className="w-full mt-1.5 px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-neutral-900 placeholder-neutral-400 font-mono text-[11px] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-            />
-          </div>
+          <AvatarUploader
+            currentAvatar={formData.avatar}
+            onAvatarChange={(newUrl) => setFormData(prev => ({ ...prev, avatar: newUrl }))}
+            presetAvatars={PRESET_AVATARS}
+            userId={photographerToEdit?.id}
+            label="Ảnh Đại Diện (Avatar)"
+          />
 
           {/* Kỹ Năng Chuyên Môn */}
           <div>

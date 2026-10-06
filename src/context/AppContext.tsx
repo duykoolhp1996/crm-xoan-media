@@ -703,6 +703,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setCurrentUser(updatedUser);
 
+    // Đồng bộ avatar sang danh sách nhân viên / thợ chụp tương ứng
+    if (data.avatar) {
+      if (currentRole === 'photographer') {
+        const photo = photographers.find(p => p.id === currentUser.id || (p.phone && p.phone === currentUser.phone));
+        if (photo) {
+          updatePhotographer({ ...photo, avatar: data.avatar });
+        }
+      } else if (currentRole === 'sales') {
+        const staff = salesStaff.find((s: SalesStaff) => s.id === currentUser.id || (s.phone && s.phone === currentUser.phone));
+        if (staff) {
+          updateSalesStaff({ ...staff, avatar: data.avatar });
+        }
+      }
+    }
+
     // Lưu vào localStorage để giữ session
     try {
       const savedAuth = localStorage.getItem('xoan_crm_auth_user');
