@@ -20,11 +20,16 @@ import { syncToLocalSqlCache } from './localSqlStorageService';
 
 // Xác định URL API Server tùy thuộc môi trường
 export const getApiBaseUrl = (): string => {
-  if (typeof window === 'undefined') return 'http://localhost:4321/api';
+  if (typeof window === 'undefined') return 'https://crm.xoanmedia.com/api';
   if (window.location.hostname === 'crm.xoanmedia.com') {
     return '/api';
   }
-  return (import.meta as any).env?.VITE_API_URL || 'http://localhost:4321/api';
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return (import.meta as any).env?.VITE_API_URL || 'http://localhost:4321/api';
+  }
+  // Khi chạy trên GitHub Pages (duykoolhp1996.github.io) hoặc domain ngoài:
+  // LUÔN LUÔN KẾT NỐI TRỰC TIẾP VỀ SQL SERVER PRODUCTION crm.xoanmedia.com
+  return (import.meta as any).env?.VITE_API_URL || 'https://crm.xoanmedia.com/api';
 };
 
 export interface ServerStorageStatus {

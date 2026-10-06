@@ -215,8 +215,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
     return mockSalesStaff;
   });
-  const [schools, setSchools] = useState<School[]>(mockSchools);
-  const [classes, setClasses] = useState<SchoolClass[]>(mockSchoolClasses);
+  const [schools, setSchools] = useState<School[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_schools');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockSchools;
+  });
+  const [classes, setClasses] = useState<SchoolClass[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_classes');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockSchoolClasses;
+  });
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>(mockServicePackages);
   const [segments, setSegments] = useState<RemarketingSegment[]>(mockRemarketingSegments);
   const [campaigns, setCampaigns] = useState<RemarketingCampaign[]>(mockRemarketingCampaigns);
@@ -1250,7 +1268,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addClass = (newClass: SchoolClass) => {
-    setClasses(prev => [newClass, ...prev]);
+    setClasses(prev => {
+      const updated = [newClass, ...prev];
+      try {
+        localStorage.setItem('crm_xoan_classes', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const toggleWorkflow = (id: string) => {
