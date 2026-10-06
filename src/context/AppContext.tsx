@@ -44,6 +44,7 @@ import { crmSupabaseService } from '../services/crmSupabaseService';
 import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup, notifyCustomerDepositToZaloGroup } from '../lib/zaloBotService';
 import { FacebookApiService } from '../services/facebookApiService';
 import { dispatchCustomerSyncToZones, dispatchBookingSyncToZones } from '../services/multiZoneSyncService';
+import { apiClient } from '../services/apiClient';
 
 
 export type NavigationTab = 
@@ -261,34 +262,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
-  // Tự động kết nối và nạp dữ liệu từ Supabase Database khi khởi chạy
+  // 1. NẠP DỮ LIỆU TỪ SQL SERVER (PRIMARY SINGLE SOURCE OF TRUTH)
   useEffect(() => {
+    const loadFromSqlDatabase = async () => {
+      try {
+        const [custRes, bookRes] = await Promise.allSettled([
+          apiClient.getCustomers({ limit: 500 }),
+          apiClient.getBookings({ limit: 500 })
+        ]);
+
+        if (custRes.status === 'fulfilled' && custRes.value && custRes.value.customers) {
+          const sqlCusts = custRes.value.customers;
+          if (sqlCusts.length > 0) {
+            setCustomers(sqlCusts);
+            console.log(`[SQL Database] 🖥️ Đã nạp thành công ${sqlCusts.length} khách hàng từ SQL Server.`);
+          }
+        }
+
+        if (bookRes.status === 'fulfilled' && bookRes.value && bookRes.value.bookings) {
+          const sqlBooks = bookRes.value.bookings;
+          if (sqlBooks.length > 0) {
+            setBookings(sqlBooks);
+            console.log(`[SQL Database] 🖥️ Đã nạp thành công ${sqlBooks.length} lịch booking từ SQL Server.`);
+          }
+        }
+      } catch (e) {
+        console.warn('[SQL Database] Lỗi nạp dữ liệu từ server:', e);
+      }
+    };
+
+    loadFromSqlDatabase();
+
+    // 2. Nạp thêm từ Supabase Replica (nếu có dữ liệu mới hơn trên cloud)
     crmSupabaseService.getCustomers().then(remoteCustomers => {
       if (remoteCustomers && remoteCustomers.length > 0) {
         setCustomers(prev => {
           const map = new Map<string, Customer>();
-          // 1. Thêm khách từ Supabase
-          remoteCustomers.forEach(c => map.set(c.id, c));
-          // 2. Thêm khách từ mockData / state hiện tại nếu ID và SĐT chưa tồn tại
-          prev.forEach(c => {
-            if (!map.has(c.id)) {
-              const cleanP = (c.phone || '').replace(/\D/g, '');
-              const cleanZalo = (c.zalo || '').replace(/\D/g, '');
-              const isDupe = Array.from(map.values()).some(existing => {
-                const exP = (existing.phone || '').replace(/\D/g, '');
-                const exZ = (existing.zalo || '').replace(/\D/g, '');
-                return (cleanP && (cleanP === exP || cleanP === exZ)) || (cleanZalo && (cleanZalo === exP || cleanZalo === exZ));
-              });
-              if (!isDupe) {
-                map.set(c.id, c);
-              }
-            }
+          prev.forEach(c => map.set(c.id, c));
+          remoteCustomers.forEach(c => {
+            if (!map.has(c.id)) map.set(c.id, c);
           });
           return Array.from(map.values());
         });
-        console.log(`[Supabase] Đã nạp thành công ${remoteCustomers.length} khách hàng từ cơ sở dữ liệu.`);
       }
-    });
+    }).catch(() => {});
   }, []);
 
   // Xử lý đăng nhập bằng username / ID / email / số điện thoại & password
@@ -689,6 +706,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updatedAt: new Date().toISOString()
     };
     setCustomers(prev => [newCustomer, ...prev]);
+    // 1. Lưu bền vững vào SQL Server REST API
+    apiClient.createCustomer(newCustomer).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API createCustomer:', err);
+    });
+    // 2. Lưu đồng thời các vùng replica (Supabase, Google Sheets)
     crmSupabaseService.saveCustomer(newCustomer).catch(() => {});
     dispatchCustomerSyncToZones(newCustomer, {
       customers: [newCustomer, ...customers],
@@ -720,6 +742,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteCustomer = (id: string) => {
     setCustomers(prev => prev.filter(c => c.id !== id));
+    apiClient.deleteCustomer(id).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API deleteCustomer:', err);
+    });
     crmSupabaseService.deleteCustomer(id).catch(() => {});
   };
 
@@ -847,6 +872,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (updated.assignedSalesName || currentUser.name);
 
     setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+    // 1. Cập nhật bền vững vào SQL Server REST API
+    apiClient.updateCustomer(updated.id, updated).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API updateCustomer:', err);
+    });
+    // 2. Đồng bộ các vùng replica
     crmSupabaseService.saveCustomer(updated).catch(() => {});
     dispatchCustomerSyncToZones(updated, {
       customers: customers.map(c => c.id === updated.id ? updated : c),
@@ -887,6 +917,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updatedAt: new Date().toISOString()
     };
     setBookings(prev => [newBooking, ...prev]);
+    // 1. Lưu bền vững vào SQL Server REST API
+    apiClient.createBooking(newBooking).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API createBooking:', err);
+    });
 
     // Thêm notification nếu chưa có thợ
     if (!bookingData.assignments.leadPhotographerId) {
@@ -922,6 +956,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateBooking = (updated: Booking) => {
     setBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
+    // 1. Cập nhật bền vững vào SQL Server REST API
+    apiClient.updateBooking(updated.id, updated).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API updateBooking:', err);
+    });
+    // 2. Đồng bộ các vùng replica
     dispatchBookingSyncToZones(updated, {
       customers,
       bookings: bookings.map(b => b.id === updated.id ? updated : b),

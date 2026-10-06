@@ -34,4 +34,9 @@ API/token.json
 # Server SQLite Database & Excel Backups
 server/data/*.db*
 server/backups/
+backups/
+*.db
+*.sqlite
+*.sqlite3
+/database/data/
 *.lock
