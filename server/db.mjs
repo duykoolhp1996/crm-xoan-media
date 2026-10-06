@@ -371,7 +371,7 @@ const runSafeMigrations = () => {
     addColumnIfNotExists('photographers', 'username', "TEXT DEFAULT ''");
     addColumnIfNotExists('photographers', 'password', "TEXT DEFAULT ''");
     addColumnIfNotExists('photographers', 'can_login', 'INTEGER DEFAULT 1');
-    addColumnIfNotExists('photographers', 'updated_at', 'TEXT DEFAULT CURRENT_TIMESTAMP');
+    addColumnIfNotExists('photographers', 'updated_at', 'TEXT');
 
     // 2. Thêm các cột tài khoản, avatar, khu vực cho sales_staff
     addColumnIfNotExists('sales_staff', 'username', "TEXT DEFAULT ''");
@@ -379,7 +379,7 @@ const runSafeMigrations = () => {
     addColumnIfNotExists('sales_staff', 'can_login', 'INTEGER DEFAULT 1');
     addColumnIfNotExists('sales_staff', 'avatar', "TEXT DEFAULT ''");
     addColumnIfNotExists('sales_staff', 'active_regions_json', "TEXT DEFAULT '[]'");
-    addColumnIfNotExists('sales_staff', 'updated_at', 'TEXT DEFAULT CURRENT_TIMESTAMP');
+    addColumnIfNotExists('sales_staff', 'updated_at', 'TEXT');
 
     // 3. Chuẩn hóa & điền dữ liệu mặc định từ file cấu hình nếu các cột mới đang trống
     try {
