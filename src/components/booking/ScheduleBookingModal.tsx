@@ -132,7 +132,7 @@ export const ScheduleBookingModal: React.FC<ScheduleBookingModalProps> = ({
     const updatedCustomer: Customer = {
       ...customer,
       expectedShootDate: shootDate,
-      pipelineStage: 'Đã Booking' as PipelineStage,
+      pipelineStage: 'Book ngày' as PipelineStage,
       shootingLocations: location ? location.split(',').map(s => s.trim()) : customer.shootingLocations,
       notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã chốt ngày chụp: ${new Date(shootDate).toLocaleDateString('vi-VN')} (${timeSlot}). ${notes ? 'Ghi chú: ' + notes : ''}`.trim(),
       updatedAt: new Date().toISOString()

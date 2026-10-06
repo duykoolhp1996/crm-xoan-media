@@ -27,7 +27,8 @@ import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 import { TrashBinModal } from '../crm/TrashBinModal';
 import {
   CLOSED_BOOKED_STAGES,
-  isCustomerBookedOrDeposited
+  isCustomerBookedOrDeposited,
+  isCustomerInStage
 } from '../../lib/revenueUtils';
 
 export const KanbanPipeline: React.FC = () => {
@@ -354,7 +355,7 @@ export const KanbanPipeline: React.FC = () => {
           className="flex gap-3.5 overflow-x-auto pb-3 pt-1 items-stretch custom-scrollbar flex-1 min-h-0 overscroll-x-contain"
         >
           {STAGES.map((stage) => {
-            const stageCustomers = accessibleCustomers.filter(c => c.pipelineStage === stage);
+            const stageCustomers = accessibleCustomers.filter(c => isCustomerInStage(c.pipelineStage, stage));
             const stageTotalMoney = stageCustomers.reduce((acc, curr) => {
               const money = curr.totalAmount ?? curr.totalRevenue ?? curr.expectedBudget ?? 0;
               return acc + money;
@@ -525,7 +526,7 @@ export const KanbanPipeline: React.FC = () => {
                           )}
 
                           {/* 3. BADGE ĐÃ CỌC & NÚT CHỐT NGÀY CHỤP (Đã cọc) */}
-                          {(cust.pipelineStage === 'Đã cọc' || cust.pipelineStage === 'Đã đặt cọc') && (
+                          {isCustomerInStage(cust.pipelineStage, 'Đã cọc') && (
                             <>
                               <div
                                 onClick={(e) => {
@@ -565,7 +566,7 @@ export const KanbanPipeline: React.FC = () => {
                           )}
 
                           {/* 4. BADGE LỊCH CHỤP & NÚT NỘP DRIVE (Book ngày) */}
-                          {(cust.pipelineStage === 'Book ngày' || cust.pipelineStage === 'Đã Booking') && (
+                          {isCustomerInStage(cust.pipelineStage, 'Book ngày') && (
                             <>
                               <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
                                 <span className="text-purple-900 font-semibold flex items-center gap-1.5">

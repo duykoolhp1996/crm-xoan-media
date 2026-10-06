@@ -29,7 +29,8 @@ import {
   getCustomerTotalOrderValue,
   getCustomerPaidDeposit,
   getCustomerRemainingDebt,
-  calculateCrmFinancials
+  calculateCrmFinancials,
+  isCustomerInStage
 } from '../../lib/revenueUtils';
 
 export const CustomerList: React.FC = () => {
@@ -107,7 +108,7 @@ export const CustomerList: React.FC = () => {
         (c.region && c.region.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchSource = selectedSource === 'all' || c.source === selectedSource;
-      const matchStage = selectedStage === 'all' || c.pipelineStage === selectedStage;
+      const matchStage = selectedStage === 'all' || isCustomerInStage(c.pipelineStage, selectedStage);
 
       return matchSearch && matchSource && matchStage;
     });

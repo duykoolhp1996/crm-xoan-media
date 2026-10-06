@@ -35,6 +35,7 @@ import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 import { CustomerModal } from './CustomerModal';
+import { isCustomerInStage } from '../../lib/revenueUtils';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -317,8 +318,8 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
               </button>
             )}
 
-            {/* Nút Xem / Đổi Lịch Chụp & Nút Bàn Giao Drive: Hiển thị ở Đã Booking */}
-            {customer.pipelineStage === 'Đã Booking' && (
+            {/* Nút Xem / Đổi Lịch Chụp & Nút Bàn Giao Drive: Hiển thị ở Book ngày / Đã Booking */}
+            {isCustomerInStage(customer.pipelineStage, 'Book ngày') && (
               <>
                 <button
                   type="button"
@@ -852,8 +853,8 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                 </div>
               )}
 
-              {/* Banner Giai Đoạn Đã Booking: Đã chốt ngày chụp */}
-              {customer.pipelineStage === 'Đã Booking' && (
+              {/* Banner Giai Đoạn Đã Booking / Book ngày: Đã chốt ngày chụp */}
+              {isCustomerInStage(customer.pipelineStage, 'Book ngày') && (
                 <div className="p-4 bg-gradient-to-r from-purple-50 via-indigo-50 to-neutral-50 border border-purple-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -1566,8 +1567,8 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
             </button>
           )}
 
-          {/* Nút Xem / Đổi Lịch Chụp: Hiển thị ở Đã Booking */}
-          {customer.pipelineStage === 'Đã Booking' && (
+          {/* Nút Xem / Đổi Lịch Chụp: Hiển thị ở Book ngày / Đã Booking */}
+          {isCustomerInStage(customer.pipelineStage, 'Book ngày') && (
             <>
               <button
                 type="button"

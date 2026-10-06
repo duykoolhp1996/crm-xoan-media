@@ -18,6 +18,48 @@ export const CLOSED_BOOKED_STAGES: readonly PipelineStage[] = [
 ] as const;
 
 /**
+ * Kiểm tra xem khách hàng có khớp với một giai đoạn Pipeline hay không
+ * (Hỗ trợ tương thích ngược đầy đủ giữa các alias: Đã cọc <-> Đã đặt cọc, Book ngày <-> Đã Booking...)
+ */
+export const isCustomerInStage = (custStage?: string, targetStage?: PipelineStage | string): boolean => {
+  if (!custStage || !targetStage) return false;
+  if (targetStage === 'all') return true;
+  if (custStage === targetStage) return true;
+
+  // 1. Nhóm Đã cọc
+  if (targetStage === 'Đã cọc' || targetStage === 'Đã đặt cọc') {
+    return custStage === 'Đã cọc' || custStage === 'Đã đặt cọc';
+  }
+
+  // 2. Nhóm Book ngày / Đã Booking
+  if (targetStage === 'Book ngày' || targetStage === 'Đã Booking') {
+    return custStage === 'Book ngày' || custStage === 'Đã Booking';
+  }
+
+  // 3. Nhóm Giao ảnh / Bàn giao
+  if (targetStage === 'Giao ảnh' || targetStage === 'Đã bàn giao') {
+    return ['Giao ảnh', 'Đã bàn giao', 'Đã gửi link ảnh', 'Đã giao ảnh'].includes(custStage);
+  }
+
+  // 4. Nhóm Báo giá
+  if (targetStage === 'Đã gửi báo giá') {
+    return custStage === 'Đã gửi báo giá' || custStage === 'Đang thương lượng';
+  }
+
+  // 5. Nhóm Tư vấn
+  if (targetStage === 'Đang tư vấn') {
+    return custStage === 'Đang tư vấn' || custStage === 'Đã liên hệ' || custStage === 'Mới tiếp nhận';
+  }
+
+  // 6. Nhóm Hoàn thành
+  if (targetStage === 'Hoàn thành') {
+    return custStage === 'Hoàn thành' || custStage === 'Đã hoàn thành';
+  }
+
+  return false;
+};
+
+/**
  * Kiểm tra xem khách hàng/lớp học đã được tính là ĐÃ BOOK VÀ CỌC hay chưa
  * Điều kiện:
  * 1. Nằm trong các giai đoạn từ Đã cọc trở đi

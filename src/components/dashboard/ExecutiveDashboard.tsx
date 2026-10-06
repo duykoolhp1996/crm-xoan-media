@@ -111,7 +111,7 @@ export const ExecutiveDashboard: React.FC = () => {
 
   const consultingLeads = filteredCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ', 'Mới tiếp nhận', 'New Lead'].includes(c.pipelineStage)).length;
   const quotedLeads = filteredCustomers.filter(c => c.pipelineStage === 'Đã gửi báo giá').length;
-  const bookedLeads = filteredCustomers.filter(c => ['Đã đặt cọc', 'Đã Booking'].includes(c.pipelineStage) || (c.paidAmount && c.paidAmount > 0)).length;
+  const bookedLeads = filteredCustomers.filter(c => ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking'].includes(c.pipelineStage) || (c.paidAmount && c.paidAmount > 0)).length;
   const shootingLeads = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao'].includes(c.pipelineStage)).length;
   const completedCustomers = filteredCustomers.filter(c => c.pipelineStage === 'Hoàn thành').length;
 

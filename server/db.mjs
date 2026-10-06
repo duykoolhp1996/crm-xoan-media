@@ -445,6 +445,35 @@ const runSafeMigrations = () => {
       .run('mig-6', 6, 'expand_photographer_and_sales_salary_and_account_fields');
     console.log('[Migration] ✅ Đã hoàn tất Migration 6: Mở rộng thùy lao/lương thưởng thợ & tài khoản Sales');
   }
+
+  // Migration 7: Chuẩn hóa tên giai đoạn Pipeline (Đã đặt cọc -> Đã cọc, Đã Booking -> Book ngày, Đã bàn giao -> Giao ảnh)
+  if (!existingMigrations.has(7)) {
+    try {
+      db.prepare(`
+        UPDATE customers 
+        SET pipeline_stage = 'Đã cọc' 
+        WHERE pipeline_stage = 'Đã đặt cọc'
+      `).run();
+
+      db.prepare(`
+        UPDATE customers 
+        SET pipeline_stage = 'Book ngày' 
+        WHERE pipeline_stage = 'Đã Booking'
+      `).run();
+
+      db.prepare(`
+        UPDATE customers 
+        SET pipeline_stage = 'Giao ảnh' 
+        WHERE pipeline_stage = 'Đã bàn giao'
+      `).run();
+
+      db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
+        .run('mig-7', 7, 'standardize_legacy_pipeline_stages');
+      console.log('[Migration] ✅ Đã hoàn tất Migration 7: Chuẩn hóa tên giai đoạn Pipeline (Đã cọc, Book ngày, Giao ảnh)');
+    } catch (mig7Err) {
+      console.warn('[Migration 7] Lỗi chuẩn hóa stage:', mig7Err.message);
+    }
+  }
 };
 
 runSafeMigrations();
