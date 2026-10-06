@@ -430,8 +430,8 @@ export const PriceQuoteModal: React.FC<PriceQuoteModalProps> = ({
 
     const text = `📸 BẢNG BÁO GIÁ KỶ YẾU 2026 - XOĂN MEDIA STUDIO
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎓 Kính gửi: Tập thể lớp ${customer.className} - ${customer.schoolName}
-👤 Đại diện: ${customer.name} (${customer.representativeRole || 'Lớp trưởng'}) - SĐT: ${customer.phone}
+🎓 Kính gửi: Tập thể lớp ${customer.className || 'Kỷ yếu'} - ${customer.schoolName || 'Trường học'}
+👤 Đại diện: ${customer.name} (${customer.representativeRole || 'Đại diện'})${customer.phone ? ` - SĐT: ${customer.phone}` : ''}
 👥 Sỉ số lớp: ${customer.studentCount} bạn
 📦 Gói: ${customer.servicePackageName || 'Gói Kỷ Yếu Standard'}
 ✨ Concept: ${customer.concept || 'Thanh xuân vườn trường'}
@@ -453,7 +453,7 @@ ${itemsText}
 
 🏦 TÀI KHOẢN NHẬN CỌC:
 • Ngân hàng: MB BANK • STK: 0981108601 • Chủ TK: CHU DUC DUY
-• Cú pháp CK: COC KYYEU ${customer.className.toUpperCase()} ${customer.phone}
+• Cú pháp CK: COC KYYEU ${(customer.className || 'KYYEU').toUpperCase()} ${customer.phone || customer.id.slice(-6)}
 
 📞 Chuyên viên tư vấn: ${customer.assignedSalesName || 'Xoăn Media'}
 🌐 Hotline: 0981 108 601 • Website: xoanmedia.vn`;
@@ -947,7 +947,7 @@ ${itemsText}
                   </p>
                   <p className="text-neutral-600 flex items-center gap-1 text-[11px]">
                     <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
-                    Số điện thoại: <strong>{customer.phone}</strong>
+                    Số điện thoại: <strong>{customer.phone || '(Chưa cập nhật)'}</strong>
                   </p>
                 </div>
 
@@ -1085,7 +1085,7 @@ ${itemsText}
                     <p>Số tài khoản: <strong className="text-neutral-950 font-bold text-xs">0981108601</strong></p>
                     <p>Chủ TK: <strong>CHU DUC DUY</strong></p>
                     <p className="text-[9px] text-neutral-500 font-sans mt-0.5">
-                      Nội dung CK: <code className="bg-neutral-200 px-1 rounded font-bold">COC KYYEU {customer.className.toUpperCase()} {customer.phone}</code>
+                      Nội dung CK: <code className="bg-neutral-200 px-1 rounded font-bold">COC KYYEU {(customer.className || 'KYYEU').toUpperCase()} {customer.phone || customer.id.slice(-6)}</code>
                     </p>
                   </div>
                 </div>

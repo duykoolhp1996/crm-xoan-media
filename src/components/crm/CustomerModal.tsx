@@ -40,6 +40,16 @@ const parseMoneyInput = (val: string | number): number => {
   return isNaN(parsed) ? 0 : parsed;
 };
 
+// Các giai đoạn trước cọc (tiếp nhận, tư vấn, gửi báo giá) KHÔNG BẮT BUỘC số điện thoại & tên lớp
+const STAGES_WITHOUT_REQUIRED_CONTACT: PipelineStage[] = [
+  'New Lead',
+  'Đang tư vấn',
+  'Đã liên hệ',
+  'Đang thương lượng',
+  'Đã gửi báo giá',
+  'Lost'
+];
+
 export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, customerToEdit }) => {
   const { addCustomer, updateCustomer, schools, servicePackages, salesStaff, currentUser, customers } = useApp();
 
@@ -212,6 +222,9 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
   const calcTotalAmount = Math.max(0, calcSubtotal + (formData.extraFee || 0) - (formData.discount || 0));
   const calcRemainingAmount = Math.max(0, calcTotalAmount - (formData.depositAmount || 0));
 
+  // Kiểm tra giai đoạn có bắt buộc Số điện thoại và Tên lớp hay không
+  const isContactRequired = !STAGES_WITHOUT_REQUIRED_CONTACT.includes(formData.pipelineStage);
+
   const availableDistricts = getDistrictsByCity(formData.city);
 
   const handleCityChange = (cityName: string) => {
@@ -253,15 +266,33 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. New Lead: chỉ cần Tên (có thể chỉ có MXH, chưa cần SĐT/Tên lớp)
-    if (!formData.name) {
+    // 1. Luôn cần Tên liên hệ hoặc tên nhóm
+    if (!formData.name?.trim()) {
       alert('Vui lòng điền ít nhất Tên liên hệ hoặc tên nhóm!');
       return;
     }
 
-    // 2. Các giai đoạn tiếp theo (không phải New Lead): yêu cầu thêm SĐT + Tên lớp
-    if (formData.pipelineStage !== 'New Lead' && formData.pipelineStage !== 'Lost' && (!formData.phone || !formData.className)) {
-      alert('Vui lòng điền đầy đủ Số điện thoại và Tên lớp để chuyển sang giai đoạn này!');
+    // 2. Kiểm tra điều kiện bắt buộc Số điện thoại & Tên lớp:
+    // Theo quy trình kỷ yếu: các giai đoạn trước cọc ("New Lead", "Đang tư vấn", "Đã gửi báo giá", "Lost")
+    // KHÔNG BẮT BUỘC số điện thoại & tên lớp (khách có thể chỉ trao đổi qua Facebook/TikTok/Zalo chat).
+    // Chỉ BẮT BUỘC Số điện thoại và Tên lớp từ giai đoạn "Đã cọc" (Đã đặt cọc) trở đi để làm hợp đồng và điều phối ekip.
+    const stagesWithoutRequiredContact: PipelineStage[] = [
+      'New Lead',
+      'Đang tư vấn',
+      'Đã liên hệ',
+      'Đang thương lượng',
+      'Đã gửi báo giá',
+      'Lost'
+    ];
+    const isContactRequired = !stagesWithoutRequiredContact.includes(formData.pipelineStage);
+
+    if (isContactRequired && !formData.phone?.trim()) {
+      alert('Từ giai đoạn Đã cọc / Lên lịch chụp trở đi, bắt buộc phải có Số điện thoại liên hệ để làm hợp đồng và điều phối ekip!');
+      return;
+    }
+
+    if (isContactRequired && !formData.className?.trim()) {
+      alert('Từ giai đoạn Đã cọc trở đi, vui lòng điền đầy đủ Tên lớp để hoàn tất thông tin đơn chụp!');
       return;
     }
 
@@ -501,10 +532,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                 <div className="flex items-center justify-between">
                   <label className="font-semibold text-neutral-700">
                     Số điện thoại
-                    {formData.pipelineStage === 'New Lead' || formData.pipelineStage === 'Lost'
-                      ? <span className="ml-1 text-neutral-400 font-normal">(tùy chọn)</span>
-                      : <span className="text-rose-500"> *</span>
-                    }
+                    {isContactRequired ? (
+                      <span className="text-rose-500 font-bold"> * (bắt buộc khi chốt cọc)</span>
+                    ) : (
+                      <span className="ml-1 text-neutral-400 font-normal text-xs">(tùy chọn)</span>
+                    )}
                   </label>
                   {duplicateCustomer && (
                     <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
@@ -595,10 +627,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
               <div>
                 <label className="font-semibold text-neutral-700">
                   Tên lớp
-                  {formData.pipelineStage === 'New Lead' || formData.pipelineStage === 'Lost'
-                    ? <span className="ml-1 text-neutral-400 font-normal">(tùy chọn)</span>
-                    : <span className="text-rose-500"> *</span>
-                  }
+                  {isContactRequired ? (
+                    <span className="text-rose-500 font-bold"> * (bắt buộc khi chốt cọc)</span>
+                  ) : (
+                    <span className="ml-1 text-neutral-400 font-normal text-xs">(tùy chọn)</span>
+                  )}
                 </label>
                 <input
                   type="text"
