@@ -356,6 +356,95 @@ const runSafeMigrations = () => {
       .run('mig-5', 5, 'lead_pipeline_pricing_and_stage_history');
     console.log('[Migration] ✅ Đã hoàn tất Migration 5: Chuẩn hóa 10 stage & bộ tính giá tự động');
   }
+
+  // Migration 6: Mở rộng trường Thùy lao / Lương thưởng Thợ & Quản lý Tài khoản Sales
+  if (!existingMigrations.has(6)) {
+    // 1. Thêm các cột thùy lao, lương thưởng, tài khoản cho photographers
+    addColumnIfNotExists('photographers', 'salary_type', "TEXT DEFAULT 'per_shoot'");
+    addColumnIfNotExists('photographers', 'monthly_salary', 'NUMERIC DEFAULT 0');
+    addColumnIfNotExists('photographers', 'skills_json', "TEXT DEFAULT '[]'");
+    addColumnIfNotExists('photographers', 'active_regions_json', "TEXT DEFAULT '[]'");
+    addColumnIfNotExists('photographers', 'equipment_list_json', "TEXT DEFAULT '[]'");
+    addColumnIfNotExists('photographers', 'avatar', "TEXT DEFAULT ''");
+    addColumnIfNotExists('photographers', 'experience_years', 'INTEGER DEFAULT 1');
+    addColumnIfNotExists('photographers', 'notes', "TEXT DEFAULT ''");
+    addColumnIfNotExists('photographers', 'username', "TEXT DEFAULT ''");
+    addColumnIfNotExists('photographers', 'password', "TEXT DEFAULT ''");
+    addColumnIfNotExists('photographers', 'can_login', 'INTEGER DEFAULT 1');
+    addColumnIfNotExists('photographers', 'updated_at', 'TEXT DEFAULT CURRENT_TIMESTAMP');
+
+    // 2. Thêm các cột tài khoản, avatar, khu vực cho sales_staff
+    addColumnIfNotExists('sales_staff', 'username', "TEXT DEFAULT ''");
+    addColumnIfNotExists('sales_staff', 'password', "TEXT DEFAULT ''");
+    addColumnIfNotExists('sales_staff', 'can_login', 'INTEGER DEFAULT 1');
+    addColumnIfNotExists('sales_staff', 'avatar', "TEXT DEFAULT ''");
+    addColumnIfNotExists('sales_staff', 'active_regions_json', "TEXT DEFAULT '[]'");
+    addColumnIfNotExists('sales_staff', 'updated_at', 'TEXT DEFAULT CURRENT_TIMESTAMP');
+
+    // 3. Chuẩn hóa & điền dữ liệu mặc định từ file cấu hình nếu các cột mới đang trống
+    try {
+      const photosPath = path.resolve(__dirname, '..', 'src', 'data', 'photographersData.json');
+      if (fs.existsSync(photosPath)) {
+        const photos = JSON.parse(fs.readFileSync(photosPath, 'utf-8'));
+        const updatePhoto = db.prepare(`
+          UPDATE photographers
+          SET 
+            salary_type = COALESCE(NULLIF(salary_type, ''), ?),
+            monthly_salary = CASE WHEN monthly_salary = 0 THEN ? ELSE monthly_salary END,
+            rate_per_shoot = CASE WHEN rate_per_shoot = 0 THEN ? ELSE rate_per_shoot END,
+            skills_json = CASE WHEN skills_json = '[]' OR skills_json IS NULL THEN ? ELSE skills_json END,
+            active_regions_json = CASE WHEN active_regions_json = '[]' OR active_regions_json IS NULL THEN ? ELSE active_regions_json END,
+            equipment_list_json = CASE WHEN equipment_list_json = '[]' OR equipment_list_json IS NULL THEN ? ELSE equipment_list_json END,
+            avatar = CASE WHEN avatar = '' OR avatar IS NULL THEN ? ELSE avatar END,
+            experience_years = CASE WHEN experience_years = 1 THEN ? ELSE experience_years END,
+            notes = CASE WHEN notes = '' OR notes IS NULL THEN ? ELSE notes END,
+            username = CASE WHEN username = '' OR username IS NULL THEN ? ELSE username END,
+            password = CASE WHEN password = '' OR password IS NULL THEN ? ELSE password END,
+            can_login = 1
+          WHERE id = ?
+        `);
+
+        for (const p of photos) {
+          updatePhoto.run(
+            p.salaryType || 'per_shoot',
+            p.monthlySalary || 0,
+            p.ratePerShoot || 1000000,
+            JSON.stringify(p.skills || ['Chụp chính']),
+            JSON.stringify(p.activeRegions || ['Hải Phòng']),
+            JSON.stringify(p.equipmentList || []),
+            p.avatar || '',
+            p.experienceYears || 1,
+            p.notes || '',
+            p.username || '',
+            p.password || '',
+            p.id
+          );
+        }
+      }
+
+      // Chuẩn hóa Sales Staff
+      const updateSales = db.prepare(`
+        UPDATE sales_staff
+        SET
+          username = CASE WHEN username = '' OR username IS NULL THEN ? ELSE username END,
+          password = CASE WHEN password = '' OR password IS NULL THEN ? ELSE password END,
+          avatar = CASE WHEN avatar = '' OR avatar IS NULL THEN ? ELSE avatar END,
+          active_regions_json = CASE WHEN active_regions_json = '[]' OR active_regions_json IS NULL THEN ? ELSE active_regions_json END,
+          can_login = 1
+        WHERE id = ?
+      `);
+      updateSales.run('son.lh@xoanmedia.vn', 'SonLead@2024', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', JSON.stringify(['Hải Phòng', 'Hà Nội']), 'user-2');
+      updateSales.run('huong.nt@xoanmedia.vn', 'HuongSales@2024', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', JSON.stringify(['Hải Phòng', 'Hà Nội']), 'user-sales-1');
+      updateSales.run('dang.th@xoanmedia.vn', 'DangSales@2024', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80', JSON.stringify(['Hải Phòng']), 'user-sales-2');
+      updateSales.run('phuong.vm@xoanmedia.vn', 'PhuongSales@2024', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80', JSON.stringify(['Hải Phòng']), 'user-sales-3');
+    } catch (enrichErr) {
+      console.warn('[Migration 6] Điền dữ liệu mặc định bổ sung:', enrichErr.message);
+    }
+
+    db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
+      .run('mig-6', 6, 'expand_photographer_and_sales_salary_and_account_fields');
+    console.log('[Migration] ✅ Đã hoàn tất Migration 6: Mở rộng thùy lao/lương thưởng thợ & tài khoản Sales');
+  }
 };
 
 runSafeMigrations();

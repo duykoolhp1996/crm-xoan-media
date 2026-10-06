@@ -197,7 +197,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [bookings, setBookings] = useState<Booking[]>(mockBookings);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
-  const [photographers, setPhotographers] = useState<Photographer[]>(mockPhotographers);
+  const [photographers, setPhotographers] = useState<Photographer[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_photographers');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return mockPhotographers;
+  });
   const [salesStaff, setSalesStaff] = useState<SalesStaff[]>(() => {
     try {
       const saved = localStorage.getItem('crm_xoan_sales_staff');
@@ -307,10 +316,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const loadFromSqlDatabase = async () => {
       try {
-        const [custRes, bookRes, delRes] = await Promise.allSettled([
+        const [custRes, bookRes, delRes, photoRes, salesRes] = await Promise.allSettled([
           apiClient.getCustomers({ limit: 500 }),
           apiClient.getBookings({ limit: 500 }),
-          apiClient.getDeletedCustomers()
+          apiClient.getDeletedCustomers(),
+          apiClient.getPhotographers(),
+          apiClient.getSalesStaff()
         ]);
 
         if (custRes.status === 'fulfilled' && custRes.value && custRes.value.customers) {
@@ -331,6 +342,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (delRes.status === 'fulfilled' && Array.isArray(delRes.value)) {
           setDeletedCustomers(delRes.value);
+        }
+
+        if (photoRes.status === 'fulfilled' && Array.isArray(photoRes.value) && photoRes.value.length > 0) {
+          setPhotographers(photoRes.value);
+          try {
+            localStorage.setItem('crm_xoan_photographers', JSON.stringify(photoRes.value));
+          } catch {}
+          console.log(`[SQL Database] 📸 Đã nạp thành công ${photoRes.value.length} photographer từ SQL Server.`);
+        }
+
+        if (salesRes.status === 'fulfilled' && Array.isArray(salesRes.value) && salesRes.value.length > 0) {
+          setSalesStaff(salesRes.value);
+          try {
+            localStorage.setItem('crm_xoan_sales_staff', JSON.stringify(salesRes.value));
+          } catch {}
+          console.log(`[SQL Database] 💼 Đã nạp thành công ${salesRes.value.length} nhân sự Sales từ SQL Server.`);
         }
       } catch (e) {
         console.warn('[SQL Database] Lỗi nạp dữ liệu từ server:', e);
@@ -1202,19 +1229,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rating: 5.0,
       completedShootsCount: 0
     };
-    setPhotographers(prev => [newPhotographer, ...prev]);
+    setPhotographers(prev => {
+      const updated = [newPhotographer, ...prev];
+      try {
+        localStorage.setItem('crm_xoan_photographers', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    apiClient.createPhotographer(newPhotographer).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API createPhotographer:', err);
+    });
   };
 
   const updatePhotographer = (updated: Photographer) => {
-    setPhotographers(prev => prev.map(p => p.id === updated.id ? updated : p));
+    setPhotographers(prev => {
+      const next = prev.map(p => p.id === updated.id ? updated : p);
+      try {
+        localStorage.setItem('crm_xoan_photographers', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    apiClient.updatePhotographer(updated.id, updated).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API updatePhotographer:', err);
+    });
   };
 
   const deletePhotographer = (id: string) => {
-    setPhotographers(prev => prev.filter(p => p.id !== id));
+    setPhotographers(prev => {
+      const next = prev.filter(p => p.id !== id);
+      try {
+        localStorage.setItem('crm_xoan_photographers', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    apiClient.deletePhotographer(id).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API deletePhotographer:', err);
+    });
   };
 
   const updatePhotographerStatus = (id: string, status: Photographer['status']) => {
-    setPhotographers(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+    setPhotographers(prev => {
+      const next = prev.map(p => p.id === id ? { ...p, status } : p);
+      try {
+        localStorage.setItem('crm_xoan_photographers', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    apiClient.updatePhotographer(id, { status }).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API updatePhotographerStatus:', err);
+    });
   };
 
   // Sales Staff Handlers
@@ -1232,6 +1299,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error(e);
       }
       return updated;
+    });
+
+    apiClient.createSalesStaff(newStaff).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API createSalesStaff:', err);
     });
 
     addActivityLog({
@@ -1253,6 +1324,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return newList;
     });
+
+    apiClient.updateSalesStaff(updated.id, updated).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API updateSalesStaff:', err);
+    });
   };
 
   const deleteSalesStaff = (id: string) => {
@@ -1264,6 +1339,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error(e);
       }
       return newList;
+    });
+
+    apiClient.deleteSalesStaff(id).catch(err => {
+      console.warn('[SQL Database] Lỗi gọi API deleteSalesStaff:', err);
     });
   };
 

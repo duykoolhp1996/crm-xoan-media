@@ -13,7 +13,7 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.2.1';
+const VERSION = '1.2.2';
 
 // Helper đọc body request JSON
 const readJsonBody = (req) => {
@@ -222,6 +222,74 @@ const mapDbRowToBooking = (row) => {
     createdAt: row.created_at || new Date().toISOString(),
     updatedAt: row.updated_at || new Date().toISOString(),
     version: row.version || 1
+  };
+};
+
+const mapDbRowToPhotographer = (row) => {
+  if (!row) return null;
+  let skills = ['Chụp chính'];
+  let activeRegions = ['Hải Phòng'];
+  let equipmentList = [];
+  try {
+    if (row.skills_json) skills = JSON.parse(row.skills_json);
+  } catch {}
+  try {
+    if (row.active_regions_json) activeRegions = JSON.parse(row.active_regions_json);
+  } catch {}
+  try {
+    if (row.equipment_list_json) equipmentList = JSON.parse(row.equipment_list_json);
+  } catch {}
+
+  return {
+    id: row.id,
+    fullName: row.full_name || '',
+    phone: row.phone || '',
+    email: row.email || '',
+    avatar: row.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    rating: Number(row.rating) || 5.0,
+    completedShootsCount: Number(row.completed_shoots_count) || 0,
+    photographerType: row.photographer_type || 'Freelancer',
+    experienceYears: Number(row.experience_years) || 1,
+    skills,
+    activeRegions,
+    equipmentList,
+    ratePerShoot: Number(row.rate_per_shoot) || 0,
+    salaryType: row.salary_type || 'per_shoot',
+    monthlySalary: Number(row.monthly_salary) || 0,
+    status: row.status || 'available',
+    notes: row.notes || '',
+    username: row.username || '',
+    password: row.password || '',
+    canLogin: row.can_login === 1 || row.can_login === true || row.can_login === '1',
+    createdAt: row.created_at || new Date().toISOString(),
+    updatedAt: row.updated_at || undefined
+  };
+};
+
+const mapDbRowToSalesStaff = (row) => {
+  if (!row) return null;
+  let activeRegions = ['Hải Phòng'];
+  try {
+    if (row.active_regions_json) activeRegions = JSON.parse(row.active_regions_json);
+  } catch {}
+
+  return {
+    id: row.id,
+    name: row.name || '',
+    phone: row.phone || '',
+    email: row.email || '',
+    roleTitle: row.role_title || 'Chuyên viên Sales Tư Vấn',
+    commissionType: row.commission_type || 'percentage',
+    commissionRate: Number(row.commission_rate) || 0,
+    commissionFixedAmount: Number(row.commission_fixed_amount) || 0,
+    status: row.status || 'active',
+    username: row.username || '',
+    password: row.password || '',
+    canLogin: row.can_login === 1 || row.can_login === true || row.can_login === '1',
+    avatar: row.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    activeRegions,
+    createdAt: row.created_at || new Date().toISOString(),
+    updatedAt: row.updated_at || undefined
   };
 };
 
@@ -1010,16 +1078,303 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { success: true, data: logs });
     }
 
+    // -------------------------------------------------------------
+    // PHOTOGRAPHERS API (CRUD - Quản lý nhân sự & Thùy lao / Lương thưởng Thợ)
+    // -------------------------------------------------------------
+
     // GET /api/photographers
     if (pathname === '/api/photographers' && req.method === 'GET') {
-      const rows = db.prepare('SELECT * FROM photographers').all();
-      return sendJson(res, 200, { success: true, data: rows });
+      const rows = db.prepare('SELECT * FROM photographers ORDER BY full_name ASC').all();
+      return sendJson(res, 200, { success: true, data: rows.map(mapDbRowToPhotographer) });
     }
+
+    // POST /api/photographers
+    if (pathname === '/api/photographers' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const newId = body.id || `photo-${Date.now()}`;
+      const fullName = (body.fullName || body.name || 'Thợ Chụp Mới').trim();
+      const phone = (body.phone || '').trim();
+      const email = (body.email || '').trim();
+      const photoType = body.photographerType || 'Freelancer';
+      const rating = Number(body.rating) || 5.0;
+      const completedCount = Number(body.completedShootsCount) || 0;
+      const ratePerShoot = Number(body.ratePerShoot) || 0;
+      const salaryType = body.salaryType || 'per_shoot';
+      const monthlySalary = Number(body.monthlySalary) || 0;
+      const status = body.status || 'available';
+      const skillsJson = JSON.stringify(Array.isArray(body.skills) ? body.skills : ['Chụp chính']);
+      const activeRegionsJson = JSON.stringify(Array.isArray(body.activeRegions) ? body.activeRegions : ['Hải Phòng']);
+      const equipmentListJson = JSON.stringify(Array.isArray(body.equipmentList) ? body.equipmentList : []);
+      const avatar = body.avatar || '';
+      const expYears = Number(body.experienceYears) || 1;
+      const notes = (body.notes || '').trim();
+      const username = (body.username || '').trim();
+      const password = (body.password || '').trim();
+      const canLogin = body.canLogin !== false ? 1 : 0;
+
+      const stmt = db.prepare(`
+        INSERT INTO photographers (
+          id, full_name, phone, email, photographer_type, rating, completed_shoots_count,
+          rate_per_shoot, salary_type, monthly_salary, status, skills_json, active_regions_json,
+          equipment_list_json, avatar, experience_years, notes, username, password, can_login,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `);
+      stmt.run(
+        newId, fullName, phone, email, photoType, rating, completedCount,
+        ratePerShoot, salaryType, monthlySalary, status, skillsJson, activeRegionsJson,
+        equipmentListJson, avatar, expYears, notes, username, password, canLogin
+      );
+
+      const created = db.prepare('SELECT * FROM photographers WHERE id = ?').get(newId);
+      logAudit({
+        userId: currentUserId,
+        userName: currentUserName,
+        action: 'CREATE_PHOTOGRAPHER',
+        tableName: 'photographers',
+        recordId: newId,
+        newData: mapDbRowToPhotographer(created),
+        ipAddress: req.socket.remoteAddress
+      });
+
+      return sendJson(res, 201, { success: true, data: mapDbRowToPhotographer(created) });
+    }
+
+    // PUT /api/photographers/:id
+    if (pathname.startsWith('/api/photographers/') && req.method === 'PUT') {
+      const photoId = decodeURIComponent(pathname.replace('/api/photographers/', ''));
+      const existing = db.prepare('SELECT * FROM photographers WHERE id = ?').get(photoId);
+      if (!existing) {
+        return sendJson(res, 404, { success: false, error: 'Không tìm thấy Photographer với ID này' });
+      }
+
+      const body = await readJsonBody(req);
+      const fullName = (body.fullName !== undefined ? body.fullName : existing.full_name || '').trim();
+      const phone = body.phone !== undefined ? body.phone.trim() : existing.phone;
+      const email = body.email !== undefined ? body.email.trim() : existing.email;
+      const photoType = body.photographerType !== undefined ? body.photographerType : existing.photographer_type;
+      const rating = body.rating !== undefined ? Number(body.rating) : existing.rating;
+      const completedCount = body.completedShootsCount !== undefined ? Number(body.completedShootsCount) : existing.completed_shoots_count;
+      const ratePerShoot = body.ratePerShoot !== undefined ? Number(body.ratePerShoot) : existing.rate_per_shoot;
+      const salaryType = body.salaryType !== undefined ? body.salaryType : existing.salary_type;
+      const monthlySalary = body.monthlySalary !== undefined ? Number(body.monthlySalary) : existing.monthly_salary;
+      const status = body.status !== undefined ? body.status : existing.status;
+      const skillsJson = body.skills !== undefined ? JSON.stringify(body.skills) : existing.skills_json;
+      const activeRegionsJson = body.activeRegions !== undefined ? JSON.stringify(body.activeRegions) : existing.active_regions_json;
+      const equipmentListJson = body.equipmentList !== undefined ? JSON.stringify(body.equipmentList) : existing.equipment_list_json;
+      const avatar = body.avatar !== undefined ? body.avatar : existing.avatar;
+      const expYears = body.experienceYears !== undefined ? Number(body.experienceYears) : existing.experience_years;
+      const notes = body.notes !== undefined ? body.notes.trim() : existing.notes;
+      const username = body.username !== undefined ? body.username.trim() : existing.username;
+      const password = body.password !== undefined ? body.password.trim() : existing.password;
+      const canLogin = body.canLogin !== undefined ? (body.canLogin ? 1 : 0) : existing.can_login;
+
+      const stmt = db.prepare(`
+        UPDATE photographers
+        SET
+          full_name = ?,
+          phone = ?,
+          email = ?,
+          photographer_type = ?,
+          rating = ?,
+          completed_shoots_count = ?,
+          rate_per_shoot = ?,
+          salary_type = ?,
+          monthly_salary = ?,
+          status = ?,
+          skills_json = ?,
+          active_regions_json = ?,
+          equipment_list_json = ?,
+          avatar = ?,
+          experience_years = ?,
+          notes = ?,
+          username = ?,
+          password = ?,
+          can_login = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `);
+      stmt.run(
+        fullName, phone, email, photoType, rating, completedCount,
+        ratePerShoot, salaryType, monthlySalary, status, skillsJson, activeRegionsJson,
+        equipmentListJson, avatar, expYears, notes, username, password, canLogin,
+        photoId
+      );
+
+      const updated = db.prepare('SELECT * FROM photographers WHERE id = ?').get(photoId);
+      logAudit({
+        userId: currentUserId,
+        userName: currentUserName,
+        action: 'UPDATE_PHOTOGRAPHER',
+        tableName: 'photographers',
+        recordId: photoId,
+        oldData: mapDbRowToPhotographer(existing),
+        newData: mapDbRowToPhotographer(updated),
+        ipAddress: req.socket.remoteAddress
+      });
+
+      return sendJson(res, 200, { success: true, data: mapDbRowToPhotographer(updated) });
+    }
+
+    // DELETE /api/photographers/:id
+    if (pathname.startsWith('/api/photographers/') && req.method === 'DELETE') {
+      const photoId = decodeURIComponent(pathname.replace('/api/photographers/', ''));
+      const existing = db.prepare('SELECT * FROM photographers WHERE id = ?').get(photoId);
+      if (!existing) {
+        return sendJson(res, 404, { success: false, error: 'Không tìm thấy Photographer' });
+      }
+
+      db.prepare('DELETE FROM photographers WHERE id = ?').run(photoId);
+      logAudit({
+        userId: currentUserId,
+        userName: currentUserName,
+        action: 'DELETE_PHOTOGRAPHER',
+        tableName: 'photographers',
+        recordId: photoId,
+        oldData: mapDbRowToPhotographer(existing),
+        ipAddress: req.socket.remoteAddress
+      });
+
+      return sendJson(res, 200, { success: true, message: 'Đã xóa Photographer thành công' });
+    }
+
+    // -------------------------------------------------------------
+    // SALES STAFF API (CRUD - Quản lý nhân sự & Hoa hồng Sales)
+    // -------------------------------------------------------------
 
     // GET /api/sales-staff
     if (pathname === '/api/sales-staff' && req.method === 'GET') {
-      const rows = db.prepare('SELECT * FROM sales_staff').all();
-      return sendJson(res, 200, { success: true, data: rows });
+      const rows = db.prepare('SELECT * FROM sales_staff ORDER BY name ASC').all();
+      return sendJson(res, 200, { success: true, data: rows.map(mapDbRowToSalesStaff) });
+    }
+
+    // POST /api/sales-staff
+    if (pathname === '/api/sales-staff' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const newId = body.id || `sales-${Date.now()}`;
+      const name = (body.name || 'Sales Mới').trim();
+      const phone = (body.phone || '').trim();
+      const email = (body.email || '').trim();
+      const roleTitle = body.roleTitle || 'Chuyên viên Sales Tư Vấn';
+      const commType = body.commissionType || 'percentage';
+      const commRate = Number(body.commissionRate) || 0;
+      const commFixed = Number(body.commissionFixedAmount) || 0;
+      const status = body.status || 'active';
+      const username = (body.username || '').trim();
+      const password = (body.password || '').trim();
+      const canLogin = body.canLogin !== false ? 1 : 0;
+      const avatar = body.avatar || '';
+      const activeRegionsJson = JSON.stringify(Array.isArray(body.activeRegions) ? body.activeRegions : ['Hải Phòng']);
+
+      const stmt = db.prepare(`
+        INSERT INTO sales_staff (
+          id, name, phone, email, role_title, commission_type, commission_rate,
+          commission_fixed_amount, status, username, password, can_login, avatar,
+          active_regions_json, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `);
+      stmt.run(
+        newId, name, phone, email, roleTitle, commType, commRate,
+        commFixed, status, username, password, canLogin, avatar, activeRegionsJson
+      );
+
+      const created = db.prepare('SELECT * FROM sales_staff WHERE id = ?').get(newId);
+      logAudit({
+        userId: currentUserId,
+        userName: currentUserName,
+        action: 'CREATE_SALES_STAFF',
+        tableName: 'sales_staff',
+        recordId: newId,
+        newData: mapDbRowToSalesStaff(created),
+        ipAddress: req.socket.remoteAddress
+      });
+
+      return sendJson(res, 201, { success: true, data: mapDbRowToSalesStaff(created) });
+    }
+
+    // PUT /api/sales-staff/:id
+    if (pathname.startsWith('/api/sales-staff/') && req.method === 'PUT') {
+      const staffId = decodeURIComponent(pathname.replace('/api/sales-staff/', ''));
+      const existing = db.prepare('SELECT * FROM sales_staff WHERE id = ?').get(staffId);
+      if (!existing) {
+        return sendJson(res, 404, { success: false, error: 'Không tìm thấy Sales Staff' });
+      }
+
+      const body = await readJsonBody(req);
+      const name = (body.name !== undefined ? body.name : existing.name).trim();
+      const phone = body.phone !== undefined ? body.phone.trim() : existing.phone;
+      const email = body.email !== undefined ? body.email.trim() : existing.email;
+      const roleTitle = body.roleTitle !== undefined ? body.roleTitle : existing.role_title;
+      const commType = body.commissionType !== undefined ? body.commissionType : existing.commission_type;
+      const commRate = body.commissionRate !== undefined ? Number(body.commissionRate) : existing.commission_rate;
+      const commFixed = body.commissionFixedAmount !== undefined ? Number(body.commissionFixedAmount) : existing.commission_fixed_amount;
+      const status = body.status !== undefined ? body.status : existing.status;
+      const username = body.username !== undefined ? body.username.trim() : existing.username;
+      const password = body.password !== undefined ? body.password.trim() : existing.password;
+      const canLogin = body.canLogin !== undefined ? (body.canLogin ? 1 : 0) : existing.can_login;
+      const avatar = body.avatar !== undefined ? body.avatar : existing.avatar;
+      const activeRegionsJson = body.activeRegions !== undefined ? JSON.stringify(body.activeRegions) : existing.active_regions_json;
+
+      const stmt = db.prepare(`
+        UPDATE sales_staff
+        SET
+          name = ?,
+          phone = ?,
+          email = ?,
+          role_title = ?,
+          commission_type = ?,
+          commission_rate = ?,
+          commission_fixed_amount = ?,
+          status = ?,
+          username = ?,
+          password = ?,
+          can_login = ?,
+          avatar = ?,
+          active_regions_json = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `);
+      stmt.run(
+        name, phone, email, roleTitle, commType, commRate,
+        commFixed, status, username, password, canLogin, avatar, activeRegionsJson,
+        staffId
+      );
+
+      const updated = db.prepare('SELECT * FROM sales_staff WHERE id = ?').get(staffId);
+      logAudit({
+        userId: currentUserId,
+        userName: currentUserName,
+        action: 'UPDATE_SALES_STAFF',
+        tableName: 'sales_staff',
+        recordId: staffId,
+        oldData: mapDbRowToSalesStaff(existing),
+        newData: mapDbRowToSalesStaff(updated),
+        ipAddress: req.socket.remoteAddress
+      });
+
+      return sendJson(res, 200, { success: true, data: mapDbRowToSalesStaff(updated) });
+    }
+
+    // DELETE /api/sales-staff/:id
+    if (pathname.startsWith('/api/sales-staff/') && req.method === 'DELETE') {
+      const staffId = decodeURIComponent(pathname.replace('/api/sales-staff/', ''));
+      const existing = db.prepare('SELECT * FROM sales_staff WHERE id = ?').get(staffId);
+      if (!existing) {
+        return sendJson(res, 404, { success: false, error: 'Không tìm thấy Sales Staff' });
+      }
+
+      db.prepare('DELETE FROM sales_staff WHERE id = ?').run(staffId);
+      logAudit({
+        userId: currentUserId,
+        userName: currentUserName,
+        action: 'DELETE_SALES_STAFF',
+        tableName: 'sales_staff',
+        recordId: staffId,
+        oldData: mapDbRowToSalesStaff(existing),
+        ipAddress: req.socket.remoteAddress
+      });
+
+      return sendJson(res, 200, { success: true, message: 'Đã xóa Sales Staff thành công' });
     }
 
     // -------------------------------------------------------------

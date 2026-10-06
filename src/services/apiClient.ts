@@ -345,5 +345,135 @@ export const apiClient = {
     } catch {
       return [];
     }
+  },
+
+  // -----------------------------------------------------------------
+  // 5. PHOTOGRAPHERS (CRUD & THÙY LAO / LƯƠNG THƯỞNG)
+  // -----------------------------------------------------------------
+  async getPhotographers(): Promise<Photographer[]> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/photographers`, {
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(6000)
+      });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.data || [];
+    } catch (err) {
+      console.warn('[ApiClient] Lỗi tải danh sách thợ từ server:', err);
+      return [];
+    }
+  },
+
+  async createPhotographer(photographer: Partial<Photographer>): Promise<Photographer | null> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/photographers`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(photographer),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data || null;
+    } catch (err) {
+      console.error('[ApiClient] Lỗi tạo thợ trên server:', err);
+      return null;
+    }
+  },
+
+  async updatePhotographer(id: string, photographer: Partial<Photographer>): Promise<Photographer | null> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/photographers/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(photographer),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data || null;
+    } catch (err) {
+      console.error('[ApiClient] Lỗi cập nhật thợ trên server:', err);
+      return null;
+    }
+  },
+
+  async deletePhotographer(id: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/photographers/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(6000)
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  // -----------------------------------------------------------------
+  // 6. SALES STAFF (CRUD & HOA HỒNG SALES)
+  // -----------------------------------------------------------------
+  async getSalesStaff(): Promise<SalesStaff[]> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/sales-staff`, {
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(6000)
+      });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.data || [];
+    } catch (err) {
+      console.warn('[ApiClient] Lỗi tải danh sách Sales từ server:', err);
+      return [];
+    }
+  },
+
+  async createSalesStaff(staff: Partial<SalesStaff>): Promise<SalesStaff | null> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/sales-staff`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(staff),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data || null;
+    } catch (err) {
+      console.error('[ApiClient] Lỗi tạo Sales trên server:', err);
+      return null;
+    }
+  },
+
+  async updateSalesStaff(id: string, staff: Partial<SalesStaff>): Promise<SalesStaff | null> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/sales-staff/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(staff),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.data || null;
+    } catch (err) {
+      console.error('[ApiClient] Lỗi cập nhật Sales trên server:', err);
+      return null;
+    }
+  },
+
+  async deleteSalesStaff(id: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/sales-staff/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(6000)
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
   }
 };
