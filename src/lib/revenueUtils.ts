@@ -72,19 +72,26 @@ export const isCustomerBookedOrDeposited = (
 ): boolean => {
   if (!customer) return false;
 
-  // Thuộc stage chốt cọc trở đi
+  // 1. Khách hàng ở New Lead hoặc Lost tuyệt đối không tính là Booked/Cọc trừ khi có số tiền cọc thực tế > 0
+  if (customer.pipelineStage === 'New Lead' || customer.pipelineStage === 'Lost') {
+    const paid = Number(customer.paidAmount ?? 0);
+    const deposit = Number(customer.depositAmount ?? 0);
+    return paid > 0 || deposit > 0;
+  }
+
+  // 2. Thuộc stage chốt cọc trở đi (Đã cọc, Book ngày, Đã chụp...)
   if (CLOSED_BOOKED_STAGES.includes(customer.pipelineStage)) {
     return true;
   }
 
-  // Đã có tiền cọc hoặc thanh toán thực tế phát sinh
+  // 3. Đã có tiền cọc hoặc thanh toán thực tế phát sinh (> 0)
   const paid = Number(customer.paidAmount ?? 0);
   const deposit = Number(customer.depositAmount ?? 0);
   if (paid > 0 || deposit > 0) {
     return true;
   }
 
-  // Đã có booking xếp lịch thực tế
+  // 4. Đã có booking xếp lịch thực tế (chỉ khi không phải New Lead / Lost)
   if (bookings.length > 0 && bookings.some(b => b.customerId === customer.id)) {
     return true;
   }
@@ -125,9 +132,14 @@ export const getCustomerPaidDeposit = (customer: Customer): number => {
 
 /**
  * Lấy CÔNG NỢ CÒN LẠI CẦN THU (Doanh thu toàn bộ đơn - Tiền cọc đã nhận)
+ * Quy chuẩn kế toán: Khách hàng ở New Lead / chưa chốt cọc TUYỆT ĐỐI KHÔNG CÓ CÔNG NỢ (trả về 0)
  */
 export const getCustomerRemainingDebt = (customer: Customer): number => {
   if (!customer) return 0;
+  // Nếu khách chưa ở giai đoạn chốt cọc / chưa có cọc: không phát sinh công nợ
+  if (!isCustomerBookedOrDeposited(customer)) {
+    return 0;
+  }
   const total = getCustomerTotalOrderValue(customer);
   const paid = getCustomerPaidDeposit(customer);
   return Math.max(0, total - paid);

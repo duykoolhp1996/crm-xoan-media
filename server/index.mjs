@@ -13,7 +13,7 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.2.4';
+const VERSION = '1.2.5';
 
 // Thư mục lưu trữ tĩnh bền vững (nằm trong server/data/ nên không bị rsync đè mất)
 const UPLOADS_DIR = path.resolve(path.dirname(DB_PATH), 'uploads');
@@ -558,13 +558,26 @@ const server = http.createServer(async (req, res) => {
       }
 
       const prevStage = existing.pipeline_stage;
+      const isLeadOrLost = newStage === 'New Lead' || newStage === 'Lost';
       runTransaction(() => {
-        db.prepare(`
-          UPDATE customers SET 
-            pipeline_stage = ?,
-            updated_at = CURRENT_TIMESTAMP
-          WHERE id = ?
-        `).run(newStage, id);
+        if (isLeadOrLost) {
+          db.prepare(`
+            UPDATE customers SET 
+              pipeline_stage = ?,
+              deposit_amount = 0,
+              paid_amount = 0,
+              remaining_amount = 0,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `).run(newStage, id);
+        } else {
+          db.prepare(`
+            UPDATE customers SET 
+              pipeline_stage = ?,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `).run(newStage, id);
+        }
 
         const histId = `hist-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
         db.prepare(`
@@ -629,7 +642,11 @@ const server = http.createServer(async (req, res) => {
       } else {
         totalAmount = Math.max(0, subtotal + extraFee - discount);
       }
-      const remainingAmount = Math.max(0, totalAmount - depositAmount);
+      const stage = body.pipelineStage || body.pipeline_stage || 'New Lead';
+      const isClosedStage = ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao', 'Hoàn thành'].includes(stage);
+      const remainingAmount = (isClosedStage || depositAmount > 0)
+        ? Math.max(0, totalAmount - depositAmount)
+        : 0;
 
       runTransaction(() => {
         const stmt = db.prepare(`
@@ -756,7 +773,11 @@ const server = http.createServer(async (req, res) => {
       } else {
         totalAmount = Math.max(0, subtotal + extraFee - discount);
       }
-      const remainingAmount = Math.max(0, totalAmount - depositAmount);
+      const finalStage = body.pipelineStage ?? body.pipeline_stage ?? existing.pipeline_stage;
+      const isClosedStage = ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao', 'Hoàn thành'].includes(finalStage);
+      const remainingAmount = (isClosedStage || depositAmount > 0)
+        ? Math.max(0, totalAmount - depositAmount)
+        : 0;
 
       runTransaction(() => {
         const stmt = db.prepare(`

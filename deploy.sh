@@ -2,7 +2,7 @@
 set -e
 
 echo "=========================================================="
-echo "🚀 CRM Xoăn Media - Zero-Data-Loss Deployment (v1.2.4)"
+echo "🚀 CRM Xoăn Media - Zero-Data-Loss Deployment (v1.2.5)"
 echo "=========================================================="
 
 # 1. Tự động sao lưu Database trên Server trước khi deploy bất kỳ thay đổi nào
@@ -49,6 +49,6 @@ echo "Health Check: $HEALTH_RES"
 echo "Database Status: $DB_HEALTH_RES"
 
 echo "=========================================================="
-echo "✅ Đã deploy thành công lên Server Production https://crm.xoanmedia.com! (Version v1.2.4)"
+echo "✅ Đã deploy thành công lên Server Production https://crm.xoanmedia.com! (Version v1.2.5)"
 echo "💾 Dữ liệu Database SQL Server được bảo toàn 100%!"
 echo "=========================================================="

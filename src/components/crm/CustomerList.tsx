@@ -371,9 +371,10 @@ export const CustomerList: React.FC = () => {
                       <span className="font-bold text-neutral-700 text-xs block">
                         {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
                       </span>
-                      <span className="text-[10px] text-neutral-400 italic block mt-0.5">
-                        Chưa chốt cọc
-                      </span>
+                      <div className="text-[10px] text-neutral-400 font-medium flex items-center justify-end gap-1 mt-0.5">
+                        <span>Đã cọc: 0đ</span>
+                        <span className="italic">• Chưa chốt (Không nợ)</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -490,8 +491,9 @@ export const CustomerList: React.FC = () => {
                           <p className="font-bold text-neutral-700 text-xs">
                             {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
                           </p>
-                          <p className="text-[10px] text-neutral-400 italic">
-                            Chưa chốt cọc (Dự kiến)
+                          <p className="text-[11px] text-neutral-500 font-medium flex items-center gap-1.5 flex-wrap">
+                            <span className="text-neutral-600 font-semibold">Đã cọc: 0đ</span>
+                            <span className="text-neutral-400 italic">• Chưa chốt cọc (Không nợ)</span>
                           </p>
                         </div>
                       )}

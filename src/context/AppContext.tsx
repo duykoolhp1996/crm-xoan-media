@@ -988,11 +988,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCustomers(prev =>
       prev.map(c => {
         if (c.id === customerId) {
+          const isLeadOrLost = newStage === 'New Lead' || newStage === 'Lost';
           updatedCustObj = {
             ...c,
             pipelineStage: newStage,
             assignedSalesName: newSalesName || c.assignedSalesName,
             assignedSalesId: newSalesId || c.assignedSalesId,
+            depositAmount: isLeadOrLost ? 0 : c.depositAmount,
+            paidAmount: isLeadOrLost ? 0 : c.paidAmount,
+            remainingAmount: isLeadOrLost ? 0 : c.remainingAmount,
             updatedAt: new Date().toISOString()
           };
           return updatedCustObj;
@@ -1081,6 +1085,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateCustomer = (updated: Customer) => {
+    // Nếu khách hàng ở New Lead hoặc Lost và không có cọc thực tế: Đảm bảo cọc và công nợ = 0
+    if ((updated.pipelineStage === 'New Lead' || updated.pipelineStage === 'Lost') && Number(updated.depositAmount || 0) === 0) {
+      updated = {
+        ...updated,
+        depositAmount: 0,
+        paidAmount: 0,
+        remainingAmount: 0
+      };
+    }
     const prevCust = customers.find(c => c.id === updated.id);
     const isNewDeposit = prevCust && !['Đã cọc', 'Đã đặt cọc'].includes(prevCust.pipelineStage) && ['Đã cọc', 'Đã đặt cọc'].includes(updated.pipelineStage);
     const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (updated.assignedSalesName || currentUser.name);
