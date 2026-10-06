@@ -62,7 +62,7 @@ const server = http.createServer(async (req, res) => {
         status: 'ok',
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
-        version: '1.1.3'
+        version: '1.1.4'
       });
     }
 

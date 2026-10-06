@@ -96,31 +96,41 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone || !formData.className) {
-      alert('Vui lòng điền đầy đủ Tên, Số điện thoại và Tên lớp!');
+
+    // New Lead: chỉ cần Tên (có thể chỉ có MXH, chưa cần SĐT/Tên lớp)
+    if (!formData.name) {
+      alert('Vui lòng điền ít nhất Tên liên hệ hoặc tên nhóm!');
+      return;
+    }
+    // Các giai đoạn tiếp theo (không phải New Lead): yêu cầu thêm SĐT + Tên lớp
+    if (formData.pipelineStage !== 'New Lead' && (!formData.phone || !formData.className)) {
+      alert('Vui lòng điền đầy đủ Số điện thoại và Tên lớp để chuyển sang giai đoạn này!');
       return;
     }
 
+    // Kiểm tra trùng số điện thoại (chỉ khi có nhập SĐT)
     const inputCleanPhone = cleanPhone(formData.phone);
     const inputCleanZalo = cleanPhone(formData.zalo);
-    const directDup = (customers || []).find(c => {
-      const cPhone = cleanPhone(c.phone);
-      const cZalo = cleanPhone(c.zalo);
-      return (cPhone && (cPhone === inputCleanPhone || (inputCleanZalo && cPhone === inputCleanZalo))) ||
-             (cZalo && ((inputCleanPhone && cZalo === inputCleanPhone) || (inputCleanZalo && cZalo === inputCleanZalo)));
-    });
+    if (inputCleanPhone.length >= 4) {
+      const directDup = (customers || []).find(c => {
+        const cPhone = cleanPhone(c.phone);
+        const cZalo = cleanPhone(c.zalo);
+        return (cPhone && (cPhone === inputCleanPhone || (inputCleanZalo && cPhone === inputCleanZalo))) ||
+               (cZalo && ((inputCleanPhone && cZalo === inputCleanPhone) || (inputCleanZalo && cZalo === inputCleanZalo)));
+      });
 
-    if (directDup) {
-      alert(
-        `⚠️ SỐ ĐIỆN THOẠI ĐÃ BỊ TRÙNG!\n\n` +
-        `Số điện thoại "${formData.phone}" đã tồn tại trên hệ thống với thông tin:\n` +
-        `• Khách hàng: ${directDup.name}\n` +
-        `• Lớp / Trường: ${directDup.className} - ${directDup.schoolName}\n` +
-        `• Sales phụ trách: ${directDup.assignedSalesName || 'Chưa gán'}\n` +
-        `• Trạng thái: ${directDup.pipelineStage}\n\n` +
-        `Hệ thống từ chối lưu để tránh trùng lặp dữ liệu CRM!`
-      );
-      return;
+      if (directDup) {
+        alert(
+          `⚠️ SỐ ĐIỆN THOẠI ĐÃ BỊ TRÙNG!\n\n` +
+          `Số điện thoại "${formData.phone}" đã tồn tại trên hệ thống với thông tin:\n` +
+          `• Khách hàng: ${directDup.name}\n` +
+          `• Lớp / Trường: ${directDup.className} - ${directDup.schoolName}\n` +
+          `• Sales phụ trách: ${directDup.assignedSalesName || 'Chưa gán'}\n` +
+          `• Trạng thái: ${directDup.pipelineStage}\n\n` +
+          `Hệ thống từ chối lưu để tránh trùng lặp dữ liệu CRM!`
+        );
+        return;
+      }
     }
 
     const selectedPkg = servicePackages.find(p => p.id === formData.servicePackageId);
@@ -224,7 +234,13 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
               </div>
               <div>
                 <div className="flex items-center justify-between">
-                  <label className="font-semibold text-neutral-700">Số điện thoại *</label>
+                  <label className="font-semibold text-neutral-700">
+                    Số điện thoại
+                    {formData.pipelineStage === 'New Lead'
+                      ? <span className="ml-1 text-neutral-400 font-normal">(tùy chọn)</span>
+                      : <span className="text-rose-500"> *</span>
+                    }
+                  </label>
                   {duplicateCustomer && (
                     <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
                       Đã trùng SĐT
@@ -233,7 +249,6 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
                 </div>
                 <input
                   type="tel"
-                  required
                   placeholder="0912..."
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
@@ -324,10 +339,15 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose })
                 />
               </div>
               <div>
-                <label className="font-semibold text-neutral-700">Tên Lớp *</label>
+                <label className="font-semibold text-neutral-700">
+                  Tên Lớp
+                  {formData.pipelineStage === 'New Lead'
+                    ? <span className="ml-1 text-neutral-400 font-normal">(tùy chọn)</span>
+                    : <span className="text-rose-500"> *</span>
+                  }
+                </label>
                 <input
                   type="text"
-                  required
                   placeholder="VD: 12A1, 9B..."
                   value={formData.className}
                   onChange={e => setFormData({ ...formData, className: e.target.value })}
