@@ -1,4 +1,4 @@
-import { Customer, Booking, Photographer, SalesStaff } from '../types';
+import { Customer, Booking, Photographer, SalesStaff, SystemNotification } from '../types';
 import { getApiBaseUrl } from './multiZoneSyncService';
 
 /**
@@ -494,6 +494,68 @@ export const apiClient = {
     } catch (err) {
       console.warn('[ApiClient] Lỗi tải lên avatar lên server:', err);
       return null;
+    }
+  },
+
+  // -----------------------------------------------------------------
+  // 8. NOTIFICATIONS API (Đồng bộ thông báo đa thiết bị & iOS)
+  // -----------------------------------------------------------------
+  async getNotifications(userId?: string, role?: string): Promise<SystemNotification[]> {
+    try {
+      const query = new URLSearchParams();
+      if (userId) query.set('userId', userId);
+      if (role) query.set('role', role);
+
+      const res = await fetch(`${getApiBaseUrl()}/notifications?${query.toString()}`, {
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(6000)
+      });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.data || [];
+    } catch {
+      return [];
+    }
+  },
+
+  async createNotification(notif: SystemNotification): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/notifications`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(notif),
+        signal: AbortSignal.timeout(6000)
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async markNotificationAsRead(id: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        signal: AbortSignal.timeout(5000)
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async markAllNotificationsAsRead(userId?: string, role?: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/notifications/read-all`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ userId, role }),
+        signal: AbortSignal.timeout(5000)
+      });
+      return res.ok;
+    } catch {
+      return false;
     }
   }
 };

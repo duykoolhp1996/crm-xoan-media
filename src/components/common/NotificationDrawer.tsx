@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
@@ -13,8 +13,11 @@ import {
   Camera,
   DollarSign,
   Trash2,
-  UserCheck,
-  ArrowRight
+  ArrowRight,
+  Smartphone,
+  Volume2,
+  Share,
+  Info
 } from 'lucide-react';
 import { SystemNotification } from '../../types';
 
@@ -28,6 +31,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
     currentUser,
     currentRole,
     userNotifications,
+    addNotification,
     markNotificationAsRead,
     markAllNotificationsAsRead,
     clearAllNotifications,
@@ -37,6 +41,18 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
   } = useApp();
 
   const [activeFilterTab, setActiveFilterTab] = useState<'all' | 'unread'>('all');
+  const [testSent, setTestSent] = useState(false);
+
+  // Trạng thái quyền thông báo Web Notification API
+  const [hasNotificationSupport, setHasNotificationSupport] = useState(false);
+  const [permissionState, setPermissionState] = useState<string>('default');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setHasNotificationSupport(true);
+      setPermissionState(Notification.permission);
+    }
+  }, [isOpen]);
 
   // Lọc thông báo theo tab
   const displayedNotifications = useMemo(() => {
@@ -67,6 +83,96 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
       }
       onClose();
     }
+  };
+
+  // Phát âm thanh chuông báo (Ding Chime) bằng Web Audio API
+  const playNotificationTone = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
+      osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.16); // D6
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.45);
+    } catch {
+      // Bỏ qua nếu audio bị chặn
+    }
+  };
+
+  // Xin quyền thông báo đẩy của hệ điều hành
+  const handleRequestPermission = async () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        const perm = await Notification.requestPermission();
+        setPermissionState(perm);
+        if (perm === 'granted') {
+          handleSendTestNotification();
+        }
+      } catch (e) {
+        console.warn('Lỗi xin quyền thông báo:', e);
+      }
+    }
+  };
+
+  // Bắn thông báo thử nghiệm tới thiết bị di động / iOS
+  const handleSendTestNotification = () => {
+    // 1. Phát âm thanh chuông chuông ngân
+    playNotificationTone();
+
+    // 2. Rung máy (Hỗ trợ điện thoại)
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate([150, 80, 150]);
+      } catch {}
+    }
+
+    // 3. Kích hoạt thông báo hệ thống (Tương thích chuẩn iOS PWA & Desktop/Android)
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      const notifTitle = '🔔 CRM Xoăn Media (iOS & Mobile)';
+      const notifOptions = {
+        body: `Thông báo thử nghiệm cho ${currentUser.name} (${roleText}) hoạt động thành công!`,
+        icon: './favicon.png',
+        badge: './favicon.png',
+        tag: 'crm-test-' + Date.now()
+      };
+
+      if ('serviceWorker' in navigator && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready
+          .then((registration) => {
+            registration.showNotification(notifTitle, notifOptions);
+          })
+          .catch(() => {
+            try {
+              new Notification(notifTitle, notifOptions);
+            } catch {}
+          });
+      } else {
+        try {
+          new Notification(notifTitle, notifOptions);
+        } catch {}
+      }
+    }
+
+    // 4. Thêm một thông báo thực tế vào hệ thống
+    addNotification({
+      type: 'system',
+      title: '🔔 THỬ NGHIỆM THÔNG BÁO THÀNH CÔNG',
+      message: `Thiết bị của ${currentUser.name} (${roleText}) đã kết nối thông báo thành công. Mọi Lead mới và lịch chụp sẽ được báo về ngay lập tức!`,
+      targetUserId: currentUser.id,
+      severity: 'success'
+    });
+
+    setTestSent(true);
+    setTimeout(() => setTestSent(false), 4000);
   };
 
   const formatNotificationTime = (timestamp: string) => {
@@ -247,6 +353,52 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               )}
+            </div>
+          </div>
+
+          {/* Công cụ hỗ trợ iOS & Thông báo Đẩy (Device Push & Test Tool) */}
+          <div className="p-3 bg-[#B8F23D]/10 border-b border-[#B8F23D]/20 flex flex-col gap-2 shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-neutral-800 text-xs font-bold">
+                <Smartphone className="w-3.5 h-3.5 text-[#5d9004]" />
+                <span>Hỗ Trợ Thiết Bị Di Động & iOS</span>
+              </div>
+
+              {testSent && (
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full animate-in fade-in">
+                  ✅ Đã bắn thông báo!
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {permissionState !== 'granted' && hasNotificationSupport ? (
+                <button
+                  type="button"
+                  onClick={handleRequestPermission}
+                  className="flex-1 py-1.5 px-2.5 bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 font-black rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  <span>Bật Thông Báo Đẩy Trên Máy</span>
+                </button>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={handleSendTestNotification}
+                className="flex-1 py-1.5 px-2.5 bg-neutral-900 hover:bg-neutral-800 text-white font-bold rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+              >
+                <Volume2 className="w-3.5 h-3.5 text-[#B8F23D]" />
+                <span>🧪 Test Thông Báo Trên Máy Này</span>
+              </button>
+            </div>
+
+            {/* Mẹo nhận thông báo trên iPhone */}
+            <div className="text-[10px] text-neutral-600 bg-white/70 rounded-xl p-2 border border-black/[0.04] flex items-start gap-1.5 leading-tight">
+              <Info className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Mẹo trên iPhone / iPad:</strong> Nhấn biểu tượng <strong>Chia sẻ (Share ⬆️)</strong> trên Safari ➔ Chọn <strong>"Thêm vào Màn hình chính" (Add to Home Screen)</strong> để nhận thông báo đẩy tức thì như ứng dụng gốc!
+              </span>
             </div>
           </div>
 

@@ -378,12 +378,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const loadFromSqlDatabase = async () => {
       try {
-        const [custRes, bookRes, delRes, photoRes, salesRes] = await Promise.allSettled([
+        const [custRes, bookRes, delRes, photoRes, salesRes, notifRes] = await Promise.allSettled([
           apiClient.getCustomers({ limit: 500 }),
           apiClient.getBookings({ limit: 500 }),
           apiClient.getDeletedCustomers(),
           apiClient.getPhotographers(),
-          apiClient.getSalesStaff()
+          apiClient.getSalesStaff(),
+          apiClient.getNotifications(currentUser?.id, currentRole)
         ]);
 
         if (custRes.status === 'fulfilled' && custRes.value && custRes.value.customers) {
@@ -421,12 +422,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           } catch {}
           console.log(`[SQL Database] 💼 Đã nạp thành công ${salesRes.value.length} nhân sự Sales từ SQL Server.`);
         }
+
+        if (notifRes.status === 'fulfilled' && Array.isArray(notifRes.value) && notifRes.value.length > 0) {
+          const serverNotifs = notifRes.value;
+          setNotifications(prev => {
+            const existingIds = new Set(serverNotifs.map(n => n.id));
+            const localOnly = prev.filter(n => !existingIds.has(n.id));
+            return [...serverNotifs, ...localOnly];
+          });
+          console.log(`[SQL Database] 🔔 Đã nạp thành công ${serverNotifs.length} thông báo từ SQL Server.`);
+        }
       } catch (e) {
         console.warn('[SQL Database] Lỗi nạp dữ liệu từ server:', e);
       }
     };
 
     loadFromSqlDatabase();
+
+    // Polling định kỳ mỗi 20s để tự động cập nhật thông báo mới cho thiết bị di động (iOS / Android)
+    const notifPollingTimer = setInterval(async () => {
+      try {
+        const serverNotifs = await apiClient.getNotifications(currentUser?.id, currentRole);
+        if (Array.isArray(serverNotifs) && serverNotifs.length > 0) {
+          setNotifications(prev => {
+            const existingIds = new Set(serverNotifs.map(n => n.id));
+            const localOnly = prev.filter(n => !existingIds.has(n.id));
+            return [...serverNotifs, ...localOnly];
+          });
+        }
+      } catch {}
+    }, 20000);
+
+    return () => clearInterval(notifPollingTimer);
 
     // 2. Nạp thêm từ Supabase Replica (nếu có dữ liệu mới hơn trên cloud)
     crmSupabaseService.getCustomers().then(remoteCustomers => {
@@ -1770,15 +1797,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       read: false
     };
     setNotifications(prev => [newNotif, ...prev]);
+    // Đồng bộ lưu bền vững lên SQL Server REST API để đa thiết bị (iOS, Android, PC) cùng nhận được
+    apiClient.createNotification(newNotif).catch(() => {});
   };
 
   const markNotificationAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    apiClient.markNotificationAsRead(id).catch(() => {});
   };
 
   const markAllNotificationsAsRead = () => {
     const userNotifIds = new Set(userNotifications.map(n => n.id));
     setNotifications(prev => prev.map(n => userNotifIds.has(n.id) ? { ...n, read: true } : n));
+    apiClient.markAllNotificationsAsRead(currentUser?.id, currentRole).catch(() => {});
   };
 
   const clearAllNotifications = () => {

@@ -300,6 +300,29 @@ const mapDbRowToSalesStaff = (row) => {
   };
 };
 
+const mapDbRowToNotification = (row) => {
+  if (!row) return null;
+  let metadata = undefined;
+  try {
+    if (row.metadata_json) metadata = JSON.parse(row.metadata_json);
+  } catch {}
+
+  return {
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    message: row.message,
+    bookingId: row.booking_id || undefined,
+    customerId: row.customer_id || undefined,
+    targetUserId: row.target_user_id || undefined,
+    targetRole: row.target_role || undefined,
+    severity: row.severity || 'info',
+    timestamp: row.timestamp || row.created_at,
+    read: Boolean(row.read),
+    metadata
+  };
+};
+
 // ==========================================
 // HTTP SERVER & ROUTING
 // ==========================================
@@ -1490,6 +1513,101 @@ const server = http.createServer(async (req, res) => {
       });
 
       return sendJson(res, 200, { success: true, message: 'Đã xóa Sales Staff thành công' });
+    }
+
+    // -------------------------------------------------------------
+    // NOTIFICATIONS API (Đồng bộ thông báo bền vững đa thiết bị & iOS)
+    // -------------------------------------------------------------
+
+    // GET /api/notifications - Lấy danh sách thông báo theo tài khoản
+    if (pathname === '/api/notifications' && req.method === 'GET') {
+      const targetUserId = searchParams.get('userId') || '';
+      const targetRole = searchParams.get('role') || '';
+
+      let rows = [];
+      if (targetRole === 'admin' || (!targetUserId && !targetRole)) {
+        rows = db.prepare(`
+          SELECT * FROM notifications 
+          ORDER BY created_at DESC 
+          LIMIT 100
+        `).all();
+      } else {
+        rows = db.prepare(`
+          SELECT * FROM notifications 
+          WHERE target_user_id = ? 
+             OR target_role = ? 
+             OR target_role = 'all'
+          ORDER BY created_at DESC 
+          LIMIT 100
+        `).all(targetUserId, targetRole);
+      }
+
+      return sendJson(res, 200, { success: true, data: rows.map(mapDbRowToNotification) });
+    }
+
+    // POST /api/notifications - Tạo mới thông báo trên Server
+    if (pathname === '/api/notifications' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const newId = body.id || `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const type = body.type || 'system';
+      const title = (body.title || 'Thông báo mới').trim();
+      const message = (body.message || '').trim();
+      const bookingId = body.bookingId || null;
+      const customerId = body.customerId || null;
+      const targetUserId = body.targetUserId || null;
+      const targetRole = body.targetRole || null;
+      const severity = body.severity || 'info';
+      const timestamp = body.timestamp || new Date().toISOString();
+      const read = body.read ? 1 : 0;
+      const metadataJson = body.metadata ? JSON.stringify(body.metadata) : null;
+
+      const stmt = db.prepare(`
+        INSERT OR REPLACE INTO notifications (
+          id, type, title, message, booking_id, customer_id, target_user_id,
+          target_role, severity, timestamp, read, metadata_json, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `);
+      stmt.run(
+        newId, type, title, message, bookingId, customerId, targetUserId,
+        targetRole, severity, timestamp, read, metadataJson
+      );
+
+      const created = db.prepare('SELECT * FROM notifications WHERE id = ?').get(newId);
+      return sendJson(res, 201, { success: true, data: mapDbRowToNotification(created) });
+    }
+
+    // PUT /api/notifications/:id/read - Đánh dấu đã đọc 1 thông báo
+    if (pathname.startsWith('/api/notifications/') && pathname.endsWith('/read') && req.method === 'PUT') {
+      const notifId = pathname.replace('/api/notifications/', '').replace('/read', '').trim();
+      db.prepare('UPDATE notifications SET read = 1 WHERE id = ?').run(notifId);
+      return sendJson(res, 200, { success: true, message: 'Đã đánh dấu đã đọc' });
+    }
+
+    // PUT /api/notifications/read-all - Đánh dấu đã đọc tất cả thông báo của user
+    if (pathname === '/api/notifications/read-all' && req.method === 'PUT') {
+      const body = await readJsonBody(req);
+      const targetUserId = body.userId || searchParams.get('userId') || '';
+      const targetRole = body.role || searchParams.get('role') || '';
+
+      if (targetRole === 'admin') {
+        db.prepare('UPDATE notifications SET read = 1').run();
+      } else if (targetUserId) {
+        db.prepare('UPDATE notifications SET read = 1 WHERE target_user_id = ? OR target_role = ? OR target_role = "all"').run(targetUserId, targetRole);
+      }
+      return sendJson(res, 200, { success: true, message: 'Đã đánh dấu đã đọc tất cả' });
+    }
+
+    // DELETE /api/notifications - Xóa thông báo của user
+    if (pathname === '/api/notifications' && req.method === 'DELETE') {
+      const targetUserId = searchParams.get('userId') || '';
+      const targetRole = searchParams.get('role') || '';
+
+      if (targetRole === 'admin') {
+        db.prepare('DELETE FROM notifications').run();
+      } else if (targetUserId) {
+        db.prepare('DELETE FROM notifications WHERE target_user_id = ?').run(targetUserId);
+      }
+      return sendJson(res, 200, { success: true, message: 'Đã xóa thông báo' });
     }
 
     // -------------------------------------------------------------

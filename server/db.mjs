@@ -474,6 +474,96 @@ const runSafeMigrations = () => {
       console.warn('[Migration 7] Lỗi chuẩn hóa stage:', mig7Err.message);
     }
   }
+
+  // Migration 8: Bảng Notifications lưu trữ thông báo bền vững & đồng bộ đa thiết bị (iOS, Android, PC)
+  if (!existingMigrations.has(8)) {
+    try {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS notifications (
+          id TEXT PRIMARY KEY,
+          type TEXT NOT NULL,
+          title TEXT NOT NULL,
+          message TEXT NOT NULL,
+          booking_id TEXT,
+          customer_id TEXT,
+          target_user_id TEXT,
+          target_role TEXT,
+          severity TEXT DEFAULT 'info',
+          timestamp TEXT NOT NULL,
+          read INTEGER DEFAULT 0,
+          metadata_json TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_notifications_target_user ON notifications(target_user_id);
+        CREATE INDEX IF NOT EXISTS idx_notifications_target_role ON notifications(target_role);
+        CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at);
+      `);
+
+      // Seed sẵn thông báo cập nhật v1.2.7 và thông báo mẫu cho các tài khoản
+      const insertNotif = db.prepare(`
+        INSERT OR IGNORE INTO notifications (id, type, title, message, customer_id, target_user_id, target_role, severity, timestamp, read)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      insertNotif.run(
+        'notif-system-v127',
+        'system',
+        '🚀 CRM XOĂN MEDIA CẬP NHẬT PHIÊN BẢN V1.2.7',
+        'Hệ thống đã nâng cấp phiên bản v1.2.7 thành công: Tối ưu hiển thị cho thiết bị di động, cá nhân hóa thông báo trúng đích theo từng tài khoản (Lead mới cho Sales & Admin, Lịch chụp cho Photographer).',
+        null,
+        null,
+        'all',
+        'info',
+        new Date().toISOString(),
+        0
+      );
+
+      insertNotif.run(
+        'notif-admin-1',
+        'new_lead',
+        '🌟 LEAD MỚI TIẾP NHẬN: Cô Giá',
+        'Khách hàng Cô Giá (12A3 - THPT Marie Curie Hải Phòng) từ kênh Facebook Ads đã được tiếp nhận vào Pipeline.',
+        'cust-1',
+        null,
+        'admin',
+        'info',
+        new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        0
+      );
+
+      insertNotif.run(
+        'notif-sales-son-1',
+        'new_lead',
+        '🎯 BẠN CÓ LEAD MỚI PHỤ TRÁCH',
+        'Bạn được phân công chăm sóc Lead: Cô Giá (12A3 - THPT Marie Curie Hải Phòng). Hãy liên hệ tư vấn sớm!',
+        'cust-1',
+        'user-2',
+        'sales',
+        'info',
+        new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+        0
+      );
+
+      insertNotif.run(
+        'notif-photo-long-1',
+        'shoot_assigned',
+        '📸 CA CHỤP MỚI ĐƯỢC PHÂN CÔNG (Trưởng nháy)',
+        'Bạn được phân công làm Trưởng nháy cho ca chụp: Lớp 12A3 THPT Marie Curie vào ngày 28/10/2026 tại Hải Phòng. Vui lòng kiểm tra thiết bị!',
+        'cust-1',
+        'photo-1',
+        'photographer',
+        'info',
+        new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+        0
+      );
+
+      db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
+        .run('mig-8', 8, 'persistent_notifications_table_and_sync');
+      console.log('[Migration] ✅ Đã hoàn tất Migration 8: Bảng notifications lưu trữ bền vững & đồng bộ đa thiết bị');
+    } catch (mig8Err) {
+      console.warn('[Migration 8] Lỗi tạo bảng notifications:', mig8Err.message);
+    }
+  }
 };
 
 runSafeMigrations();
