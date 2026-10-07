@@ -373,42 +373,42 @@ export const ExecutiveDashboard: React.FC = () => {
     ];
   }, [filteredCustomers]);
 
-  // 7. Doanh thu theo tháng: Tính từ Bookings thực tế kết hợp tiến độ mùa vụ
+  // 7. Doanh thu theo tháng: Tính từ Bookings thực tế (Doanh thu hợp đồng & Tiền cọc đã nhận)
   const monthlyRevenueData = useMemo(() => {
-    const bookingByMonth: Record<string, { revenue: number; bookings: number }> = {};
+    const bookingByMonth: Record<string, { revenue: number; deposit: number; bookings: number }> = {};
     bookings.forEach(b => {
+      if (!b.shootDate) return;
       const parts = b.shootDate.split('-');
       if (parts.length >= 2) {
         const monthNum = parseInt(parts[1], 10);
         const key = `T${monthNum}`;
         if (!bookingByMonth[key]) {
-          bookingByMonth[key] = { revenue: 0, bookings: 0 };
+          bookingByMonth[key] = { revenue: 0, deposit: 0, bookings: 0 };
         }
-        bookingByMonth[key].revenue += (b.totalAmount / 1000000);
+        bookingByMonth[key].revenue += ((b.totalAmount || 0) / 1000000);
+        bookingByMonth[key].deposit += ((b.depositAmount || 0) / 1000000);
         bookingByMonth[key].bookings += 1;
       }
     });
 
     const timeline = [
-      { month: 'T7', baseRev: 0, baseCost: 0, baseBks: 0 },
-      { month: 'T8', baseRev: 0, baseCost: 0, baseBks: 0 },
-      { month: 'T9', baseRev: 0, baseCost: 0, baseBks: 0 },
-      { month: 'T10', baseRev: 0, baseCost: 0, baseBks: 0 },
-      { month: 'T11 (Cao Điểm)', baseRev: 0, baseCost: 0, baseBks: 0 },
-      { month: 'T12', baseRev: 0, baseCost: 0, baseBks: 0 },
+      { month: 'T9', key: 'T9' },
+      { month: 'T10', key: 'T10' },
+      { month: 'T11 (Cao Điểm)', key: 'T11' },
+      { month: 'T12', key: 'T12' },
+      { month: 'T1', key: 'T1' },
+      { month: 'T2', key: 'T2' },
     ];
 
     return timeline.map(m => {
-      const cleanKey = m.month.split(' ')[0]; // 'T10', 'T11'
-      const bkData = bookingByMonth[cleanKey] || { revenue: 0, bookings: 0 };
-      const totalRev = Number((m.baseRev + bkData.revenue).toFixed(1));
-      const totalBks = m.baseBks + bkData.bookings;
-      const totalCost = Number((m.baseCost + (bkData.revenue * 0.2)).toFixed(1));
+      const bkData = bookingByMonth[m.key] || { revenue: 0, deposit: 0, bookings: 0 };
+      const totalRev = Number(bkData.revenue.toFixed(1));
+      const totalDep = Number(bkData.deposit.toFixed(1));
       return {
         month: m.month,
         revenue: totalRev,
-        cost: totalCost,
-        bookings: totalBks
+        deposit: totalDep,
+        bookings: bkData.bookings
       };
     });
   }, [bookings]);
@@ -1051,14 +1051,24 @@ export const ExecutiveDashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Doanh thu theo tháng */}
             <div className="lg:col-span-2 glass-panel p-6 rounded-3xl">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <div>
                   <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Tăng Trưởng Doanh Thu Kỷ Yếu Theo Tháng (Triệu VNĐ)</h2>
                   <p className="text-xs text-neutral-400 mt-0.5">Thống kê theo dữ liệu hợp đồng và lịch chụp thực tế các tháng</p>
                 </div>
-                <span className="text-xs font-bold text-neutral-900 bg-[#B8F23D] px-3 py-1 rounded-full shadow-xs">
-                  {peakMonth.revenue > 0 ? `Tháng ${peakMonth.month} Đỉnh Điểm: ${peakMonth.revenue}tr` : 'Sẵn sàng ghi nhận hợp đồng mới'}
-                </span>
+                <div className="flex items-center gap-3">
+                  <div className="hidden sm:flex items-center gap-3 text-xs text-neutral-600 font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#65a30d]"></span> Doanh Thu Hợp Đồng
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#0284c7]"></span> Tiền Cọc Đã Thu
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-neutral-900 bg-[#B8F23D] px-3 py-1 rounded-full shadow-xs">
+                    {peakMonth.revenue > 0 ? `Tháng ${peakMonth.month} Đỉnh Điểm: ${peakMonth.revenue}tr` : 'Sẵn sàng ghi nhận hợp đồng mới'}
+                  </span>
+                </div>
               </div>
 
               <div className="h-72">
@@ -1069,9 +1079,9 @@ export const ExecutiveDashboard: React.FC = () => {
                         <stop offset="5%" stopColor="#84cc16" stopOpacity={0.7} />
                         <stop offset="95%" stopColor="#84cc16" stopOpacity={0.0} />
                       </linearGradient>
-                      <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.0} />
+                      <linearGradient id="colorDeposit" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0284c7" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#0284c7" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0, 0, 0, 0.04)" />
@@ -1080,7 +1090,7 @@ export const ExecutiveDashboard: React.FC = () => {
                     <Tooltip
                       formatter={(value: any, name: any) => [
                         `${value} Triệu VNĐ`,
-                        name === 'revenue' ? 'Doanh Thu Thực' : 'Chi Phí MKT & CTV'
+                        name
                       ]}
                       contentStyle={{
                         backgroundColor: '#111827',
@@ -1091,8 +1101,8 @@ export const ExecutiveDashboard: React.FC = () => {
                         boxShadow: '0 20px 40px rgba(0,0,0,0.15)'
                       }}
                     />
-                    <Area type="monotone" dataKey="revenue" stroke="#65a30d" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Doanh Thu Thực" />
-                    <Area type="monotone" dataKey="cost" stroke="#cbd5e1" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorCost)" name="Chi Phí MKT & CTV" />
+                    <Area type="monotone" dataKey="revenue" stroke="#65a30d" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" name="Doanh Thu Hợp Đồng" />
+                    <Area type="monotone" dataKey="deposit" stroke="#0284c7" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorDeposit)" name="Tiền Cọc Đã Thu" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>

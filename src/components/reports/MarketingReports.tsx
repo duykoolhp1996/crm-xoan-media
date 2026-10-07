@@ -325,7 +325,7 @@ export const MarketingReports: React.FC = () => {
                   <XAxis dataKey="source" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                   <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} unit="M" />
                   <Tooltip
-                    formatter={(val: any, name: any) => [`${val}M VNĐ`, name === 'revenue' ? 'Doanh Thu' : 'Chi Phí Ads']}
+                    formatter={(val: any, name: any) => [`${val}M VNĐ`, name]}
                     contentStyle={{
                       backgroundColor: '#111827',
                       borderRadius: '16px',
