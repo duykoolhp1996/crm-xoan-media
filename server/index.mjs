@@ -341,6 +341,7 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
+  const searchParams = url.searchParams;
   const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
   const currentUserId = req.headers['x-user-id'] || 'system';
   const currentUserName = req.headers['x-user-name'] || 'Người dùng CRM';
