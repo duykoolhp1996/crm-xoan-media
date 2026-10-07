@@ -20,7 +20,12 @@ import {
   CheckCircle2,
   LogIn,
   Percent,
-  Briefcase
+  Briefcase,
+  ArrowDown,
+  PhoneCall,
+  FileText,
+  CalendarCheck,
+  ArrowRight
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -109,11 +114,12 @@ export const ExecutiveDashboard: React.FC = () => {
     return filteredCustomers.reduce((sum, c) => sum + (c.studentCount || 0), 0);
   }, [filteredCustomers]);
 
-  const consultingLeads = filteredCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ', 'Mới tiếp nhận', 'New Lead'].includes(c.pipelineStage)).length;
-  const quotedLeads = filteredCustomers.filter(c => c.pipelineStage === 'Đã gửi báo giá').length;
+  const consultingLeads = filteredCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ'].includes(c.pipelineStage)).length;
+  const newLeads = filteredCustomers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage)).length;
+  const quotedLeads = filteredCustomers.filter(c => ['Đã gửi báo giá', 'Đang thương lượng'].includes(c.pipelineStage)).length;
   const bookedLeads = filteredCustomers.filter(c => ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking'].includes(c.pipelineStage) || (c.paidAmount && c.paidAmount > 0)).length;
-  const shootingLeads = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ', 'Đã bàn giao'].includes(c.pipelineStage)).length;
-  const completedCustomers = filteredCustomers.filter(c => c.pipelineStage === 'Hoàn thành').length;
+  const shootingLeads = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ'].includes(c.pipelineStage)).length;
+  const completedCustomers = filteredCustomers.filter(c => ['Giao ảnh', 'Hoàn thành', 'Đã bàn giao'].includes(c.pipelineStage)).length;
 
   // 2. Định nghĩa các giai đoạn đã chốt hợp đồng (phát sinh cọc trở đi)
   const CLOSED_STAGES = [
@@ -247,18 +253,117 @@ export const ExecutiveDashboard: React.FC = () => {
 
   const COLORS = ['#111827', '#84cc16', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
-  // 6. Funnel Pipeline Data chính xác từ danh sách lớp (KHÔNG padding ảo)
-  const funnelData = useMemo(() => {
-    const newLeadCount = filteredCustomers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage)).length;
+  // 6. Phễu Pipeline Data chuẩn hình phễu kinh doanh (Funnel Architecture)
+  const funnelStages = useMemo(() => {
+    const s1 = filteredCustomers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage));
+    const s2 = filteredCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ'].includes(c.pipelineStage));
+    const s3 = filteredCustomers.filter(c => ['Đã gửi báo giá', 'Đang thương lượng'].includes(c.pipelineStage));
+    const s4 = filteredCustomers.filter(c => ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking'].includes(c.pipelineStage) || (Number(c.paidAmount ?? 0) > 0 || Number(c.depositAmount ?? 0) > 0));
+    const s5 = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ'].includes(c.pipelineStage));
+    const s6 = filteredCustomers.filter(c => ['Giao ảnh', 'Hoàn thành', 'Đã bàn giao'].includes(c.pipelineStage));
+
+    const sumVal = (list: typeof filteredCustomers) => list.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
+    const totalCount = filteredCustomers.length || 1;
+
     return [
-      { name: 'Lead Mới Tiếp Nhận', value: newLeadCount, fill: '#94a3b8' },
-      { name: 'Đang Tư Vấn & Khảo Sát', value: consultingLeads, fill: '#60a5fa' },
-      { name: 'Đã Gửi Báo Giá Concept', value: quotedLeads, fill: '#818cf8' },
-      { name: 'Đã Đặt Cọc / Booking', value: bookedLeads, fill: '#B8F23D' },
-      { name: 'Đang Chụp & Hậu Kỳ', value: shootingLeads, fill: '#34d399' },
-      { name: 'Hoàn Thành Bàn Giao', value: completedCustomers, fill: '#10b981' }
+      {
+        id: 'new_lead',
+        stageKey: 'New Lead',
+        name: 'Lead Mới Tiếp Nhận',
+        sub: 'Từ Ads, Zalo, Form',
+        count: s1.length,
+        revenue: sumVal(s1),
+        pct: Math.round((s1.length / totalCount) * 100),
+        widthClass: 'w-full',
+        widthPct: 100,
+        color: '#64748b',
+        gradient: 'from-slate-100 to-slate-200/90 text-slate-800 border-slate-300',
+        barColor: '#64748b',
+        badgeClass: 'bg-slate-200/80 text-slate-800 border-slate-300',
+        step: 1
+      },
+      {
+        id: 'consulting',
+        stageKey: 'Đang tư vấn',
+        name: 'Đang Tư Vấn & Khảo Sát',
+        sub: 'Tư vấn concept & sĩ số',
+        count: s2.length,
+        revenue: sumVal(s2),
+        pct: Math.round((s2.length / totalCount) * 100),
+        widthClass: 'w-[90%]',
+        widthPct: 90,
+        color: '#3b82f6',
+        gradient: 'from-sky-50 to-blue-100/90 text-blue-900 border-blue-200',
+        barColor: '#3b82f6',
+        badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
+        step: 2
+      },
+      {
+        id: 'quoted',
+        stageKey: 'Đã gửi báo giá',
+        name: 'Đã Gửi Báo Giá Concept',
+        sub: 'Báo giá PDF & chốt gói',
+        count: s3.length,
+        revenue: sumVal(s3),
+        pct: Math.round((s3.length / totalCount) * 100),
+        widthClass: 'w-[80%]',
+        widthPct: 80,
+        color: '#8b5cf6',
+        gradient: 'from-purple-50 to-indigo-100/90 text-purple-900 border-purple-200',
+        barColor: '#8b5cf6',
+        badgeClass: 'bg-purple-100 text-purple-800 border-purple-200',
+        step: 3
+      },
+      {
+        id: 'booked',
+        stageKey: 'Đã cọc',
+        name: 'Đã Chốt Cọc & Book Ngày',
+        sub: 'Cọc VietQR & khóa lịch',
+        count: s4.length,
+        revenue: sumVal(s4),
+        pct: Math.round((s4.length / totalCount) * 100),
+        widthClass: 'w-[70%]',
+        widthPct: 70,
+        color: '#84cc16',
+        gradient: 'from-[#B8F23D]/25 to-[#B8F23D]/50 text-neutral-900 border-lime-400',
+        barColor: '#84cc16',
+        badgeClass: 'bg-[#B8F23D] text-neutral-950 font-black border-lime-400 shadow-2xs',
+        step: 4
+      },
+      {
+        id: 'shooting',
+        stageKey: 'Đã chụp',
+        name: 'Đang Chụp & Hậu Kỳ',
+        sub: 'Thợ tác nghiệp & dựng album',
+        count: s5.length,
+        revenue: sumVal(s5),
+        pct: Math.round((s5.length / totalCount) * 100),
+        widthClass: 'w-[60%]',
+        widthPct: 60,
+        color: '#06b6d4',
+        gradient: 'from-cyan-50 to-teal-100/90 text-cyan-950 border-cyan-300',
+        barColor: '#06b6d4',
+        badgeClass: 'bg-cyan-100 text-cyan-900 border-cyan-300',
+        step: 5
+      },
+      {
+        id: 'completed',
+        stageKey: 'Hoàn thành',
+        name: 'Hoàn Thành Bàn Giao',
+        sub: 'Giao Drive, in ảnh & thu đủ',
+        count: s6.length,
+        revenue: sumVal(s6),
+        pct: Math.round((s6.length / totalCount) * 100),
+        widthClass: 'w-[50%]',
+        widthPct: 50,
+        color: '#10b981',
+        gradient: 'from-emerald-100 to-emerald-200 text-emerald-950 border-emerald-400',
+        barColor: '#10b981',
+        badgeClass: 'bg-emerald-600 text-white font-bold border-emerald-700 shadow-2xs',
+        step: 6
+      }
     ];
-  }, [filteredCustomers, consultingLeads, quotedLeads, bookedLeads, shootingLeads, completedCustomers]);
+  }, [filteredCustomers]);
 
   // 7. Doanh thu theo tháng: Tính từ Bookings thực tế kết hợp tiến độ mùa vụ
   const monthlyRevenueData = useMemo(() => {
@@ -1029,41 +1134,95 @@ export const ExecutiveDashboard: React.FC = () => {
 
           {/* Row 3: Funnel Kỷ Yếu & Lịch Chụp Sắp Tới */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Phễu Chuyển Đổi Kỷ Yếu */}
-            <div className="glass-panel p-6 rounded-3xl">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Phễu Chuyển Đổi Kỷ Yếu</h2>
-                  <p className="text-xs text-neutral-400 mt-0.5">Từ Lead ban đầu đến hoàn thành bàn giao</p>
+            {/* Phễu Chuyển Đổi Kỷ Yếu (Funnel Chart Architecture) */}
+            <div className="glass-panel p-6 rounded-3xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 className="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-2">
+                      <Filter className="w-4 h-4 text-[#84cc16]" />
+                      Phễu Chuyển Đổi Kỷ Yếu
+                    </h2>
+                    <p className="text-xs text-neutral-400 mt-0.5">Tiến trình luân chuyển từ Lead đến hoàn tất</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('pipeline')}
+                    className="text-xs font-bold text-neutral-900 hover:text-emerald-700 flex items-center gap-1 transition-colors px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-neutral-200"
+                    title="Mở toàn bộ quy trình trên bảng Kanban"
+                  >
+                    Kanban <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setActiveTab('pipeline')}
-                  className="text-xs font-bold text-neutral-900 hover:text-emerald-700 flex items-center gap-1 transition-colors"
-                >
-                  Mở Kanban <ChevronRight className="w-3.5 h-3.5" />
-                </button>
+
+                {/* Thống kê tỷ lệ chuyển đổi chốt đơn toàn phễu */}
+                <div className="flex items-center justify-between py-2 px-3 mb-4 rounded-2xl bg-neutral-50 border border-black/[0.04]">
+                  <div className="flex items-center gap-1.5 text-xs text-neutral-600">
+                    <span className="font-semibold">Đầu phễu:</span>
+                    <span className="font-bold text-neutral-900">{totalLeads} lớp</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="text-neutral-500 font-semibold">Tỷ lệ chốt:</span>
+                    <span className="font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200">
+                      {totalLeads > 0 ? (((bookedLeads + shootingLeads + completedCustomers) / totalLeads) * 100).toFixed(0) : 0}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Khối Hình Phễu Tapered Funnel */}
+                <div className="space-y-1.5 py-1">
+                  {funnelStages.map((stage, idx) => {
+                    const isLast = idx === funnelStages.length - 1;
+                    return (
+                      <div key={stage.id} className="relative group">
+                        {/* Tầng phễu dạng hình thang thon dần căn giữa */}
+                        <div
+                          onClick={() => setActiveTab('pipeline')}
+                          className={`${stage.widthClass} mx-auto p-2.5 rounded-2xl border bg-gradient-to-r ${stage.gradient} transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer select-none`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="w-5 h-5 rounded-lg bg-white/80 border border-black/[0.06] text-[10px] font-black flex items-center justify-center shrink-0 shadow-2xs">
+                                {stage.step}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold truncate leading-tight">
+                                  {stage.name}
+                                </p>
+                                <p className="text-[10px] opacity-70 truncate leading-tight">
+                                  {stage.sub}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-extrabold ${stage.badgeClass}`}>
+                                {stage.count} lớp
+                              </span>
+                              <p className="text-[10px] font-semibold opacity-80 mt-0.5">
+                                {stage.revenue > 0 ? `${(stage.revenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M` : '0đ'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mũi tên kết nối dạng phễu giữa các tầng */}
+                        {!isLast && (
+                          <div className="flex justify-center -my-0.5 relative z-10 pointer-events-none">
+                            <div className="w-4 h-3 flex items-center justify-center text-neutral-400 group-hover:text-neutral-700 transition-colors">
+                              <ArrowDown className="w-2.5 h-2.5" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="space-y-3">
-                {funnelData.map((item, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold text-neutral-700">
-                      <span>{item.name}</span>
-                      <span className="font-extrabold text-neutral-900">
-                        {item.value} lớp ({((item.value / (totalLeads || 1)) * 100).toFixed(0)}%)
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-neutral-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-500 shadow-xs"
-                        style={{
-                          width: `${Math.max((item.value / (totalLeads || 1)) * 100, 6)}%`,
-                          backgroundColor: item.fill === '#B8F23D' ? '#84cc16' : item.fill
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
+              {/* Chân phễu: Ghi chú tương tác */}
+              <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-400 flex items-center justify-between">
+                <span>💡 Bấm vào tầng để xem chi tiết trên Kanban</span>
+                <span className="font-semibold text-neutral-600">6 giai đoạn</span>
               </div>
             </div>
 
