@@ -265,6 +265,18 @@ export const ExecutiveDashboard: React.FC = () => {
     const sumVal = (list: typeof filteredCustomers) => list.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
     const totalCount = filteredCustomers.length || 1;
 
+    // Tính độ rộng động theo tỷ lệ thực tế của data:
+    // Tầng có số lượng cao nhất sẽ chiếm 100% độ rộng.
+    // Tầng có 0 lớp sẽ thu gọn về 38% (vừa đủ hiển thị gọn gàng).
+    // Tầng ở giữa sẽ nội suy tuyến tính từ 38% đến 100%.
+    const rawCounts = [s1.length, s2.length, s3.length, s4.length, s5.length, s6.length];
+    const maxStageCount = Math.max(...rawCounts, 1);
+    const getDynamicWidthPct = (count: number) => {
+      if (maxStageCount <= 0) return 40;
+      const ratio = count / maxStageCount;
+      return Math.round(38 + ratio * 62);
+    };
+
     return [
       {
         id: 'new_lead',
@@ -274,8 +286,7 @@ export const ExecutiveDashboard: React.FC = () => {
         count: s1.length,
         revenue: sumVal(s1),
         pct: Math.round((s1.length / totalCount) * 100),
-        widthClass: 'w-full',
-        widthPct: 100,
+        widthPct: getDynamicWidthPct(s1.length),
         color: '#64748b',
         gradient: 'from-slate-100 to-slate-200/90 text-slate-800 border-slate-300',
         barColor: '#64748b',
@@ -290,8 +301,7 @@ export const ExecutiveDashboard: React.FC = () => {
         count: s2.length,
         revenue: sumVal(s2),
         pct: Math.round((s2.length / totalCount) * 100),
-        widthClass: 'w-[90%]',
-        widthPct: 90,
+        widthPct: getDynamicWidthPct(s2.length),
         color: '#3b82f6',
         gradient: 'from-sky-50 to-blue-100/90 text-blue-900 border-blue-200',
         barColor: '#3b82f6',
@@ -306,8 +316,7 @@ export const ExecutiveDashboard: React.FC = () => {
         count: s3.length,
         revenue: sumVal(s3),
         pct: Math.round((s3.length / totalCount) * 100),
-        widthClass: 'w-[80%]',
-        widthPct: 80,
+        widthPct: getDynamicWidthPct(s3.length),
         color: '#8b5cf6',
         gradient: 'from-purple-50 to-indigo-100/90 text-purple-900 border-purple-200',
         barColor: '#8b5cf6',
@@ -322,8 +331,7 @@ export const ExecutiveDashboard: React.FC = () => {
         count: s4.length,
         revenue: sumVal(s4),
         pct: Math.round((s4.length / totalCount) * 100),
-        widthClass: 'w-[70%]',
-        widthPct: 70,
+        widthPct: getDynamicWidthPct(s4.length),
         color: '#84cc16',
         gradient: 'from-[#B8F23D]/25 to-[#B8F23D]/50 text-neutral-900 border-lime-400',
         barColor: '#84cc16',
@@ -338,8 +346,7 @@ export const ExecutiveDashboard: React.FC = () => {
         count: s5.length,
         revenue: sumVal(s5),
         pct: Math.round((s5.length / totalCount) * 100),
-        widthClass: 'w-[60%]',
-        widthPct: 60,
+        widthPct: getDynamicWidthPct(s5.length),
         color: '#06b6d4',
         gradient: 'from-cyan-50 to-teal-100/90 text-cyan-950 border-cyan-300',
         barColor: '#06b6d4',
@@ -354,8 +361,7 @@ export const ExecutiveDashboard: React.FC = () => {
         count: s6.length,
         revenue: sumVal(s6),
         pct: Math.round((s6.length / totalCount) * 100),
-        widthClass: 'w-[50%]',
-        widthPct: 50,
+        widthPct: getDynamicWidthPct(s6.length),
         color: '#10b981',
         gradient: 'from-emerald-100 to-emerald-200 text-emerald-950 border-emerald-400',
         barColor: '#10b981',
@@ -1135,84 +1141,73 @@ export const ExecutiveDashboard: React.FC = () => {
           {/* Row 3: Funnel Kỷ Yếu & Lịch Chụp Sắp Tới */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Phễu Chuyển Đổi Kỷ Yếu (Funnel Chart Architecture) */}
-            <div className="glass-panel p-6 rounded-3xl flex flex-col justify-between">
+            <div className="glass-panel p-4 sm:p-5 rounded-3xl flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h2 className="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-2">
-                      <Filter className="w-4 h-4 text-[#84cc16]" />
+                    <h2 className="text-xs sm:text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
+                      <Filter className="w-3.5 h-3.5 text-[#84cc16]" />
                       Phễu Chuyển Đổi Kỷ Yếu
                     </h2>
-                    <p className="text-xs text-neutral-400 mt-0.5">Tiến trình luân chuyển từ Lead đến hoàn tất</p>
+                    <p className="text-[11px] text-neutral-400 mt-0.5">Tiến trình luân chuyển từ Lead đến hoàn tất</p>
                   </div>
                   <button
                     onClick={() => setActiveTab('pipeline')}
-                    className="text-xs font-bold text-neutral-900 hover:text-emerald-700 flex items-center gap-1 transition-colors px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-neutral-200"
+                    className="text-[11px] font-bold text-neutral-900 hover:text-emerald-700 flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg bg-neutral-100 hover:bg-neutral-200"
                     title="Mở toàn bộ quy trình trên bảng Kanban"
                   >
-                    Kanban <ChevronRight className="w-3.5 h-3.5" />
+                    Kanban <ChevronRight className="w-3 h-3" />
                   </button>
                 </div>
 
                 {/* Thống kê tỷ lệ chuyển đổi chốt đơn toàn phễu */}
-                <div className="flex items-center justify-between py-2 px-3 mb-4 rounded-2xl bg-neutral-50 border border-black/[0.04]">
-                  <div className="flex items-center gap-1.5 text-xs text-neutral-600">
-                    <span className="font-semibold">Đầu phễu:</span>
-                    <span className="font-bold text-neutral-900">{totalLeads} lớp</span>
+                <div className="flex items-center justify-between py-1.5 px-2.5 mb-2.5 rounded-xl bg-neutral-50 border border-black/[0.04] text-xs">
+                  <div className="flex items-center gap-1.5 text-neutral-600">
+                    <span className="font-semibold text-[11px]">Đầu phễu:</span>
+                    <span className="font-bold text-neutral-900 text-xs">{totalLeads} lớp</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs">
-                    <span className="text-neutral-500 font-semibold">Tỷ lệ chốt:</span>
-                    <span className="font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-lg border border-emerald-200">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-neutral-500 font-semibold text-[11px]">Tỷ lệ chốt:</span>
+                    <span className="font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-md border border-emerald-200 text-[11px]">
                       {totalLeads > 0 ? (((bookedLeads + shootingLeads + completedCustomers) / totalLeads) * 100).toFixed(0) : 0}%
                     </span>
                   </div>
                 </div>
 
-                {/* Khối Hình Phễu Tapered Funnel */}
-                <div className="space-y-1.5 py-1">
-                  {funnelStages.map((stage, idx) => {
-                    const isLast = idx === funnelStages.length - 1;
+                {/* Khối Hình Phễu Thon Gọn (Compact Funnel Stack - Độ Rộng Bằng Chính Tỷ Lệ Data) */}
+                <div className="space-y-1 py-0.5">
+                  {funnelStages.map((stage) => {
                     return (
                       <div key={stage.id} className="relative group">
-                        {/* Tầng phễu dạng hình thang thon dần căn giữa */}
+                        {/* Tầng phễu dạng tháp xếp tầng tự co giãn độ rộng theo tỷ lệ data, căn giữa */}
                         <div
                           onClick={() => setActiveTab('pipeline')}
-                          className={`${stage.widthClass} mx-auto p-2.5 rounded-2xl border bg-gradient-to-r ${stage.gradient} transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer select-none`}
+                          style={{ width: `${stage.widthPct}%`, minWidth: '148px' }}
+                          title={`${stage.name} (${stage.sub}) - ${stage.count} lớp`}
+                          className={`mx-auto px-2.5 py-1.5 rounded-xl border bg-gradient-to-r ${stage.gradient} transition-all duration-300 hover:scale-[1.02] hover:shadow-xs cursor-pointer select-none`}
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="w-5 h-5 rounded-lg bg-white/80 border border-black/[0.06] text-[10px] font-black flex items-center justify-center shrink-0 shadow-2xs">
+                          <div className="flex items-center justify-between gap-1.5">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="w-4 h-4 rounded-md bg-white/90 border border-black/[0.08] text-[9px] font-black flex items-center justify-center shrink-0 shadow-2xs">
                                 {stage.step}
                               </span>
-                              <div className="min-w-0">
-                                <p className="text-xs font-bold truncate leading-tight">
-                                  {stage.name}
-                                </p>
-                                <p className="text-[10px] opacity-70 truncate leading-tight">
-                                  {stage.sub}
-                                </p>
-                              </div>
+                              <p className="text-[11px] font-bold truncate leading-tight">
+                                {stage.name}
+                              </p>
                             </div>
 
-                            <div className="text-right shrink-0">
-                              <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-extrabold ${stage.badgeClass}`}>
+                            <div className="flex items-center gap-1 shrink-0 ml-1">
+                              <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${stage.badgeClass}`}>
                                 {stage.count} lớp
                               </span>
-                              <p className="text-[10px] font-semibold opacity-80 mt-0.5">
-                                {stage.revenue > 0 ? `${(stage.revenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M` : '0đ'}
-                              </p>
+                              {stage.revenue > 0 && (
+                                <span className="text-[9px] font-bold opacity-80 hidden sm:inline">
+                                  {(stage.revenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
-
-                        {/* Mũi tên kết nối dạng phễu giữa các tầng */}
-                        {!isLast && (
-                          <div className="flex justify-center -my-0.5 relative z-10 pointer-events-none">
-                            <div className="w-4 h-3 flex items-center justify-center text-neutral-400 group-hover:text-neutral-700 transition-colors">
-                              <ArrowDown className="w-2.5 h-2.5" />
-                            </div>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -1220,8 +1215,8 @@ export const ExecutiveDashboard: React.FC = () => {
               </div>
 
               {/* Chân phễu: Ghi chú tương tác */}
-              <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-400 flex items-center justify-between">
-                <span>💡 Bấm vào tầng để xem chi tiết trên Kanban</span>
+              <div className="mt-2.5 pt-2 border-t border-black/[0.06] text-[10px] text-neutral-400 flex items-center justify-between">
+                <span>💡 Bấm vào tầng để xem trên Kanban</span>
                 <span className="font-semibold text-neutral-600">6 giai đoạn</span>
               </div>
             </div>
