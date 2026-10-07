@@ -634,6 +634,18 @@ export const mockTasks: Task[] = [];
 export const mockActivityLogs: ActivityLog[] = [];
 
 export const mockNotifications: SystemNotification[] = [
+  // 0. Thông báo toàn hệ thống: Cập nhật phiên bản v1.2.7 (Mọi tài khoản & thiết bị đều nhận được)
+  {
+    id: 'notif-system-v127',
+    type: 'system',
+    title: '🚀 CRM XOĂN MEDIA CẬP NHẬT PHIÊN BẢN V1.2.7',
+    message: 'Hệ thống đã nâng cấp phiên bản v1.2.7 thành công: Tối ưu hiển thị cho thiết bị di động, cá nhân hóa thông báo trúng đích theo từng tài khoản (Lead mới cho Sales & Admin, Lịch chụp cho Photographer).',
+    targetRole: 'all',
+    severity: 'info',
+    timestamp: new Date().toISOString(),
+    read: false
+  },
+
   // 1. Thông báo dành cho Admin
   {
     id: 'notif-admin-1',

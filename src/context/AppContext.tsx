@@ -268,7 +268,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('crm_xoan_notifications');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasV127 = parsed.some(n => n.id === 'notif-system-v127');
+          if (!hasV127 && mockNotifications[0]?.id === 'notif-system-v127') {
+            return [mockNotifications[0], ...parsed];
+          }
+          return parsed;
+        }
       }
     } catch (e) {
       console.error('Failed to load notifications from localStorage', e);

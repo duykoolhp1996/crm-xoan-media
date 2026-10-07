@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { NotificationDrawer } from './NotificationDrawer';
 import { ProfileModal } from './ProfileModal';
+import { VersionUpdateBanner } from './VersionUpdateBanner';
 
 export const Header: React.FC = () => {
   const {
@@ -194,6 +195,11 @@ export const Header: React.FC = () => {
       <ProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+      />
+
+      {/* Floating Toast: Thông báo cập nhật phiên bản mới v1.2.7 */}
+      <VersionUpdateBanner
+        onOpenNotifications={() => setIsNotifOpen(true)}
       />
     </header>
   );
