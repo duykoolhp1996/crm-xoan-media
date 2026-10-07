@@ -241,11 +241,13 @@ export const mockSchoolClasses: SchoolClass[] = [];
 // Danh sách 38 thợ chụp chính thức năm 2026 từ Google Sheets của Xoăn Media
 export const mockPhotographers: Photographer[] = photographersJson as Photographer[];
 
-// Đã xóa toàn bộ dữ liệu demo - Khởi tạo danh sách khách hàng / leads rỗng
-export const mockCustomers: Customer[] = [];
+import { importedCustomers, importedBookings } from './importedScheduleData';
 
-// Đã xóa toàn bộ dữ liệu demo - Khởi tạo danh sách booking lịch chụp rỗng
-export const mockBookings: Booking[] = [];
+// Danh sách khách hàng thực tế (12 lớp chụp & quay kỷ yếu đã cọc)
+export const mockCustomers: Customer[] = [...importedCustomers];
+
+// Danh sách booking lịch chụp & quay thực tế (12 ca chụp của Xoăn Media)
+export const mockBookings: Booking[] = [...importedBookings];
 
 // Đã xóa toàn bộ dữ liệu demo - Khởi tạo danh sách phân khúc remarketing rỗng
 export const mockRemarketingSegments: RemarketingSegment[] = [];
