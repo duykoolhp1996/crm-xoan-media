@@ -2,16 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   TrendingUp,
-  ArrowUpRight,
   Download,
   DollarSign,
   Users,
   Target,
   BarChart3,
   Calendar,
-  Layers,
-  Sparkles,
-  Plus
+  Layers
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -20,8 +17,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
-  Legend
+  CartesianGrid
 } from 'recharts';
 import {
   isCustomerBookedOrDeposited,
@@ -31,8 +27,8 @@ import {
 } from '../../lib/revenueUtils';
 
 export const MarketingReports: React.FC = () => {
-  const { customers, bookings, campaigns, setActiveTab } = useApp();
-  const [timeRange, setTimeRange] = useState<'this_week' | 'this_month' | 'quarter' | 'year' | 'all'>('this_month');
+  const { customers, bookings } = useApp();
+  const [timeRange, setTimeRange] = useState<'this_week' | 'this_month' | 'quarter' | 'year' | 'all'>('all');
 
   // 1. Lọc khách hàng thực tế theo khoảng thời gian được chọn
   const filteredCustomers = useMemo(() => {
@@ -51,31 +47,11 @@ export const MarketingReports: React.FC = () => {
     });
   }, [customers, timeRange]);
 
-  // 2. Tính chi phí Ads từ các chiến dịch Marketing thực tế
-  const adsSpendByChannel = useMemo(() => {
-    const map: Record<string, number> = {
-      'Facebook Ads': 0,
-      'TikTok Ads': 0,
-      'Zalo': 0,
-      'Google': 0
-    };
-    campaigns.forEach(camp => {
-      if (camp.channel === 'Facebook') map['Facebook Ads'] = (map['Facebook Ads'] || 0) + (camp.spent || 0);
-      else if (camp.channel === 'TikTok') map['TikTok Ads'] = (map['TikTok Ads'] || 0) + (camp.spent || 0);
-      else if (camp.channel === 'Zalo') map['Zalo'] = (map['Zalo'] || 0) + (camp.spent || 0);
-    });
-    return map;
-  }, [campaigns]);
-
-  // 3. Tổng hợp hiệu quả theo từng nguồn Lead thực tế từ customers & bookings
+  // 2. Tổng hợp hiệu quả theo từng nguồn Lead thực tế từ customers & bookings (Không có chi phí marketing)
   const sourcePerformance = useMemo(() => {
-    // Thu thập tất cả các kênh xuất hiện trong dữ liệu thực tế
     const sourcesSet = new Set<string>();
     filteredCustomers.forEach(c => {
       if (c.source) sourcesSet.add(c.source);
-    });
-    Object.keys(adsSpendByChannel).forEach(k => {
-      if (adsSpendByChannel[k] > 0) sourcesSet.add(k);
     });
 
     if (sourcesSet.size === 0 && filteredCustomers.length === 0) {
@@ -92,30 +68,18 @@ export const MarketingReports: React.FC = () => {
       );
       const bookingCount = bookedCustomers.length;
 
-      // DOANH THU TOÀN BỘ ĐƠN CỦA CÁC LỚP ĐÃ BOOK & CỌC
+      // Doanh thu và tiền cọc thực tế
       const revenueRaw = bookedCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
       const revenueMillions = Number((revenueRaw / 1000000).toFixed(1));
 
-      // Tiền cọc thực thu & Công nợ theo kênh
       const depositRaw = bookedCustomers.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
       const depositMillions = Number((depositRaw / 1000000).toFixed(1));
+
       const debtRaw = Math.max(0, revenueRaw - depositRaw);
       const debtMillions = Number((debtRaw / 1000000).toFixed(1));
 
-      // Chi phí Ads (VNĐ & Triệu VNĐ)
-      const costRaw = adsSpendByChannel[sourceName] || 0;
-      const costMillions = Number((costRaw / 1000000).toFixed(1));
-
       // Tỷ lệ chốt
       const conversionRate = leads > 0 ? Number(((bookingCount / leads) * 100).toFixed(1)) : 0;
-
-      // Cost per Lead (CPL)
-      const cpl = leads > 0 && costRaw > 0 ? Math.round(costRaw / leads) : 0;
-
-      // ROAS (Tính trên doanh thu đơn đã chốt / Chi phí Ads)
-      const roas = costRaw > 0
-        ? `${Number((revenueRaw / costRaw).toFixed(2))}x`
-        : (revenueRaw > 0 ? 'Tự nhiên (0đ Ads)' : '0x');
 
       return {
         source: sourceName,
@@ -127,57 +91,41 @@ export const MarketingReports: React.FC = () => {
         depositRaw,
         debtMillions,
         debtRaw,
-        cost: costMillions,
-        costRaw,
-        cpl,
-        roas,
         conversionRate
       };
     });
 
     // Sắp xếp theo doanh thu giảm dần
     return result.sort((a, b) => b.revenueRaw - a.revenueRaw);
-  }, [filteredCustomers, bookings, adsSpendByChannel]);
+  }, [filteredCustomers, bookings]);
 
-  // 4. Tổng hợp các chỉ số KPI Toàn Kênh từ dữ liệu thực tế
+  // Tổng số toàn hệ thống
   const totalLeads = filteredCustomers.length;
-  const bookedCustomers = useMemo(() => {
+  const bookedCustomersTotal = useMemo(() => {
     return filteredCustomers.filter(c => isCustomerBookedOrDeposited(c, bookings));
   }, [filteredCustomers, bookings]);
 
-  const totalBookings = bookedCustomers.length;
-
-  // TỔNG DOANH THU: CHỈ GHI NHẬN TOÀN BỘ GIÁ TRỊ ĐƠN CỦA CÁC LỚP ĐÃ BOOK VÀ CỌC
+  const totalBookings = bookedCustomersTotal.length;
   const totalRevenue = useMemo(() => {
-    return bookedCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
-  }, [bookedCustomers]);
+    return bookedCustomersTotal.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
+  }, [bookedCustomersTotal]);
 
-  // TỔNG CỌC ĐÃ THU THỰC TẾ
   const totalDeposit = useMemo(() => {
-    return bookedCustomers.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
-  }, [bookedCustomers]);
+    return bookedCustomersTotal.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
+  }, [bookedCustomersTotal]);
 
-  // TỔNG CÔNG NỢ CÒN LẠI
-  const totalRemainingDebt = Math.max(0, totalRevenue - totalDeposit);
-
-  const totalAdsCost = useMemo(() => {
-    return Object.values(adsSpendByChannel).reduce((sum, val) => sum + val, 0);
-  }, [adsSpendByChannel]);
-
-  const avgCpl = totalLeads > 0 && totalAdsCost > 0 ? Math.round(totalAdsCost / totalLeads) : 0;
-  const overallConversionRate = totalLeads > 0 ? Number(((totalBookings / totalLeads) * 100).toFixed(1)) : 0;
-  const overallRoas = totalAdsCost > 0
-    ? `${Number((totalRevenue / totalAdsCost).toFixed(2))}x`
-    : (totalRevenue > 0 ? 'Tự nhiên (0đ Ads)' : '0x');
+  const overallConversionRate = totalLeads > 0
+    ? Number(((totalBookings / totalLeads) * 100).toFixed(1))
+    : 0;
 
   // Xuất file CSV thực tế
   const handleExportCsv = () => {
     if (sourcePerformance.length === 0) {
-      alert('Chưa có dữ liệu kênh marketing trong kỳ này để xuất file!');
+      alert('Chưa có dữ liệu kênh trong kỳ này để xuất file!');
       return;
     }
 
-    const headers = ['Kênh / Nguồn', 'Số Lead', 'Số Booking', 'Tỷ Lệ Chốt (%)', 'Doanh Thu HĐ (Tr Đ)', 'Đã Cọc (Tr Đ)', 'Còn Nợ (Tr Đ)', 'Chi Phí Ads (Tr Đ)', 'CPL (VNĐ)', 'ROAS'];
+    const headers = ['Kênh / Nguồn', 'Số Lead', 'Số Booking', 'Tỷ Lệ Chốt (%)', 'Doanh Thu HĐ (Tr Đ)', 'Đã Cọc (Tr Đ)', 'Còn Nợ (Tr Đ)'];
     const rows = sourcePerformance.map(s => [
       `"${s.source}"`,
       s.leads,
@@ -185,10 +133,7 @@ export const MarketingReports: React.FC = () => {
       `${s.conversionRate}%`,
       `${s.revenue.toFixed(1)} Tr`,
       `${s.depositMillions.toFixed(1)} Tr`,
-      `${s.debtMillions.toFixed(1)} Tr`,
-      `${s.cost.toFixed(1)} Tr`,
-      s.cpl.toLocaleString('vi-VN'),
-      `"${s.roas}"`
+      `${s.debtMillions.toFixed(1)} Tr`
     ]);
 
     const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -196,7 +141,7 @@ export const MarketingReports: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Bao_Cao_Marketing_XoanMedia_${timeRange}_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `Bao_Cao_Kenh_Tiep_Can_XoanMedia_${timeRange}_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -209,10 +154,10 @@ export const MarketingReports: React.FC = () => {
         <div>
           <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-neutral-900" />
-            Báo Cáo Hiệu Quả Marketing & Kênh Tiếp Cận
+            Báo Cáo Hiệu Quả Kênh Tiếp Cận Khách Hàng
           </h1>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Dữ liệu tính toán thời gian thực từ <strong>{totalLeads} khách hàng / lớp</strong> và các chiến dịch quảng cáo thực tế
+            Thống kê chuyển đổi từ <strong>{totalLeads} khách hàng / lớp</strong> trong hệ thống CRM
           </p>
         </div>
 
@@ -223,9 +168,9 @@ export const MarketingReports: React.FC = () => {
             className="px-3 py-2 bg-neutral-50 hover:bg-neutral-100 border border-black/[0.08] rounded-xl text-xs font-bold text-neutral-800 cursor-pointer shadow-xs focus:outline-none"
           >
             <option value="this_week">7 ngày qua</option>
-            <option value="this_month">Tháng này (Mùa Kỷ Yếu)</option>
+            <option value="this_month">Tháng này</option>
             <option value="quarter">Quý này (3 tháng)</option>
-            <option value="year">Cả năm 2024</option>
+            <option value="year">Cả năm</option>
             <option value="all">Toàn bộ thời gian</option>
           </select>
 
@@ -240,25 +185,25 @@ export const MarketingReports: React.FC = () => {
 
       {/* KPI Cards: Dữ liệu thực tế 100% */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Tổng chi phí Ads */}
+        {/* Card 1: Tổng số Lead */}
         <div className="bg-white border border-black/[0.08] p-5 rounded-3xl shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG CHI PHÍ ADS</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG SỐ LEAD TIẾP NHẬN</span>
           <p className="text-2xl font-black text-neutral-900 mt-2">
-            {(totalAdsCost / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
+            {totalLeads} Lead
           </p>
           <span className="text-[11px] text-neutral-500 mt-1 block">
-            {totalAdsCost > 0 ? 'Chiến dịch Facebook + TikTok Ads' : 'Chưa phát sinh chi phí Ads'}
+            Từ Facebook, CTV, Giới thiệu, v.v.
           </span>
         </div>
 
-        {/* Card 2: Cost Per Lead */}
+        {/* Card 2: Số Lớp Chốt Cọc */}
         <div className="bg-white border border-black/[0.08] p-5 rounded-3xl shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">COST PER LEAD (CPL)</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">SỐ LỚP ĐÃ CHỐT CỌC</span>
           <p className="text-2xl font-black text-sky-600 mt-2">
-            {avgCpl > 0 ? `${avgCpl.toLocaleString('vi-VN')}đ` : '0đ'}
+            {totalBookings} Lớp
           </p>
           <span className="text-[11px] text-neutral-500 mt-1 block">
-            {totalLeads > 0 ? `Tính trên ${totalLeads} lead tiếp nhận` : 'Chưa có lead trong kỳ'}
+            Đã chuyển sang lịch chụp chính thức
           </span>
         </div>
 
@@ -273,48 +218,39 @@ export const MarketingReports: React.FC = () => {
           </span>
         </div>
 
-        {/* Card 4: ROAS & Doanh Thu Đơn Đã Chốt */}
+        {/* Card 4: Tổng doanh thu đã chốt */}
         <div className="bg-white border border-black/[0.08] p-5 rounded-3xl shadow-xs">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">ROAS & DOANH THU ĐƠN CHỐT</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">TỔNG DOANH THU ĐÃ CHỐT</span>
           <p className="text-2xl font-black text-orange-600 mt-2">
-            {overallRoas}
+            {(totalRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
           </p>
           <div className="text-[11px] text-neutral-500 mt-1 space-y-0.5">
             <span className="block font-semibold text-neutral-800">
-              Doanh thu: {(totalRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ ({totalBookings} lớp)
-            </span>
-            <span className="block text-emerald-700 font-medium text-[10px]">
-              Đã cọc: {(totalDeposit / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M • Còn nợ: {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M
+              Đã thu cọc: {(totalDeposit / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
             </span>
           </div>
         </div>
       </div>
 
-      {/* Main Content: Chart & Breakdown */}
+      {/* Biểu đồ & Chi tiết từng kênh */}
       {sourcePerformance.length === 0 ? (
-        <div className="py-16 px-6 text-center bg-white border border-black/[0.08] rounded-3xl space-y-3 shadow-xs">
-          <div className="w-14 h-14 rounded-3xl bg-neutral-100 flex items-center justify-center mx-auto text-neutral-400 shadow-2xs">
-            <BarChart3 className="w-7 h-7" />
+        <div className="bg-white border border-black/[0.08] p-12 rounded-3xl text-center space-y-3 shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto text-neutral-400">
+            <BarChart3 className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-neutral-900">Chưa có dữ liệu khách hàng thực tế trong kỳ này</h3>
-          <p className="text-xs text-neutral-500 max-w-md mx-auto leading-relaxed">
-            Hệ thống đã xóa toàn bộ data demo và chuyển sang liên kết trực tiếp với dữ liệu khách hàng thực tế. Khi có lead mới từ Facebook Ads, TikTok Ads, Website... hoặc tạo lớp mới, biểu đồ sẽ hiển thị ngay lập tức.
+          <h3 className="text-sm font-bold text-neutral-900">Chưa Có Dữ Liệu Kênh Tiếp Cận</h3>
+          <p className="text-xs text-neutral-500 max-w-sm mx-auto">
+            Dữ liệu sẽ tự động tổng hợp khi bạn gán Nguồn Tiếp Cận cho khách hàng trong CRM.
           </p>
-          <button
-            onClick={() => setActiveTab('customers')}
-            className="mt-2 px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
-          >
-            <Plus className="w-4 h-4" /> Tiếp Nhận Lead / Lớp Mới
-          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Chart: Doanh thu & Chi phí theo kênh thực tế */}
+          {/* Chart: Doanh thu theo kênh thực tế */}
           <div className="lg:col-span-2 bg-white border border-black/[0.08] p-6 rounded-3xl space-y-4 shadow-xs">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-sm font-bold text-neutral-900">Doanh Thu & Chi Phí Theo Kênh Tiếp Cận Thực Tế</h2>
-                <p className="text-xs text-neutral-500 mt-0.5">So sánh hiệu quả mang lại của từng nguồn lead trong hệ thống</p>
+                <h2 className="text-sm font-bold text-neutral-900">Doanh Thu & Tiền Cọc Theo Kênh Tiếp Cận Thực Tế</h2>
+                <p className="text-xs text-neutral-500 mt-0.5">So sánh hiệu quả doanh số mang lại của từng nguồn khách hàng</p>
               </div>
             </div>
 
@@ -334,8 +270,8 @@ export const MarketingReports: React.FC = () => {
                       fontSize: '12px'
                     }}
                   />
-                  <Bar dataKey="revenue" name="Doanh Thu" fill="#f97316" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="cost" name="Chi Phí Ads" fill="#38bdf8" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="revenue" name="Doanh Thu Hợp Đồng" fill="#65a30d" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="depositMillions" name="Tiền Cọc Đã Thu" fill="#0284c7" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -353,22 +289,15 @@ export const MarketingReports: React.FC = () => {
                 <div key={idx} className="p-3 bg-neutral-50 rounded-2xl border border-black/[0.05] text-xs space-y-1.5 shadow-2xs">
                   <div className="flex justify-between font-bold text-neutral-900">
                     <span className="truncate pr-2">{item.source}</span>
-                    <span className="text-orange-600 shrink-0">{item.revenue}M đ</span>
+                    <span className="text-emerald-700 shrink-0">{item.revenue}M đ</span>
                   </div>
                   <div className="flex justify-between text-neutral-500 text-[11px]">
                     <span>{item.leads} Lead • {item.bookings} Chốt ({item.conversionRate}%)</span>
-                    <span className="font-semibold text-emerald-700">ROAS: {item.roas}</span>
                   </div>
                   {item.revenueRaw > 0 && (
                     <div className="text-[10px] text-neutral-600 flex justify-between bg-white px-2 py-1 rounded-lg border border-black/[0.04]">
                       <span>Đã cọc: <strong className="text-emerald-700">{item.depositMillions}M đ</strong></span>
                       <span>Còn nợ: <strong className="text-rose-600">{item.debtMillions}M đ</strong></span>
-                    </div>
-                  )}
-                  {item.cpl > 0 && (
-                    <div className="text-[10px] text-neutral-400 pt-0.5 border-t border-black/[0.04] flex justify-between">
-                      <span>CPL:</span>
-                      <strong className="text-neutral-700">{item.cpl.toLocaleString('vi-VN')}đ / lead</strong>
                     </div>
                   )}
                 </div>
