@@ -154,9 +154,12 @@ interface AppContextType {
 
   // Notifications
   notifications: SystemNotification[];
+  userNotifications: SystemNotification[];
+  unreadNotificationCount: number;
   addNotification: (notification: Omit<SystemNotification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
+  clearAllNotifications: () => void;
 
   // Search & Filters
   isSearchOpen: boolean;
@@ -260,8 +263,61 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return mockWorkflows;
   });
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_notifications');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load notifications from localStorage', e);
+    }
+    return mockNotifications;
+  });
+
+  // Tự động lưu notifications vào localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('crm_xoan_notifications', JSON.stringify(notifications));
+    } catch (e) {
+      console.error('Failed to save notifications to localStorage', e);
+    }
+  }, [notifications]);
+
+  // Bộ lọc thông báo chuẩn xác theo tài khoản đăng nhập (Admin, Sales phụ trách, Photographer)
+  const userNotifications = useMemo(() => {
+    if (!currentUser) return [];
+    const isCurrentAdmin = currentUser.role === 'admin' || currentRole === 'admin';
+    const isCurrentSales = currentUser.role === 'sales' || currentRole === 'sales';
+    const isCurrentPhoto = currentUser.role === 'photographer' || currentRole === 'photographer';
+
+    return notifications.filter(n => {
+      // 1. Nếu thông báo gửi đích danh user ID (Ưu tiên số 1)
+      if (n.targetUserId) {
+        return n.targetUserId === currentUser.id;
+      }
+
+      // 2. Nếu thông báo gửi cho nhóm quyền (targetRole)
+      if (n.targetRole) {
+        if (n.targetRole === 'all') return true;
+        if (n.targetRole === 'admin' && isCurrentAdmin) return true;
+        if (n.targetRole === 'sales' && isCurrentSales) return true;
+        if (n.targetRole === 'photographer' && isCurrentPhoto) return true;
+        return false;
+      }
+
+      // 3. Thông báo chung toàn hệ thống (không có targetUserId hay targetRole)
+      // Admin luôn nhận được tất cả thông báo hệ thống
+      if (isCurrentAdmin) return true;
+      return false;
+    });
+  }, [notifications, currentUser, currentRole]);
+
+  const unreadNotificationCount = useMemo(() => {
+    return userNotifications.filter(n => !n.read).length;
+  }, [userNotifications]);
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(mockActivityLogs);
-  const [notifications, setNotifications] = useState<SystemNotification[]>(mockNotifications);
   const [feedbacks, setFeedbacks] = useState<ClassFeedback[]>(mockFeedbacks);
   const [moments, setMoments] = useState<ClassMoment[]>(mockMoments);
   
@@ -825,6 +881,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('[Zalo Bot] Lỗi gửi thông báo khách mới:', err);
     });
 
+    // In-App Notification: Báo có Lead mới cho Admin & Sales được phân công
+    const assignedSalesId = customerData.assignedSalesId || (salesStaff.find(s => s.name === salesName)?.id);
+    const createdNotifs: SystemNotification[] = [
+      {
+        id: `notif-${Date.now()}-admin`,
+        type: 'new_lead',
+        title: `🌟 LEAD MỚI TIẾP NHẬN: ${customerData.name}`,
+        message: `Lead ${customerData.className || customerData.name} (${customerData.schoolName || 'Chưa rõ trường'}) từ nguồn ${customerData.source || 'Trực tiếp'} vừa được tiếp nhận.${salesName && salesName !== 'Chưa gán' ? ` Phụ trách: ${salesName}` : ''}`,
+        customerId: newId,
+        targetRole: 'admin',
+        severity: 'info',
+        timestamp: new Date().toISOString(),
+        read: false
+      }
+    ];
+
+    if (assignedSalesId) {
+      createdNotifs.push({
+        id: `notif-${Date.now()}-sales`,
+        type: 'new_lead',
+        title: `🎯 BẠN CÓ LEAD MỚI PHỤ TRÁCH`,
+        message: `Bạn được phân công chăm sóc Lead: ${customerData.name} (${customerData.className || ''} - ${customerData.schoolName || ''}). Nguồn: ${customerData.source || 'Trực tiếp'}. Hãy liên hệ sớm!`,
+        customerId: newId,
+        targetUserId: assignedSalesId,
+        targetRole: 'sales',
+        severity: 'info',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+    }
+    setNotifications(prev => [...createdNotifs, ...prev]);
+
     return true;
   };
 
@@ -1048,34 +1136,106 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.warn('[Zalo Bot] Lỗi gửi thông báo chốt cọc:', err);
       });
 
-      // 2. Thêm thông báo chuông hệ thống
-      const depositNotif: SystemNotification = {
-        id: `notif-${Date.now()}`,
-        type: 'deposit',
-        title: `🎉 CHỐT CỌC THÀNH CÔNG: ${targetCustomer.className || targetCustomer.name}`,
-        message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}).`,
-        severity: 'success',
-        timestamp: new Date().toISOString(),
-        read: false
-      };
-      setNotifications(prev => [depositNotif, ...prev]);
+      // 2. Thêm thông báo chuông hệ thống cho Admin & Sales
+      const targetSalesId = newSalesId || targetCustomer.assignedSalesId;
+      const depositNotifs: SystemNotification[] = [
+        {
+          id: `notif-${Date.now()}-admin`,
+          type: 'deposit',
+          title: `🎉 CHỐT CỌC THÀNH CÔNG: ${targetCustomer.className || targetCustomer.name}`,
+          message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}).`,
+          customerId: customerId,
+          targetRole: 'admin',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        }
+      ];
+
+      if (targetSalesId) {
+        depositNotifs.push({
+          id: `notif-${Date.now()}-sales`,
+          type: 'deposit',
+          title: `🎉 CHỐT CỌC THÀNH CÔNG: ${targetCustomer.className || targetCustomer.name}`,
+          message: `Chúc mừng bạn đã chốt cọc thành công cho lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName})!`,
+          customerId: customerId,
+          targetUserId: targetSalesId,
+          targetRole: 'sales',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        });
+      }
+      setNotifications(prev => [...depositNotifs, ...prev]);
     } else if (isMovingToConsulting) {
-      const newNotif: SystemNotification = {
-        id: `notif-${Date.now()}`,
-        type: 'new_lead',
-        title: `🎯 ĐÃ GÁN SALES TƯ VẤN: ${newSalesName}`,
-        message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đã chuyển sang "${newStage}". Phụ trách tư vấn: ${newSalesName}.`,
-        severity: 'info',
-        timestamp: new Date().toISOString(),
-        read: false
-      };
-      setNotifications(prev => [newNotif, ...prev]);
+      const consultingNotifs: SystemNotification[] = [
+        {
+          id: `notif-${Date.now()}-admin`,
+          type: 'new_lead',
+          title: `🎯 ĐÃ GÁN SALES TƯ VẤN: ${newSalesName}`,
+          message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đã chuyển sang "${newStage}". Phụ trách: ${newSalesName}.`,
+          customerId: customerId,
+          targetRole: 'admin',
+          severity: 'info',
+          timestamp: new Date().toISOString(),
+          read: false
+        }
+      ];
+
+      if (newSalesId) {
+        consultingNotifs.push({
+          id: `notif-${Date.now()}-sales`,
+          type: 'new_lead',
+          title: `🎯 BẠN ĐƯỢC PHÂN BỔ LEAD: ${targetCustomer.className || targetCustomer.name}`,
+          message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đã chuyển sang "${newStage}". Bạn được phân công phụ trách tư vấn.`,
+          customerId: customerId,
+          targetUserId: newSalesId,
+          targetRole: 'sales',
+          severity: 'info',
+          timestamp: new Date().toISOString(),
+          read: false
+        });
+      }
+      setNotifications(prev => [...consultingNotifs, ...prev]);
+    } else if (newStage === 'Book ngày' || newStage === 'Đã Booking') {
+      const targetSalesId = newSalesId || targetCustomer.assignedSalesId;
+      const bookingStageNotifs: SystemNotification[] = [
+        {
+          id: `notif-${Date.now()}-admin`,
+          type: 'shoot_scheduled',
+          title: `📅 KHÁCH ĐÃ CHỐT BOOK NGÀY: ${targetCustomer.className || targetCustomer.name}`,
+          message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đã chốt ngày chụp: ${targetCustomer.shootDate || 'Chờ xếp ngày'}.`,
+          customerId: customerId,
+          targetRole: 'admin',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        }
+      ];
+
+      if (targetSalesId) {
+        bookingStageNotifs.push({
+          id: `notif-${Date.now()}-sales`,
+          type: 'shoot_scheduled',
+          title: `📅 KHÁCH CỦA BẠN ĐÃ BOOK NGÀY: ${targetCustomer.className || targetCustomer.name}`,
+          message: `Khách hàng ${targetCustomer.className || targetCustomer.name} đã chuyển sang trạng thái Book ngày (${targetCustomer.shootDate || 'Chờ xếp ngày'}).`,
+          customerId: customerId,
+          targetUserId: targetSalesId,
+          targetRole: 'sales',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        });
+      }
+      setNotifications(prev => [...bookingStageNotifs, ...prev]);
     } else if (newStage === 'Lost') {
       const lostNotif: SystemNotification = {
         id: `notif-${Date.now()}`,
         type: 'unassigned',
         title: '⚠️ KHÁCH HÀNG TỪ CHỐI (LOST)',
         message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đã chuyển sang trạng thái Lost.`,
+        customerId: customerId,
+        targetRole: 'admin',
         severity: 'warning',
         timestamp: new Date().toISOString(),
         read: false
@@ -1121,16 +1281,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.warn('[Zalo Bot] Lỗi gửi thông báo chốt cọc:', err);
       });
 
-      const depositNotif: SystemNotification = {
-        id: `notif-${Date.now()}`,
-        type: 'deposit',
-        title: `🎉 CHỐT CỌC THÀNH CÔNG: ${updated.className}`,
-        message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${updated.className} (${updated.schoolName}).`,
-        severity: 'success',
-        timestamp: new Date().toISOString(),
-        read: false
-      };
-      setNotifications(prev => [depositNotif, ...prev]);
+      const targetSalesId = updated.assignedSalesId || (salesStaff.find(s => s.name === closerSalesName)?.id);
+      const depositNotifs: SystemNotification[] = [
+        {
+          id: `notif-${Date.now()}-admin`,
+          type: 'deposit',
+          title: `🎉 CHỐT CỌC THÀNH CÔNG: ${updated.className || updated.name}`,
+          message: `Sales ${closerSalesName} đã chốt cọc thành công cho lớp ${updated.className || updated.name} (${updated.schoolName}).`,
+          customerId: updated.id,
+          targetRole: 'admin',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        }
+      ];
+
+      if (targetSalesId) {
+        depositNotifs.push({
+          id: `notif-${Date.now()}-sales`,
+          type: 'deposit',
+          title: `🎉 CHỐT CỌC THÀNH CÔNG: ${updated.className || updated.name}`,
+          message: `Chúc mừng bạn đã chốt cọc thành công cho lớp ${updated.className || updated.name} (${updated.schoolName})!`,
+          customerId: updated.id,
+          targetUserId: targetSalesId,
+          targetRole: 'sales',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        });
+      }
+      setNotifications(prev => [...depositNotifs, ...prev]);
+    } else if (prevCust && !['Book ngày', 'Đã Booking'].includes(prevCust.pipelineStage) && ['Book ngày', 'Đã Booking'].includes(updated.pipelineStage)) {
+      const targetSalesId = updated.assignedSalesId || (salesStaff.find(s => s.name === closerSalesName)?.id);
+      const bookNotifs: SystemNotification[] = [
+        {
+          id: `notif-${Date.now()}-admin`,
+          type: 'shoot_scheduled',
+          title: `📅 KHÁCH ĐÃ BOOK NGÀY: ${updated.className || updated.name}`,
+          message: `Lớp ${updated.className || updated.name} (${updated.schoolName}) đã chốt ngày chụp: ${updated.shootDate || 'Chờ xếp ngày'}.`,
+          customerId: updated.id,
+          targetRole: 'admin',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        }
+      ];
+      if (targetSalesId) {
+        bookNotifs.push({
+          id: `notif-${Date.now()}-sales`,
+          type: 'shoot_scheduled',
+          title: `📅 KHÁCH CỦA BẠN ĐÃ BOOK NGÀY: ${updated.className || updated.name}`,
+          message: `Khách hàng ${updated.className || updated.name} đã chuyển sang trạng thái Book ngày (${updated.shootDate || 'Chờ xếp ngày'}).`,
+          customerId: updated.id,
+          targetUserId: targetSalesId,
+          targetRole: 'sales',
+          severity: 'success',
+          timestamp: new Date().toISOString(),
+          read: false
+        });
+      }
+      setNotifications(prev => [...bookNotifs, ...prev]);
     }
   };
 
@@ -1149,20 +1359,91 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('[SQL Database] Lỗi gọi API createBooking:', err);
     });
 
-    // Thêm notification nếu chưa có thợ
-    if (!bookingData.assignments.leadPhotographerId) {
-      const notif: SystemNotification = {
-        id: `notif-${Date.now()}`,
+    // In-App Notification: Báo Lịch chụp cho Admin, Ekip Thợ Chụp & Sales phụ trách
+    const bookingNotifs: SystemNotification[] = [
+      {
+        id: `notif-${Date.now()}-admin`,
+        type: 'shoot_scheduled',
+        title: `📅 ĐƠN BOOKING MỚI: ${bookingData.className} (${bookingData.schoolName})`,
+        message: `Mã đơn ${bookingData.code} chụp ngày ${bookingData.shootDate} (${bookingData.startTime || '07:30'} - ${bookingData.endTime || '17:00'}) tại ${bookingData.location || 'Studio'}. Gói: ${bookingData.packageName}.`,
+        bookingId: newId,
+        customerId: bookingData.customerId,
+        targetRole: 'admin',
+        severity: 'info',
+        timestamp: new Date().toISOString(),
+        read: false
+      }
+    ];
+
+    // Báo cho Trưởng nháy
+    if (bookingData.assignments.leadPhotographerId) {
+      bookingNotifs.push({
+        id: `notif-${Date.now()}-photo-lead`,
+        type: 'shoot_assigned',
+        title: `📸 CA CHỤP MỚI ĐƯỢC PHÂN CÔNG (Trưởng nháy)`,
+        message: `Bạn được phân công làm Trưởng nháy cho ca chụp: ${bookingData.className} (${bookingData.schoolName}) ngày ${bookingData.shootDate} (${bookingData.startTime || '07:30'} - ${bookingData.endTime || '17:00'}) tại ${bookingData.location || 'Studio'}. Vui lòng kiểm tra thiết bị!`,
+        bookingId: newId,
+        customerId: bookingData.customerId,
+        targetUserId: bookingData.assignments.leadPhotographerId,
+        targetRole: 'photographer',
+        severity: 'info',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+    } else {
+      // Cảnh báo Admin đơn chưa có thợ
+      bookingNotifs.push({
+        id: `notif-${Date.now()}-unassigned`,
         type: 'unassigned',
         title: '⚠️ ĐƠN BOOKING CHƯA CÓ THỢ',
         message: `Booking ${bookingData.code} (${bookingData.className} - ${bookingData.schoolName}) ngày ${bookingData.shootDate} chưa được gán Photographer.`,
         bookingId: newId,
+        customerId: bookingData.customerId,
+        targetRole: 'admin',
         severity: 'warning',
-        timestamp: 'Vừa xong',
+        timestamp: new Date().toISOString(),
         read: false
-      };
-      setNotifications(prev => [notif, ...prev]);
+      });
     }
+
+    // Báo cho từng Thợ phụ
+    if (bookingData.assignments.assistantPhotographerIds && bookingData.assignments.assistantPhotographerIds.length > 0) {
+      bookingData.assignments.assistantPhotographerIds.forEach((asId, idx) => {
+        bookingNotifs.push({
+          id: `notif-${Date.now()}-photo-as-${idx}`,
+          type: 'shoot_assigned',
+          title: `📸 BẠN ĐƯỢC PHÂN CÔNG HỖ TRỢ CA CHỤP`,
+          message: `Bạn được phân công hỗ trợ chụp lớp ${bookingData.className} (${bookingData.schoolName}) ngày ${bookingData.shootDate} tại ${bookingData.location || 'Studio'}.`,
+          bookingId: newId,
+          customerId: bookingData.customerId,
+          targetUserId: asId,
+          targetRole: 'photographer',
+          severity: 'info',
+          timestamp: new Date().toISOString(),
+          read: false
+        });
+      });
+    }
+
+    // Báo cho Sales phụ trách của khách này
+    const relCustomer = customers.find(c => c.id === bookingData.customerId);
+    if (relCustomer?.assignedSalesId) {
+      bookingNotifs.push({
+        id: `notif-${Date.now()}-sales-bk`,
+        type: 'shoot_scheduled',
+        title: `📅 KHÁCH CỦA BẠN ĐÃ TẠO BOOKING`,
+        message: `Đơn chụp cho khách hàng ${bookingData.className || relCustomer.name} ngày ${bookingData.shootDate} đã được thiết lập thành công.`,
+        bookingId: newId,
+        customerId: bookingData.customerId,
+        targetUserId: relCustomer.assignedSalesId,
+        targetRole: 'sales',
+        severity: 'success',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+    }
+
+    setNotifications(prev => [...bookingNotifs, ...prev]);
 
     // Tự động bắn thông báo qua Zalo Bot AI Task Man
     sendZaloBotNotification({
@@ -1224,6 +1505,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         content: `Đã xếp ${targetPhotographer.fullName} (${roleType === 'lead' ? 'Trưởng nháy' : 'Thợ phụ/hỗ trợ'}) | Ngày: ${currentBooking.shootDate} | Giờ: ${currentBooking.startTime || '07:30'} - ${currentBooking.endTime || '17:00'}.`,
         recipient: targetPhotographer.phone || targetPhotographer.fullName || 'Nhóm Điều Phối Thợ Chụp'
       }).catch(() => {});
+
+      // In-App Notification: Báo ca chụp được phân công đúng tài khoản Photographer
+      const photoNotif: SystemNotification = {
+        id: `notif-${Date.now()}-photo-assign`,
+        type: 'shoot_assigned',
+        title: `📸 BẠN ĐƯỢC ĐIỀU PHỐI VÀO CA CHỤP (${roleType === 'lead' ? 'Trưởng nháy' : roleType === 'assistant' ? 'Thợ phụ' : 'Quay phim'})`,
+        message: `Bạn được phân công làm ${roleType === 'lead' ? 'Trưởng nháy' : roleType === 'assistant' ? 'Thợ phụ hỗ trợ' : 'Quay phim'} cho lớp ${currentBooking.className} (${currentBooking.schoolName}) ngày ${currentBooking.shootDate} (${currentBooking.startTime || '07:30'} - ${currentBooking.endTime || '17:00'}) tại ${currentBooking.location || 'Studio'}.`,
+        bookingId: currentBooking.id,
+        customerId: currentBooking.customerId,
+        targetUserId: photographerId,
+        targetRole: 'photographer',
+        severity: 'info',
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      setNotifications(prev => [photoNotif, ...prev]);
     }
 
     setBookings(prev =>
@@ -1474,7 +1771,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const markAllNotificationsAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    const userNotifIds = new Set(userNotifications.map(n => n.id));
+    setNotifications(prev => prev.map(n => userNotifIds.has(n.id) ? { ...n, read: true } : n));
+  };
+
+  const clearAllNotifications = () => {
+    const userNotifIds = new Set(userNotifications.map(n => n.id));
+    setNotifications(prev => prev.filter(n => !userNotifIds.has(n.id)));
   };
 
   const addFeedback = (feedbackData: Omit<ClassFeedback, 'id' | 'createdAt'>) => {
@@ -1801,9 +2104,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         activityLogs,
         addActivityLog,
         notifications,
+        userNotifications,
+        unreadNotificationCount,
         addNotification,
         markNotificationAsRead,
         markAllNotificationsAsRead,
+        clearAllNotifications,
         isSearchOpen,
         setIsSearchOpen,
         dateFilter,

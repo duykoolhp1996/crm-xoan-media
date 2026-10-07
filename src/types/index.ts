@@ -100,6 +100,7 @@ export interface Customer {
   driveUrl?: string; // Alias link Google Drive chung
   photoNotes?: string; // Lời dặn dò/ghi chú của Photo cho bộ phận Hậu Kỳ / Designer
   shotDate?: string; // Ngày chụp thực tế hoàn thành
+  shootDate?: string; // Ngày chụp chốt (tương thích Booking)
   photoCount?: number; // Ước tính số lượng ảnh đã chụp (VD: 1200)
 
   // Nguồn Marketing
@@ -432,14 +433,17 @@ export interface ActivityLog {
 // 9. Alert & Notification System
 export interface SystemNotification {
   id: string;
-  type: 'conflict' | 'overload' | 'unassigned' | 'new_lead' | 'upcoming_booking' | 'due_task' | 'unpaid' | 'deposit';
+  type: 'conflict' | 'overload' | 'unassigned' | 'new_lead' | 'upcoming_booking' | 'due_task' | 'unpaid' | 'deposit' | 'shoot_assigned' | 'shoot_scheduled' | 'system';
   title: string;
   message: string;
   bookingId?: string;
   customerId?: string;
+  targetUserId?: string; // ID của user nhận (VD: 'user-admin', 'user-2', 'photo-1')
+  targetRole?: 'admin' | 'sales' | 'photographer' | 'all'; // Quyền hạn nhận
   severity: 'info' | 'warning' | 'danger' | 'success';
   timestamp: string;
   read: boolean;
+  metadata?: Record<string, any>;
 }
 
 // 10. Khoảnh Khắc & Feedback Từ Các Lớp

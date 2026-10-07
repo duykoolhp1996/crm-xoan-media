@@ -15,7 +15,7 @@ export const Header: React.FC = () => {
   const {
     currentUser,
     currentRole,
-    notifications,
+    unreadNotificationCount,
     setIsSearchOpen,
     dateFilter,
     setDateFilter,
@@ -30,7 +30,7 @@ export const Header: React.FC = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = unreadNotificationCount;
   const isSalesOrPhoto = currentRole === 'sales' || currentRole === 'photographer';
 
   const roleLabels: Record<UserRole, { label: string; badgeClass: string; desc: string }> = {

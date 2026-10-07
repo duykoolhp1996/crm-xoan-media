@@ -633,7 +633,95 @@ export const mockTasks: Task[] = [];
 
 export const mockActivityLogs: ActivityLog[] = [];
 
-export const mockNotifications: SystemNotification[] = [];
+export const mockNotifications: SystemNotification[] = [
+  // 1. Thông báo dành cho Admin
+  {
+    id: 'notif-admin-1',
+    type: 'new_lead',
+    title: '🌟 LEAD MỚI TIẾP NHẬN',
+    message: 'Khách hàng Cô Giá (12A3 - THPT Marie Curie Hải Phòng) từ kênh Facebook Ads đã được tiếp nhận vào Pipeline.',
+    customerId: 'cust-1',
+    targetRole: 'admin',
+    severity: 'info',
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 phút trước
+    read: false
+  },
+  {
+    id: 'notif-admin-2',
+    type: 'shoot_scheduled',
+    title: '📅 LỊCH CHỤP MỚI ĐÃ CHỐT',
+    message: 'Lớp 12A3 (THPT Marie Curie) đã chốt lịch chụp ngày 28/10/2026. Trưởng nháy: Đỗ Hoàng Long.',
+    customerId: 'cust-1',
+    targetRole: 'admin',
+    severity: 'success',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 giờ trước
+    read: false
+  },
+  {
+    id: 'notif-admin-3',
+    type: 'deposit',
+    title: '🎉 CHỐT CỌC THÀNH CÔNG: 5.000.000đ',
+    message: 'Sales Lê Hoàng Sơn đã chốt cọc thành công 5.000.000đ từ khách hàng Cô Giá (12A3 THPT Marie Curie).',
+    customerId: 'cust-1',
+    targetRole: 'admin',
+    severity: 'success',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // 4 giờ trước
+    read: true
+  },
+
+  // 2. Thông báo dành cho Sales Lê Hoàng Sơn (user-2)
+  {
+    id: 'notif-sales-son-1',
+    type: 'new_lead',
+    title: '🎯 BẠN CÓ LEAD MỚI PHỤ TRÁCH',
+    message: 'Bạn được phân công chăm sóc Lead: Cô Giá (12A3 - THPT Marie Curie Hải Phòng). Hãy liên hệ tư vấn sớm!',
+    customerId: 'cust-1',
+    targetUserId: 'user-2',
+    targetRole: 'sales',
+    severity: 'info',
+    timestamp: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+    read: false
+  },
+  {
+    id: 'notif-sales-son-2',
+    type: 'shoot_scheduled',
+    title: '📅 LỊCH CHỤP KHÁCH HÀNG ĐÃ CHỐT',
+    message: 'Khách hàng Cô Giá của bạn đã được xếp lịch chụp ngày 28/10/2026. Ekip: Đỗ Hoàng Long phụ trách.',
+    customerId: 'cust-1',
+    targetUserId: 'user-2',
+    targetRole: 'sales',
+    severity: 'success',
+    timestamp: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+    read: false
+  },
+
+  // 3. Thông báo dành cho Photographer Đỗ Hoàng Long (photo-1)
+  {
+    id: 'notif-photo-long-1',
+    type: 'shoot_assigned',
+    title: '📸 CA CHỤP MỚI ĐƯỢC PHÂN CÔNG (Trưởng nháy)',
+    message: 'Bạn được phân công làm Trưởng nháy cho ca chụp: Lớp 12A3 THPT Marie Curie vào ngày 28/10/2026 tại Hải Phòng. Vui lòng kiểm tra thiết bị!',
+    customerId: 'cust-1',
+    targetUserId: 'photo-1',
+    targetRole: 'photographer',
+    severity: 'info',
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    read: false
+  },
+
+  // 4. Thông báo dành cho Sales Nguyễn Thu Hương (user-sales-1)
+  {
+    id: 'notif-sales-huong-1',
+    type: 'new_lead',
+    title: '🎯 BẠN CÓ LEAD MỚI PHỤ TRÁCH',
+    message: 'Bạn được phân công phụ trách Lead mới từ chiến dịch TikTok Ads. Vui lòng vào CRM kiểm tra thông tin khách!',
+    targetUserId: 'user-sales-1',
+    targetRole: 'sales',
+    severity: 'info',
+    timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+    read: false
+  }
+];
 
 export const mockFeedbacks: ClassFeedback[] = [];
 
