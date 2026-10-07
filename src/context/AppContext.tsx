@@ -45,6 +45,13 @@ import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup, notifyCustom
 import { FacebookApiService } from '../services/facebookApiService';
 import { dispatchCustomerSyncToZones, dispatchBookingSyncToZones } from '../services/multiZoneSyncService';
 import { apiClient } from '../services/apiClient';
+import {
+  playNotificationTone,
+  vibrateDevice,
+  triggerNativePushNotification,
+  unlockAudio
+} from '../utils/notificationAudio';
+
 
 
 export type NavigationTab = 
@@ -156,6 +163,9 @@ interface AppContextType {
   notifications: SystemNotification[];
   userNotifications: SystemNotification[];
   unreadNotificationCount: number;
+  activePushBanner: SystemNotification | null;
+  triggerPushBanner: (notification: SystemNotification) => void;
+  closePushBanner: () => void;
   addNotification: (notification: Omit<SystemNotification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
@@ -290,6 +300,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('Failed to save notifications to localStorage', e);
     }
   }, [notifications]);
+
+  // iOS Push Banner State (Dynamic Island Style)
+  const [activePushBanner, setActivePushBanner] = useState<SystemNotification | null>(null);
+
+  const triggerPushBanner = (notif: SystemNotification) => {
+    setActivePushBanner(notif);
+    playNotificationTone();
+    vibrateDevice([150, 80, 150]);
+    triggerNativePushNotification(notif.title, notif.message);
+  };
+
+  const closePushBanner = () => {
+    setActivePushBanner(null);
+  };
+
+  // Mở khóa AudioContext khi người dùng chạm màn hình lần đầu (Yêu cầu Safari iOS)
+  useEffect(() => {
+    const handleFirstTouch = () => {
+      unlockAudio();
+      window.removeEventListener('click', handleFirstTouch);
+      window.removeEventListener('touchstart', handleFirstTouch);
+    };
+    window.addEventListener('click', handleFirstTouch, { passive: true });
+    window.addEventListener('touchstart', handleFirstTouch, { passive: true });
+    return () => {
+      window.removeEventListener('click', handleFirstTouch);
+      window.removeEventListener('touchstart', handleFirstTouch);
+    };
+  }, []);
 
   // Bộ lọc thông báo chuẩn xác theo tài khoản đăng nhập (Admin, Sales phụ trách, Photographer)
   const userNotifications = useMemo(() => {
@@ -445,6 +484,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const serverNotifs = await apiClient.getNotifications(currentUser?.id, currentRole);
         if (Array.isArray(serverNotifs) && serverNotifs.length > 0) {
           setNotifications(prev => {
+            const prevIds = new Set(prev.map(n => n.id));
+            const newIncoming = serverNotifs.filter(n => !prevIds.has(n.id) && !n.read);
+            if (newIncoming.length > 0) {
+              triggerPushBanner(newIncoming[0]);
+            }
             const existingIds = new Set(serverNotifs.map(n => n.id));
             const localOnly = prev.filter(n => !existingIds.has(n.id));
             return [...serverNotifs, ...localOnly];
@@ -1797,6 +1841,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       read: false
     };
     setNotifications(prev => [newNotif, ...prev]);
+
+    // Kiểm tra xem thông báo này có gửi cho user hiện tại hay không
+    const isForMe =
+      currentRole === 'admin' ||
+      newNotif.targetRole === 'all' ||
+      newNotif.targetRole === currentRole ||
+      newNotif.targetUserId === currentUser?.id;
+
+    if (isForMe) {
+      triggerPushBanner(newNotif);
+    }
+
     // Đồng bộ lưu bền vững lên SQL Server REST API để đa thiết bị (iOS, Android, PC) cùng nhận được
     apiClient.createNotification(newNotif).catch(() => {});
   };
@@ -2143,6 +2199,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notifications,
         userNotifications,
         unreadNotificationCount,
+        activePushBanner,
+        triggerPushBanner,
+        closePushBanner,
         addNotification,
         markNotificationAsRead,
         markAllNotificationsAsRead,

@@ -25,7 +25,8 @@ import {
   PhoneCall,
   FileText,
   CalendarCheck,
-  ArrowRight
+  ArrowRight,
+  Bell
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -58,7 +59,8 @@ export const ExecutiveDashboard: React.FC = () => {
     currentRole,
     loginAsStaff,
     setActiveTab,
-    setSelectedBookingId
+    setSelectedBookingId,
+    triggerPushBanner
   } = useApp();
 
   const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
@@ -450,7 +452,26 @@ export const ExecutiveDashboard: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#B8F23D] animate-ping" />
+            <button
+              type="button"
+              onClick={() => {
+                triggerPushBanner({
+                  id: `notif-test-${Date.now()}`,
+                  type: 'system',
+                  title: '🔔 THỬ NGHIỆM THÔNG BÁO THÀNH CÔNG',
+                  message: `Thiết bị của ${currentUser.name} (${currentRole}) đã kết nối thông báo thành công. Mọi Lead mới và lịch chụp sẽ được báo về ngay lập tức!`,
+                  targetUserId: currentUser.id,
+                  severity: 'success',
+                  timestamp: new Date().toISOString(),
+                  read: false
+                });
+              }}
+              className="px-2.5 py-1 rounded-full bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 text-[10px] font-black flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+              title="Nhấn để test chuông và thông báo trên iPhone"
+            >
+              <Bell className="w-3 h-3 text-neutral-950 animate-bounce" />
+              <span>Test Noti</span>
+            </button>
             <span className="px-2.5 py-1 rounded-full bg-neutral-900 text-[#B8F23D] text-[10px] font-extrabold uppercase tracking-wide">
               {currentRole}
             </span>

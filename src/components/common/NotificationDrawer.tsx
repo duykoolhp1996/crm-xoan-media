@@ -37,7 +37,8 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
     clearAllNotifications,
     setSelectedCustomerId,
     setSelectedBookingId,
-    setActiveTab
+    setActiveTab,
+    triggerPushBanner
   } = useApp();
 
   const [activeFilterTab, setActiveFilterTab] = useState<'all' | 'unread'>('all');
@@ -162,16 +163,26 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, 
       }
     }
 
-    // 4. Thêm một thông báo thực tế vào hệ thống
-    addNotification({
+    // 4. Bắn banner đẩy kiểu iOS (Dynamic Island) trượt từ đỉnh màn hình xuống
+    const testNotif: SystemNotification = {
+      id: `notif-test-${Date.now()}`,
       type: 'system',
       title: '🔔 THỬ NGHIỆM THÔNG BÁO THÀNH CÔNG',
       message: `Thiết bị của ${currentUser.name} (${roleText}) đã kết nối thông báo thành công. Mọi Lead mới và lịch chụp sẽ được báo về ngay lập tức!`,
       targetUserId: currentUser.id,
-      severity: 'success'
-    });
+      severity: 'success',
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+
+    triggerPushBanner(testNotif);
+    addNotification(testNotif);
 
     setTestSent(true);
+    // Tự động đóng Drawer sau 300ms để người dùng nhìn thấy banner iOS trượt xuống màn hình chính
+    setTimeout(() => {
+      onClose();
+    }, 350);
     setTimeout(() => setTestSent(false), 4000);
   };
 

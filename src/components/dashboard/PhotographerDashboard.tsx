@@ -17,7 +17,8 @@ import {
   Video,
   Award,
   FolderOpen,
-  ExternalLink
+  ExternalLink,
+  Bell
 } from 'lucide-react';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 import { Booking } from '../../types';
@@ -29,7 +30,8 @@ export const PhotographerDashboard: React.FC = () => {
     photographers,
     bookings,
     feedbacks,
-    setActiveTab
+    setActiveTab,
+    triggerPushBanner
   } = useApp();
 
   const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
@@ -229,9 +231,31 @@ export const PhotographerDashboard: React.FC = () => {
               <Sparkles className="w-3.5 h-3.5" />
               <span>Hệ Thống Ekip Thợ Chụp Kỷ Yếu 2026</span>
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white">
-              Xin chào, {currentPhotographer.fullName}! 📸
-            </h1>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white">
+                Xin chào, {currentPhotographer.fullName}! 📸
+              </h1>
+              <button
+                type="button"
+                onClick={() => {
+                  triggerPushBanner({
+                    id: `notif-test-${Date.now()}`,
+                    type: 'shoot_assigned',
+                    title: '📸 TEST CA CHỤP PHÂN CÔNG (THỬ NGHIỆM)',
+                    message: `Bạn được phân công làm Trưởng nháy cho ca chụp: Lớp 12A3 Marie Curie ngày 28/10/2026. Chuông báo đã kết nối thành công!`,
+                    targetUserId: currentUser.id,
+                    severity: 'info',
+                    timestamp: new Date().toISOString(),
+                    read: false
+                  });
+                }}
+                className="px-2.5 py-1 rounded-full bg-[#B8F23D] hover:bg-[#a8e22d] text-neutral-950 text-[11px] font-black flex items-center gap-1 shadow-xs active:scale-95 transition-all cursor-pointer"
+                title="Nhấn để test chuông và thông báo ca chụp trên điện thoại"
+              >
+                <Bell className="w-3 h-3 text-neutral-950 animate-bounce" />
+                <span>Test Noti</span>
+              </button>
+            </div>
             <p className="text-xs sm:text-sm text-neutral-300 font-medium leading-relaxed">
               {isPhotoLead ? (
                 <>

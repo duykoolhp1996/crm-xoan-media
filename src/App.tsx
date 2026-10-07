@@ -23,6 +23,7 @@ import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
 import { TrashBinModal } from './components/crm/TrashBinModal';
 import { CustomerDetail360 } from './components/crm/CustomerDetail360';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
+import { IosPushBanner } from './components/common/IosPushBanner';
 import { initGA4, trackPageView } from './lib/analytics';
 
 const MainContent: React.FC = () => {
@@ -98,6 +99,9 @@ const CrmAppShell: React.FC = () => {
 
       {/* Mobile Bottom Navigation Bar (iOS / Android App Style) */}
       <MobileBottomNav />
+
+      {/* iOS Push Notification Banner (Dynamic Island Style) */}
+      <IosPushBanner />
     </div>
   );
 };
