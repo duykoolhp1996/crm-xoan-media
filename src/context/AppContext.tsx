@@ -19,7 +19,9 @@ import {
   ClassMoment,
   SalesStaff,
   FacebookChatConversation,
-  FacebookChatMessage
+  FacebookChatMessage,
+  PaymentStatus,
+  BookingStatus
 } from '../types';
 import {
   mockUsers,
@@ -40,6 +42,7 @@ import {
   mockMoments
 } from '../data/mockData';
 import { mockMessengerConversations } from '../data/mockMessengerData';
+import { INITIAL_PANCAKE_CONVERSATIONS } from '../data/mockPancakeData';
 import { crmSupabaseService } from '../services/crmSupabaseService';
 import { sendZaloBotNotification, notifyNewCustomerLeadToZaloGroup, notifyCustomerDepositToZaloGroup } from '../lib/zaloBotService';
 import { FacebookApiService } from '../services/facebookApiService';
@@ -70,6 +73,7 @@ export type NavigationTab =
   | 'reports-photographer'
   | 'settings'
   | 'chat-messenger'
+  | 'pancake'
   | 'trash';
 
 interface AppContextType {
@@ -181,7 +185,7 @@ interface AppContextType {
   isMobileSidebarOpen: boolean;
   setIsMobileSidebarOpen: (open: boolean) => void;
 
-  // Facebook Messenger Live Chat cho Sales
+  // Facebook Messenger & App Pancake Đa Kênh cho Sales
   messengerConversations: FacebookChatConversation[];
   activeConversationId: string | null;
   setActiveConversationId: (id: string | null) => void;
@@ -193,6 +197,14 @@ interface AppContextType {
   isSyncingFacebook: boolean;
   syncFacebookLiveConversations: (silent?: boolean) => Promise<void>;
   facebookPageName: string;
+
+  // Tiện ích nghiệp vụ App Pancake (Pancake POS & Tags)
+  addPancakeTag: (convId: string, tag: string) => void;
+  removePancakeTag: (convId: string, tag: string) => void;
+  assignPancakeStaff: (convId: string, staffName: string, staffId?: string) => void;
+  sendPancakeCardMessage: (convId: string, text: string, cardType: 'quote' | 'vietqr' | 'booking', cardData: any) => void;
+  createPancakeQuickBooking: (convId: string, bookingData: { packageName: string; studentCount: number; packagePrice: number; depositAmount: number; shootDate: string; location: string; notes?: string }) => void;
+  loadPancakeSampleData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -225,12 +237,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('crm_xoan_sales_staff');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Luôn hợp nhất với danh sách Sales mặc định để đảm bảo tài khoản không bị thiếu
-          const existingIds = new Set(parsed.map(s => s.id));
-          const missingDefaults = mockSalesStaff.filter(s => !existingIds.has(s.id));
-          return [...parsed, ...missingDefaults];
-        }
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) {
       console.error('Failed to load sales staff from localStorage', e);
@@ -551,12 +558,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    // 2. Kiểm tra tài khoản Sales Tư Vấn (luôn gộp state + mockSalesStaff cứng để tránh localStorage cũ)
-    const allSalesPool = [
-      ...salesStaff,
-      // Thêm các account mặc định nếu chưa có trong state (tránh localStorage cũ ghi đè)
-      ...mockSalesStaff.filter(ms => !salesStaff.some(s => s.id === ms.id || s.email === ms.email))
-    ];
+    // 2. Kiểm tra tài khoản Sales Tư Vấn (Lấy trực tiếp từ DATA thực tế, không tự động hồi sinh tài khoản đã bị xóa)
+    const allSalesPool = salesStaff.length > 0 ? salesStaff : mockSalesStaff;
 
     const matchSalesIdentifier = (s: SalesStaff) => {
       const sId = (s.id || '').toLowerCase();
@@ -1888,23 +1891,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMoments(prev => [newMoment, ...prev]);
   };
 
-  // Quản lý tin nhắn Facebook Messenger Live Chat cho Sales
+  // Quản lý tin nhắn Facebook Messenger Live Chat & App Pancake cho Sales
   const [messengerConversations, setMessengerConversations] = useState<FacebookChatConversation[]>(() => {
     try {
-      localStorage.removeItem('crm_xoan_messenger_chats');
+      const saved = localStorage.getItem('crm_xoan_messenger_chats');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch (e) {
       console.error(e);
     }
-    return [];
+    return INITIAL_PANCAKE_CONVERSATIONS;
   });
 
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(() => {
+    return INITIAL_PANCAKE_CONVERSATIONS[0]?.id || null;
+  });
 
   useEffect(() => {
     try {
-      if (messengerConversations.length === 0) {
-        localStorage.removeItem('crm_xoan_messenger_chats');
-      } else {
+      if (messengerConversations.length > 0) {
         localStorage.setItem('crm_xoan_messenger_chats', JSON.stringify(messengerConversations));
       }
     } catch (e) {
@@ -2115,6 +2122,130 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return messengerConversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
   }, [messengerConversations]);
 
+  // Tiện ích quản lý App Pancake
+  const addPancakeTag = (convId: string, tag: string) => {
+    setMessengerConversations(prev =>
+      prev.map(c => {
+        if (c.id !== convId) return c;
+        if (c.tags.includes(tag)) return c;
+        return { ...c, tags: [...c.tags, tag] };
+      })
+    );
+  };
+
+  const removePancakeTag = (convId: string, tag: string) => {
+    setMessengerConversations(prev =>
+      prev.map(c => {
+        if (c.id !== convId) return c;
+        return { ...c, tags: c.tags.filter(t => t !== tag) };
+      })
+    );
+  };
+
+  const assignPancakeStaff = (convId: string, staffName: string, staffId?: string) => {
+    setMessengerConversations(prev =>
+      prev.map(c => {
+        if (c.id !== convId) return c;
+        return { ...c, assignedSalesName: staffName, assignedSalesId: staffId };
+      })
+    );
+  };
+
+  const sendPancakeCardMessage = (convId: string, text: string, cardType: 'quote' | 'vietqr' | 'booking', cardData: any) => {
+    const newMsg: FacebookChatMessage = {
+      id: `msg-${Date.now()}`,
+      sender: 'sales',
+      senderName: `${currentUser.name} (Sales)`,
+      senderAvatar: currentUser.avatar,
+      text,
+      timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      cardType,
+      cardData
+    };
+
+    setMessengerConversations(prev =>
+      prev.map(c => {
+        if (c.id !== convId) return c;
+        return {
+          ...c,
+          isReplied: true,
+          lastMessage: text,
+          lastMessageTime: newMsg.timestamp,
+          messages: [...c.messages, newMsg]
+        };
+      })
+    );
+  };
+
+  const createPancakeQuickBooking = (convId: string, bookingData: { packageName: string; studentCount: number; packagePrice: number; depositAmount: number; shootDate: string; location: string; notes?: string }) => {
+    const targetConv = messengerConversations.find(c => c.id === convId);
+    if (!targetConv) return;
+
+    const bookingCode = `BK-${Date.now().toString().slice(-6)}`;
+    const totalAmount = bookingData.studentCount * bookingData.packagePrice;
+
+    // 1. Tạo đơn Booking mới vào CRM
+    const newBooking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'> = {
+      code: bookingCode,
+      customerId: targetConv.customerId || `cust-${Date.now()}`,
+      customerName: targetConv.customerName,
+      schoolName: targetConv.customerSchool || 'Chưa cập nhật trường',
+      className: targetConv.customerClass || 'Lớp Kỷ Yếu',
+      packageId: 'pkg-custom',
+      packageName: bookingData.packageName,
+      studentCount: bookingData.studentCount,
+      totalAmount,
+      depositAmount: bookingData.depositAmount,
+      remainingAmount: totalAmount - bookingData.depositAmount,
+      paymentStatus: (bookingData.depositAmount >= totalAmount ? 'paid' : bookingData.depositAmount > 0 ? 'partial' : 'pending') as PaymentStatus,
+      bookingStatus: 'confirmed' as BookingStatus,
+      shootDate: bookingData.shootDate,
+      startTime: '07:30',
+      endTime: '17:00',
+      location: bookingData.location,
+      notes: bookingData.notes || `Tạo nhanh từ Pancake Chat bởi ${currentUser.name}`,
+      assignments: {
+        leadPhotographerId: '',
+        assistantPhotographerIds: []
+      }
+    };
+
+    addBooking(newBooking);
+
+    // 2. Cập nhật trạng thái hội thoại và khách hàng
+    updateMessengerStage(convId, 'Đã đặt cọc');
+    addPancakeTag(convId, '💰 Đã cọc VietQR');
+
+    // 3. Gửi tin nhắn xác nhận chốt booking vào khung chat
+    sendPancakeCardMessage(
+      convId,
+      `🎉 XÁC NHẬN CHỐT BOOKING KỶ YẾU #${bookingCode}\n✨ Gói: ${bookingData.packageName} (${bookingData.studentCount} bạn)\n📅 Ngày chụp: ${bookingData.shootDate}\n📍 Địa điểm: ${bookingData.location}\n💵 Tổng chi phí: ${totalAmount.toLocaleString('vi-VN')}đ | Đã cọc: ${bookingData.depositAmount.toLocaleString('vi-VN')}đ\nEkip Xoăn Media đã khóa lịch thành công trên hệ thống CRM!`,
+      'booking',
+      {
+        bookingCode,
+        packageName: bookingData.packageName,
+        packagePrice: bookingData.packagePrice,
+        studentCount: bookingData.studentCount,
+        totalAmount,
+        depositAmount: bookingData.depositAmount,
+        shootDate: bookingData.shootDate,
+        location: bookingData.location
+      }
+    );
+
+    addNotification({
+      title: `⚡ PANCAKE POS: CHỐT BOOKING #${bookingCode}`,
+      message: `Đã tạo đơn thành công cho ${targetConv.customerName} (${targetConv.customerClass} - ${targetConv.customerSchool})`,
+      type: 'deposit',
+      severity: 'success'
+    });
+  };
+
+  const loadPancakeSampleData = () => {
+    setMessengerConversations(INITIAL_PANCAKE_CONVERSATIONS);
+    localStorage.setItem('crm_xoan_messenger_chats', JSON.stringify(INITIAL_PANCAKE_CONVERSATIONS));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -2207,7 +2338,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         unreadMessengerCount,
         isSyncingFacebook,
         syncFacebookLiveConversations,
-        facebookPageName
+        facebookPageName,
+        addPancakeTag,
+        removePancakeTag,
+        assignPancakeStaff,
+        sendPancakeCardMessage,
+        createPancakeQuickBooking,
+        loadPancakeSampleData
       }}
     >
       {children}

@@ -18,6 +18,7 @@ import { ServiceModule } from './components/services/ServiceModule';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
+import { PancakeApp } from './components/pancake/PancakeApp';
 import { TrashBinModal } from './components/crm/TrashBinModal';
 import { CustomerDetail360 } from './components/crm/CustomerDetail360';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
@@ -33,7 +34,7 @@ const MainContent: React.FC = () => {
     trackPageView(`/#${activeTab}`, `CRM Xoăn - ${activeTab}`);
   }, [activeTab]);
 
-  const isNoOuterScroll = activeTab === 'pipeline' || activeTab === 'chat-messenger' || activeTab === 'trash';
+  const isNoOuterScroll = activeTab === 'pipeline' || activeTab === 'chat-messenger' || activeTab === 'pancake' || activeTab === 'trash';
 
   return (
     <main className={`flex-1 ${isNoOuterScroll ? 'overflow-hidden flex flex-col min-h-0 p-2 sm:p-4 lg:p-5 pb-20 lg:pb-5' : 'overflow-y-auto p-3 sm:p-6 lg:p-8 pb-24 lg:pb-8 custom-scrollbar overscroll-contain'}`}>
@@ -47,7 +48,8 @@ const MainContent: React.FC = () => {
             <TrashBinModal isOpen={true} onClose={() => setActiveTab('pipeline')} />
           </>
         )}
-        {activeTab === 'chat-messenger' && <SalesMessengerInbox />}
+        {activeTab === 'pancake' && <PancakeApp />}
+        {activeTab === 'chat-messenger' && <PancakeApp />}
         {activeTab === 'schools' && <SchoolClassModule />}
         {activeTab === 'bookings' && <BookingModule />}
         {activeTab === 'calendar' && <PhotoCalendar />}

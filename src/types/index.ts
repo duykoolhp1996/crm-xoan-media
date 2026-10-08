@@ -544,7 +544,7 @@ export interface QuoteData {
   note?: string; // Ghi chú ưu đãi toàn đơn
 }
 
-// 13. Khung Chat Facebook Messenger cho Tài Khoản Sales
+// 13. Khung Chat Facebook Messenger & Pancake Đa Kênh cho Tài Khoản Sales
 export interface FacebookChatMessage {
   id: string;
   sender: 'customer' | 'sales' | 'system';
@@ -558,6 +558,21 @@ export interface FacebookChatMessage {
     name?: string;
   }[];
   isQuickReply?: boolean;
+  cardType?: 'quote' | 'vietqr' | 'booking' | 'normal';
+  cardData?: {
+    packageName?: string;
+    packagePrice?: number;
+    studentCount?: number;
+    totalAmount?: number;
+    depositAmount?: number;
+    shootDate?: string;
+    location?: string;
+    bookingCode?: string;
+    bankName?: string;
+    accountNo?: string;
+    accountHolder?: string;
+    transferSyntax?: string;
+  };
 }
 
 export interface FacebookChatConversation {
@@ -569,11 +584,15 @@ export interface FacebookChatConversation {
   customerSchool?: string;
   customerPhone?: string;
   facebookUrl?: string;
+  channel?: 'facebook' | 'zalo' | 'tiktok' | 'instagram';
+  channelId?: string;
   pageName: string;
   unreadCount: number;
+  isReplied?: boolean;
   lastMessage: string;
   lastMessageTime: string;
   assignedSalesName?: string;
+  assignedSalesId?: string;
   pipelineStage: PipelineStage;
   tags: string[];
   notes?: string;

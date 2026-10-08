@@ -11,6 +11,9 @@
   - **Sales Tư Vấn**: Sử dụng tài khoản được cấp để nhận lead tự động (round-robin), chăm sóc khách hàng trên Pipeline, báo giá, gửi hợp đồng, chốt cọc và tạo booking.
   - **Photographer (Thợ chụp / Ekip)**: Sử dụng tài khoản được cấp để tra cứu lịch chụp cá nhân, xác nhận nhận ca chụp, cập nhật tình trạng buổi chụp và tiến độ hậu kỳ bàn giao.
   - **Manager / Vận hành**: Điều phối thợ chụp, gán ekip cho booking, giải quyết trùng lịch và giám sát KPI.
+- **Nguyên Tắc Dữ Liệu Thực Tế (Single Source of Truth From Database Data)**:
+  - Mọi thông tin danh sách tài khoản (Sales, Thợ chụp) và trạng thái hoạt động **BẮT BUỘC** phải lấy trực tiếp từ **CSDL Data thực tế** (Database SQL / Server API `https://crm.xoanmedia.com/api`), TUYỆT ĐỐI không dùng trí nhớ / bộ nhớ tĩnh (mock hardcode) để trả lời hoặc hiển thị.
+  - Nếu Admin đã xóa hoặc vô hiệu hóa tài khoản trong hệ thống, hệ thống và trợ lý phải cập nhật theo đúng dữ liệu đã xóa, tuyệt đối không tự ý hồi sinh hay liệt kê lại các tài khoản đã bị Admin xóa.
 
 ## 2. Quy Tắc Tự Động Hóa (Automation Rules)
 - Kéo thẻ khách hàng từ `New Lead` sang `Đã liên hệ` trong Pipeline: Tự động phân bổ và gán nhân viên Sales tư vấn phụ trách.
