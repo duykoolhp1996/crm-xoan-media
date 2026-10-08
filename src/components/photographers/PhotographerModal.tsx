@@ -53,10 +53,14 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
   onClose,
   photographerToEdit
 }) => {
-  const { addPhotographer, updatePhotographer, deletePhotographer } = useApp();
+  const { addPhotographer, updatePhotographer, deletePhotographer, currentUser, currentRole } = useApp();
 
   const isEditMode = Boolean(photographerToEdit);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Chỉ Admin / Quản trị viên mới có quyền sửa Cơ Chế & Chính Sách Lương
+  const isAdmin = currentRole === 'admin' || currentUser?.role === 'admin';
+  const canEditSalary = isAdmin;
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -194,6 +198,10 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
     const finalUsername = formData.username.trim() || finalEmail;
     const finalPassword = formData.password.trim() || 'PhotoXoan@2024';
 
+    const finalSalaryType = canEditSalary ? formData.salaryType : (photographerToEdit?.salaryType ?? formData.salaryType);
+    const finalMonthlySalary = canEditSalary ? (Number(formData.monthlySalary) || 0) : (photographerToEdit?.monthlySalary ?? (Number(formData.monthlySalary) || 0));
+    const finalRatePerShoot = canEditSalary ? (Number(formData.ratePerShoot) || 0) : (photographerToEdit?.ratePerShoot ?? (Number(formData.ratePerShoot) || 0));
+
     if (isEditMode && photographerToEdit) {
       updatePhotographer({
         ...photographerToEdit,
@@ -204,9 +212,9 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
         photographerType: formData.photographerType,
         experienceYears: Number(formData.experienceYears) || 1,
         status: formData.status,
-        salaryType: formData.salaryType,
-        monthlySalary: Number(formData.monthlySalary) || 0,
-        ratePerShoot: Number(formData.ratePerShoot) || 0,
+        salaryType: finalSalaryType,
+        monthlySalary: finalMonthlySalary,
+        ratePerShoot: finalRatePerShoot,
         skills: formData.skills,
         activeRegions: formData.activeRegions,
         equipmentList,
@@ -345,38 +353,49 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
           </div>
 
           {/* Khối Cấu Hình Lương (Admin Setup) — 2 loại: Lương Tháng hoặc Theo Buổi Chụp */}
-          <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-200/80 space-y-3">
-            <div className="flex items-center justify-between">
+          <div className={`p-4 rounded-2xl border space-y-3 ${
+            canEditSalary ? 'bg-emerald-50/50 border-emerald-200/80' : 'bg-neutral-50/80 border-black/[0.08]'
+          }`}>
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <label className="font-extrabold text-neutral-900 text-xs flex items-center gap-1.5 uppercase tracking-wider">
                 <DollarSign className="w-4 h-4 text-emerald-700" />
                 Cơ Chế & Chính Sách Lương (Admin Cấu Hình)
               </label>
-              <span className="text-[10px] font-bold text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
-                {formData.salaryType === 'monthly' ? '📅 Lương Tháng' : '📸 Theo Buổi Chụp'}
-              </span>
+              <div className="flex items-center gap-1.5">
+                {!canEditSalary && (
+                  <span className="text-[10px] font-bold text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-300 flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-amber-700" /> Chỉ Được Phép Xem
+                  </span>
+                )}
+                <span className="text-[10px] font-bold text-emerald-900 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                  {formData.salaryType === 'monthly' ? '📅 Lương Tháng' : '📸 Theo Buổi Chụp'}
+                </span>
+              </div>
             </div>
 
             {/* Chọn Loại Lương: 2 Loại */}
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setFormData(prev => ({ ...prev, salaryType: 'monthly' }))}
+                disabled={!canEditSalary}
+                onClick={() => canEditSalary && setFormData(prev => ({ ...prev, salaryType: 'monthly' }))}
                 className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
                   formData.salaryType === 'monthly'
                     ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-xs'
                     : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
-                }`}
+                } ${!canEditSalary ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'}`}
               >
                 📅 1. Lương Tháng Cố Định
               </button>
               <button
                 type="button"
-                onClick={() => setFormData(prev => ({ ...prev, salaryType: 'per_shoot' }))}
+                disabled={!canEditSalary}
+                onClick={() => canEditSalary && setFormData(prev => ({ ...prev, salaryType: 'per_shoot' }))}
                 className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
                   formData.salaryType === 'per_shoot'
                     ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-xs'
                     : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
-                }`}
+                } ${!canEditSalary ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'}`}
               >
                 📸 2. Theo Buổi Chụp (Ca)
               </button>
@@ -387,8 +406,9 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
               {formData.salaryType === 'monthly' ? (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-neutral-800">
-                      Mức Lương Tháng Cố Định
+                    <label className="text-xs font-bold text-neutral-800 flex items-center gap-1">
+                      <span>Mức Lương Tháng Cố Định</span>
+                      {!canEditSalary && <Lock className="w-3 h-3 text-neutral-400" />}
                     </label>
                     <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md">
                       {toVnMoneyText(formData.monthlySalary)}
@@ -400,33 +420,40 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
+                      readOnly={!canEditSalary}
                       value={(formData.monthlySalary || 0).toLocaleString('vi-VN')}
-                      onChange={e => handleMoneyChange('monthlySalary', e.target.value)}
-                      className="w-full pl-3.5 pr-14 py-2.5 bg-white border-2 border-emerald-300 rounded-xl text-neutral-900 font-black text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tracking-tight"
+                      onChange={e => canEditSalary && handleMoneyChange('monthlySalary', e.target.value)}
+                      className={`w-full pl-3.5 pr-14 py-2.5 rounded-xl font-black text-base font-mono tracking-tight ${
+                        canEditSalary
+                          ? 'bg-white border-2 border-emerald-300 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+                          : 'bg-neutral-100/90 border border-neutral-300 text-neutral-700 cursor-not-allowed select-none'
+                      }`}
                     />
                     <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-neutral-400 bg-neutral-100 px-2 py-1 rounded-lg pointer-events-none">
                       VNĐ/tháng
                     </span>
                   </div>
 
-                  {/* Nút chọn nhanh mức lương tháng */}
-                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                    <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
-                    {[8000000, 10000000, 12000000, 15000000, 18000000, 20000000].map(val => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, monthlySalary: val }))}
-                        className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
-                          formData.monthlySalary === val
-                            ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-2xs'
-                            : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
-                        }`}
-                      >
-                        {val / 1000000} Triệu
-                      </button>
-                    ))}
-                  </div>
+                  {/* Nút chọn nhanh mức lương tháng - Chỉ Admin mới thấy */}
+                  {canEditSalary && (
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
+                      {[8000000, 10000000, 12000000, 15000000, 18000000, 20000000].map(val => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, monthlySalary: val }))}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
+                            formData.monthlySalary === val
+                              ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-2xs'
+                              : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                          }`}
+                        >
+                          {val / 1000000} Triệu
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-[10px] text-neutral-500 mt-1">
                     Chi trả cố định hàng tháng cho thợ Full-time / Quản lý ekip
                   </p>
@@ -434,8 +461,9 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
               ) : (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-neutral-800">
-                      Thù Lao / Buổi Chụp
+                    <label className="text-xs font-bold text-neutral-800 flex items-center gap-1">
+                      <span>Thù Lao / Buổi Chụp</span>
+                      {!canEditSalary && <Lock className="w-3 h-3 text-neutral-400" />}
                     </label>
                     <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md">
                       {toVnMoneyText(formData.ratePerShoot)}
@@ -447,33 +475,40 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
+                      readOnly={!canEditSalary}
                       value={(formData.ratePerShoot || 0).toLocaleString('vi-VN')}
-                      onChange={e => handleMoneyChange('ratePerShoot', e.target.value)}
-                      className="w-full pl-3.5 pr-14 py-2.5 bg-white border-2 border-emerald-300 rounded-xl text-neutral-900 font-black text-base focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tracking-tight"
+                      onChange={e => canEditSalary && handleMoneyChange('ratePerShoot', e.target.value)}
+                      className={`w-full pl-3.5 pr-14 py-2.5 rounded-xl font-black text-base font-mono tracking-tight ${
+                        canEditSalary
+                          ? 'bg-white border-2 border-emerald-300 text-neutral-900 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+                          : 'bg-neutral-100/90 border border-neutral-300 text-neutral-700 cursor-not-allowed select-none'
+                      }`}
                     />
                     <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-neutral-400 bg-neutral-100 px-2 py-1 rounded-lg pointer-events-none">
                       VNĐ/buổi
                     </span>
                   </div>
 
-                  {/* Nút chọn nhanh thù lao ca */}
-                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                    <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
-                    {[500000, 800000, 1000000, 1200000, 1500000].map(val => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, ratePerShoot: val }))}
-                        className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
-                          formData.ratePerShoot === val
-                            ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-2xs'
-                            : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
-                        }`}
-                      >
-                        {val >= 1000000 ? `${val / 1000000} Tr` : `${val / 1000}k`}
-                      </button>
-                    ))}
-                  </div>
+                  {/* Nút chọn nhanh thù lao ca - Chỉ Admin mới thấy */}
+                  {canEditSalary && (
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
+                      {[500000, 800000, 1000000, 1200000, 1500000].map(val => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, ratePerShoot: val }))}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
+                            formData.ratePerShoot === val
+                              ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900 shadow-2xs'
+                              : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                          }`}
+                        >
+                          {val >= 1000000 ? `${val / 1000000} Tr` : `${val / 1000}k`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-[10px] text-neutral-500 mt-1">
                     Tự động tính: Số lớp đi chụp thực tế × Đơn giá/buổi
                   </p>
@@ -484,8 +519,9 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
               {formData.salaryType === 'monthly' ? (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-neutral-800">
-                      Định mức / Phụ cấp ca thêm (vượt KPI)
+                    <label className="text-xs font-bold text-neutral-800 flex items-center gap-1">
+                      <span>Định mức / Phụ cấp ca thêm (vượt KPI)</span>
+                      {!canEditSalary && <Lock className="w-3 h-3 text-neutral-400" />}
                     </label>
                     <span className="text-[11px] font-bold text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md">
                       {toVnMoneyText(formData.ratePerShoot)}
@@ -497,32 +533,39 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
                       type="text"
                       inputMode="numeric"
                       placeholder="0"
+                      readOnly={!canEditSalary}
                       value={(formData.ratePerShoot || 0).toLocaleString('vi-VN')}
-                      onChange={e => handleMoneyChange('ratePerShoot', e.target.value)}
-                      className="w-full pl-3.5 pr-14 py-2.5 bg-white border border-black/[0.12] rounded-xl text-neutral-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-[#B8F23D] font-mono tracking-tight"
+                      onChange={e => canEditSalary && handleMoneyChange('ratePerShoot', e.target.value)}
+                      className={`w-full pl-3.5 pr-14 py-2.5 rounded-xl font-bold text-base font-mono tracking-tight ${
+                        canEditSalary
+                          ? 'bg-white border border-black/[0.12] text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#B8F23D]'
+                          : 'bg-neutral-100/90 border border-neutral-300 text-neutral-700 cursor-not-allowed select-none'
+                      }`}
                     />
                     <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-neutral-400 bg-neutral-100 px-2 py-1 rounded-lg pointer-events-none">
                       VNĐ/ca
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                    <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
-                    {[300000, 500000, 700000, 1000000].map(val => (
-                      <button
-                        key={val}
-                        type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, ratePerShoot: val }))}
-                        className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
-                          formData.ratePerShoot === val
-                            ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900'
-                            : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
-                        }`}
-                      >
-                        {val >= 1000000 ? `${val / 1000000} Tr` : `${val / 1000}k`}
-                      </button>
-                    ))}
-                  </div>
+                  {canEditSalary && (
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                      <span className="text-[10px] text-neutral-400 font-medium">Chọn nhanh:</span>
+                      {[300000, 500000, 700000, 1000000].map(val => (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, ratePerShoot: val }))}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition-all border ${
+                            formData.ratePerShoot === val
+                              ? 'bg-neutral-900 text-[#B8F23D] border-neutral-900'
+                              : 'bg-white text-neutral-700 border-black/[0.08] hover:bg-neutral-100'
+                          }`}
+                        >
+                          {val >= 1000000 ? `${val / 1000000} Tr` : `${val / 1000}k`}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-[10px] text-neutral-500 mt-1">
                     Thưởng thêm mỗi ca khi chụp vượt chỉ tiêu tháng
                   </p>
@@ -538,6 +581,19 @@ export const PhotographerModal: React.FC<PhotographerModalProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Thông báo phân quyền nếu là Thợ Chụp */}
+            {!canEditSalary && (
+              <div className="p-3 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-start gap-2.5">
+                <Lock className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="font-bold text-amber-950">Chính sách thù lao do Admin cấu hình cố định</p>
+                  <p className="text-[11px] text-amber-800 leading-relaxed">
+                    Tài khoản Ekip Thợ Chụp chỉ được phép xem cơ chế lương/thù lao ca chụp, không được tự ý chỉnh sửa. Nếu có thay đổi hoặc sai sót, vui lòng liên hệ Admin Xoăn Media.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Row: Kinh nghiệm & Trạng thái */}

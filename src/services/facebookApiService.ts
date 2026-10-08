@@ -50,10 +50,34 @@ export interface FbRawConversation {
 
 const DEFAULT_PAGE_TOKEN = 'EAAUclwiuILMBSnEqBXJuUSZBxPbZAz5nURKtlRJvHp8WGioMFgUiPZCVvZBxay0qJQjwt4MV9wDoiy25luvZC0oKUKWLz1qHPf4QFuM8ITXLOr4zBZAA6ZCw8kL1luV0qSx8wfTecxGd56AQkp2Ob6IMWYwKkOjXIadVWMqkKqtT4fGwRJm4rnMymQGhUwzuwIRuZBETwTLZAnAUJlv0J3t5fuwZDZD';
 const DEFAULT_PAGE_ID = '411200738737677';
+const DEFAULT_APP_ID = '1438809894822067';
+const DEFAULT_APP_SECRET = 'aea735928835d4cb8ffebd651a5e83be';
 
 export class FacebookApiService {
   private static tokenKey = 'crm_xoan_fb_page_token';
   private static pageIdKey = 'crm_xoan_fb_page_id';
+  private static appIdKey = 'crm_xoan_fb_app_id';
+  private static appSecretKey = 'crm_xoan_fb_app_secret';
+
+  public static getAppId(): string {
+    return localStorage.getItem(this.appIdKey) || DEFAULT_APP_ID;
+  }
+
+  public static setAppId(appId: string): void {
+    localStorage.setItem(this.appIdKey, appId.trim());
+  }
+
+  public static getAppSecret(): string {
+    return localStorage.getItem(this.appSecretKey) || DEFAULT_APP_SECRET;
+  }
+
+  public static setAppSecret(appSecret: string): void {
+    localStorage.setItem(this.appSecretKey, appSecret.trim());
+  }
+
+  public static getAppToken(): string {
+    return `${this.getAppId()}|${this.getAppSecret()}`;
+  }
 
   public static getPageToken(): string {
     return localStorage.getItem(this.tokenKey) || DEFAULT_PAGE_TOKEN;
@@ -69,6 +93,20 @@ export class FacebookApiService {
 
   public static setPageId(pageId: string): void {
     localStorage.setItem(this.pageIdKey, pageId.trim());
+  }
+
+  /**
+   * Kiểm tra và phân tích thông tin chi tiết của Token qua Meta Debugger
+   */
+  public static async debugToken(inputToken?: string) {
+    const token = inputToken || this.getPageToken();
+    const appToken = this.getAppToken();
+    const res = await fetch(`https://graph.facebook.com/v19.0/debug_token?input_token=${encodeURIComponent(token)}&access_token=${encodeURIComponent(appToken)}`);
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error?.message || 'Không thể kiểm tra token với Meta API');
+    }
+    return data.data;
   }
 
   /**

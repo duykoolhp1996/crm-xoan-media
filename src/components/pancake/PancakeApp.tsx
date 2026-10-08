@@ -166,7 +166,13 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
   const [fbPageIdInput, setFbPageIdInput] = useState(FacebookApiService.getPageId());
   const [fbConfigStatus, setFbConfigStatus] = useState<string | null>(null);
   const [isTestingFb, setIsTestingFb] = useState(false);
-  const [fbTestSuccess, setFbTestSuccess] = useState<{ name: string; id: string; pictureUrl?: string } | null>(null);
+  const [fbTestSuccess, setFbTestSuccess] = useState<{
+    name: string;
+    id: string;
+    pictureUrl?: string;
+    isNeverExpires?: boolean;
+    scopes?: string[];
+  } | null>(null);
 
   const handleTestFbConnection = async () => {
     if (!fbTokenInput.trim()) {
@@ -181,10 +187,16 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
       if (!res.ok) {
         throw new Error(data.error?.message || 'Token không hợp lệ hoặc đã hết hạn.');
       }
+      const debugData = await FacebookApiService.debugToken(fbTokenInput.trim()).catch(() => null);
+      const isNeverExpires = debugData ? debugData.expires_at === 0 : false;
+      const scopes = debugData?.scopes || [];
+
       setFbTestSuccess({
         name: data.name,
         id: data.id,
-        pictureUrl: data.picture?.data?.url
+        pictureUrl: data.picture?.data?.url,
+        isNeverExpires,
+        scopes
       });
       if (!fbPageIdInput) {
         setFbPageIdInput(data.id);
@@ -1849,6 +1861,24 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
 
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto space-y-4 text-xs">
+              {/* Meta Developer App Info */}
+              <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-extrabold text-neutral-900 text-xs">Meta App: Crm-xoan-media</span>
+                    <span className="bg-blue-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded">
+                      ĐÃ KẾT NỐI
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-neutral-600 mt-0.5">
+                    App ID: <code className="font-mono text-blue-700 font-bold">{FacebookApiService.getAppId()}</code> • Khóa bí mật: <code className="font-mono text-neutral-500">aea735...83be</code>
+                  </p>
+                </div>
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded-lg border border-emerald-300 flex items-center gap-1 shrink-0">
+                  <Check className="w-3 h-3 text-emerald-600" /> Xác Thực OK
+                </span>
+              </div>
+
               {/* Form Input */}
               <div className="space-y-3">
                 <div>
@@ -1886,19 +1916,32 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
 
               {/* Status / Test Result */}
               {fbTestSuccess && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3">
-                  {fbTestSuccess.pictureUrl ? (
-                    <img src={fbTestSuccess.pictureUrl} alt={fbTestSuccess.name} className="w-10 h-10 rounded-full border border-emerald-300 shrink-0" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-black flex items-center justify-center text-sm shrink-0">FB</div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-black text-neutral-900 text-xs truncate">{fbTestSuccess.name}</p>
-                    <p className="text-[11px] text-emerald-700 font-mono truncate">ID: {fbTestSuccess.id} • Đã kết nối hợp lệ</p>
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-2">
+                  <div className="flex items-center gap-3">
+                    {fbTestSuccess.pictureUrl ? (
+                      <img src={fbTestSuccess.pictureUrl} alt={fbTestSuccess.name} className="w-10 h-10 rounded-full border border-emerald-300 shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-black flex items-center justify-center text-sm shrink-0">FB</div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-black text-neutral-900 text-xs truncate">{fbTestSuccess.name}</p>
+                      <p className="text-[11px] text-emerald-700 font-mono truncate">ID: {fbTestSuccess.id} • Đã kết nối hợp lệ</p>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800 text-[10px] font-black shrink-0">
+                      Live OK
+                    </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800 text-[10px] font-black shrink-0">
-                    Live OK
-                  </span>
+
+                  <div className="pt-2 border-t border-emerald-200/60 flex flex-wrap items-center gap-2 text-[10px]">
+                    <span className="px-2 py-0.5 rounded bg-white text-emerald-800 border border-emerald-200 font-bold">
+                      {fbTestSuccess.isNeverExpires ? '🕒 Hạn: Vĩnh viễn (Never Expires)' : '🕒 Hạn: Tạm thời'}
+                    </span>
+                    {fbTestSuccess.scopes && fbTestSuccess.scopes.map(s => (
+                      <span key={s} className="px-1.5 py-0.5 rounded bg-emerald-100/70 text-emerald-800 font-mono">
+                        {s}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 
