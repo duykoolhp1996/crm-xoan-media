@@ -48,8 +48,8 @@ export interface FbRawConversation {
   };
 }
 
-const DEFAULT_PAGE_TOKEN = 'EAAUclwiuILMBSnEqBXJuUSZBxPbZAz5nURKtlRJvHp8WGioMFgUiPZCVvZBxay0qJQjwt4MV9wDoiy25luvZC0oKUKWLz1qHPf4QFuM8ITXLOr4zBZAA6ZCw8kL1luV0qSx8wfTecxGd56AQkp2Ob6IMWYwKkOjXIadVWMqkKqtT4fGwRJm4rnMymQGhUwzuwIRuZBETwTLZAnAUJlv0J3t5fuwZDZD';
-const DEFAULT_PAGE_ID = '100083303952726';
+const DEFAULT_PAGE_TOKEN = 'EAAPYDkXqBPoBSn5CYIfZAkhaB3wnzKRyrfr4p2vfW3PdQF2SgceOtFuwfc6GT2aQE9r8dnZBZADYVE9nR1qFZCVYWXRMTwLZAX5MZBSrJISquZCZBA30jULSUMUMeDzeCRbCKex2E1a42AXrdrHNn3RHzaDRbuVSdgXHHRvwtGo0giN0Ts1JmDIULryzeNtZB0ysWK60aNGSjOaI9XHfC06ZAuuJ4QIgPc3w2r0XZC3QPSTkwBf2fqK2sgDetkZD';
+const DEFAULT_PAGE_ID = '111065964964204';
 const DEFAULT_APP_ID = '1438809894822067';
 const DEFAULT_APP_SECRET = 'aea735928835d4cb8ffebd651a5e83be';
 
@@ -80,7 +80,11 @@ export class FacebookApiService {
   }
 
   public static getPageToken(): string {
-    return localStorage.getItem(this.tokenKey) || DEFAULT_PAGE_TOKEN;
+    const saved = localStorage.getItem(this.tokenKey);
+    if (!saved || saved.startsWith('EAAUclwiuILM')) {
+      return DEFAULT_PAGE_TOKEN;
+    }
+    return saved;
   }
 
   public static setPageToken(token: string): void {
@@ -89,7 +93,7 @@ export class FacebookApiService {
 
   public static getPageId(): string {
     const saved = localStorage.getItem(this.pageIdKey);
-    if (saved === '411200738737677' || !saved) {
+    if (!saved || saved === '411200738737677' || saved === '100083303952726') {
       return DEFAULT_PAGE_ID;
     }
     return saved;

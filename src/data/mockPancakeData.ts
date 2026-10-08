@@ -20,7 +20,7 @@ export const PANCAKE_CHANNELS: PancakeChannel[] = [
     badge: 'ALL'
   },
   {
-    id: '100083303952726',
+    id: '111065964964204',
     name: 'Xoăn Media - Chụp Ảnh Kỷ Yếu',
     platform: 'facebook',
     avatar: 'https://ui-avatars.com/api/?name=Xoan+Media&background=1877F2&color=fff&bold=true',
