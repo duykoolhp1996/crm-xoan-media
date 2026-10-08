@@ -180,7 +180,7 @@ export const LoginPage: React.FC = () => {
           <div className="pt-3 border-t border-neutral-800/80 text-[11px] text-neutral-400 flex items-start gap-2">
             <HelpCircle className="w-4 h-4 text-neutral-500 shrink-0 mt-0.5" />
             <span>
-              Tài khoản & mật khẩu do <strong>Admin Xoăn Media</strong> cấp cho nhân sự Sales & Ekip Thợ Chụp. Quên mật khẩu vui lòng liên hệ Hotline Admin: <strong>0981 108 601</strong>.
+              Tài khoản & mật khẩu do <strong>Admin Xoăn Media</strong> cấp cho nhân sự Sales & Ekip Thợ Chụp. Quên mật khẩu vui lòng liên hệ Admin để được cấp lại.
             </span>
           </div>
 
