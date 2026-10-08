@@ -12,11 +12,32 @@ import {
 } from 'lucide-react';
 import { BookingModal } from './BookingModal';
 import { BookingDetailModal } from './BookingDetailModal';
+import {
+  filterAccessibleCustomers,
+  filterAccessibleBookingsForSales
+} from '../../utils/salesPermissions';
 
 export const BookingModule: React.FC = () => {
-  const { bookings, updateBooking, currentUser, currentRole, photographers, setSelectedCustomerId } = useApp();
+  const {
+    bookings,
+    updateBooking,
+    currentUser,
+    currentRole,
+    photographers,
+    customers,
+    salesStaff,
+    setSelectedCustomerId
+  } = useApp();
 
   const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
+  const isSalesUser = currentRole === 'sales' || currentUser?.role === 'sales';
+
+  // Danh sách khách hàng Sales được phép xem
+  const accessibleCustomers = useMemo(() => {
+    if (!isSalesUser) return customers;
+    return filterAccessibleCustomers(customers, currentUser, currentRole, salesStaff);
+  }, [customers, currentUser, currentRole, salesStaff, isSalesUser]);
+
   const currentPhotographer = useMemo(() => {
     if (!isPhotographerUser) return null;
     return (
@@ -59,9 +80,14 @@ export const BookingModule: React.FC = () => {
   }, [photographers, isPhotoLead, myTeam]);
 
   // Lọc Bookings:
-  // - Lead xem các booking của Team mình
-  // - Thành viên chỉ xem ca chụp mình tham gia
+  // - Sales / Sales Lead: Chỉ xem booking thuộc các khách hàng mình có quyền truy cập
+  // - Photo Lead: Xem các booking của Team mình
+  // - Photo thường: Xem ca chụp mình tham gia
+  // - Admin: Xem toàn bộ
   const accessibleBookings = useMemo(() => {
+    if (isSalesUser) {
+      return filterAccessibleBookingsForSales(bookings, accessibleCustomers, true);
+    }
     if (!isPhotographerUser) return bookings;
     if (isPhotoLead) {
       return bookings.filter(b => {
@@ -82,7 +108,7 @@ export const BookingModule: React.FC = () => {
         b.assignments.assistantPhotographerIds?.includes(myId) ||
         b.assignments.leadPhotographerName === myName
     );
-  }, [bookings, isPhotographerUser, isPhotoLead, myTeam, myTeamPhotographerIds, currentPhotographer, currentUser]);
+  }, [bookings, isSalesUser, accessibleCustomers, isPhotographerUser, isPhotoLead, myTeam, myTeamPhotographerIds, currentPhotographer, currentUser]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

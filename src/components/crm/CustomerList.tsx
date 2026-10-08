@@ -32,6 +32,10 @@ import {
   calculateCrmFinancials,
   isCustomerInStage
 } from '../../lib/revenueUtils';
+import {
+  getSalesHierarchyInfo,
+  filterAccessibleCustomers
+} from '../../utils/salesPermissions';
 
 export const CustomerList: React.FC = () => {
   const {
@@ -49,6 +53,7 @@ export const CustomerList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [selectedStage, setSelectedStage] = useState<string>('all');
+  const [leadMemberFilter, setLeadMemberFilter] = useState<string>('all_team');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
 
@@ -68,31 +73,44 @@ export const CustomerList: React.FC = () => {
     setCustomerToEdit(null);
   };
 
-  const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
-  const mySalesStaff = useMemo(() => {
-    if (!isSalesUser) return null;
-    return salesStaff.find(s => 
-      s.id === currentUser.id || 
-      s.name.toLowerCase() === currentUser.name.toLowerCase() ||
-      (currentUser.email && s.email.toLowerCase() === currentUser.email.toLowerCase()) ||
-      (currentUser.phone && s.phone === currentUser.phone)
-    ) || salesStaff[0];
-  }, [salesStaff, currentUser, isSalesUser]);
+  // Thông tin phân cấp Sales & Sales Lead
+  const salesHierarchy = useMemo(() => {
+    return getSalesHierarchyInfo(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
 
-  // Lọc quyền truy cập: Sales chỉ được xem khách hàng được gán cho mình hoặc chưa gán
+  // Lọc quyền truy cập:
+  // - Admin: Xem toàn bộ
+  // - Sales Lead: Data do Admin phân quyền + Data các nhân sự dưới quyền thu thập được
+  // - Sales thường: Chỉ data của chính mình
   const accessibleCustomers = useMemo(() => {
-    if (!isSalesUser) return customers;
-    const myId = mySalesStaff?.id || currentUser.id;
-    const myName = mySalesStaff?.name || currentUser.name;
-    return customers.filter(c => {
-      const isMine = 
-        c.assignedSalesId === myId ||
-        c.assignedSalesName === myName ||
-        (mySalesStaff && c.assignedSalesName?.toLowerCase() === mySalesStaff.name.toLowerCase());
-      const isUnassigned = !c.assignedSalesId || !c.assignedSalesName || c.assignedSalesName === 'Chưa gán';
-      return isMine || isUnassigned;
-    });
-  }, [customers, isSalesUser, mySalesStaff, currentUser]);
+    const baseAccessible = filterAccessibleCustomers(customers, currentUser, currentRole, salesStaff);
+
+    // Nếu là Sales Lead và có chọn xem riêng theo nhân sự trong nhóm
+    if (salesHierarchy.isLead && leadMemberFilter !== 'all_team') {
+      if (leadMemberFilter === 'mine') {
+        const myId = salesHierarchy.myStaff?.id || currentUser.id;
+        const myName = (salesHierarchy.myStaff?.name || currentUser.name).toLowerCase();
+        return baseAccessible.filter(c => 
+          c.assignedSalesId === myId || 
+          c.assignedSalesName?.toLowerCase() === myName ||
+          c.createdById === myId ||
+          c.createdByName?.toLowerCase() === myName
+        );
+      } else {
+        // Lọc theo một nhân viên cấp dưới cụ thể
+        const targetStaff = salesHierarchy.subordinateStaff.find(s => s.id === leadMemberFilter);
+        const targetName = targetStaff?.name?.toLowerCase() || '';
+        return baseAccessible.filter(c =>
+          c.assignedSalesId === leadMemberFilter ||
+          (targetName && c.assignedSalesName?.toLowerCase() === targetName) ||
+          c.createdById === leadMemberFilter ||
+          (targetName && c.createdByName?.toLowerCase() === targetName)
+        );
+      }
+    }
+
+    return baseAccessible;
+  }, [customers, currentUser, currentRole, salesStaff, salesHierarchy, leadMemberFilter]);
 
   // Lọc dữ liệu
   const filteredCustomers = useMemo(() => {
@@ -289,6 +307,26 @@ export const CustomerList: React.FC = () => {
             <option value="Lost">Khách từ chối (Lost)</option>
           </select>
         </div>
+
+        {/* Bộ Lọc Theo Nhân Sự Cho Sales Lead */}
+        {salesHierarchy.isLead && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-neutral-500 shrink-0">Nhóm:</span>
+            <select
+              value={leadMemberFilter}
+              onChange={(e) => setLeadMemberFilter(e.target.value)}
+              className="px-3 py-2 bg-neutral-900 text-[#B8F23D] border border-black/[0.08] rounded-xl text-xs font-bold cursor-pointer focus:outline-none"
+            >
+              <option value="all_team">👑 Toàn bộ nhóm Sales ({salesHierarchy.subordinateStaff.length + 1} nhân sự)</option>
+              <option value="mine">👤 Riêng của tôi (Sales Lead)</option>
+              {salesHierarchy.subordinateStaff.map(sub => (
+                <option key={sub.id} value={sub.id}>
+                  ↳ {sub.name} ({sub.roleTitle || 'Sales'})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Mobile Card View (Chuyên dụng cho màn hình điện thoại - Tuyệt đối không bị vỡ/tràn) */}

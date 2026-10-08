@@ -44,7 +44,7 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
   onClose,
   staffToEdit
 }) => {
-  const { addSalesStaff, updateSalesStaff, deleteSalesStaff } = useApp();
+  const { addSalesStaff, updateSalesStaff, deleteSalesStaff, salesStaff } = useApp();
 
   const isEditMode = Boolean(staffToEdit);
   const [showPassword, setShowPassword] = useState(false);
@@ -62,7 +62,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
     commissionFixedAmount: 500000,
     username: '',
     password: '',
-    canLogin: true
+    canLogin: true,
+    leaderId: 'user-2',
+    leaderName: 'Lê Hoàng Sơn'
   });
 
   const generatePassword = () => {
@@ -89,7 +91,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         commissionFixedAmount: staffToEdit.commissionFixedAmount ?? 500000,
         username: staffToEdit.username || staffToEdit.email || '',
         password: staffToEdit.password || 'XoanSales@2024',
-        canLogin: staffToEdit.canLogin ?? true
+        canLogin: staffToEdit.canLogin ?? true,
+        leaderId: staffToEdit.leaderId || '',
+        leaderName: staffToEdit.leaderName || ''
       });
     } else {
       setFormData({
@@ -105,7 +109,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         commissionFixedAmount: 500000,
         username: '',
         password: 'XoanSales@2024',
-        canLogin: true
+        canLogin: true,
+        leaderId: 'user-2',
+        leaderName: 'Lê Hoàng Sơn'
       });
     }
   }, [staffToEdit, isOpen]);
@@ -151,7 +157,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         commissionFixedAmount: formData.commissionType === 'fixed' ? Number(formData.commissionFixedAmount) : undefined,
         username: finalUsername,
         password: finalPassword,
-        canLogin: formData.canLogin
+        canLogin: formData.canLogin,
+        leaderId: formData.leaderId || undefined,
+        leaderName: formData.leaderName || undefined
       });
     } else {
       addSalesStaff({
@@ -167,7 +175,9 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         commissionFixedAmount: formData.commissionType === 'fixed' ? Number(formData.commissionFixedAmount) : undefined,
         username: finalUsername,
         password: finalPassword,
-        canLogin: formData.canLogin
+        canLogin: formData.canLogin,
+        leaderId: formData.leaderId || undefined,
+        leaderName: formData.leaderName || undefined
       });
     }
 
@@ -238,7 +248,16 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
                 <label className="text-xs font-semibold text-neutral-700">Vị trí / Chức danh</label>
                 <select
                   value={formData.roleTitle}
-                  onChange={e => setFormData({ ...formData, roleTitle: e.target.value })}
+                  onChange={e => {
+                    const newTitle = e.target.value;
+                    const isNowLead = newTitle.toLowerCase().includes('lead') || newTitle.toLowerCase().includes('trưởng nhóm');
+                    setFormData({
+                      ...formData,
+                      roleTitle: newTitle,
+                      leaderId: isNowLead ? '' : formData.leaderId,
+                      leaderName: isNowLead ? '' : formData.leaderName
+                    });
+                  }}
                   className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl text-xs font-semibold cursor-pointer focus:bg-white focus:outline-none"
                 >
                   <option value="Sales Lead">Sales Lead (Trưởng nhóm Sales)</option>
@@ -247,6 +266,42 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
                   <option value="Tư Vấn & CSKH">Tư Vấn & CSKH</option>
                 </select>
               </div>
+
+              {/* Phân cấp Quản lý: Chọn Sales Lead phụ trách nếu không phải là Lead */}
+              {!formData.roleTitle.toLowerCase().includes('lead') && !formData.roleTitle.toLowerCase().includes('trưởng nhóm') ? (
+                <div>
+                  <label className="text-xs font-semibold text-neutral-700 flex items-center justify-between">
+                    <span>👑 Trưởng Nhóm / Sales Lead Quản Lý</span>
+                    <span className="text-[10px] text-neutral-400 font-normal">Quản lý duyệt data của nhân sự này</span>
+                  </label>
+                  <select
+                    value={formData.leaderId}
+                    onChange={e => {
+                      const leadId = e.target.value;
+                      const matchedLead = salesStaff.find(s => s.id === leadId);
+                      setFormData({
+                        ...formData,
+                        leaderId: leadId,
+                        leaderName: matchedLead ? matchedLead.name : ''
+                      });
+                    }}
+                    className="w-full mt-1 px-3 py-2 bg-sky-50/60 border border-sky-200 text-sky-950 rounded-xl text-xs font-bold cursor-pointer focus:bg-white focus:outline-none"
+                  >
+                    <option value="">Không có (Trực thuộc Admin quản lý trực tiếp)</option>
+                    {salesStaff
+                      .filter(s => s.id !== staffToEdit?.id)
+                      .map(lead => (
+                        <option key={lead.id} value={lead.id}>
+                          {lead.name} ({lead.roleTitle || 'Sales Lead'})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="p-2.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-[11px] text-emerald-800 font-medium">
+                  👑 <strong>Quyền Hạn Sales Lead</strong>: Được xem data do Admin phân bổ + toàn bộ data các nhân sự cấp dưới thu thập được.
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-semibold text-neutral-700 flex items-center gap-1">

@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Customer, LeadSource, PipelineStage } from '../../types';
 import { VIETNAM_LOCATIONS, getDistrictsByCity } from '../../data/vietnamLocations';
+import {
+  getSalesHierarchyInfo,
+  getAssignableSalesList
+} from '../../utils/salesPermissions';
 import {
   X,
   Sparkles,
@@ -51,10 +55,30 @@ const STAGES_WITHOUT_REQUIRED_CONTACT: PipelineStage[] = [
 ];
 
 export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, customerToEdit }) => {
-  const { addCustomer, updateCustomer, schools, servicePackages, salesStaff, currentUser, customers } = useApp();
+  const {
+    addCustomer,
+    updateCustomer,
+    schools,
+    servicePackages,
+    salesStaff,
+    currentUser,
+    currentRole,
+    customers
+  } = useApp();
+
+  const salesHierarchy = useMemo(() => {
+    return getSalesHierarchyInfo(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
+
+  const assignableSalesList = useMemo(() => {
+    return getAssignableSalesList(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
+
+  const isSalesStaffUser = currentUser.role === 'sales' || currentRole === 'sales';
+  const isLead = salesHierarchy.isLead;
 
   // Tự động gán Sales là chính mình nếu user đang đăng nhập có vai trò Sales
-  const initialSalesName = currentUser.role === 'sales' ? currentUser.name : 'Chưa gán';
+  const initialSalesName = isSalesStaffUser ? currentUser.name : 'Chưa gán';
 
   const getInitialFormData = () => {
     if (customerToEdit) {
@@ -1130,19 +1154,32 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
               </div>
 
               <div>
-                <label className="font-semibold text-neutral-700">Sales Tư Vấn Phụ Trách</label>
+                <label className="font-semibold text-neutral-700 flex items-center justify-between">
+                  <span>Sales Tư Vấn Phụ Trách</span>
+                  {isSalesStaffUser && !isLead && (
+                    <span className="text-[10px] text-neutral-400 font-normal">Tự động gắn tài khoản của bạn</span>
+                  )}
+                  {isLead && (
+                    <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded-md">Quyền Sales Lead: Gán cho mình hoặc cấp dưới</span>
+                  )}
+                </label>
                 <select
                   value={formData.assignedSalesName}
                   onChange={e => setFormData({ ...formData, assignedSalesName: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:bg-white focus:outline-none font-bold"
+                  disabled={isSalesStaffUser && !isLead}
+                  className={`w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl focus:bg-white focus:outline-none font-bold ${
+                    isSalesStaffUser && !isLead ? 'opacity-80 cursor-not-allowed bg-neutral-100' : 'cursor-pointer'
+                  }`}
                 >
-                  <option value="Chưa gán">Chưa gán (Tự động chia khi liên hệ)</option>
-                  {salesStaff.map((staff) => (
+                  {!isSalesStaffUser && (
+                    <option value="Chưa gán">Chưa gán (Tự động chia khi liên hệ)</option>
+                  )}
+                  {assignableSalesList.map((staff) => (
                     <option key={staff.id} value={staff.name}>
-                      {staff.name} — {staff.roleTitle}
+                      {staff.name} — {staff.roleTitle || 'Sales'}
                     </option>
                   ))}
-                  {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
+                  {isSalesStaffUser && !assignableSalesList.some(s => s.name === currentUser.name) && (
                     <option value={currentUser.name}>{currentUser.name}</option>
                   )}
                 </select>

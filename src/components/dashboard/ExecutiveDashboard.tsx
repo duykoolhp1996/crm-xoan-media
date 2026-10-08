@@ -47,6 +47,10 @@ import {
   getCustomerPaidDeposit,
   getCustomerRemainingDebt
 } from '../../lib/revenueUtils';
+import {
+  getSalesHierarchyInfo,
+  filterAccessibleCustomers
+} from '../../utils/salesPermissions';
 
 export const ExecutiveDashboard: React.FC = () => {
   const {
@@ -65,19 +69,26 @@ export const ExecutiveDashboard: React.FC = () => {
 
   const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
 
-  // Nhận diện nhân sự Sales tương ứng với tài khoản đang đăng nhập
-  const mySalesStaff = useMemo(() => {
-    if (!isSalesUser) return null;
-    return salesStaff.find(s => 
-      s.id === currentUser.id || 
-      s.name.toLowerCase() === currentUser.name.toLowerCase() ||
-      (currentUser.email && s.email.toLowerCase() === currentUser.email.toLowerCase()) ||
-      (currentUser.phone && s.phone === currentUser.phone)
-    ) || salesStaff[0];
-  }, [salesStaff, currentUser, isSalesUser]);
+  // Thông tin phân cấp Sales & Sales Lead
+  const salesHierarchy = useMemo(() => {
+    return getSalesHierarchyInfo(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
 
-  // State lọc doanh số theo tài khoản nhân sự (Chỉ Admin / Manager mới được đổi selectedStaffId; Sales luôn khóa chặt vào tài khoản cá nhân)
+  const mySalesStaff = salesHierarchy.myStaff;
+
+  // Danh sách khách hàng thuộc phạm vi truy cập hợp lệ
+  const accessibleCustomers = useMemo(() => {
+    return filterAccessibleCustomers(customers, currentUser, currentRole, salesStaff);
+  }, [customers, currentUser, currentRole, salesStaff]);
+
+  // State lọc doanh số theo tài khoản nhân sự:
+  // - Admin: 'all' hoặc bất kỳ staffId
+  // - Sales Lead: 'team' (toàn nhóm) hoặc staffId trong nhóm (chính mình hoặc cấp dưới)
+  // - Sales thường: luôn là ID của chính mình
   const [selectedStaffId, setSelectedStaffId] = useState<string>(() => {
+    if (salesHierarchy.isLead) {
+      return 'team';
+    }
     if (currentUser?.role === 'sales') {
       const match = salesStaff.find(s => 
         s.id === currentUser.id || 
@@ -88,27 +99,59 @@ export const ExecutiveDashboard: React.FC = () => {
     return 'all';
   });
 
-  // ID nhân sự có hiệu lực thực tế: Nếu là Sales thì BẮT BUỘC luôn là ID của chính mình, KHÔNG thể là 'all' hay ID của người khác
-  const effectiveStaffId = isSalesUser
-    ? (mySalesStaff?.id || currentUser.id)
-    : selectedStaffId;
+  // ID nhân sự có hiệu lực thực tế
+  const effectiveStaffId = useMemo(() => {
+    if (salesHierarchy.isLead) {
+      if (selectedStaffId === 'team') return 'team';
+      // Lead chỉ được chọn chính mình hoặc nhân sự cấp dưới
+      if (salesHierarchy.teamMemberIds.has(selectedStaffId)) {
+        return selectedStaffId;
+      }
+      return 'team';
+    }
+    if (isSalesUser) {
+      return mySalesStaff?.id || currentUser.id;
+    }
+    return selectedStaffId;
+  }, [salesHierarchy, isSalesUser, mySalesStaff, currentUser, selectedStaffId]);
 
   // Tìm thông tin nhân sự đang được chọn
   const activeStaff = useMemo(() => {
-    if (effectiveStaffId === 'all') return null;
+    if (effectiveStaffId === 'all' || effectiveStaffId === 'team') return null;
     return salesStaff.find(s => s.id === effectiveStaffId) || mySalesStaff || null;
   }, [effectiveStaffId, salesStaff, mySalesStaff]);
 
   // Lọc danh sách khách hàng / lớp học theo nhân sự được chọn
   const filteredCustomers = useMemo(() => {
+    if (salesHierarchy.isLead) {
+      if (effectiveStaffId === 'team') {
+        return accessibleCustomers;
+      }
+      // Lọc theo một thành viên cụ thể trong nhóm của Lead
+      const targetStaff = salesStaff.find(s => s.id === effectiveStaffId);
+      const targetName = targetStaff?.name?.toLowerCase() || '';
+      return accessibleCustomers.filter(c => 
+        c.assignedSalesId === effectiveStaffId ||
+        (targetName && c.assignedSalesName?.toLowerCase() === targetName) ||
+        c.createdById === effectiveStaffId ||
+        (targetName && c.createdByName?.toLowerCase() === targetName)
+      );
+    }
+
     if (isSalesUser) {
       const myId = mySalesStaff?.id || currentUser.id;
-      const myName = mySalesStaff?.name || currentUser.name;
-      return customers.filter(c => c.assignedSalesId === myId || c.assignedSalesName === myName);
+      const myName = (mySalesStaff?.name || currentUser.name).toLowerCase();
+      return accessibleCustomers.filter(c => 
+        c.assignedSalesId === myId || 
+        c.assignedSalesName?.toLowerCase() === myName ||
+        c.createdById === myId ||
+        c.createdByName?.toLowerCase() === myName
+      );
     }
+
     if (effectiveStaffId === 'all') return customers;
     return customers.filter(c => c.assignedSalesId === effectiveStaffId);
-  }, [customers, effectiveStaffId, isSalesUser, mySalesStaff, currentUser]);
+  }, [customers, accessibleCustomers, effectiveStaffId, isSalesUser, salesHierarchy, mySalesStaff, currentUser, salesStaff]);
 
   // 1. Tính toán KPIs Khách hàng & Lớp học
   const totalLeads = filteredCustomers.length;
@@ -202,6 +245,15 @@ export const ExecutiveDashboard: React.FC = () => {
 
   // Hoa hồng hiển thị trên Card 4:
   const activeStaffCommission = useMemo(() => {
+    if (salesHierarchy.isLead) {
+      if (effectiveStaffId === 'team') {
+        return staffPerformanceList
+          .filter(s => salesHierarchy.teamMemberIds.has(s.staff.id) || salesHierarchy.teamMemberNames.has(s.staff.name.toLowerCase()))
+          .reduce((sum, s) => sum + s.commission, 0);
+      }
+      const found = staffPerformanceList.find(s => s.staff.id === effectiveStaffId);
+      return found ? found.commission : 0;
+    }
     if (isSalesUser) {
       const found = staffPerformanceList.find(s => s.staff.id === effectiveStaffId);
       return found ? found.commission : 0;
@@ -211,7 +263,7 @@ export const ExecutiveDashboard: React.FC = () => {
     }
     const found = staffPerformanceList.find(s => s.staff.id === selectedStaffId);
     return found ? found.commission : 0;
-  }, [selectedStaffId, staffPerformanceList, isSalesUser, effectiveStaffId]);
+  }, [selectedStaffId, staffPerformanceList, isSalesUser, effectiveStaffId, salesHierarchy]);
 
   // Tỷ lệ chốt chung hoặc theo cá nhân
   const winRate = totalLeads > 0 ? Math.round((bookedLeads / totalLeads) * 100) : 0;
@@ -805,9 +857,17 @@ export const ExecutiveDashboard: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm font-black text-neutral-900">
-                {isSalesUser ? 'Báo Cáo Doanh Số & Hoa Hồng Cá Nhân' : 'Xem Báo Cáo Doanh Số Theo Tài Khoản'}
+                {salesHierarchy.isLead
+                  ? 'Báo Cáo Doanh Số Đội Nhóm Sales (Sales Lead)'
+                  : isSalesUser
+                  ? 'Báo Cáo Doanh Số & Hoa Hồng Cá Nhân'
+                  : 'Xem Báo Cáo Doanh Số Theo Tài Khoản'}
               </h3>
-              {isSalesUser ? (
+              {salesHierarchy.isLead ? (
+                <span className="text-[11px] font-bold bg-[#B8F23D] text-neutral-950 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                  <UserCheck className="w-3 h-3" /> Sales Lead: {salesHierarchy.myStaff?.name || currentUser.name} ({salesHierarchy.subordinateStaff.length} nhân sự dưới quyền)
+                </span>
+              ) : isSalesUser ? (
                 <span className="text-[11px] font-bold bg-[#B8F23D] text-neutral-950 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <UserCheck className="w-3 h-3" /> Tài khoản: {mySalesStaff?.name || currentUser.name}
                 </span>
@@ -822,7 +882,9 @@ export const ExecutiveDashboard: React.FC = () => {
               )}
             </div>
             <p className="text-xs text-neutral-500 mt-0.5">
-              {isSalesUser ? (
+              {salesHierarchy.isLead ? (
+                `Theo dõi tổng thể KPI doanh số của toàn bộ nhóm phụ trách và chi tiết từng nhân sự cấp dưới`
+              ) : isSalesUser ? (
                 `Dữ liệu hợp đồng cá nhân & chính sách hoa hồng: ${mySalesStaff?.commissionType === 'percentage' ? `${mySalesStaff.commissionRate}% Doanh thu` : `${(mySalesStaff?.commissionFixedAmount || 500000).toLocaleString('vi-VN')}đ / HĐ chốt thành công`}`
               ) : activeStaff ? (
                 `Chính sách hoa hồng: ${activeStaff.commissionType === 'percentage' ? `${activeStaff.commissionRate}% Doanh thu` : `${(activeStaff.commissionFixedAmount || 0).toLocaleString('vi-VN')}đ / HĐ chốt thành công`}`
@@ -833,7 +895,75 @@ export const ExecutiveDashboard: React.FC = () => {
           </div>
         </div>
 
-        {isSalesUser ? (
+        {salesHierarchy.isLead ? (
+          /* Giao diện chọn nhân sự cho Sales Lead: Toàn nhóm hoặc từng thành viên */
+          <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
+            <button
+              onClick={() => setSelectedStaffId('team')}
+              className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                selectedStaffId === 'team'
+                  ? 'bg-neutral-900 text-[#B8F23D] shadow-sm'
+                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+              }`}
+            >
+              <span>👑 Toàn bộ nhóm</span>
+              <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                selectedStaffId === 'team' ? 'bg-[#B8F23D] text-neutral-900' : 'bg-neutral-200 text-neutral-700'
+              }`}>
+                {accessibleCustomers.length} lớp
+              </span>
+            </button>
+
+            {/* Pill của chính Sales Lead */}
+            {salesHierarchy.myStaff && (
+              <button
+                onClick={() => setSelectedStaffId(salesHierarchy.myStaff!.id)}
+                className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                  selectedStaffId === salesHierarchy.myStaff.id
+                    ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm'
+                    : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/[0.08]'
+                }`}
+              >
+                <img
+                  src={salesHierarchy.myStaff.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                  alt={salesHierarchy.myStaff.name}
+                  className="w-5 h-5 rounded-full object-cover border border-neutral-300"
+                />
+                <span className="truncate max-w-[100px]">{salesHierarchy.myStaff.name} (Tôi)</span>
+              </button>
+            )}
+
+            {/* Pills của các nhân sự cấp dưới trong nhóm */}
+            {salesHierarchy.subordinateStaff.map(sub => {
+              const isSelected = selectedStaffId === sub.id;
+              const staffPerf = staffPerformanceList.find(p => p.staff.id === sub.id);
+              return (
+                <button
+                  key={sub.id}
+                  onClick={() => setSelectedStaffId(sub.id)}
+                  className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                    isSelected
+                      ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm'
+                      : 'bg-white hover:bg-neutral-50 text-neutral-700 border-black/[0.08]'
+                  }`}
+                >
+                  <img
+                    src={sub.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                    alt={sub.name}
+                    className="w-5 h-5 rounded-full object-cover border border-neutral-300"
+                  />
+                  <span className="truncate max-w-[100px]">{sub.name.split('(')[0].trim()}</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                    isSelected ? 'bg-[#B8F23D] text-neutral-900' : 'bg-emerald-50 text-emerald-700'
+                  }`}>
+                    {((staffPerf?.closedRev || 0) / 1000000).toFixed(1)} Tr
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ) : isSalesUser ? (
+          /* Giao diện cho Sales thường: Chỉ hiển thị cá nhân */
           <div className="flex items-center gap-2.5 bg-neutral-50 border border-black/[0.08] px-3.5 py-2 rounded-2xl shadow-xs">
             <img
               src={mySalesStaff?.avatar || currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
@@ -846,6 +976,7 @@ export const ExecutiveDashboard: React.FC = () => {
             </div>
           </div>
         ) : (
+          /* Giao diện cho Admin / Manager: Toàn Studio + tất cả nhân sự */
           <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
             <button
               onClick={() => setSelectedStaffId('all')}
@@ -1406,10 +1537,18 @@ export const ExecutiveDashboard: React.FC = () => {
                   {staffPerformanceList
                     .filter(item => {
                       if (!isSalesUser) return true;
-                      return item.staff.id === effectiveStaffId || 
-                             (mySalesStaff && item.staff.id === mySalesStaff.id) ||
-                             item.staff.name.toLowerCase().includes(currentUser.name.toLowerCase()) ||
-                             currentUser.name.toLowerCase().includes(item.staff.name.toLowerCase());
+                      if (salesHierarchy.isLead) {
+                        return (
+                          salesHierarchy.teamMemberIds.has(item.staff.id) ||
+                          salesHierarchy.teamMemberNames.has(item.staff.name.toLowerCase())
+                        );
+                      }
+                      return (
+                        item.staff.id === effectiveStaffId || 
+                        (mySalesStaff && item.staff.id === mySalesStaff.id) ||
+                        item.staff.name.toLowerCase().includes(currentUser.name.toLowerCase()) ||
+                        currentUser.name.toLowerCase().includes(item.staff.name.toLowerCase())
+                      );
                     })
                     .sort((a, b) => b.closedRev - a.closedRev)
                     .map((item, index) => {

@@ -928,9 +928,20 @@ export const SettingsModule: React.FC = () => {
                             <h3 className="font-bold text-sm text-neutral-900 group-hover:text-neutral-700 transition-colors">
                               {s.name}
                             </h3>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 inline-block mt-0.5">
-                              {s.roleTitle}
-                            </span>
+                            <div className="flex items-center gap-1 flex-wrap mt-0.5">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 inline-block">
+                                {s.roleTitle}
+                              </span>
+                              {s.roleTitle?.toLowerCase().includes('lead') || s.roleTitle?.toLowerCase().includes('trưởng nhóm') ? (
+                                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-300 inline-block">
+                                  👑 Sales Lead
+                                </span>
+                              ) : s.leaderName ? (
+                                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 inline-block">
+                                  ↳ Quản lý: {s.leaderName}
+                                </span>
+                              ) : null}
+                            </div>
                           </div>
                         </div>
 

@@ -564,6 +564,27 @@ const runSafeMigrations = () => {
       console.warn('[Migration 8] Lỗi tạo bảng notifications:', mig8Err.message);
     }
   }
+
+  // Migration 9: Phân quyền Sales Lead và Cấp Dưới (leader_id, leader_name)
+  if (!existingMigrations.has(9)) {
+    try {
+      addColumnIfNotExists('sales_staff', 'leader_id', "TEXT DEFAULT ''");
+      addColumnIfNotExists('sales_staff', 'leader_name', "TEXT DEFAULT ''");
+
+      // Gán Lê Hoàng Sơn (user-2) làm leader mặc định cho nhân sự Sales cấp dưới nếu chưa có
+      db.prepare(`
+        UPDATE sales_staff
+        SET leader_id = 'user-2', leader_name = 'Lê Hoàng Sơn'
+        WHERE id != 'user-2' AND (leader_id IS NULL OR leader_id = '')
+      `).run();
+
+      db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
+        .run('mig-9', 9, 'sales_lead_hierarchy_leader_id_and_leader_name');
+      console.log('[Migration] ✅ Đã hoàn tất Migration 9: Phân quyền Sales Lead và Cấp Dưới (leader_id, leader_name)');
+    } catch (mig9Err) {
+      console.warn('[Migration 9] Lỗi phân quyền Sales Lead:', mig9Err.message);
+    }
+  }
 };
 
 runSafeMigrations();

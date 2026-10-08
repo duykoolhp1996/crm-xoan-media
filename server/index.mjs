@@ -295,6 +295,8 @@ const mapDbRowToSalesStaff = (row) => {
     canLogin: row.can_login === 1 || row.can_login === true || row.can_login === '1',
     avatar: row.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     activeRegions,
+    leaderId: row.leader_id || undefined,
+    leaderName: row.leader_name || undefined,
     createdAt: row.created_at || new Date().toISOString(),
     updatedAt: row.updated_at || undefined
   };
@@ -1404,17 +1406,20 @@ const server = http.createServer(async (req, res) => {
       const canLogin = body.canLogin !== false ? 1 : 0;
       const avatar = body.avatar || '';
       const activeRegionsJson = JSON.stringify(Array.isArray(body.activeRegions) ? body.activeRegions : ['Hải Phòng']);
+      const leaderId = (body.leaderId || '').trim();
+      const leaderName = (body.leaderName || '').trim();
 
       const stmt = db.prepare(`
         INSERT INTO sales_staff (
           id, name, phone, email, role_title, commission_type, commission_rate,
           commission_fixed_amount, status, username, password, can_login, avatar,
-          active_regions_json, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          active_regions_json, leader_id, leader_name, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `);
       stmt.run(
         newId, name, phone, email, roleTitle, commType, commRate,
-        commFixed, status, username, password, canLogin, avatar, activeRegionsJson
+        commFixed, status, username, password, canLogin, avatar, activeRegionsJson,
+        leaderId, leaderName
       );
 
       const created = db.prepare('SELECT * FROM sales_staff WHERE id = ?').get(newId);
@@ -1453,6 +1458,8 @@ const server = http.createServer(async (req, res) => {
       const canLogin = body.canLogin !== undefined ? (body.canLogin ? 1 : 0) : existing.can_login;
       const avatar = body.avatar !== undefined ? body.avatar : existing.avatar;
       const activeRegionsJson = body.activeRegions !== undefined ? JSON.stringify(body.activeRegions) : existing.active_regions_json;
+      const leaderId = body.leaderId !== undefined ? (body.leaderId || '').trim() : (existing.leader_id || '');
+      const leaderName = body.leaderName !== undefined ? (body.leaderName || '').trim() : (existing.leader_name || '');
 
       const stmt = db.prepare(`
         UPDATE sales_staff
@@ -1470,12 +1477,15 @@ const server = http.createServer(async (req, res) => {
           can_login = ?,
           avatar = ?,
           active_regions_json = ?,
+          leader_id = ?,
+          leader_name = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `);
       stmt.run(
         name, phone, email, roleTitle, commType, commRate,
         commFixed, status, username, password, canLogin, avatar, activeRegionsJson,
+        leaderId, leaderName,
         staffId
       );
 

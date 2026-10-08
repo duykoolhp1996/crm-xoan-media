@@ -30,6 +30,10 @@ import {
   isCustomerBookedOrDeposited,
   isCustomerInStage
 } from '../../lib/revenueUtils';
+import {
+  getSalesHierarchyInfo,
+  filterAccessibleCustomers
+} from '../../utils/salesPermissions';
 
 export const KanbanPipeline: React.FC = () => {
   const {
@@ -50,37 +54,50 @@ export const KanbanPipeline: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTrashOpen, setIsTrashOpen] = useState(false);
   const [showLostView, setShowLostView] = useState(false);
+  const [leadMemberFilter, setLeadMemberFilter] = useState<string>('all_team');
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
   const [scheduleBookingCustomer, setScheduleBookingCustomer] = useState<Customer | null>(null);
   const [uploadDriveCustomer, setUploadDriveCustomer] = useState<Customer | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
 
-  const isSalesUser = currentUser?.role === 'sales' || currentRole === 'sales';
-  const mySalesStaff = React.useMemo(() => {
-    if (!isSalesUser) return null;
-    return salesStaff.find(s => 
-      s.id === currentUser.id || 
-      s.name.toLowerCase() === currentUser.name.toLowerCase() ||
-      (currentUser.email && s.email.toLowerCase() === currentUser.email.toLowerCase()) ||
-      (currentUser.phone && s.phone === currentUser.phone)
-    ) || salesStaff[0];
-  }, [salesStaff, currentUser, isSalesUser]);
+  // Thông tin phân cấp Sales & Sales Lead
+  const salesHierarchy = React.useMemo(() => {
+    return getSalesHierarchyInfo(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
 
-  // Chỉ hiển thị các khách hàng được gán cho Sales này hoặc khách chưa được gán ai
+  // Chỉ hiển thị các khách hàng thuộc quyền hạn:
+  // - Admin: Xem toàn bộ
+  // - Sales Lead: Data được Admin gán + Data cấp dưới thu thập được
+  // - Sales thường: Chỉ data của chính mình
   const accessibleCustomers = React.useMemo(() => {
-    if (!isSalesUser) return customers;
-    const myId = mySalesStaff?.id || currentUser.id;
-    const myName = mySalesStaff?.name || currentUser.name;
-    return customers.filter(c => {
-      const isMine = 
-        c.assignedSalesId === myId ||
-        c.assignedSalesName === myName ||
-        (mySalesStaff && c.assignedSalesName?.toLowerCase() === mySalesStaff.name.toLowerCase());
-      const isUnassigned = !c.assignedSalesId || !c.assignedSalesName || c.assignedSalesName === 'Chưa gán';
-      return isMine || isUnassigned;
-    });
-  }, [customers, isSalesUser, mySalesStaff, currentUser]);
+    const baseAccessible = filterAccessibleCustomers(customers, currentUser, currentRole, salesStaff);
+
+    // Nếu là Sales Lead và có chọn xem riêng theo nhân sự trong nhóm
+    if (salesHierarchy.isLead && leadMemberFilter !== 'all_team') {
+      if (leadMemberFilter === 'mine') {
+        const myId = salesHierarchy.myStaff?.id || currentUser.id;
+        const myName = (salesHierarchy.myStaff?.name || currentUser.name).toLowerCase();
+        return baseAccessible.filter(c => 
+          c.assignedSalesId === myId || 
+          c.assignedSalesName?.toLowerCase() === myName ||
+          c.createdById === myId ||
+          c.createdByName?.toLowerCase() === myName
+        );
+      } else {
+        const targetStaff = salesHierarchy.subordinateStaff.find(s => s.id === leadMemberFilter);
+        const targetName = targetStaff?.name?.toLowerCase() || '';
+        return baseAccessible.filter(c =>
+          c.assignedSalesId === leadMemberFilter ||
+          (targetName && c.assignedSalesName?.toLowerCase() === targetName) ||
+          c.createdById === leadMemberFilter ||
+          (targetName && c.createdByName?.toLowerCase() === targetName)
+        );
+      }
+    }
+
+    return baseAccessible;
+  }, [customers, currentUser, currentRole, salesStaff, salesHierarchy, leadMemberFilter]);
 
   // Cuộn ngang siêu mượt khi dùng chuột cuộn dọc hoặc trackpad
   const handleBoardWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -221,6 +238,26 @@ export const KanbanPipeline: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Bộ Lọc Theo Nhân Sự Cho Sales Lead */}
+          {salesHierarchy.isLead && (
+            <div className="flex items-center gap-1.5 bg-neutral-900 text-[#B8F23D] px-2.5 py-1.5 rounded-xl border border-black/[0.08] shadow-xs">
+              <span className="text-[11px] font-bold text-neutral-300">Nhóm Sales:</span>
+              <select
+                value={leadMemberFilter}
+                onChange={(e) => setLeadMemberFilter(e.target.value)}
+                className="bg-transparent text-[#B8F23D] text-xs font-black cursor-pointer focus:outline-none"
+              >
+                <option value="all_team" className="text-neutral-900 bg-white">👑 Toàn bộ nhóm ({salesHierarchy.subordinateStaff.length + 1} người)</option>
+                <option value="mine" className="text-neutral-900 bg-white">👤 Riêng của tôi (Lead)</option>
+                {salesHierarchy.subordinateStaff.map(sub => (
+                  <option key={sub.id} value={sub.id} className="text-neutral-900 bg-white">
+                    ↳ {sub.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Nút Chuyển Tab Xem Lost */}
           <button
             onClick={() => setShowLostView(!showLostView)}
