@@ -54,8 +54,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
     feedbacks,
     currentUser,
     setSelectedBookingId,
-    setActiveTab,
-    openPancakeForCustomer
+    setActiveTab
   } = useApp();
 
   const customer = customers.find(c => c.id === customerId);
@@ -227,19 +226,6 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
-            {/* Nút Nhắn Tin Trên App Pancake */}
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                openPancakeForCustomer(customer);
-              }}
-              className="px-3 py-1.5 bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 text-neutral-950 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-2xs hover:opacity-95 active:scale-95 cursor-pointer"
-              title="Mở App Pancake để nhắn tin & chốt đơn trực tiếp với khách này"
-            >
-              <span>🥞 Chat Pancake</span>
-            </button>
-
             {/* Nút Chỉnh Sửa Hồ Sơ Khách Hàng */}
             <button
               type="button"

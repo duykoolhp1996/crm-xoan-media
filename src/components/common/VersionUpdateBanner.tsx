@@ -63,21 +63,25 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Ra Mắt App Pancake (Chat & POS Bán Hàng Đa Kênh)!
+              Cập Nhật CRM Xoăn Media v1.3.0
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Tích hợp hoàn hảo Pancake vào CRM: Hộp thư đa kênh, lọc chưa trả lời, phím tắt kịch bản (/), gửi VietQR và tạo Booking ngay trong chat!
+              Tối ưu phân quyền bảo mật dữ liệu Sales Lead, khóa quyền chỉnh sửa cơ chế lương thợ chụp (view-only) và nâng cấp hệ thống thông báo đa thiết bị cho iOS!
             </p>
 
             {/* Quick feature tags */}
             <div className="flex items-center gap-2 mt-2 text-[10px] text-neutral-400">
               <span className="flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Khóa lương thợ
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
                 <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Tối ưu di động
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Bell className="w-3 h-3 text-[#B8F23D]" /> Noti đúng tài khoản
+                <Bell className="w-3 h-3 text-[#B8F23D]" /> Noti đa thiết bị
               </span>
             </div>
 

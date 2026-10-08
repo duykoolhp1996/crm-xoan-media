@@ -11,7 +11,6 @@ import {
 import { NotificationDrawer } from './NotificationDrawer';
 import { ProfileModal } from './ProfileModal';
 import { VersionUpdateBanner } from './VersionUpdateBanner';
-import { AppSwitcherModal } from './AppSwitcherModal';
 
 export const Header: React.FC = () => {
   const {
@@ -146,9 +145,6 @@ export const Header: React.FC = () => {
             {roleLabels[currentRole]?.label.split(' ')[0] || 'User'}
           </span>
         </div>
-
-        {/* Bộ Chuyển Đổi Ứng Dụng (9 Chấm - App Launcher) */}
-        <AppSwitcherModal buttonClassName="w-9 h-9 rounded-2xl bg-white/90 hover:bg-white border border-black/[0.06] flex items-center justify-center text-neutral-600 hover:text-neutral-950 transition-colors shadow-xs cursor-pointer" />
 
         {/* Notifications Icon Button */}
         <button

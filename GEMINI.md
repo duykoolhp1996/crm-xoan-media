@@ -47,3 +47,10 @@
 - **Frontend & Cầu Nối API**:
   - Luôn kết nối trực tiếp Single Source of Truth về SQL Server API (`https://crm.xoanmedia.com/api`).
   - Khi khởi động app hay update frontend, tuyệt đối không ghi đè mảng rỗng hay mock data lên dữ liệu đang có của người dùng.
+
+## 6. Tách Biệt Tuyệt Đối Giữa CRM và Pancake (Hai Ứng Dụng Độc Lập)
+- **CRM Xoăn Media** và **Pancake** là **2 ứng dụng hoàn toàn độc lập và tách biệt**:
+  - Codebase này (`/Users/Admin/Documents/CRM Xoan`) **CHỈ PHỤC VỤ HỆ THỐNG CRM XOĂN MEDIA** (Quản lý Khách hàng, Lead Pipeline 10 bước, Lịch chụp Ekip, Booking cọc, Phân quyền Sales & Thợ chụp, Báo cáo hiệu suất, Cài đặt hệ thống).
+  - TUYỆT ĐỐI không tự ý phát triển, nhúng, tích hợp các tính năng của App Pancake (Meta Graph API, Facebook Webhook, chat đa kênh, POS Pancake...) vào trong hệ thống CRM.
+  - Mọi yêu cầu chỉnh sửa trong repository này đều là **chỉnh sửa nghiệp vụ cho hệ thống CRM**.
+

@@ -219,60 +219,25 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Xác định ứng dụng ban đầu từ URL parameter hoặc localStorage
+  // Ứng dụng luôn luôn hoạt động ở chế độ CRM Xoăn Media thuần túy
   const getInitialApp = (): AppMode => {
     try {
       if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        const appParam = urlParams.get('app');
-        if (appParam === 'pancake' || appParam === 'crm') return appParam;
-        if (window.location.hash.includes('app=pancake') || window.location.hash.includes('#pancake') || window.location.hash.includes('#/pancake')) {
-          return 'pancake';
-        }
-        const saved = localStorage.getItem('crm_xoan_active_app');
-        if (saved === 'pancake' || saved === 'crm') return saved;
+        localStorage.removeItem('crm_xoan_active_app');
       }
     } catch (e) {}
     return 'crm';
   };
 
-  const [activeApp, setActiveAppState] = useState<AppMode>(getInitialApp);
+  const [activeApp, setActiveAppState] = useState<AppMode>('crm');
 
-  const switchApp = (app: AppMode, inNewTab: boolean = false) => {
-    if (inNewTab) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('app', app);
-      window.open(url.toString(), '_blank');
-      return;
-    }
-    setActiveAppState(app);
-    try {
-      localStorage.setItem('crm_xoan_active_app', app);
-      const url = new URL(window.location.href);
-      url.searchParams.set('app', app);
-      window.history.pushState({}, '', url.toString());
-    } catch (e) {}
+  const switchApp = (app: AppMode) => {
+    setActiveAppState('crm');
   };
 
   const setActiveApp = (app: AppMode) => {
-    switchApp(app, false);
+    setActiveAppState('crm');
   };
-
-  useEffect(() => {
-    const handleUrlChange = () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const appParam = urlParams.get('app');
-        if (appParam === 'pancake' || appParam === 'crm') {
-          setActiveAppState(appParam);
-        } else if (window.location.hash.includes('app=pancake') || window.location.hash.includes('#pancake')) {
-          setActiveAppState('pancake');
-        }
-      } catch (e) {}
-    };
-    window.addEventListener('popstate', handleUrlChange);
-    return () => window.removeEventListener('popstate', handleUrlChange);
-  }, []);
 
   const [currentUser, setCurrentUser] = useState<User>(mockUsers[0]);
   const [currentRole, setCurrentRoleState] = useState<UserRole>('admin');
