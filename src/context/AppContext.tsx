@@ -1924,7 +1924,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('crm_xoan_messenger_chats');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((c: any) => c && c.id && !String(c.id).startsWith('pan-'));
+        }
       }
     } catch (e) {
       console.error(e);
@@ -1933,7 +1935,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(() => {
-    return INITIAL_PANCAKE_CONVERSATIONS[0]?.id || null;
+    return null;
   });
 
   useEffect(() => {
