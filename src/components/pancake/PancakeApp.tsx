@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { FacebookApiService } from '../../services/facebookApiService';
 import { MessengerIcon } from '../chat/MessengerIcon';
+import { AppSwitcherModal } from '../common/AppSwitcherModal';
 import {
   PANCAKE_CHANNELS,
   PANCAKE_AVAILABLE_TAGS,
@@ -73,7 +74,11 @@ const STAGE_COLORS: Partial<Record<PipelineStage, { bg: string; text: string; bo
   'Mới tiếp nhận': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' }
 };
 
-export const PancakeApp: React.FC = () => {
+interface PancakeAppProps {
+  isStandaloneView?: boolean;
+}
+
+export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false }) => {
   const {
     messengerConversations,
     activeConversationId,
@@ -98,7 +103,10 @@ export const PancakeApp: React.FC = () => {
     assignPancakeStaff,
     sendPancakeCardMessage,
     createPancakeQuickBooking,
-    loadPancakeSampleData
+    loadPancakeSampleData,
+    switchApp,
+    openCrmForCustomer,
+    activeApp
   } = useApp();
 
   // Fullscreen standalone app state
@@ -357,7 +365,9 @@ export const PancakeApp: React.FC = () => {
   return (
     <div
       className={`${
-        isFullscreen
+        isStandaloneView
+          ? 'h-screen w-screen flex flex-col bg-[#F0F2F5] overflow-hidden'
+          : isFullscreen
           ? 'fixed inset-0 z-50 bg-[#F0F2F5] flex flex-col w-screen h-screen'
           : 'h-[calc(100vh-120px)] min-h-[640px] bg-white rounded-3xl border border-black/[0.08] shadow-sm flex flex-col overflow-hidden'
       }`}
@@ -366,8 +376,11 @@ export const PancakeApp: React.FC = () => {
           PANCAKE TOP BAR: STATUS, MULTI-CHANNEL & TOOLS
           ======================================================== */}
       <div className="h-13 bg-neutral-900 text-white px-3 sm:px-5 flex items-center justify-between shrink-0 shadow-sm border-b border-white/10 select-none">
-        {/* Left: Brand & Page Status */}
-        <div className="flex items-center gap-3 min-w-0">
+        {/* Left: App Switcher (9 Chấm), Brand & Page Status */}
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          {/* App Switcher 9-Dots Launcher Button */}
+          <AppSwitcherModal buttonClassName="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors shrink-0 cursor-pointer" />
+
           <div className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 via-orange-500 to-rose-500 flex items-center justify-center text-white shadow-xs font-black text-sm">
               🥞
@@ -397,12 +410,31 @@ export const PancakeApp: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Quick Controls & Fullscreen toggle */}
+        {/* Right: Quick Controls, Switch to CRM & Fullscreen */}
         <div className="flex items-center gap-2">
+          {/* Nút 1-Chạm: Chuyển Sang App CRM Xoăn */}
+          <button
+            onClick={() => switchApp('crm')}
+            className="flex items-center gap-1.5 text-xs font-black px-3 py-1.5 bg-[#B8F23D] hover:bg-[#a6de2f] text-neutral-950 rounded-xl transition-all shadow-xs active:scale-95 cursor-pointer"
+            title="Chuyển ngay sang App CRM Xoăn Media"
+          >
+            <span>🏢 Sang CRM Xoăn</span>
+          </button>
+
+          {/* Nút Mở CRM Tab Mới (Dùng song song 2 màn hình) */}
+          <button
+            onClick={() => switchApp('crm', true)}
+            className="hidden sm:flex items-center gap-1 text-[11px] font-bold px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-neutral-300 rounded-xl transition-colors border border-white/10 cursor-pointer"
+            title="Mở CRM Xoăn trong Tab mới ↗ để làm việc song song 2 màn hình"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden xl:inline">Mở CRM Tab Mới</span>
+          </button>
+
           {/* Nạp lại dữ liệu mẫu */}
           <button
             onClick={() => loadPancakeSampleData()}
-            className="hidden lg:flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 bg-white/10 hover:bg-white/20 text-neutral-200 rounded-lg transition-colors border border-white/10"
+            className="hidden lg:flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 bg-white/10 hover:bg-white/20 text-neutral-200 rounded-xl transition-colors border border-white/10"
             title="Khôi phục lại các kênh và tin nhắn mẫu đa kênh để trải nghiệm"
           >
             <RefreshCw className="w-3 h-3" />
@@ -413,24 +445,26 @@ export const PancakeApp: React.FC = () => {
           <button
             onClick={() => syncFacebookLiveConversations()}
             disabled={isSyncingFacebook}
-            className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors shadow-xs"
+            className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-colors shadow-xs"
             title="Đồng bộ tin nhắn mới từ Fanpage Facebook thật"
           >
             <RefreshCw className={`w-3 h-3 ${isSyncingFacebook ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">{isSyncingFacebook ? 'Đang tải...' : 'Sync Fanpage'}</span>
           </button>
 
-          {/* Fullscreen Standalone App Switcher */}
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 text-neutral-300 hover:text-white hover:bg-white/15 rounded-lg transition-colors"
-            title={isFullscreen ? 'Thu nhỏ về giao diện CRM' : 'Mở toàn màn hình độc lập (Chế độ App Pancake)'}
-          >
-            {isFullscreen ? <Minimize2 className="w-4 h-4 text-amber-300" /> : <Maximize2 className="w-4 h-4" />}
-          </button>
+          {/* Fullscreen Toggle (chỉ khi không ở Standalone View) */}
+          {!isStandaloneView && (
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-1.5 text-neutral-300 hover:text-white hover:bg-white/15 rounded-lg transition-colors"
+              title={isFullscreen ? 'Thu nhỏ về giao diện CRM' : 'Mở toàn màn hình độc lập (Chế độ App Pancake)'}
+            >
+              {isFullscreen ? <Minimize2 className="w-4 h-4 text-amber-300" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          )}
 
           {/* Trở lại CRM nếu đang fullscreen */}
-          {isFullscreen && (
+          {!isStandaloneView && isFullscreen && (
             <button
               onClick={() => setIsFullscreen(false)}
               className="text-xs font-bold px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-lg border border-neutral-700 transition-colors"
@@ -1426,20 +1460,36 @@ export const PancakeApp: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Linked Customer Action */}
-                  {linkedCustomer && (
-                    <div className="pt-2 border-t border-black/[0.06]">
+                  {/* Deep link actions sang CRM */}
+                  <div className="pt-2 border-t border-black/[0.06] space-y-1.5">
+                    {linkedCustomer ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openCrmForCustomer(linkedCustomer.id)}
+                          className="w-full py-2 bg-[#B8F23D] hover:bg-[#a6de2f] text-neutral-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs border border-[#B8F23D] cursor-pointer"
+                        >
+                          <span>🏢 Mở Hồ Sơ CRM 360°</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => openCrmForCustomer(linkedCustomer.id, 'pipeline')}
+                          className="w-full py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <span>📋 Xem Trên Pipeline CRM</span>
+                        </button>
+                      </>
+                    ) : (
                       <button
-                        onClick={() => {
-                          setSelectedCustomerId(linkedCustomer.id);
-                          setActiveTab('customers');
-                        }}
-                        className="w-full py-1.5 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-xl transition-colors border border-amber-200"
+                        type="button"
+                        onClick={() => switchApp('crm')}
+                        className="w-full py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
-                        Mở Hồ Sơ Khách 360° Đầy Đủ
+                        <span>🏢 Chuyển Sang App CRM</span>
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
 

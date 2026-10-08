@@ -2308,6 +2308,58 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('crm_xoan_messenger_chats', JSON.stringify(INITIAL_PANCAKE_CONVERSATIONS));
   };
 
+  // Liên kết 2 chiều giữa CRM và Pancake
+  const openPancakeForCustomer = (customer: Customer | { id?: string; name: string; phone?: string; className?: string; schoolName?: string }) => {
+    let matchedConv = messengerConversations.find(
+      c => (customer.id && c.customerId === customer.id) || (customer.phone && c.customerPhone && c.customerPhone === customer.phone)
+    );
+
+    if (!matchedConv) {
+      const newConvId = `conv-cust-${Date.now()}`;
+      const newConv: FacebookChatConversation = {
+        id: newConvId,
+        customerId: customer.id,
+        customerName: customer.name,
+        customerAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name)}&background=0084FF&color=fff&bold=true`,
+        customerClass: customer.className || 'Chưa rõ lớp',
+        customerSchool: customer.schoolName || 'Chưa rõ trường',
+        customerPhone: customer.phone || '',
+        pageName: 'Xoăn Media - Kỷ Yếu & Sự Kiện',
+        channel: 'facebook',
+        channelId: 'fb-xoan-hn',
+        unreadCount: 0,
+        isReplied: true,
+        lastMessage: 'Cuộc hội thoại được liên kết từ CRM Xoăn',
+        lastMessageTime: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        assignedSalesName: currentUser.name,
+        assignedSalesId: currentUser.id,
+        pipelineStage: (customer as Customer).pipelineStage || 'Đang tư vấn',
+        tags: ['CRM Lead', 'Cần tư vấn'],
+        notes: (customer as Customer).notes || '',
+        messages: [
+          {
+            id: `msg-${Date.now()}`,
+            sender: 'system',
+            senderName: 'Hệ thống CRM',
+            text: `✨ Cuộc trò chuyện được mở từ Hồ Sơ Khách Hàng CRM bởi ${currentUser.name}`,
+            timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+          }
+        ]
+      };
+      setMessengerConversations(prev => [newConv, ...prev]);
+      matchedConv = newConv;
+    }
+
+    setActiveConversationId(matchedConv.id);
+    switchApp('pancake');
+  };
+
+  const openCrmForCustomer = (customerId: string, targetTab: NavigationTab = 'customers') => {
+    setSelectedCustomerId(customerId);
+    setActiveTab(targetTab);
+    switchApp('crm');
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -2406,7 +2458,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         assignPancakeStaff,
         sendPancakeCardMessage,
         createPancakeQuickBooking,
-        loadPancakeSampleData
+        loadPancakeSampleData,
+        activeApp,
+        setActiveApp,
+        switchApp,
+        openPancakeForCustomer,
+        openCrmForCustomer
       }}
     >
       {children}

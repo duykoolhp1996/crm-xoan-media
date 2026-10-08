@@ -70,14 +70,17 @@ const MainContent: React.FC = () => {
   );
 };
 
+const PancakeStandaloneShell: React.FC = () => {
+  return (
+    <div className="relative flex flex-col h-screen w-screen bg-[#F0F2F5] text-neutral-900 overflow-hidden font-sans">
+      <PancakeApp isStandaloneView={true} />
+      <GlobalSearchModal />
+      <IosPushBanner />
+    </div>
+  );
+};
+
 const CrmAppShell: React.FC = () => {
-  const { isAuthenticated } = useApp();
-
-  // Nếu chưa đăng nhập -> hiển thị màn hình Login
-  if (!isAuthenticated) {
-    return <LoginPage />;
-  }
-
   return (
     <div className="relative flex h-screen bg-[#F4FBE8] text-neutral-900 overflow-hidden font-sans selection:bg-[#B8F23D]/60 selection:text-neutral-900">
       {/* Spatial Ambient Glow Layer */}
@@ -104,6 +107,23 @@ const CrmAppShell: React.FC = () => {
   );
 };
 
+const AppShellRouter: React.FC = () => {
+  const { isAuthenticated, activeApp } = useApp();
+
+  // Nếu chưa đăng nhập -> hiển thị màn hình Login
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  // Nếu đang ở App Pancake độc lập
+  if (activeApp === 'pancake') {
+    return <PancakeStandaloneShell />;
+  }
+
+  // Mặc định ở App CRM Xoăn Media
+  return <CrmAppShell />;
+};
+
 export const App: React.FC = () => {
   React.useEffect(() => {
     initGA4();
@@ -111,7 +131,7 @@ export const App: React.FC = () => {
 
   return (
     <AppProvider>
-      <CrmAppShell />
+      <AppShellRouter />
     </AppProvider>
   );
 };

@@ -61,6 +61,8 @@ export const mockSalesStaff: SalesStaff[] = [
     commissionType: 'percentage',
     commissionRate: 8,
     commissionFixedAmount: 400000,
+    leaderId: 'user-2',
+    leaderName: 'Lê Hoàng Sơn',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
   },
   {
@@ -77,6 +79,8 @@ export const mockSalesStaff: SalesStaff[] = [
     commissionType: 'percentage',
     commissionRate: 8,
     commissionFixedAmount: 400000,
+    leaderId: 'user-2',
+    leaderName: 'Lê Hoàng Sơn',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
   },
   {
@@ -93,6 +97,8 @@ export const mockSalesStaff: SalesStaff[] = [
     commissionType: 'fixed',
     commissionRate: 5,
     commissionFixedAmount: 300000,
+    leaderId: 'user-2',
+    leaderName: 'Lê Hoàng Sơn',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&auto=format&fit=crop&q=80'
   }
 ];

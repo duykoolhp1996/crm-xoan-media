@@ -31,7 +31,8 @@ export const Sidebar: React.FC = () => {
     photographers,
     isMobileSidebarOpen,
     setIsMobileSidebarOpen,
-    unreadMessengerCount
+    unreadMessengerCount,
+    switchApp
   } = useApp();
 
   const newLeadsCount = customers.filter(c => c.pipelineStage === 'New Lead').length;
@@ -180,6 +181,11 @@ export const Sidebar: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => {
+                      if (item.id === 'pancake') {
+                        switchApp('pancake');
+                        if (isMobile) setIsMobileSidebarOpen(false);
+                        return;
+                      }
                       setActiveTab(item.id);
                       if (isMobile) setIsMobileSidebarOpen(false);
                     }}

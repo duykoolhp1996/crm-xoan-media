@@ -42,7 +42,8 @@ export const KanbanPipeline: React.FC = () => {
     currentUser,
     currentRole,
     selectedCustomerId,
-    setSelectedCustomerId
+    setSelectedCustomerId,
+    openPancakeForCustomer
   } = useApp();
 
   const [draggedCustomerId, setDraggedCustomerId] = useState<string | null>(null);
@@ -420,9 +421,22 @@ export const KanbanPipeline: React.FC = () => {
                                 {cust.name}
                               </h4>
                             </div>
-                            <span className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded-md">
-                              {cust.studentCount || 35} bạn
-                            </span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openPancakeForCustomer(cust);
+                                }}
+                                className="p-1 hover:bg-amber-100 rounded-lg text-xs transition-colors"
+                                title="Mở đoạn chat trên App Pancake Xoăn"
+                              >
+                                🥞
+                              </button>
+                              <span className="text-[10px] text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded-md">
+                                {cust.studentCount || 35} bạn
+                              </span>
+                            </div>
                           </div>
 
                           <p className="text-[11px] text-neutral-500 flex items-center gap-1.5 mt-1.5 truncate">

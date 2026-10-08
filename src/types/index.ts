@@ -517,6 +517,8 @@ export interface SalesStaff {
   password?: string;
   canLogin?: boolean;
   lastLoginAt?: string;
+  leaderId?: string; // ID của Sales Lead quản lý nhân sự này
+  leaderName?: string; // Tên của Sales Lead quản lý
 }
 
 // 12. Bảng Báo Giá Chi Tiết (Sản phẩm / Dịch vụ, Số lượng, Đơn giá, Chiết khấu)
