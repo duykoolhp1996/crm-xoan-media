@@ -54,6 +54,11 @@ const MainContent: React.FC = () => {
         {activeTab === 'reports-photographer' && <PhotographerReports />}
         {activeTab === 'settings' && <SettingsModule />}
 
+        {/* Fallback an toàn nếu activeTab không khớp bất kỳ tab CRM nào */}
+        {!['dashboard', 'customers', 'leads', 'pipeline', 'trash', 'schools', 'bookings', 'calendar', 'photographers', 'services', 'reports-photographer', 'settings'].includes(activeTab) && (
+          isPhotographer ? <PhotographerDashboard /> : <ExecutiveDashboard />
+        )}
+
         {/* Global Customer 360 Detail Modal: Hiển thị khi đang ở Calendar, Bookings hoặc Dashboard */}
         {!['customers', 'leads', 'pipeline', 'schools'].includes(activeTab) && selectedCustomerId && (
           <CustomerDetail360
