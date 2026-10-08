@@ -76,6 +76,8 @@ export type NavigationTab =
   | 'pancake'
   | 'trash';
 
+export type AppMode = 'crm' | 'pancake';
+
 interface AppContextType {
   currentUser: User;
   currentRole: UserRole;
@@ -205,11 +207,73 @@ interface AppContextType {
   sendPancakeCardMessage: (convId: string, text: string, cardType: 'quote' | 'vietqr' | 'booking', cardData: any) => void;
   createPancakeQuickBooking: (convId: string, bookingData: { packageName: string; studentCount: number; packagePrice: number; depositAmount: number; shootDate: string; location: string; notes?: string }) => void;
   loadPancakeSampleData: () => void;
+
+  // Hệ sinh thái đa ứng dụng (App Suite: CRM ⟷ Pancake)
+  activeApp: AppMode;
+  setActiveApp: (app: AppMode) => void;
+  switchApp: (app: AppMode, inNewTab?: boolean) => void;
+  openPancakeForCustomer: (customer: Customer | { id?: string; name: string; phone?: string; className?: string; schoolName?: string }) => void;
+  openCrmForCustomer: (customerId: string, targetTab?: NavigationTab) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Xác định ứng dụng ban đầu từ URL parameter hoặc localStorage
+  const getInitialApp = (): AppMode => {
+    try {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const appParam = urlParams.get('app');
+        if (appParam === 'pancake' || appParam === 'crm') return appParam;
+        if (window.location.hash.includes('app=pancake') || window.location.hash.includes('#pancake') || window.location.hash.includes('#/pancake')) {
+          return 'pancake';
+        }
+        const saved = localStorage.getItem('crm_xoan_active_app');
+        if (saved === 'pancake' || saved === 'crm') return saved;
+      }
+    } catch (e) {}
+    return 'crm';
+  };
+
+  const [activeApp, setActiveAppState] = useState<AppMode>(getInitialApp);
+
+  const switchApp = (app: AppMode, inNewTab: boolean = false) => {
+    if (inNewTab) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('app', app);
+      window.open(url.toString(), '_blank');
+      return;
+    }
+    setActiveAppState(app);
+    try {
+      localStorage.setItem('crm_xoan_active_app', app);
+      const url = new URL(window.location.href);
+      url.searchParams.set('app', app);
+      window.history.pushState({}, '', url.toString());
+    } catch (e) {}
+  };
+
+  const setActiveApp = (app: AppMode) => {
+    switchApp(app, false);
+  };
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const appParam = urlParams.get('app');
+        if (appParam === 'pancake' || appParam === 'crm') {
+          setActiveAppState(appParam);
+        } else if (window.location.hash.includes('app=pancake') || window.location.hash.includes('#pancake')) {
+          setActiveAppState('pancake');
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, []);
+
   const [currentUser, setCurrentUser] = useState<User>(mockUsers[0]);
   const [currentRole, setCurrentRoleState] = useState<UserRole>('admin');
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
@@ -586,8 +650,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         'SonLead@2024',
         'HuongSales@2024',
         'DangSales@2024',
-        'PhuongCTV@2024',
-        '123456'
+        'PhuongCTV@2024'
       ].filter(Boolean) as string[];
 
       if (validPasswords.includes(p)) {
@@ -638,8 +701,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (matchedPhoto) {
       const validPasswords = [
         matchedPhoto.password,
-        'XoanPhoto@2026',
-        '123456'
+        'XoanPhoto@2026'
       ].filter(Boolean) as string[];
 
       if (validPasswords.includes(p)) {
@@ -795,10 +857,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (savedAuth) {
           const parsed = JSON.parse(savedAuth);
           const storedPassword = parsed.password || '';
-          const defaultPasswords = ['XoanPhoto@2026', '123456', 'XoanAdmin@2026'];
+          const defaultPasswords = ['XoanPhoto@2026', 'XoanAdmin@2026'];
           if (storedPassword !== data.currentPassword && !defaultPasswords.includes(data.currentPassword)) {
             // Thử so sánh mật khẩu mặc định theo role
-            if (currentRole === 'photographer' && !['XoanPhoto@2026', '123456'].includes(data.currentPassword)) {
+            if (currentRole === 'photographer' && data.currentPassword !== 'XoanPhoto@2026') {
               if (storedPassword && storedPassword !== data.currentPassword) {
                 return { success: false, message: 'Mật khẩu hiện tại không đúng. Vui lòng thử lại.' };
               }
