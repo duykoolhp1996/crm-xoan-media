@@ -437,6 +437,73 @@ const server = http.createServer(async (req, res) => {
     }
 
     // -------------------------------------------------------------
+    // FACEBOOK MESSENGER WEBHOOK (Realtime Push Events)
+    // -------------------------------------------------------------
+    const FB_VERIFY_TOKEN = process.env.FB_VERIFY_TOKEN || 'xoanmedia_meta_webhook_2026';
+
+    // 1. GET: Xác thực Webhook với Meta Developer (hub.challenge)
+    if ((pathname === '/api/facebook/webhook' || pathname === '/api/webhook/facebook') && req.method === 'GET') {
+      const mode = searchParams.get('hub.mode');
+      const token = searchParams.get('hub.verify_token');
+      const challenge = searchParams.get('hub.challenge');
+
+      if (mode === 'subscribe' && token === FB_VERIFY_TOKEN) {
+        console.log('[Facebook Webhook] Xác thực thành công với Meta!');
+        res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end(challenge);
+        return;
+      } else {
+        console.warn(`[Facebook Webhook] Xác thực thất bại! Token không khớp (nhận: ${token})`);
+        return sendJson(res, 403, { success: false, message: 'Forbidden: Invalid verify token' });
+      }
+    }
+
+    // 2. GET: Trạng thái cấu hình Webhook Facebook
+    if (pathname === '/api/facebook/webhook/status' && req.method === 'GET') {
+      return sendJson(res, 200, {
+        success: true,
+        webhookUrl: 'https://crm.xoanmedia.com/api/facebook/webhook',
+        verifyToken: FB_VERIFY_TOKEN,
+        appId: '1438809894822067',
+        pageId: '411200738737677',
+        subscribedFields: ['messages', 'messaging_postbacks', 'message_reads', 'message_deliveries']
+      });
+    }
+
+    // 3. POST: Nhận sự kiện tin nhắn từ Facebook Messenger (Realtime)
+    if ((pathname === '/api/facebook/webhook' || pathname === '/api/webhook/facebook') && req.method === 'POST') {
+      const body = await readJsonBody(req);
+
+      if (body.object === 'page') {
+        // Meta yêu cầu phản hồi 200 OK ngay lập tức (trong vòng 20s) để tránh bị timeout/retry
+        sendJson(res, 200, { success: true, message: 'EVENT_RECEIVED' });
+
+        // Xử lý sự kiện tin nhắn trong background
+        try {
+          if (Array.isArray(body.entry)) {
+            for (const entry of body.entry) {
+              const pageId = entry.id;
+              const messagingEvents = entry.messaging || [];
+              for (const event of messagingEvents) {
+                const senderId = event.sender?.id; // PSID khách hàng
+                const message = event.message;
+
+                if (message && message.text) {
+                  console.log(`[Facebook Webhook] Tin nhắn mới từ PSID ${senderId} tới Fanpage ${pageId}: "${message.text}"`);
+                }
+              }
+            }
+          }
+        } catch (eventErr) {
+          console.error('[Facebook Webhook] Lỗi xử lý sự kiện:', eventErr);
+        }
+        return;
+      } else {
+        return sendJson(res, 404, { success: false, message: 'Not Found' });
+      }
+    }
+
+    // -------------------------------------------------------------
     // 1. HEALTH CHECKS
     // -------------------------------------------------------------
     if (pathname === '/api/health' && req.method === 'GET') {

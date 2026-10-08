@@ -1987,6 +1987,41 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
                   </li>
                 </ol>
               </div>
+
+              {/* Webhook Configuration Info */}
+              <div className="p-3.5 bg-neutral-50 border border-neutral-200 rounded-2xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-black text-neutral-800 text-xs">⚡ Cấu Hình Webhook (Tin Nhắn Realtime)</span>
+                    <span className="bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded">TỨC THÌ</span>
+                  </div>
+                  <a
+                    href="https://developers.facebook.com/docs/messenger-platform/webhooks"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 text-[11px]"
+                  >
+                    Tài liệu Webhook <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <p className="text-[11px] text-neutral-600">
+                  Khi cấu hình Webhook trên Meta Developers, mọi tin nhắn của khách sẽ được đẩy về máy chủ CRM Xoăn tức thì trong 0.1s:
+                </p>
+                <div className="space-y-1.5 bg-white p-2.5 rounded-xl border border-black/5 font-mono text-[11px]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-neutral-500 font-sans">Callback URL:</span>
+                    <code className="text-blue-700 font-bold select-all break-all">https://crm.xoanmedia.com/api/facebook/webhook</code>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <span className="text-neutral-500 font-sans">Verify Token:</span>
+                    <code className="text-emerald-700 font-bold select-all">xoanmedia_meta_webhook_2026</code>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-neutral-500 font-sans">Trường đăng ký:</span>
+                    <span className="text-neutral-700 font-sans font-semibold">messages, messaging_postbacks</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Modal Footer */}
