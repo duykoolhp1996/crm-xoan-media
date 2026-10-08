@@ -48,7 +48,9 @@ export const PANCAKE_AVAILABLE_TAGS: PancakeTagDef[] = [
   { id: 'prom_night', name: '🎆 Dạ hội Prom', color: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-200' }
 ];
 
-export const INITIAL_PANCAKE_CONVERSATIONS: FacebookChatConversation[] = [];
+import realConvs from './realConversations.json';
+
+export const INITIAL_PANCAKE_CONVERSATIONS: FacebookChatConversation[] = realConvs as unknown as FacebookChatConversation[];
 
 export const PANCAKE_QUICK_SCRIPTS = [
   {

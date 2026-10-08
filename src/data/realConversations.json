@@ -1,0 +1,2212 @@
+[
+  {
+    "id": "fb-t_1857648728939927",
+    "facebookPsid": "39558177170434054",
+    "isLiveFacebook": true,
+    "customerName": "Hínn Cte",
+    "customerAvatar": "https://ui-avatars.com/api/?name=H%C3%ADnn%20Cte&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "okayy a",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_kwwAYmCXjGTYxaaUGKYM0hMqj6vsqtdLgmS3WhCGylO20M2GrI71O_pZYG6N0BZfdsI9v7JDsFirl79bqqASYw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "trường đông hải thì chắc m nằm vùng luôn chứ còn",
+        "timestamp": "21:59"
+      },
+      {
+        "id": "m_ilY5fgHdgmIAbeZKZlIFTBMqj6vsqtdLgmS3WhCGylOMuMC65-LxkBYsFwZFoE3g5udnidQA2nJkNoWJWIkg4w",
+        "sender": "customer",
+        "senderName": "Hínn Cte",
+        "text": "kkk đôu ra",
+        "timestamp": "22:17"
+      },
+      {
+        "id": "m_s4OHMN5uxVCof1mNN8y-8RMqj6vsqtdLgmS3WhCGylMqEzG71lxrGCWsYNMZa2e7cLcMUeltw0_cR-KisuSKDA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "kiểu j m chả quen nửa khối",
+        "timestamp": "22:20"
+      },
+      {
+        "id": "m_cMm05duqpOx6AjuZQCsC0hMqj6vsqtdLgmS3WhCGylNFgr0NjajmadRVa4vbLPq3Rnm0f4DtOfEEQYEm9yenNQ",
+        "sender": "customer",
+        "senderName": "Hínn Cte",
+        "text": ":)))) e hướng nội mà",
+        "timestamp": "22:20"
+      },
+      {
+        "id": "m_Svr1T1-O8pEgjNqkk-LAHhMqj6vsqtdLgmS3WhCGylMp6EwMb9xoPT4HrkYix54oL9FaZrbhZYrj6i1J5-q_Ng",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "chém giỏi là dc rồi",
+        "timestamp": "22:21"
+      },
+      {
+        "id": "m_593FWXC9KqJysT-FqQvKnBMqj6vsqtdLgmS3WhCGylPj7S26DGt9sUJ7AWfo4BT0M0G5sWd1e6S3E1vKcVDNMw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "m kiếm ít lớp trưởng khóa dưới đông hải",
+        "timestamp": "22:21"
+      },
+      {
+        "id": "m_ZFsv1wsNQ3umj3p0JLGmVhMqj6vsqtdLgmS3WhCGylNqlmFIaTjwe-zOZkG4CwcPkE6I6A_D1vJpS2vNZRXmVg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "rồi rải bom phát là dc e ai",
+        "timestamp": "22:21"
+      },
+      {
+        "id": "m_upp3g6RlC5HCadEOvKzK8RMqj6vsqtdLgmS3WhCGylNQdYN3S6p7ghA4SRg168kwLBGp4V76Vqu4FsWWeCu-sA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "nhanh gọn lẹ luôn",
+        "timestamp": "22:21"
+      },
+      {
+        "id": "m_CGEQDjD7hH88QBojpdEE7hMqj6vsqtdLgmS3WhCGylP2ZL5vGd_Bdg_2GHcgtZ5Pvj8bqCBKf6KhEyVzNj9BZA",
+        "sender": "customer",
+        "senderName": "Hínn Cte",
+        "text": "kk",
+        "timestamp": "22:29"
+      },
+      {
+        "id": "m_aWRzZVPEwAoqdnMN-C5eFxMqj6vsqtdLgmS3WhCGylMR8nh_uGQM7V8xrvPhjYiMIYWUN2J9byt-3eP2iATmuw",
+        "sender": "customer",
+        "senderName": "Hínn Cte",
+        "text": "okayy a",
+        "timestamp": "22:29"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1454893563217716",
+    "facebookPsid": "29164951266478212",
+    "isLiveFacebook": true,
+    "customerName": "Nguyễn Thảo",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Nguy%E1%BB%85n%20Th%E1%BA%A3o&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "lớp có j mới hok e :)))",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_mIXYAtStoXdQvZmI6KPcErMc7V-RZFzpsfDVGi-wQNerOlHpJJ4NongVcxvEhT-ESWNLTPeUnUchmm72tydJxw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Tiền mặt 1tr cho lớp",
+        "timestamp": "21:18"
+      },
+      {
+        "id": "m_Ov6PoU-2EuOMFxM1oY1gtrMc7V-RZFzpsfDVGi-wQNeXg4LNQOYeAbQZyoSnFXQyfAUaAI1KCBiIFt4icdbgxw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "21:19"
+      },
+      {
+        "id": "m_f_9Y4KV-ztx8mAMuMuZEm7Mc7V-RZFzpsfDVGi-wQNediAOyOEn9hqZ20_2IA7ShRfKEJpnnJmYsf7vcyjz6vg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Giá êm luôn kk",
+        "timestamp": "21:19"
+      },
+      {
+        "id": "m_FwKuksMvMYN1LK1IDTewZbMc7V-RZFzpsfDVGi-wQNfMLg9kXkQCewUYFI17a3rF36rXK8dDcNx3ZnB6w3gikg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "21:19"
+      },
+      {
+        "id": "m_b_JD1POc9s3lBD8HKxRrNLMc7V-RZFzpsfDVGi-wQNe4OdZfmVefLTddxfb6ORb0L-aa_1kQzm8paaIUVM1sSA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Feedback thực",
+        "timestamp": "21:19"
+      },
+      {
+        "id": "m_m94fLrTnyMGgxumEvLQ7l7Mc7V-RZFzpsfDVGi-wQNeP9NQ1Ofwhji-uKqwSi0cJ2Dgl-rq6R7DZEeyNaDzXmg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "https://www.facebook.com/share/p/19ZUwgsPfQ/?mibextid=wwXIfr",
+        "timestamp": "21:19"
+      },
+      {
+        "id": "m_BmobN9DDpY8Agwrw6-nPxrMc7V-RZFzpsfDVGi-wQNc4tYg06Kpkb1U9re7b4Rsv-QnLr7WnOKfOklVGvYCKvg",
+        "sender": "customer",
+        "senderName": "Nguyễn Thảo",
+        "text": "[Hình ảnh]",
+        "timestamp": "21:20"
+      },
+      {
+        "id": "m_u2PR0cziMivumqt4x_sL0bMc7V-RZFzpsfDVGi-wQNeeuPb10Zpo945daW-LPKd2Q9bTmbu8oOVbE3RhuEe0WQ",
+        "sender": "customer",
+        "senderName": "Nguyễn Thảo",
+        "text": "wow",
+        "timestamp": "21:20"
+      },
+      {
+        "id": "m_kawGIOY-R8e-6AduSuR2rbMc7V-RZFzpsfDVGi-wQNfbXIxBE_xMDvAt6Rn_X6DXTSJ9ercwVAv6lv8Uk6OZYA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "M cứ hỏi những đứa đã chụp ấy là rõ",
+        "timestamp": "21:20"
+      },
+      {
+        "id": "m_zbDrYm36RPCsQEhgD84iSLMc7V-RZFzpsfDVGi-wQNemKdWQYeeVzFF8ijPrSbZsRNR1LWX_Bcj_qTHMDa76SA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "lớp có j mới hok e :)))",
+        "timestamp": "21:45"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1654109606084222",
+    "facebookPsid": "28560404616920514",
+    "isLiveFacebook": true,
+    "customerName": "Chipp Anhn",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Chipp%20Anhn&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "Huhu",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_YVq71-cQITTEJDDWLG1piQ_lhnZQoRMKaGTim8kkdK9jDTptG2kApToXxPt2zKqCBq-NC86peovwZV3wkifBZw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "20:33"
+      },
+      {
+        "id": "m_w4UH4DsqwhQqO0HQJ9Z3cQ_lhnZQoRMKaGTim8kkdK9cdwV0ogze2t243Y9sL-h5p1QsVRxgZy8gn-hWyRgb6g",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "20:34"
+      },
+      {
+        "id": "m_AKA0UvdpBNvUm1g1KJ0RcQ_lhnZQoRMKaGTim8kkdK-zd3q86K-v-mERPYkjDZ5TH6I2cuCYBV_SBHa3gu4t5Q",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Đã đủ uy tín chưa",
+        "timestamp": "20:34"
+      },
+      {
+        "id": "m_8ONanIKtdwb_8M06hDD-UQ_lhnZQoRMKaGTim8kkdK9SMb4xLitvkQcWOyw0sGYmKZ5FvcVUfrLrhwQjN10aiw",
+        "sender": "customer",
+        "senderName": "Chipp Anhn",
+        "text": "E xem bên a",
+        "timestamp": "20:42"
+      },
+      {
+        "id": "m_CHfYpQbK9PQ69Wp6Clj5PA_lhnZQoRMKaGTim8kkdK9vaPQViHnUSQUclVp27YTH_X563giq0EI3SmcHFHs3wQ",
+        "sender": "customer",
+        "senderName": "Chipp Anhn",
+        "text": "Từ năm lớp 10 r:))))",
+        "timestamp": "20:42"
+      },
+      {
+        "id": "m_FLH-IxlMd5D4sW_Zbm0gQA_lhnZQoRMKaGTim8kkdK_HNGdRWg8p7dsVs0M5MeQn6tVAJe-BqsB-9q12rYmy3Q",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Thế thì sợ rồi :)))",
+        "timestamp": "20:43"
+      },
+      {
+        "id": "m_8tn4wobORn_Ww6t11sBrgg_lhnZQoRMKaGTim8kkdK92UClXSBglFM2Hh4KDosodxjer_gHfQLKkv1aXEi_Svw",
+        "sender": "customer",
+        "senderName": "Chipp Anhn",
+        "text": "Coa hỗ trợ thêm dc k a :(",
+        "timestamp": "20:43"
+      },
+      {
+        "id": "m_CdyivEW6bl1N_dDkqHhJPw_lhnZQoRMKaGTim8kkdK_WVJ-QXyjYqEyTvZWfolrjtMioEY8PUpm7Dh7BjIXcSQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Hết tầm rồi e ơi",
+        "timestamp": "20:43"
+      },
+      {
+        "id": "m_h0E2wQAPF5jkuNQJHpOo7Q_lhnZQoRMKaGTim8kkdK8Nr1TQgA3iPO9Y3HKbhMFqWHBC8KaajNmFc_7_UGBbAw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Còn lớp khác nhìn vào nữa",
+        "timestamp": "20:43"
+      },
+      {
+        "id": "m_dHgXD0qdWFXSiQSh22fAkQ_lhnZQoRMKaGTim8kkdK_Ttd_N3JEnb_5vYHQ09JrV2yMqawK2JnquKfoCvBrY2w",
+        "sender": "customer",
+        "senderName": "Chipp Anhn",
+        "text": "Huhu",
+        "timestamp": "20:44"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1127382566413209",
+    "facebookPsid": "29064834486533368",
+    "isLiveFacebook": true,
+    "customerName": "Trần Minh Ngọc",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Tr%E1%BA%A7n%20Minh%20Ng%E1%BB%8Dc&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Hok ưng rồi nó lại mất vui",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_VUCpSwg5xaUUoxN1Z4ZLVGdHEqI2t9rIjkLKKDaYMvF5-VL2cLYEHcV2hjeQs93ai6hvBjFiAKZvmVpDHdaqlw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Bên ấy khó mà",
+        "timestamp": "18:11"
+      },
+      {
+        "id": "m_8m_sFpIJeUL40P3XGxSfBWdHEqI2t9rIjkLKKDaYMvFnlsXY-7U-sdSrYg44HcKC-iox5RhKaf7SvSM34YA6JQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "A vào toàn các lớp các cô chăm hs",
+        "timestamp": "18:11"
+      },
+      {
+        "id": "m_Ko44KYZhDvnAwW068tce2WdHEqI2t9rIjkLKKDaYMvGC00LPJxV_zyoU0hhHCiuosfaLmry9Ffkb2Qh7xlK7vg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Nên hs thích ntn cô chiều",
+        "timestamp": "18:11"
+      },
+      {
+        "id": "m_bsL8ed7VeNsOQPjRpHVyAmdHEqI2t9rIjkLKKDaYMvHNxUTqC_byIGET89OFEnj-RDqr3tYmpNqrFxr7BKHBMw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Đứng ra tổ chức cho luôn",
+        "timestamp": "18:11"
+      },
+      {
+        "id": "m_-84XcdhlxbtWYEUze_3pNWdHEqI2t9rIjkLKKDaYMvFOyGiSz7Y7-oN8m4vNhANzkw8QvNZjEZ_OEHihNtFRhA",
+        "sender": "customer",
+        "senderName": "Trần Minh Ngọc",
+        "text": "Cô em thích theo ý mình cơ",
+        "timestamp": "18:11"
+      },
+      {
+        "id": "m_T4tDOfDQYw6LtKriy7duf2dHEqI2t9rIjkLKKDaYMvFb6nZGcHgFWVY14gMnPDagk5mdsD5Cuk42KucCDoM-Iw",
+        "sender": "customer",
+        "senderName": "Trần Minh Ngọc",
+        "text": "Ko đc cô dỗi",
+        "timestamp": "18:11"
+      },
+      {
+        "id": "m_Q7f9DlbZI7YOo-u0jsUmjWdHEqI2t9rIjkLKKDaYMvHD-Z58S9MziCS3XIFIX6ceQNaMNEdC52_lODetqtALmw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "A m gặp suốt ấy mà",
+        "timestamp": "18:11"
+      },
+      {
+        "id": "m_SK2lZW5qXWu-XlVwrpCO1WdHEqI2t9rIjkLKKDaYMvEbPEZFkYm6FQn93z6h-SVXcYiEZtiKCsRiDeio_XENJw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Còn khóc lóc các kiểu nữa cơ",
+        "timestamp": "18:12"
+      },
+      {
+        "id": "m_XTYymuqY6NNvDFV1w-5WQGdHEqI2t9rIjkLKKDaYMvET0L12TVeQEcGNtlRCVQ7MCebaWXU0UFI0rP7rgXCFJQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cái chính là stu ngon nghẻ thì kiểu j cũng dc",
+        "timestamp": "18:12"
+      },
+      {
+        "id": "m_PEmjFhL9J_KzxutUKgxQAmdHEqI2t9rIjkLKKDaYMvGiFfKDIVf2J_aTkhknXiSb-j4Wxitypm9kwX6wtrR1cg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Hok ưng rồi nó lại mất vui",
+        "timestamp": "18:12"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_2348880425920391",
+    "facebookPsid": "28987245930892398",
+    "isLiveFacebook": true,
+    "customerName": "Trần Liên",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Tr%E1%BA%A7n%20Li%C3%AAn&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "https://drive.google.com/drive/folders/1Vpumw49_FFDoxAadjQcJAzAGBKYsuv63",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_b3Hs0jJ-PjRNKgO3hmEG06Qdoqwxkg-qI-pym4YYODl5mbV8qH192pBujMGjp-K1srt1ryfYb9i526qlTc7fGA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "3 thợ chụp",
+        "timestamp": "18:01"
+      },
+      {
+        "id": "m_20or5JgrNi8y2a2ZpGNY7qQdoqwxkg-qI-pym4YYODm16fl65xOX-XKt3EQq2mPpuGE4nQeSBqZKOLBYY9ZT-A",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "1 thợ quay mv",
+        "timestamp": "18:01"
+      },
+      {
+        "id": "m_vB6qrAfG4UPzoDKEu8KbHaQdoqwxkg-qI-pym4YYODnpzGubMnL8vPuVvjPK8pFRIncScpLFKUfjOm0FlCV4gQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Xe 47 chỗ di chuyển cho cả lớp ạ",
+        "timestamp": "18:01"
+      },
+      {
+        "id": "m_-f19pxsBF0m74jbYx4OrM6Qdoqwxkg-qI-pym4YYODlTiYSI5X8jWWtUGfo4NVZZqdj01iLsY5QVtYrbUbojQA",
+        "sender": "customer",
+        "senderName": "Trần Liên",
+        "text": "Cả trang trí lớp bóng bay đồ phụ kiện hả em",
+        "timestamp": "18:02"
+      },
+      {
+        "id": "m_CFFqvK4occmEBGXaCZEDhaQdoqwxkg-qI-pym4YYODk6rHHW_psGC2JlCkgAhkhdtpRnfmJZO2g8ZQ-nEMsItw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Trang trí thì riêng c ah",
+        "timestamp": "18:02"
+      },
+      {
+        "id": "m_8Vh9niAsGVHiwpIK8M-pf6Qdoqwxkg-qI-pym4YYODmJLpH-iZsVTczUp3RJP905EbCoHRimjGdyJknMkwPV5A",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Tuỳ theo nhu cầu từng lớp ạ",
+        "timestamp": "18:02"
+      },
+      {
+        "id": "m_aNTT_T90kv9t8l7K8O-d_aQdoqwxkg-qI-pym4YYODnm_2CJlTwOzPmkcsbspt-UFYXAAWLsXI0vLemb6aAP0Q",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "18:02"
+      },
+      {
+        "id": "m_mL53B89y09n7CJYYYX2pL6Qdoqwxkg-qI-pym4YYODlYeHeTnSLSdSYJx-_jqhB2P1F0_HhPYA0vs0JHP_eCEA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Rèm vẽ",
+        "timestamp": "18:02"
+      },
+      {
+        "id": "m_XRPLL-tGOp518DzLaqhcA6Qdoqwxkg-qI-pym4YYODkEwCY1iuiNm8zhfKRgGTUXIvV8XsVgcAsCgl20_ETjIw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Trung bình full 3-4tr / lớp tuỳ mẫu ạ",
+        "timestamp": "18:03"
+      },
+      {
+        "id": "m_T7hREF9SfxQhymOytF16HaQdoqwxkg-qI-pym4YYODnfKvrcet3dl_LAHclg5___wYa-6nexMSr3WISAmuX8ew",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "https://drive.google.com/drive/folders/1Vpumw49_FFDoxAadjQcJAzAGBKYsuv63",
+        "timestamp": "18:03"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_4139025499731050",
+    "facebookPsid": "39096099163370949",
+    "isLiveFacebook": true,
+    "customerName": "Hải Ngọc",
+    "customerAvatar": "https://ui-avatars.com/api/?name=H%E1%BA%A3i%20Ng%E1%BB%8Dc&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Giáo viên phụ huynh chụp ảnh free nha e",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_WvNFRl8fNTYFFQTBnTGkyTvn2pj8SpNTWS2HGXw7E4YDFD0jLTOm6QLANBSHZvnola-nDgyEHN6DtSXwMquc1w",
+        "sender": "customer",
+        "senderName": "Hải Ngọc",
+        "text": "hi c",
+        "timestamp": "14:56"
+      },
+      {
+        "id": "m_N7i8GHlS_DgWcxKEO1U65Tvn2pj8SpNTWS2HGXw7E4bEeWS-AyWMwDxw9T3cFWgILSPa19ALUOzIuQp4-9dTjA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Chào Hải! Cảm ơn bạn đã theo dõi chúng tôi. Bạn cần chúng tôi giúp gì không?",
+        "timestamp": "14:59"
+      },
+      {
+        "id": "m_lb9-INa3npu_gsyxvHRAcDvn2pj8SpNTWS2HGXw7E4an-iLGSFFNa6ePDpxzT95n-GrMgMVLAPCSIyu0U-ofhw",
+        "sender": "customer",
+        "senderName": "Hải Ngọc",
+        "text": "em cần tư vấn các gói chụp kỉ yếu ạ",
+        "timestamp": "14:59"
+      },
+      {
+        "id": "m_03SLpeAwTOUNjsEzHwauFTvn2pj8SpNTWS2HGXw7E4bzQ-KuWt4qdkRdMaiEFUG6XZVTNYZ9DciBodYDwFOaQA",
+        "sender": "customer",
+        "senderName": "Hải Ngọc",
+        "text": "lớp e 42hs và 1gv",
+        "timestamp": "15:01"
+      },
+      {
+        "id": "m_dZuzyQ5sBhAtpxr6oo_g-jvn2pj8SpNTWS2HGXw7E4ahPU_WaorNllNkAhREUbarF5CkVARfz-1phsovwvemvA",
+        "sender": "customer",
+        "senderName": "Hải Ngọc",
+        "text": "THPT Mạc Đĩnh Chi HP ạ",
+        "timestamp": "15:01"
+      },
+      {
+        "id": "m_49Y1ItqMxkfd4kFw0D-0qjvn2pj8SpNTWS2HGXw7E4axFlp5tsW0v6xgS7WU_ynp8M36sKG2vhvduOl5-5LHTw",
+        "sender": "customer",
+        "senderName": "Hải Ngọc",
+        "text": "sdt 0904023106",
+        "timestamp": "15:02"
+      },
+      {
+        "id": "m_GkQB8V6YuXGjfFpPsKUM7zvn2pj8SpNTWS2HGXw7E4ZgkV26ESlZjIWhUEtBf_IvZKrT6Fb32vlyvfdDGSb2TQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e ơi",
+        "timestamp": "15:02"
+      },
+      {
+        "id": "m_qu4TRs-nCJ7vW_Ou8VGwITvn2pj8SpNTWS2HGXw7E4ZKG_YUIhii6RujgVjdl0-gYKGTKj5F2qvrXl3nitgFNA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Giáo viên phụ huynh chụp ảnh free nha e",
+        "timestamp": "15:02"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_926957186877012",
+    "facebookPsid": "38970864512556818",
+    "isLiveFacebook": true,
+    "customerName": "Maii Linhh",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Maii%20Linhh&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "dạaa",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_MU25IgBAUIyRrIq6hdxYvRKurGtSla_OmlU1gvmPmAFUBrxRzRzGYiRqjLPLbDGswlDf07n_ocIVQxCHGH8iag",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "13:45"
+      },
+      {
+        "id": "m_ikxfiVaMpzNLQCvTMwTZMRKurGtSla_OmlU1gvmPmAElylf1psqZRNhtNN_y9pZwKbcwJXKJAkhNB6HA41aoCA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Full concept cử nhân quốc tế đủ nha e",
+        "timestamp": "13:46"
+      },
+      {
+        "id": "m_iVcANMaee-zuF9qa3ISfNBKurGtSla_OmlU1gvmPmAH7J-CdRUkZ_tKnf930pbzOY9IHXu_UTkiYl3x8m1TJbg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "13:46"
+      },
+      {
+        "id": "m_OP46JBY3Bl5-wINdGflw0RKurGtSla_OmlU1gvmPmAFCauW8VgxKz9XNaVqU8Mvr94yjKrttOz50G5il8FA7sg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cô giáo Hoàng Quế Chi có dạy lớp mình hok e",
+        "timestamp": "13:47"
+      },
+      {
+        "id": "m_y3-FAI2y7HvMSmWfxIg4txKurGtSla_OmlU1gvmPmAFhXhyBIah2vC3x-e5pHAMXsfcMr0A2ncBK03uRT0IXIQ",
+        "sender": "customer",
+        "senderName": "Maii Linhh",
+        "text": "Dạ khom ạ",
+        "timestamp": "13:48"
+      },
+      {
+        "id": "m_k0tM1FK4_Z6heY8I2iYIWBKurGtSla_OmlU1gvmPmAFOBBulQcl6V8uFk8spGqnel1g-TlARD7pr1tsUzTIlPg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp cứ chọn gói phù hợp đi nhá cần j cứ ới shop setup cho là xong",
+        "timestamp": "13:49"
+      },
+      {
+        "id": "m_OfWePKZgdxagskqyv_IiehKurGtSla_OmlU1gvmPmAGplWajZUOVq0Sg__aBZ_E3czeJSo_hesdsdT0uJRqn4Q",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "T10 shop đang có chương trình tặng 1tr cho lớp",
+        "timestamp": "13:49"
+      },
+      {
+        "id": "m_AzAY0qm8CEWkrxEQXL-exBKurGtSla_OmlU1gvmPmAFgYLPOdVypiQtYf2yV3xM5stJb_8wt7SxqHtwuLSBrhw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Và chong chóng khổng lồ để lớp check in",
+        "timestamp": "13:49"
+      },
+      {
+        "id": "m_fjjoYCG0EE4FRFrybuvBdBKurGtSla_OmlU1gvmPmAG9PfHf9MLO5cyE0eAUmj85ETSe8sPfgL8mdF20LN1dYA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "13:49"
+      },
+      {
+        "id": "m_P14yQnjb6_OYGZS4tFmBWhKurGtSla_OmlU1gvmPmAE-lkUcdLhgYTQ_uVgVPSwFYSu9hxtgbWRuhxgU8EffbQ",
+        "sender": "customer",
+        "senderName": "Maii Linhh",
+        "text": "dạaa",
+        "timestamp": "13:50"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1789482102308826",
+    "facebookPsid": "38674934385483841",
+    "isLiveFacebook": true,
+    "customerName": "Cẩm Nhung Lê",
+    "customerAvatar": "https://ui-avatars.com/api/?name=C%E1%BA%A9m%20Nhung%20L%C3%AA&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Thấy các bạn bên trường book lịch cá nhân",
+    "lastMessageTime": "08-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_sXQVn4RzTJ7RLNJp7LHHowEl2_EG3TvUrJvKijNJ4HkndvaVJKQfNdqCmXzNQhjb-MxnNmdyft9wXfXKo4G61g",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Nó đấy c",
+        "timestamp": "20:52"
+      },
+      {
+        "id": "m_7iVX2gdkmclGRxa6dJ3RcgEl2_EG3TvUrJvKijNJ4Hl4uW_Kcy_kl-GekG0wgG8P2KmMNB6Quq7meYipgZTMdQ",
+        "sender": "customer",
+        "senderName": "Cẩm Nhung Lê",
+        "text": "Bao gồm cả bóng nữa hả",
+        "timestamp": "20:52"
+      },
+      {
+        "id": "m_CS0Q6_On8V8CeaSoTNz-PgEl2_EG3TvUrJvKijNJ4HlEe-HayiZXTsljlKn4oB2kwcQM0qjAlD_wzoIrvT0VuQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "20:52"
+      },
+      {
+        "id": "m_qEt8skFyyqV_2oAjbK9ITgEl2_EG3TvUrJvKijNJ4Hmjlo_lHM-I8hO2szt94YtzLJb8-KMf-5N4Pv_dGh9SpQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Đúng rồi c ạ",
+        "timestamp": "20:52"
+      },
+      {
+        "id": "m_zyYE0wn6qxKX0p-BO4N5CAEl2_EG3TvUrJvKijNJ4HmcPOSSlOPtMEI0zBUw_R136jpgT83VL6z8kHLV0kp0-g",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Full cả bóng trần luôn ạ",
+        "timestamp": "20:53"
+      },
+      {
+        "id": "m_KnwKlVD5AfE2mcJUMvFWZwEl2_EG3TvUrJvKijNJ4Hn9_8z8wIfF-syFWbQyEn0qevOSfjBszIxn9Ekh3qWk5w",
+        "sender": "customer",
+        "senderName": "Cẩm Nhung Lê",
+        "text": "[Hình ảnh]",
+        "timestamp": "20:53"
+      },
+      {
+        "id": "m_bw2iKL7UbO98eGhtMrW9GQEl2_EG3TvUrJvKijNJ4HnyaFE-lJQP3pSDXF5SW3N0rNQ4pVYr0qWyQOKPYSjVcA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp mình ok hết chưa c",
+        "timestamp": "09:44"
+      },
+      {
+        "id": "m_afdSUF9pzdYDLWlbRE2UkwEl2_EG3TvUrJvKijNJ4HkE8HIjZUK1XyEuWi-oG16zntgjHiuZ5JvIjtSueahFfw",
+        "sender": "customer",
+        "senderName": "Cẩm Nhung Lê",
+        "text": "Chưa e ơi, vẫn bàn e ah",
+        "timestamp": "09:45"
+      },
+      {
+        "id": "m_lYRJc0eYRWkXD3f8wqpcwAEl2_EG3TvUrJvKijNJ4Hk-p9DKZRqO6qJchLS9gbfHgK_QFZ9ZbCxi1GEVDkk6Aw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok c ơi có thông tin c báo bên e setup cho là dc ah",
+        "timestamp": "09:45"
+      },
+      {
+        "id": "m__3Oxz0HgY61u0Jr6ObqfvQEl2_EG3TvUrJvKijNJ4Hmh22iLXxBi4Q8JVF79sP80ak4MPFPWEyH306-aRLV7nA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Thấy các bạn bên trường book lịch cá nhân",
+        "timestamp": "09:45"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1797623827895919",
+    "facebookPsid": "29300471192879401",
+    "isLiveFacebook": true,
+    "customerName": "Mac An Binh",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Mac%20An%20Binh&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": ":))))",
+    "lastMessageTime": "06-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_6zReetMXOqQKtHC7NgYXK9CtLjAwp1RkUYxcdD4hlzAbwEWwIUQhfTqvXOUJds6nB0yuFigTgim4bNYCFYvPSw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cho 2 thg nam quyết luôn chứ hok chắc khỏi chụp",
+        "timestamp": "19:17"
+      },
+      {
+        "id": "m_HpBJhPEiJh2mAyc8itxEptCtLjAwp1RkUYxcdD4hlzCO4jjEYHL3itre64aM7qvJ2wUubrMOjV-gvrNPwrK-lg",
+        "sender": "customer",
+        "senderName": "Mac An Binh",
+        "text": "con trai lớp e đặt đâu ngồi đấy thôi chứ kh có ý kiến gì",
+        "timestamp": "19:17"
+      },
+      {
+        "id": "m_w_V_W-rFmb9fih83BcWMMdCtLjAwp1RkUYxcdD4hlzBcu4sEB7vwU_XJOCrIQsxAMA7VLrDJwDpLASBIGBDZJA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Con trai nó dễ mà",
+        "timestamp": "19:17"
+      },
+      {
+        "id": "m_Rbs-yF3CDnf3W9rizYyMk9CtLjAwp1RkUYxcdD4hlzAN9MafpnGHOD6f8AmQfpb3s6-Z3ZgP7DXqtmQt0rZR9g",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Quan trọng các chị đẹp nhà mình thoai",
+        "timestamp": "19:18"
+      },
+      {
+        "id": "m_Vxaki6e5MOMFBk2LLiamV9CtLjAwp1RkUYxcdD4hlzD051Lt9WBsTW-hXiDLZYGVBCZEbUrhR2Pl2qWMoS9EIw",
+        "sender": "customer",
+        "senderName": "Mac An Binh",
+        "text": "đr với cả cô giáo lớp e cầu toàn lắm cx mệt",
+        "timestamp": "19:18"
+      },
+      {
+        "id": "m_HgQK2YJ9UnUAh1vFBfPRCtCtLjAwp1RkUYxcdD4hlzAr9vMnwWojSiSQGleQtePNV5NpvwWwYGz4TOniapbLMQ",
+        "sender": "customer",
+        "senderName": "Mac An Binh",
+        "text": "lớp ngta toàn gv trẻ",
+        "timestamp": "19:18"
+      },
+      {
+        "id": "m_WiueU7sd5L0MQ-aPxY4uidCtLjAwp1RkUYxcdD4hlzBaavZxC8Z49Kmm1ZDqNajtJjq4NPF_bmBZQ7mHEobeoA",
+        "sender": "customer",
+        "senderName": "Mac An Binh",
+        "text": "chốt phát xong luôn",
+        "timestamp": "19:18"
+      },
+      {
+        "id": "m_iJDOyP6va1w8g3h5Gz3NAdCtLjAwp1RkUYxcdD4hlzCuJFUNiYnrUoCPJcvkr8aibp89kmJfV4tq5c0YirlHHg",
+        "sender": "customer",
+        "senderName": "Mac An Binh",
+        "text": "nói vs gv xong ròi gv mới nói vs phụ huynh",
+        "timestamp": "19:18"
+      },
+      {
+        "id": "m_p-KaBYNQOUc6RhX1WtTO_9CtLjAwp1RkUYxcdD4hlzAdeZEwVedfHJerUCnUbiXpRlRfcx6Cm71RYyiIkIN0nQ",
+        "sender": "customer",
+        "senderName": "Mac An Binh",
+        "text": "lằng nhằng lắm",
+        "timestamp": "19:19"
+      },
+      {
+        "id": "m_cu3nosFexMIej-FhdV6_P9CtLjAwp1RkUYxcdD4hlzAphZ1_Ye5ad1Hh7ligBnOu4mdXJ5xf_Bl5xVuebfiGFQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": ":))))",
+        "timestamp": "21:44"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1630521715399747",
+    "facebookPsid": "29517097737892173",
+    "isLiveFacebook": true,
+    "customerName": "Ph Yến Nhi",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Ph%20Y%E1%BA%BFn%20Nhi&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "oki",
+    "lastMessageTime": "06-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_gI8w3M-GvdW-XzfGk76mddwNEf8uKMUSSo7O0eGrVQ9Bvj80b7YEAsurbpdjuIolz6Ts8YoBjbetiL8DM4kMoQ",
+        "sender": "customer",
+        "senderName": "Ph Yến Nhi",
+        "text": "lớp nyc e ấy a",
+        "timestamp": "21:11"
+      },
+      {
+        "id": "m_Fy4_B412AbmKfbJBwqx3KtwNEf8uKMUSSo7O0eGrVQ9SdFqvtYLA4G8-rk2MJFq8_uxX24rzgzM7oqNODIp1jg",
+        "sender": "customer",
+        "senderName": "Ph Yến Nhi",
+        "text": "hâh",
+        "timestamp": "21:11"
+      },
+      {
+        "id": "m_-oGUsrILN2g1Jvji7GOZRNwNEf8uKMUSSo7O0eGrVQ9IWBgy2SFwTMniPmVvTdM52vht5JHo6Vva9ndGhov2TA",
+        "sender": "customer",
+        "senderName": "Ph Yến Nhi",
+        "text": "oan gia",
+        "timestamp": "21:11"
+      },
+      {
+        "id": "m_hBqjtSdta4x5hriVmr9jM9wNEf8uKMUSSo7O0eGrVQ-95Vu8T-kYKqEBqD-GpOsBgvRLmQqsuBTRsW1CXAZuyw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": ":)))",
+        "timestamp": "21:11"
+      },
+      {
+        "id": "m_5nQUawE1YKIqY-cae9alUtwNEf8uKMUSSo7O0eGrVQ91mnbnpOSVME_OBSdzkok3JxgzQqwu_H7-gBLUutH44w",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Thế chụp ké làm sao",
+        "timestamp": "21:11"
+      },
+      {
+        "id": "m_71r-S3-FKJd7wPWJlPYdTNwNEf8uKMUSSo7O0eGrVQ_QO2q9paDyv_LOcBt8pp9xVcrx9EiaEeF0lUxKtaX1mw",
+        "sender": "customer",
+        "senderName": "Ph Yến Nhi",
+        "text": "th dẹp a ạ",
+        "timestamp": "21:11"
+      },
+      {
+        "id": "m_zPdfFfj3VqiV-P-Ydvgq-9wNEf8uKMUSSo7O0eGrVQ-pWmnnIFwzJifoEcq4sEW36yHt9rqEkkVD6bJM146c7A",
+        "sender": "customer",
+        "senderName": "Ph Yến Nhi",
+        "text": "em chụp một mình",
+        "timestamp": "21:11"
+      },
+      {
+        "id": "m_gofkxG1FYDtjp7ExZHBMHdwNEf8uKMUSSo7O0eGrVQ_kozzc4L0_gxa9Ymsw14jjquBq909Y6_mauYjIHtmq8A",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok kk",
+        "timestamp": "21:12"
+      },
+      {
+        "id": "m_0VMWjUiWX06iMTkM_80iFdwNEf8uKMUSSo7O0eGrVQ_JR8ySfh6RAgff6g60TkCQp8KkmdnPiLrYVabv8OHqCw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cần thì ới a",
+        "timestamp": "21:12"
+      },
+      {
+        "id": "m_xMw25QTg6-fnFnJ1NwPM_NwNEf8uKMUSSo7O0eGrVQ9mlro5rBbW2WgE6JO5X5wk3zeEuqsVu5P1VycwLotd7w",
+        "sender": "customer",
+        "senderName": "Ph Yến Nhi",
+        "text": "oki",
+        "timestamp": "21:12"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_2016503385696842",
+    "facebookPsid": "39047263188250997",
+    "isLiveFacebook": true,
+    "customerName": "Thư Minh",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Th%C6%B0%20Minh&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Lớp mình trường nào thế ạ",
+    "lastMessageTime": "06-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_YiXUn8HgdHBY2d3Uol88r9GJvYXeS0x5JiRyoTZnPRFwygpVEAfneubyAtEvBC6GR5K9EwNtdTcl924VtG3cAg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Full trang phục truyền thống concept cho lớp mình ạ",
+        "timestamp": "20:03"
+      },
+      {
+        "id": "m_lcTWNhH-UVZnTHHGBnRE29GJvYXeS0x5JiRyoTZnPRHG-Eilr8TRW1RZlVSrd0sZLwn5cWR5oPNcTG5dTkPLeg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp mình dự kiến chụp nửa ngày hay cả ngày e tư vấn thêm cho lớp mình ạ",
+        "timestamp": "20:05"
+      },
+      {
+        "id": "m_O0PgQs3SbwRsezN5zqrNzNGJvYXeS0x5JiRyoTZnPRHdgUJATaDIHErXdxH17anDdEKZ74MoYh7t5K_1flc4qA",
+        "sender": "customer",
+        "senderName": "Thư Minh",
+        "text": "Cả ngày bạn nhé",
+        "timestamp": "20:06"
+      },
+      {
+        "id": "m_UUAQrwII8Y_zHCQzqWfHqtGJvYXeS0x5JiRyoTZnPRHfwjEuN6Q1fUSLJWvMEaHkAVzPW1qyiJHfArNfEq9QYg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Dạ vg",
+        "timestamp": "20:06"
+      },
+      {
+        "id": "m_bUqWvfGVLw41xD5oba4hi9GJvYXeS0x5JiRyoTZnPRHrQUWgpxod200ofKV2Doi3HeIL4YGSrv4SMmmhz7k1cg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Sáng mình chụp ở trường truyền thống 7h30-11h30",
+        "timestamp": "20:07"
+      },
+      {
+        "id": "m_ZJ3ZZ0c-vnbojByXLjkM59GJvYXeS0x5JiRyoTZnPRFDwoPI7DKmazW8S5zyKhMHDy-JOlDpfFH7ywSRjYrLDg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Chiều concept 2-5h",
+        "timestamp": "20:07"
+      },
+      {
+        "id": "m_l0CN78PDfBToys2zvCx6zNGJvYXeS0x5JiRyoTZnPRHjlUk2b1Agj1_k55gAiDdHtD3ZNg0_rKpDCQReCGaZFg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Có thể ngoại cảnh hay ở trường ạ",
+        "timestamp": "20:07"
+      },
+      {
+        "id": "m_9QLzIFpmSQYURpbYblWkatGJvYXeS0x5JiRyoTZnPRHJLGaZcrr40QseqgiKB4LpPcBU5tpN-5krV7R3ov5Vog",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "20:09"
+      },
+      {
+        "id": "m_7CGIKaIxzByEELFkR7P5o9GJvYXeS0x5JiRyoTZnPRHXVhlxfD5TOLxk-c-iNfgMabUo08261d9QbEBkPzvU3A",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Timeline 1 số lớp ạ",
+        "timestamp": "20:10"
+      },
+      {
+        "id": "m_knS4TntgwitPmYWOgoj4J9GJvYXeS0x5JiRyoTZnPRGrXPRtL7AHb9JvpFnnf9T81zkn_fCvnEK8aYEsRsrKGg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp mình trường nào thế ạ",
+        "timestamp": "20:13"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1734416874449210",
+    "facebookPsid": "28500652556271308",
+    "isLiveFacebook": true,
+    "customerName": "Tram Anh",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Tram%20Anh&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "buồn vậy",
+    "lastMessageTime": "06-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_4uovPVnWuctq67DVjTOq0LHm9JenJW1ZtXfwAlE3IPtzztlJSvERT-p13hi4pzXnQ3q7Dkxza2GGlJBTUaFGwQ",
+        "sender": "customer",
+        "senderName": "Tram Anh",
+        "text": "lục đục ngày chụp ý a",
+        "timestamp": "10:41"
+      },
+      {
+        "id": "m_B7MBAdu7d5BnYn1imBw1i7Hm9JenJW1ZtXfwAlE3IPvW5Njrvgy0NnOPM8vNSX80VTlOPI1vm4CQcg6Up4yVaw",
+        "sender": "customer",
+        "senderName": "Tram Anh",
+        "text": "cứ bảo bận này bận kia",
+        "timestamp": "10:41"
+      },
+      {
+        "id": "m_R4V6lpm1lbi1oBreLm9amLHm9JenJW1ZtXfwAlE3IPs_yc5_2rdPDEa4cLduYIrpkxxcmKmJyzEqvyUpDiSB_A",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "thế thì cho bình chọn là dc e",
+        "timestamp": "10:41"
+      },
+      {
+        "id": "m_EAUzY0EKeDjrxr1WkBKANbHm9JenJW1ZtXfwAlE3IPsiIdakHV9k7K6DgYxDHMEIgyZenSlF_vMSg857xVdPlQ",
+        "sender": "customer",
+        "senderName": "Tram Anh",
+        "text": "bọn e dg bàn lại",
+        "timestamp": "10:41"
+      },
+      {
+        "id": "m_rqLoxfSGjTGlEQoU-JQ6MLHm9JenJW1ZtXfwAlE3IPtGZa58r6B0xdV_yRT9ek_NVYZlcYKUlPbFjwwy2MsLzQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "theo số đông tập thể lớp",
+        "timestamp": "10:41"
+      },
+      {
+        "id": "m_pY8g_Lep6cf7Ab2r9CNbBrHm9JenJW1ZtXfwAlE3IPs_mOSAC6cntUq6zW25h5PVdZ7L0GAnL_OQnp8vO7SbQw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "mọi người bỏ bớt việc riêng vì tập thể lớp nó sẽ ok hơn",
+        "timestamp": "10:42"
+      },
+      {
+        "id": "m_19iTu6qPHfa4P927tgQ4RbHm9JenJW1ZtXfwAlE3IPvJztrzXhbtY3y5KX8deOw6nQnyxqTQmJX4eldpzm3tsQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "mỗi người nhường nhau 1 tý",
+        "timestamp": "10:42"
+      },
+      {
+        "id": "m_Y-uGPoUTzZpItY1c7eYrRLHm9JenJW1ZtXfwAlE3IPt02zPAnWT_4N3bFTX5RNijC300DMUEcUQCkeCkQ_V88w",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "lớp mình dự kiến ngày nào ok chưa e",
+        "timestamp": "18:47"
+      },
+      {
+        "id": "m_FqHDZlmZ88UEUNPWPCZ_1bHm9JenJW1ZtXfwAlE3IPvF0uwzRkrEVHK6Y_LqKEFNszsICuv6dG-JU5Bqn5JseQ",
+        "sender": "customer",
+        "senderName": "Tram Anh",
+        "text": "lớp e quyết định k chụp nữa a ơi",
+        "timestamp": "18:48"
+      },
+      {
+        "id": "m_LxwdSOfSlb_Q0L6i7ZK5srHm9JenJW1ZtXfwAlE3IPvVRf3AQcQw7wmjyZ3WFqQjUTRO7IkCVrn9soWAI-y8tQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "buồn vậy",
+        "timestamp": "18:48"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1034627039584562",
+    "facebookPsid": "39215227008123933",
+    "isLiveFacebook": true,
+    "customerName": "Hoanq Phuc",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Hoanq%20Phuc&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "anh oi bên mình còn trống lịch 21/2 k ak",
+    "lastMessageTime": "06-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_G_mhh0rCEzSpNi79sjLNtoLfdRK5Ip1xUSUZqYiEzsgnBXX7wyZUtzKArSaI6QKBuFIrL3JD_4L8Fpf9VdeUww",
+        "sender": "customer",
+        "senderName": "Hoanq Phuc",
+        "text": "anh oi bên mình còn trống lịch 21/2 k ak",
+        "timestamp": "08:50"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1043437108709343",
+    "facebookPsid": "28501445626165226",
+    "isLiveFacebook": true,
+    "customerName": "Minh Thu",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Minh%20Thu&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Full trang phục phụ kiện nó rơi vào tầm 850k/ bạn",
+    "lastMessageTime": "06-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_TNDe4jdKxYOpKr0P2tH7PoXW7QZY-fIXEZ9QK9R02BiCnFBA2aH_Hrl-gZV80uyUXNZogseXytBLX8mTzl1JvQ",
+        "sender": "customer",
+        "senderName": "Minh Thu",
+        "text": "bọn em chụp đền chiều th ạ",
+        "timestamp": "06:36"
+      },
+      {
+        "id": "m_7IWlBIWX-ikA2vuUyVm-xIXW7QZY-fIXEZ9QK9R02BjLNT_ObmlE54porsRr53YHKc9R-SnUeoZhE33BQ2cPlg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Thế thì đơn giản",
+        "timestamp": "06:37"
+      },
+      {
+        "id": "m_VQowy7k1eXsrNG2abakSZoXW7QZY-fIXEZ9QK9R02BhOMIOH8pyLGyaurSXx20iKgULJ0QV2xTzTFlobC_-9iA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "16 bạn thì 1 buổi là xong hết các hạng mục",
+        "timestamp": "06:37"
+      },
+      {
+        "id": "m_418u5kEdtWEx2gXL9Kw8MIXW7QZY-fIXEZ9QK9R02BhC81-ziSWWGS0DeLBwUyKVBeEvLWQmUxT5l_3XwFkrYA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Các bạn trẻ mong muốn mấy thợ chupk",
+        "timestamp": "06:37"
+      },
+      {
+        "id": "m_GmETHdLotzccVz--nVOUE4XW7QZY-fIXEZ9QK9R02Bh4rpSnnuUDJ_ri-TvKpKZoTJHpuxoHpqFjLKA71O3fmg",
+        "sender": "customer",
+        "senderName": "Minh Thu",
+        "text": "bọn em muốn chụp thanh xuân với áo cử nhân th ạ",
+        "timestamp": "06:38"
+      },
+      {
+        "id": "m_LlAgd1yrRzlMXGaGWGB-Z4XW7QZY-fIXEZ9QK9R02BhsgojID6hrkGkZd7N3UOVXP7WLr8WPoUl5WYeCHeXwcQ",
+        "sender": "customer",
+        "senderName": "Minh Thu",
+        "text": "1,2 b chụp áo dài",
+        "timestamp": "06:38"
+      },
+      {
+        "id": "m_hrvSbBcx5R1j7IlImFWMiIXW7QZY-fIXEZ9QK9R02BhKel93111WxlHC8vSLaxb7wVUqntdzawubqXrUh-OW8w",
+        "sender": "customer",
+        "senderName": "Minh Thu",
+        "text": "..",
+        "timestamp": "06:39"
+      },
+      {
+        "id": "m_HFY-_is7EqmfUTbaTHDO9IXW7QZY-fIXEZ9QK9R02BhNDSuFLEyhfCLt5AsqGV9MAgZ07UlIORyG3JxH3v-XOw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Đủ cả truyền thống và concept 1 buổi ok hết ấy e",
+        "timestamp": "06:39"
+      },
+      {
+        "id": "m_a2XmLXViFxjZW0v0MPIL8oXW7QZY-fIXEZ9QK9R02Bhzna-jvELwnc5imeN9bJcfz0VDvjXycF6fYjMXYWQ_RA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "16 bạn thì a đang dự tính nhóm 2 chụp",
+        "timestamp": "06:39"
+      },
+      {
+        "id": "m_T-8o-vz0Jqm102tSaYLDbIXW7QZY-fIXEZ9QK9R02BjGv30orQXtG4v_33B_KspjXbZHgBBpQuzzE0qbeyzvoA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Full trang phục phụ kiện nó rơi vào tầm 850k/ bạn",
+        "timestamp": "06:39"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1474499538072219",
+    "facebookPsid": "39031875663123345",
+    "isLiveFacebook": true,
+    "customerName": "Quynh Anh",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Quynh%20Anh&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "=))",
+    "lastMessageTime": "05-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_ZJHVaTXdyRZ4K5J0cpjPX29dySXqRHoXAImuul7yApTVTiIoapiO2QorGYDTqicepqJsr-UqwpCtn6n0S3PNAw",
+        "sender": "customer",
+        "senderName": "Quynh Anh",
+        "text": "tr ơi",
+        "timestamp": "23:34"
+      },
+      {
+        "id": "m_YKvCS5XIqnpVp6yPbjWowG9dySXqRHoXAImuul7yApQfIB7T5jytknl9D23S76_VxiTPSpLHw5cIRQHAnJ1ewg",
+        "sender": "customer",
+        "senderName": "Quynh Anh",
+        "text": "khê",
+        "timestamp": "23:35"
+      },
+      {
+        "id": "m_jBaoMY-x0me28YOhj5qcE29dySXqRHoXAImuul7yApSYBp58FJlRHVCAhp0l7ZIVvk6bQMEEhHv2xOYFaDCVig",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Bọn này đổi sang 28",
+        "timestamp": "23:35"
+      },
+      {
+        "id": "m_oxF_N0Yiz0D8SQSQHbELWm9dySXqRHoXAImuul7yApSaIICYPHPwl7HwLdASly76ftk7GaQPdakx9oIAICFqyA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Mới báo xong",
+        "timestamp": "23:35"
+      },
+      {
+        "id": "m_jy2vjjQN5wxWLRYfh1t2nm9dySXqRHoXAImuul7yApTRVRiQuI7kZuSJnxqHX57wMq-9JiNtsFgfSWUA6xVoXg",
+        "sender": "customer",
+        "senderName": "Quynh Anh",
+        "text": "ủa the đâu có trùngg",
+        "timestamp": "23:35"
+      },
+      {
+        "id": "m_9obB6Zo-TBeV0KfEOmRNvW9dySXqRHoXAImuul7yApTEREbpbo8izGTH9_fiJ5aRnQ4eHv1shUmYcDkbZAJKzw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cơ mà để a m check lại lịch idol của bọn m đã",
+        "timestamp": "23:36"
+      },
+      {
+        "id": "m_1a2qPY4Cxbn7u6aCzUY6s29dySXqRHoXAImuul7yApRUE8xzHcpc1BchZXXghAZkbxBwxMaJjA7JrA9pIX5GJg",
+        "sender": "customer",
+        "senderName": "Quynh Anh",
+        "text": "😇gi z tr",
+        "timestamp": "23:36"
+      },
+      {
+        "id": "m_HPxTIyIOv_xh5nqWmhB3MG9dySXqRHoXAImuul7yApSak26dSwe8W_RMhgs9n-EMzi-2_aOz5Ppi7vvdpqKyOg",
+        "sender": "customer",
+        "senderName": "Quynh Anh",
+        "text": ":))",
+        "timestamp": "23:36"
+      },
+      {
+        "id": "m_nzm2tuJ1QVEG0AlyDbtvLG9dySXqRHoXAImuul7yApQ1RR4CjC_2yjt_IR-CutXpxkzROj8MKeniEx_qmyV2Zw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Chứ con nhợn này quay đi quay lại là mất lịch ngay",
+        "timestamp": "23:36"
+      },
+      {
+        "id": "m_Jl3fKOeBS2YZ1orqzsrVHm9dySXqRHoXAImuul7yApRHcfyAJzbsKqHjv4r3WOA30XBC64-s0wgu3i9XsOISmA",
+        "sender": "customer",
+        "senderName": "Quynh Anh",
+        "text": "=))",
+        "timestamp": "23:36"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1600245974923944",
+    "facebookPsid": "26474264882270737",
+    "isLiveFacebook": true,
+    "customerName": "Minh Trangg",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Minh%20Trangg&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Ok kk",
+    "lastMessageTime": "05-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_ltt-r6mS7NbYVHLcjLLSDufplRefoyRgmFuxOBWMdC8YJAA95ebyGaruZyxKiBw_89abA-KZItAR-dBf8v0QVA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp cbi triển thôi nhể :)))",
+        "timestamp": "20:19"
+      },
+      {
+        "id": "m_XNx8xpZezPc2dcKLM8274OfplRefoyRgmFuxOBWMdC9dACQZ6lx0gCU5zhXEDm2x-3iYdU39VjUz3VaIdls6kg",
+        "sender": "customer",
+        "senderName": "Minh Trangg",
+        "text": "dạ a ưi lớp em chưa chốt dc",
+        "timestamp": "20:20"
+      },
+      {
+        "id": "m_qgqAaVayVCmmex_OQuTO0OfplRefoyRgmFuxOBWMdC-fft5KDc9lZPC2Jwwzr-_ucq5KIh6RhuhoYy7s2ZLSKQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Khi nào chốt ới a nhá a setup dần cho kk",
+        "timestamp": "20:23"
+      },
+      {
+        "id": "m_-HMVZy8JS7KhL2-4yuTS_ufplRefoyRgmFuxOBWMdC-pE43uWEMCdkBG764b5hbOG5TQ7tGt-wQmCifzVnaiuQ",
+        "sender": "customer",
+        "senderName": "Minh Trangg",
+        "text": "oki a",
+        "timestamp": "20:31"
+      },
+      {
+        "id": "m_3I47uLscxVN1_nEDt0ceLOfplRefoyRgmFuxOBWMdC9hd7gpjcv-0iyihQz_OnkrDiRZjEnkgjbCVywguBCr2w",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Các bạn trẻ sao rồi nhể",
+        "timestamp": "20:28"
+      },
+      {
+        "id": "m_q_CKTDfj9xMK6E4pE45txefplRefoyRgmFuxOBWMdC8mebuBiDIaxElpKxOQ8buKmIhWA2YoQNJlXSx-8s5u5g",
+        "sender": "customer",
+        "senderName": "Minh Trangg",
+        "text": "dạ xin lỗi a nhìu nhaaa",
+        "timestamp": "20:34"
+      },
+      {
+        "id": "m_-nnUf2Mz3n7vzwMKtBEqTefplRefoyRgmFuxOBWMdC_T_PqrtdUcvkMhGP4rz1opOOsrJjw97R5Z6VGSdhGigg",
+        "sender": "customer",
+        "senderName": "Minh Trangg",
+        "text": "lớp e chốt dc rui ạ",
+        "timestamp": "20:34"
+      },
+      {
+        "id": "m_g7WvkQjOaEt8RojWnVqvdOfplRefoyRgmFuxOBWMdC8_LU_3JF1u37gvynrEZdD9URKAz7M_8Yr6WUdBIAdcbw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e ơi đơn giản ấy mà",
+        "timestamp": "20:55"
+      },
+      {
+        "id": "m_RAF-57HFdkA6ghqFidVg9-fplRefoyRgmFuxOBWMdC8V_yIhPtTPlFE4ctmaq43_T3F2m71bLw5x6FqhhEQeYA",
+        "sender": "customer",
+        "senderName": "Minh Trangg",
+        "text": "cảm ơn anh nhìu nhaaa",
+        "timestamp": "20:55"
+      },
+      {
+        "id": "m_3ob0LBEh28kFAJAwelN6AOfplRefoyRgmFuxOBWMdC88Ym9AOB8259Cb1WRzcRJSH6CFhD3gih8T_vX0kIPsEg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok kk",
+        "timestamp": "20:58"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_29189627907296422",
+    "facebookPsid": "39040069118975054",
+    "isLiveFacebook": true,
+    "customerName": "Huyen Thu Vu",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Huyen%20Thu%20Vu&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Lớp mình chốt dc phương án phù hợp chưa c",
+    "lastMessageTime": "05-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_Qx2rVx9Qmwr_WInkvrkKDAPE51E36KoxAYS-qDx4FAHYnLQiHVAWdxhYnfCPXk0-sT2m0Hvval3a2lqSAnb52A",
+        "sender": "customer",
+        "senderName": "Huyen Thu Vu",
+        "text": "Ý c la gói 1tr nếu ko đi vũ yên nữa mà chụp ở won+ ăn lun thì giá tnao e",
+        "timestamp": "16:43"
+      },
+      {
+        "id": "m_m91PdfxwJFR8gKJam1rLrAPE51E36KoxAYS-qDx4FAFlds5aF5C2vbF3qulLDmM2AwjArhT8_qC8_FPg01k7Ow",
+        "sender": "customer",
+        "senderName": "Huyen Thu Vu",
+        "text": "Có đc giảm k",
+        "timestamp": "16:43"
+      },
+      {
+        "id": "m_bkegaN3Imz1QDJeVYrJx-QPE51E36KoxAYS-qDx4FAGEw4xPLzasVOl9hIc5gtnUSZM7L9L9uySgCrqekpICTg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cũng vậy c ạ",
+        "timestamp": "16:43"
+      },
+      {
+        "id": "m_BhTulNkw0fXar0xVJUU5nQPE51E36KoxAYS-qDx4FAF7Xju4LTA5TQ2Hk3ylVWuDw6EnGbVUQPR7vCb2Ks_PGA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Vì phần ăn uống thực tế bên phim trường thu rồi",
+        "timestamp": "16:44"
+      },
+      {
+        "id": "m_n8NuiiuMU5EMU2q5SZos4wPE51E36KoxAYS-qDx4FAGX5DHlYbogT95XR70mXE4THFnyPMWZPm4Ae9-ZNPA3yg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Xe di chuyển vẫn phải 2 xe 47-29 chỗ mới đủ cho lớp mình dc",
+        "timestamp": "16:44"
+      },
+      {
+        "id": "m_1A7vQZ-WAM1PCZ2DeTxiRAPE51E36KoxAYS-qDx4FAEGexXAbRcdGpThhb6rVJdL4un6bI9mNdGz1yDi4OpfOw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ekip vẫn phải 6 chụp 1 quay để chăm sóc cho lớp mình chu đáo ạ",
+        "timestamp": "16:44"
+      },
+      {
+        "id": "m_hat23qIXEp5_7H5vozwCoQPE51E36KoxAYS-qDx4FAHeSRO9V0xDw41WtdyeNRjKFs2UztwWGFxa1PvOGutcNQ",
+        "sender": "customer",
+        "senderName": "Huyen Thu Vu",
+        "text": "Uh. Để c bàn với cô giáo",
+        "timestamp": "16:46"
+      },
+      {
+        "id": "m_tej5v6WPvluFh88UCvd4NgPE51E36KoxAYS-qDx4FAFeS3f85Q82elLbyu9HZAPPsXLWwNnSG3Q3XIqtge9wRQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Dạ vg c ơi",
+        "timestamp": "16:50"
+      },
+      {
+        "id": "m_U2eIclBLke0ZW_sKhjCINwPE51E36KoxAYS-qDx4FAFlh6YR4VzkJwx9TC-vMpoOEyu8uxs0If5v0i5bfAYYnA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp mình dự kiến dc ngày nào chưa c",
+        "timestamp": "16:50"
+      },
+      {
+        "id": "m_Sl5-QvuLuM7d-utR_LEfRgPE51E36KoxAYS-qDx4FAGFeE7toTXdWOF5mek_2Uc9yMSZjR49ScR8Gxxq6rMLmw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp mình chốt dc phương án phù hợp chưa c",
+        "timestamp": "15:14"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_3037615009903878",
+    "facebookPsid": "40013039801620313",
+    "isLiveFacebook": true,
+    "customerName": "Dao Phuong Uyen",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Dao%20Phuong%20Uyen&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "ok kkk",
+    "lastMessageTime": "05-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_9qofiAejFdr75RO_4nFNaPJ6Rm1LbxDsPMSgIA5uCIxX63Y5WX8-HaXz7vXQXZBOYyVlBbV8dgUr0o4bjBDT1A",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "ok e ơi",
+        "timestamp": "12:10"
+      },
+      {
+        "id": "m_CcByGm2s9s1XcFxzAFqVafJ6Rm1LbxDsPMSgIA5uCIyoU2Z-FqP40BCaUsyl5St58CYThx7fEF-DH1CwVQ2DLw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "lớp mình ok hết chưa e ơi",
+        "timestamp": "15:09"
+      },
+      {
+        "id": "m_XXQ-_8X4y_Uat1gkz8YAt_J6Rm1LbxDsPMSgIA5uCIxbfsFkRpyB-tikF7uTaSJKYd82wryJSV3KpHCa1q4uGw",
+        "sender": "customer",
+        "senderName": "Dao Phuong Uyen",
+        "text": "lớp em vẫn ch chốt đc ngày",
+        "timestamp": "15:11"
+      },
+      {
+        "id": "m_6bp8g7jeP-sJWqAYDVOrnPJ6Rm1LbxDsPMSgIA5uCIyMfSwRy5skWvB_EcddD8oN8fC0IWd1uXIQLtRKPk5GKw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Dự kiến những ngày nào rồi e",
+        "timestamp": "15:11"
+      },
+      {
+        "id": "m_OZJzPRXpq1Wd_JklWGF1O_J6Rm1LbxDsPMSgIA5uCIw3JX4rU-MDVDbpzJmht1CnERYBMY83Arp-CVRnIgh3Vw",
+        "sender": "customer",
+        "senderName": "Dao Phuong Uyen",
+        "text": "23/1 ạ",
+        "timestamp": "15:11"
+      },
+      {
+        "id": "m_Wg_ZQhwMAo__rZwh52Oy6vJ6Rm1LbxDsPMSgIA5uCIwtToJnSedHS9auCVypFKAfWjLzgbjQGpqFJeAu5Revsw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ah đẹp luôn",
+        "timestamp": "15:12"
+      },
+      {
+        "id": "m_WjCrmMhdE7MOZGMxxZWEZvJ6Rm1LbxDsPMSgIA5uCIyH3ZhhQ1hXxWZRV4h38inhA7lXDzIr3zPGJPemzv0tjw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cứ trừ 3-10-31.1 ra là ok nhá e",
+        "timestamp": "15:12"
+      },
+      {
+        "id": "m_PAN2gdpUiG6zUAGSRTnqgvJ6Rm1LbxDsPMSgIA5uCIzplOkabmrzx4uqzJToWj2dwPE_FNTZyOh1DbektP5d7w",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Quá tải luôn rồi",
+        "timestamp": "15:12"
+      },
+      {
+        "id": "m_ewQAXQMHgVBLvzFCyiiraPJ6Rm1LbxDsPMSgIA5uCIwSpSmB-fknvfhblOz5lOU4WkMBB0hHjMxUEqTfoEBzAw",
+        "sender": "customer",
+        "senderName": "Dao Phuong Uyen",
+        "text": "dạ",
+        "timestamp": "15:13"
+      },
+      {
+        "id": "m_lU4wnLBUsyyk14q59esalPJ6Rm1LbxDsPMSgIA5uCIyj3kGy9_IZQQ7X32zayphMDpxCluOxIWHTwPL3dR-4bA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "ok kkk",
+        "timestamp": "15:13"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_2388675118553055",
+    "facebookPsid": "38924527813858189",
+    "isLiveFacebook": true,
+    "customerName": "Buii Luongg",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Buii%20Luongg&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "dạ",
+    "lastMessageTime": "05-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_fEw4nQdu95-eUdMP8nsbHBzANugHD6kOVUIxuTlB2WFM_2KochZ-F316YmFSF1A5jSJoqNL7sHj2tEMI4ku1WA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Như khối e nhá",
+        "timestamp": "11:30"
+      },
+      {
+        "id": "m_qGjnIRNfkub1DdoqPhv9phzANugHD6kOVUIxuTlB2WEx6c260dPYdjV3wblZBsHl7Pskwxl3tPTfutD-Y8QP8Q",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Nếu 10 lớp e gt stu a chụp dc",
+        "timestamp": "11:30"
+      },
+      {
+        "id": "m_7-4tnNl1us1gHGsOnS8ONBzANugHD6kOVUIxuTlB2WGPsiWujaQ76euOzAsX1K6DarlUDEGcg3Gj4d-3RyKYrQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Thì 10x300k=3tr",
+        "timestamp": "11:30"
+      },
+      {
+        "id": "m_Uj4Du0uo1BWcZom5KyBiSBzANugHD6kOVUIxuTlB2WHjUaggv9XRY8XFCwpafGuZbEGHp_QBloOUOqvT48v7FA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Để e uống trà sữa :)))",
+        "timestamp": "11:30"
+      },
+      {
+        "id": "m_MfYWlsd8MYqEJpss2uU5OBzANugHD6kOVUIxuTlB2WF2Fyw75BFi0-BMHWx7R1UI7x7oTjuedA3O4nLtAVaR1A",
+        "sender": "customer",
+        "senderName": "Buii Luongg",
+        "text": "à dạ",
+        "timestamp": "11:40"
+      },
+      {
+        "id": "m_H5vlTZBsxpIvA9JWf91uLRzANugHD6kOVUIxuTlB2WEyA9QMklMZb_HBCozMhIvsbhr_J-WnoUI9IIvq2D6-MQ",
+        "sender": "customer",
+        "senderName": "Buii Luongg",
+        "text": "=)))",
+        "timestamp": "11:40"
+      },
+      {
+        "id": "m_JUOT_F37QTbEbFtP3kK9LhzANugHD6kOVUIxuTlB2WE3j7RlWwgFx7dmg0xNGevghS7rIpCTlJlVCPmGdHbenA",
+        "sender": "customer",
+        "senderName": "Buii Luongg",
+        "text": "để e bàn mn a ậ",
+        "timestamp": "11:41"
+      },
+      {
+        "id": "m_YP74kVL-cl_GDlcgPLpVfxzANugHD6kOVUIxuTlB2WGZMzupH5S0xCxPK5rmX3TnxuYrnQe0GmzkyMO8WOgvmg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e ơi",
+        "timestamp": "11:41"
+      },
+      {
+        "id": "m_ffuLxtVkJHI7KYB4hfYKgxzANugHD6kOVUIxuTlB2WGJDEiAnXLl_zJ3kbXTY_jUhpdo4BjpiwW8Jw2mJTzdPA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Có lịch thì cứ báo a setup cho là xong nhá",
+        "timestamp": "11:43"
+      },
+      {
+        "id": "m_sXZPLBbpaf3QkKwEvuxqCxzANugHD6kOVUIxuTlB2WGMz-qtYO-nMpOFrVRSKeH_3QVuabLQiazjFiDkljcUzQ",
+        "sender": "customer",
+        "senderName": "Buii Luongg",
+        "text": "dạ",
+        "timestamp": "11:47"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1121734940390303",
+    "facebookPsid": "38830413903268884",
+    "isLiveFacebook": true,
+    "customerName": "Thuỳ Duyên",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Thu%E1%BB%B3%20Duy%C3%AAn&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Ok e",
+    "lastMessageTime": "05-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_SYqWLKlDTg2SDRJiokH3w5DFFtxtQJzcMfvsxkoJwigizLYIzRzNZ0E9L6vM6kbAlmBZ2Bny2aZmVvfBoH9zcA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "lớp mình chọn dc gói phù hợp chưa e",
+        "timestamp": "09:48"
+      },
+      {
+        "id": "m_6jc7NXuMZjOfsstBGCpqGpDFFtxtQJzcMfvsxkoJwihurKWJiz8o6IAFnb1MUFrpgjFqf8wycbOJRHflMYECGQ",
+        "sender": "customer",
+        "senderName": "Thuỳ Duyên",
+        "text": "Dạ bọn e đang bàn ạ",
+        "timestamp": "11:39"
+      },
+      {
+        "id": "m_41ShwnPrLKyEL1grWSK2JZDFFtxtQJzcMfvsxkoJwiiAw_4uSKfTGi2B554wP5iQ4S5NNfyf7CSh5OyotSCnWQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cần j tư vấn thêm ới a nhá",
+        "timestamp": "11:40"
+      },
+      {
+        "id": "m_Tmov27boB1bbgtTmdEjJ1ZDFFtxtQJzcMfvsxkoJwijV_41JTk7DCftImX4GgdRQUasy6y4BMOfoP-tX1A-PYw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lúc nào cũng nhiệt tình",
+        "timestamp": "11:40"
+      },
+      {
+        "id": "m_9ltR9DGzo-wxdleTXZpjn5DFFtxtQJzcMfvsxkoJwij1hlZ2uMDeUhGrFaFckMUPZWB27Ny7tls3F9Ppzde0gQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cần ảnh stu là ảnh thật thì cứ bảo a",
+        "timestamp": "11:41"
+      },
+      {
+        "id": "m_b3slUt1uFnhhi5VME3WDTJDFFtxtQJzcMfvsxkoJwihAK5JRTHRq7_XabSsvUyIGOywTe33rjoUrBNKIUPNUAA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "A có 1 kho để các bạn hs xem thực tế luôn",
+        "timestamp": "11:41"
+      },
+      {
+        "id": "m_NqPfNletS5ZAucwLxB-cO5DFFtxtQJzcMfvsxkoJwihbS4IQPpXmadeszRvNFJoOs8yknvauHYzXvbsnX2NUgA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "No seeding",
+        "timestamp": "11:41"
+      },
+      {
+        "id": "m_rpCSg-ew6V9Zcy1hZGMrOZDFFtxtQJzcMfvsxkoJwiibLMNF4SfN7cG6AqjkBa_3RHqilsZPkZC0GKLlJVcsOQ",
+        "sender": "customer",
+        "senderName": "Thuỳ Duyên",
+        "text": "Dạ vâng",
+        "timestamp": "11:42"
+      },
+      {
+        "id": "m_gmABwHs-0Q3mPIKe1XpHqZDFFtxtQJzcMfvsxkoJwijA65LC7ErlcUsoIOtQbuPvR4YHkri2cj2fbWrFPQpPAg",
+        "sender": "customer",
+        "senderName": "Thuỳ Duyên",
+        "text": "Lớp e sẽ bàn vs nhau ạ",
+        "timestamp": "11:42"
+      },
+      {
+        "id": "m_LTHuydt033KAfKQSoUZItpDFFtxtQJzcMfvsxkoJwihTcjVQulLhoBbsysnfEeC8ws6VXDhwROZ2EMzzZxjT2g",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e",
+        "timestamp": "11:42"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_919392821024796",
+    "facebookPsid": "28610759885254486",
+    "isLiveFacebook": true,
+    "customerName": "Huong Thu",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Huong%20Thu&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": false,
+    "lastMessage": "Chưa e nhé. Lớp c lùi lịch họp sang thứ 5 tuần này",
+    "lastMessageTime": "05-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_lRTpCW_Wq2xjpXqrP3I0W76z-OuDlDYeUoEZDLVTi68h2WzsCIMOh4t4cXj6viRnbCEktSRWS0gdEuDnfGRm8g",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "07:12"
+      },
+      {
+        "id": "m_cC6giozGk_nW4hQmjBYJcb6z-OuDlDYeUoEZDLVTi6-JbwaVlkjDefsDd3eQSyP_ru332RKlfHKasUcg4rHDrQ",
+        "sender": "customer",
+        "senderName": "Huong Thu",
+        "text": "Nếu chụp cả ngày , chụp ngoài trời là chụp ở đâu ạ",
+        "timestamp": "07:14"
+      },
+      {
+        "id": "m_uU-P566XnGSBIr-O0RT9lL6z-OuDlDYeUoEZDLVTi68ceqIOTUeQBCuDiAI6V9uV2WZOu7GRT8hpDe7cwSSQeg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "địa điểm ngoại cảnh do lớp mình lựa chọn ạ",
+        "timestamp": "07:14"
+      },
+      {
+        "id": "m_otAvDfLJ0tE8FUktg6icH76z-OuDlDYeUoEZDLVTi6_RXoQxFApcoV1_YRz-JwlDdC5KpPmngxhucv0yrxSfng",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "các bạn hay chụp ở vũ yên",
+        "timestamp": "07:14"
+      },
+      {
+        "id": "m_bYQDOO8bs80uSkahKKpyf76z-OuDlDYeUoEZDLVTi69Wx8Dw135J86kNdPEELBMHFVd7RSVAEMxkZuO2Z6uA4g",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "svđ lạch tray",
+        "timestamp": "07:14"
+      },
+      {
+        "id": "m_rl3MicQHUGU3okQQ9MAyhr6z-OuDlDYeUoEZDLVTi685IXnWFhwmnSWBTGDJz3sOvn29HVPIQaLC7RFqzPu6Gw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "phim trường wonderland ạ",
+        "timestamp": "07:14"
+      },
+      {
+        "id": "m_37Ny2T8ThVbqBVYwRzWM6L6z-OuDlDYeUoEZDLVTi68PZMRSiVA06qG3JY-3G0_yDOUxPjsymf93spPlKahlvQ",
+        "sender": "customer",
+        "senderName": "Huong Thu",
+        "text": "Vâng. Mình tham khảo , sang tuần họp PH mình sẽ báo lại nhé",
+        "timestamp": "07:15"
+      },
+      {
+        "id": "m_k6Mg3mviUjJh8WYRAog1vb6z-OuDlDYeUoEZDLVTi6-TVrmO2keY35qsXDr-5F-yw5cuRzqHfRU7PSUugwoLJQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "dạ vg c ơi",
+        "timestamp": "07:15"
+      },
+      {
+        "id": "m_ZJrXwSmkQuieGGPB71_qnL6z-OuDlDYeUoEZDLVTi6-iVg6rqIsAWAUPz9NiJfj3Qpmbjvk3hp99BHbwg7IvqA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Lớp mình chốt dc ngày chụp chưa c ơi",
+        "timestamp": "11:06"
+      },
+      {
+        "id": "m_Sn_yPrfn8fKUJiO1sF3CCb6z-OuDlDYeUoEZDLVTi68ek7mR54Rb-0SZRPY6rtMgQC9zFLTtyM7qjFc2tXBJvg",
+        "sender": "customer",
+        "senderName": "Huong Thu",
+        "text": "Chưa e nhé. Lớp c lùi lịch họp sang thứ 5 tuần này",
+        "timestamp": "06:14"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1081534404278086",
+    "facebookPsid": "28285876201113498",
+    "isLiveFacebook": true,
+    "customerName": "Nguyen Thi Thuy Van",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Nguyen%20Thi%20Thuy%20Van&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "để a setup thợ luôn cho",
+    "lastMessageTime": "04-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_mXa0MHQGwkIuU0eq_6vg1U0oGgN-aI_RZYuEGEi4UdwsYA1uZan_-Hx6pJRtXRDFbEHlSyFFWoniHCO5itGSYA",
+        "sender": "customer",
+        "senderName": "Nguyen Thi Thuy Van",
+        "text": "A ơi e cọc",
+        "timestamp": "17:23"
+      },
+      {
+        "id": "m_ljrdF-G5nPu7qOPsNzHvRE0oGgN-aI_RZYuEGEi4Udz3hkawKSm4FsTUGC5YZaMpcPJjBQffVncm1ORds6ABxA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "[Hình ảnh]",
+        "timestamp": "17:23"
+      },
+      {
+        "id": "m_MOk2GAnPs_zsn-djLZltM00oGgN-aI_RZYuEGEi4UdxOnIEFr1wI1SvrD6fthmcvP7_moZx2GnGsDFkUMo2tPw",
+        "sender": "customer",
+        "senderName": "Nguyen Thi Thuy Van",
+        "text": "12a3 thpt quốc tuấn",
+        "timestamp": "17:24"
+      },
+      {
+        "id": "m_iC3m0o4wDMh92TZ1hOoNGk0oGgN-aI_RZYuEGEi4UdxhLjuAnqN1R1I9L-GCppeuXd9Sriu9QPXZi_F53gU7EQ",
+        "sender": "customer",
+        "senderName": "Nguyen Thi Thuy Van",
+        "text": "13-12 a nha",
+        "timestamp": "17:24"
+      },
+      {
+        "id": "m_g8-GF2soQalxX3_WWlrB0U0oGgN-aI_RZYuEGEi4UdxfPulwbENaj5d0iATwzISl5PNpJgpPuNIjBJbLzi6x3Q",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e nhé",
+        "timestamp": "17:24"
+      },
+      {
+        "id": "m_EM5VVh1f7sG4iGuiNI-UW00oGgN-aI_RZYuEGEi4Udxbezm9QRfF2cQC_rBEZrdkg-AHmKxllugGSPULrHKJ_w",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Kb zalo a e ơi 0988874163",
+        "timestamp": "17:24"
+      },
+      {
+        "id": "m_5j1JF5XdniCbaV-ylJSqv00oGgN-aI_RZYuEGEi4UdzFYkrR4YPYKrpje3VOWgIdJLISl87yXAlLVHNhV49PTg",
+        "sender": "customer",
+        "senderName": "Nguyen Thi Thuy Van",
+        "text": "E gửi r í a",
+        "timestamp": "17:31"
+      },
+      {
+        "id": "m_Fdaj-skD1DINny1FRCetak0oGgN-aI_RZYuEGEi4Udw_2VB3MJ4PvNAOv7LWOl_2PS_5HVqG_twZeKqppHy55A",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "ok kk",
+        "timestamp": "17:32"
+      },
+      {
+        "id": "m_b92dMWpNnQmT-nTPkzjzrE0oGgN-aI_RZYuEGEi4UdwIASWwFh8s4sxnFLO-sZCg3Mz7azV5EiGtSW3TqdDsVg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "chốt gói nào ấy e nhỉ",
+        "timestamp": "17:32"
+      },
+      {
+        "id": "m_0h-qVXlKHtj0JRLA9kquEU0oGgN-aI_RZYuEGEi4UdxxmwKoUsUMZjx-p7eaH_b3T46snXQ3wjUSAu_RRNt9iw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "để a setup thợ luôn cho",
+        "timestamp": "17:33"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1647831763802088",
+    "facebookPsid": "28749462751360096",
+    "isLiveFacebook": true,
+    "customerName": "Vyy Chip",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Vyy%20Chip&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Đúng rồi e ơi",
+    "lastMessageTime": "04-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_7MOganQe1u0vewI3tK2sqAHWjS9OZgM0zkK4ik2bQuBbe-4E6197URW7Q94HfRO64Co2TB5NFEV2QVibKKeBRw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Thích a nào thì chọn e",
+        "timestamp": "12:21"
+      },
+      {
+        "id": "m_PohqXTN26sX3e-h-FjKDhgHWjS9OZgM0zkK4ik2bQuBctFyyqbtIQz5J_PVyGfDKMjcC56Y1aoXtDyJFnuVtUg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "https://drive.google.com/drive/folders/14t_hKt-VcpVLr3-jrGlcxgsXB3rffFQ6",
+        "timestamp": "12:21"
+      },
+      {
+        "id": "m_uCsmRU6YdpPsW_AR9fsZowHWjS9OZgM0zkK4ik2bQuCJaN-czi5L7BUguQKe_1knJlafNXWlU-nxwUc37dTOOQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "E trường nào ấy nhỉ",
+        "timestamp": "12:21"
+      },
+      {
+        "id": "m_JQLqO9nTNvv61e7JvXkfQQHWjS9OZgM0zkK4ik2bQuCx-40byPGBKGDzxh4dkdKlZ1k6_6oJaLz3kDwwpEKY9Q",
+        "sender": "customer",
+        "senderName": "Vyy Chip",
+        "text": "để e hỏi ý kiên mấy đứa bn e nữa ạ",
+        "timestamp": "12:22"
+      },
+      {
+        "id": "m__0pCQwttUOr7nH1IXNUyPQHWjS9OZgM0zkK4ik2bQuDCh-cu3-R5Hei90ydS1eN6rKT6JGlk8DOkmViICv4LcQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e ơi",
+        "timestamp": "12:22"
+      },
+      {
+        "id": "m_ebpqHxaV1DUPZkBQXbPH7AHWjS9OZgM0zkK4ik2bQuB-w5WBTN-GlBX0m7mPYj72ko3rqus-0UHXspCgp8HGLA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Xem có phải lớp bên a chụp luôn hok ấy mà kk",
+        "timestamp": "12:23"
+      },
+      {
+        "id": "m_DwDvds3s2cF0JbuZ37UPYQHWjS9OZgM0zkK4ik2bQuDLz4WV2lrLhISolDkYIzYlnYdCP7LFt5ut914NUz5s3w",
+        "sender": "customer",
+        "senderName": "Vyy Chip",
+        "text": "À a ơi chụp nhóm 3ng thì tổng 3ng là 3tr5 à vs thợ thì mỗi bn một thợ hay 3bn cùng một thợ",
+        "timestamp": "12:26"
+      },
+      {
+        "id": "m_aD6panEqjxWp15pEdofDuwHWjS9OZgM0zkK4ik2bQuCTT8FGS4NYUgTGk4poPWKR77JAlvuvELOAI7JSJCVbaw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "3 bạn cùng 1 thợ e ah",
+        "timestamp": "12:27"
+      },
+      {
+        "id": "m_bwtg-ixwmuAl_kLg-QtOLAHWjS9OZgM0zkK4ik2bQuBE3HHDPBTbNQ0zpMTo8dyy5BWtE3bOMBXrJTfW04uReg",
+        "sender": "customer",
+        "senderName": "Vyy Chip",
+        "text": "Tổng 3ng là 3tr5 ạ",
+        "timestamp": "12:27"
+      },
+      {
+        "id": "m_aYpVdRCb8irOjKW8kRi6FgHWjS9OZgM0zkK4ik2bQuAQxeboNJ_0WH3KFOpKoaoITbRNvPGcoCGNFyMTIrVauw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Đúng rồi e ơi",
+        "timestamp": "12:27"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1436107525097885",
+    "facebookPsid": "38967893802826040",
+    "isLiveFacebook": true,
+    "customerName": "Phuong Vy",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Phuong%20Vy&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Ok e",
+    "lastMessageTime": "03-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_Py61ki56md6OHZ8ntQUrcpTiv_0qAyDHvIF95_O57yV-7iIqfYa6HovD_K8AD4dENVlYWkDQWm_krPpsil47WQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e nha",
+        "timestamp": "11:24"
+      },
+      {
+        "id": "m_WmcqxQTtZZIjEMlv6ju-r5Tiv_0qAyDHvIF95_O57yW_zdrTJ8BbQE2WJAIAxydKSOeKYITQuzryCv1_QsJ7Xg",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Sđt của a 0988874163",
+        "timestamp": "11:24"
+      },
+      {
+        "id": "m_sen8aydBfrtIzKOEPLM4PZTiv_0qAyDHvIF95_O57yUYlpHcZEzzL8G-rmZRDCAoOsqBzqPAETdN8mWina4RvA",
+        "sender": "customer",
+        "senderName": "Phuong Vy",
+        "text": "vâng ạ e gửi cô r ạ",
+        "timestamp": "11:32"
+      },
+      {
+        "id": "m_uJpbpEsoA_3Z-2o3orf_h5Tiv_0qAyDHvIF95_O57yX2scFAVPjgmD0X6cdqD1cQWa7PHipvnYJTH3ow0s4gDA",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "ok e ơi",
+        "timestamp": "11:32"
+      },
+      {
+        "id": "m_19SWw9uYBVmMl7yPBe4hWZTiv_0qAyDHvIF95_O57yWKlIS7nbU48J2JP1jrxOqtmzI_lTqlmrC-HSfJRByaWQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "lớp mình ok hết chưa e nhể",
+        "timestamp": "21:52"
+      },
+      {
+        "id": "m_do2aCsT9iXaD1IJ_uWOcPZTiv_0qAyDHvIF95_O57yWVgD8-ii191JhNP1aJfk0qazi2HazYfw27UpjZ0yU49g",
+        "sender": "customer",
+        "senderName": "Phuong Vy",
+        "text": "bọn e chắc phaie đợi tới cuối tháng 10 ạ, vì cô kêu thi xong giữa kì cô mới cho tính tiếp kỉ yếu ạ huhu 😭",
+        "timestamp": "12:47"
+      },
+      {
+        "id": "m_hA8TZ-XBfiNLaLfnNWoXL5Tiv_0qAyDHvIF95_O57yV22MICb3bDf_u129OOOhYrURm9dCc0324eBafOip8ouQ",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok thoải mái e ơi",
+        "timestamp": "12:47"
+      },
+      {
+        "id": "m_jBj5JHVOqKiaw4CTeU9lqZTiv_0qAyDHvIF95_O57yXQcjBTnxivnH6URWEPCVSx7_lz4XGi7JYNRSy1mNZZsw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Cứ có lịch ới a setup cho là dc",
+        "timestamp": "12:47"
+      },
+      {
+        "id": "m_5UiDKatScRKzzwun2euGbZTiv_0qAyDHvIF95_O57yV7_VmqVzE3i79P_0M5cvGuWv6Q8Jz0cW9gtpw7c53VQg",
+        "sender": "customer",
+        "senderName": "Phuong Vy",
+        "text": "vâng ạ e báo trc cho mình bt ạ",
+        "timestamp": "12:48"
+      },
+      {
+        "id": "m_ybsADNzIedJX3OLvIoOs5JTiv_0qAyDHvIF95_O57yXSr85W4b1O5AzPJdTFU2FnoWPNt4t_AoTl9OIvoVICYw",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Ok e",
+        "timestamp": "12:48"
+      }
+    ]
+  },
+  {
+    "id": "fb-t_1635534854811487",
+    "facebookPsid": "39131097086505078",
+    "isLiveFacebook": true,
+    "customerName": "Ph Phương Linh",
+    "customerAvatar": "https://ui-avatars.com/api/?name=Ph%20Ph%C6%B0%C6%A1ng%20Linh&background=0084FF&color=fff&bold=true",
+    "customerClass": "Khách Fanpage Live",
+    "customerSchool": "Facebook Messenger",
+    "channel": "facebook",
+    "channelId": "111065964964204",
+    "pageName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+    "unreadCount": 0,
+    "isReplied": true,
+    "lastMessage": "Bọn e lớp nào thía ta",
+    "lastMessageTime": "02-10",
+    "assignedSalesName": "Duy Kool (Admin)",
+    "pipelineStage": "Đang tư vấn",
+    "tags": [
+      "Facebook Fanpage",
+      "Live Chat"
+    ],
+    "messages": [
+      {
+        "id": "m_568zBtPxnIiiWuKJdIeMl5GDFvzusQZGLrK1kcFK4iY0j2tutZSXqTlRs5qwDXOLHkF7_OhU1pcOmC0BtVtSow",
+        "sender": "sales",
+        "senderName": "Xoăn Media - Chụp Ảnh Kỷ Yếu",
+        "text": "Bọn e lớp nào thía ta",
+        "timestamp": "21:38"
+      }
+    ]
+  }
+]
