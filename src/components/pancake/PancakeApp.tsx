@@ -160,6 +160,60 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
   const [posNotes, setPosNotes] = useState('');
   const [posSuccessMsg, setPosSuccessMsg] = useState<string | null>(null);
 
+  // Facebook Connect Modal State & Handlers
+  const [showFbConfigModal, setShowFbConfigModal] = useState(false);
+  const [fbTokenInput, setFbTokenInput] = useState(FacebookApiService.getPageToken());
+  const [fbPageIdInput, setFbPageIdInput] = useState(FacebookApiService.getPageId());
+  const [fbConfigStatus, setFbConfigStatus] = useState<string | null>(null);
+  const [isTestingFb, setIsTestingFb] = useState(false);
+  const [fbTestSuccess, setFbTestSuccess] = useState<{ name: string; id: string; pictureUrl?: string } | null>(null);
+
+  const handleTestFbConnection = async () => {
+    if (!fbTokenInput.trim()) {
+      setFbConfigStatus('Vui lòng nhập Page Access Token trước khi kiểm tra.');
+      return;
+    }
+    setIsTestingFb(true);
+    setFbConfigStatus(null);
+    try {
+      const res = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,picture{url}&access_token=${fbTokenInput.trim()}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || 'Token không hợp lệ hoặc đã hết hạn.');
+      }
+      setFbTestSuccess({
+        name: data.name,
+        id: data.id,
+        pictureUrl: data.picture?.data?.url
+      });
+      if (!fbPageIdInput) {
+        setFbPageIdInput(data.id);
+      }
+      setFbConfigStatus(`✅ Kết nối thành công tới Fanpage: "${data.name}" (ID: ${data.id})`);
+    } catch (err: any) {
+      setFbTestSuccess(null);
+      setFbConfigStatus(`❌ Lỗi kiểm tra: ${err.message}`);
+    } finally {
+      setIsTestingFb(false);
+    }
+  };
+
+  const handleSaveFbConfig = async () => {
+    FacebookApiService.setPageToken(fbTokenInput);
+    FacebookApiService.setPageId(fbPageIdInput);
+    setFbConfigStatus('Đang xác thực và đồng bộ tin nhắn...');
+    try {
+      await syncFacebookLiveConversations();
+      setFbConfigStatus('🎉 Đã kết nối và đồng bộ tin nhắn Fanpage thành công!');
+      setTimeout(() => {
+        setShowFbConfigModal(false);
+        setFbConfigStatus(null);
+      }, 1500);
+    } catch (err: any) {
+      setFbConfigStatus('Lỗi đồng bộ: ' + (err.message || 'Không thể kết nối Facebook API'));
+    }
+  };
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -398,7 +452,7 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
 
           <div className="h-4 w-px bg-white/20 hidden sm:block" />
 
-          {/* Sync indicator */}
+          {/* Sync indicator & Connect Fanpage */}
           <div className="flex items-center gap-2 text-xs">
             <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -407,6 +461,14 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
             <span className="text-neutral-400 text-[11px] truncate hidden md:inline">
               Kênh: <strong className="text-white">{facebookPageName}</strong>
             </span>
+            <button
+              onClick={() => setShowFbConfigModal(true)}
+              className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 bg-white/10 hover:bg-white/20 text-neutral-200 rounded-lg transition-colors border border-white/15 cursor-pointer ml-1"
+              title="Cài đặt kết nối Fanpage Facebook (Page ID & Access Token)"
+            >
+              <Settings className="w-3 h-3 text-amber-400" />
+              <span className="hidden sm:inline">Cài Đặt Page</span>
+            </button>
           </div>
         </div>
 
@@ -542,11 +604,11 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
           {/* Bottom Rail Help/Settings */}
           <div className="pt-2 border-t border-white/10 w-full flex flex-col items-center">
             <button
-              onClick={() => setActiveTab('settings')}
-              className="p-2 text-neutral-400 hover:text-white rounded-xl transition-colors"
-              title="Cài đặt kết nối Fanpage"
+              onClick={() => setShowFbConfigModal(true)}
+              className="p-2 text-neutral-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
+              title="Cài đặt kết nối Fanpage Facebook (Meta Graph API)"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4 text-amber-400" />
             </button>
           </div>
         </div>
@@ -1751,6 +1813,175 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
           </div>
         )}
       </div>
+
+      {/* ========================================================
+          MODAL CÀI ĐẶT KẾT NỐI FANPAGE FACEBOOK (GRAPH API)
+          ======================================================== */}
+      {showFbConfigModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-black/10 overflow-hidden flex flex-col max-h-[92vh]">
+            {/* Modal Header */}
+            <div className="px-5 py-4 bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-white shadow-xs">
+                  <MessengerIcon size={24} />
+                </div>
+                <div>
+                  <h3 className="font-black text-sm tracking-tight text-white flex items-center gap-2">
+                    Kết Nối Fanpage Facebook
+                    <span className="text-[10px] bg-amber-400 text-neutral-900 font-extrabold px-1.5 py-0.5 rounded">
+                      Meta Graph API
+                    </span>
+                  </h3>
+                  <p className="text-xs text-blue-100">Đồng bộ tin nhắn & khách hàng tự động với Pancake</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowFbConfigModal(false);
+                  setFbConfigStatus(null);
+                }}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto space-y-4 text-xs">
+              {/* Form Input */}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-black text-neutral-800 mb-1">
+                    1. ID Fanpage (Facebook Page ID) <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={fbPageIdInput}
+                    onChange={e => setFbPageIdInput(e.target.value)}
+                    placeholder="Ví dụ: 411200738737677 hoặc dãy số ID Page"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-neutral-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs text-neutral-900"
+                  />
+                  <p className="text-[11px] text-neutral-500 mt-1">
+                    💡 Xem ID Fanpage: Vào Trang của bạn → Giới thiệu → Tính minh bạch của Trang (hoặc xem dãy số ID trên URL Trang).
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-neutral-800 mb-1">
+                    2. Mã Truy Cập Trang (Page Access Token) <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={fbTokenInput}
+                    onChange={e => setFbTokenInput(e.target.value)}
+                    placeholder="Dán chuỗi Token bắt đầu bằng EAAB... hoặc EAAU..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-neutral-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-[11px] text-neutral-900 resize-none break-all"
+                  />
+                  <p className="text-[11px] text-neutral-500 mt-1">
+                    💡 Token cần có các quyền: <code className="bg-neutral-100 text-blue-700 px-1 py-0.5 rounded font-mono">pages_messaging</code>, <code className="bg-neutral-100 text-blue-700 px-1 py-0.5 rounded font-mono">pages_show_list</code>, <code className="bg-neutral-100 text-blue-700 px-1 py-0.5 rounded font-mono">pages_read_engagement</code>.
+                  </p>
+                </div>
+              </div>
+
+              {/* Status / Test Result */}
+              {fbTestSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3">
+                  {fbTestSuccess.pictureUrl ? (
+                    <img src={fbTestSuccess.pictureUrl} alt={fbTestSuccess.name} className="w-10 h-10 rounded-full border border-emerald-300 shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-black flex items-center justify-center text-sm shrink-0">FB</div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-black text-neutral-900 text-xs truncate">{fbTestSuccess.name}</p>
+                    <p className="text-[11px] text-emerald-700 font-mono truncate">ID: {fbTestSuccess.id} • Đã kết nối hợp lệ</p>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-800 text-[10px] font-black shrink-0">
+                    Live OK
+                  </span>
+                </div>
+              )}
+
+              {fbConfigStatus && (
+                <div className={`p-3 rounded-2xl text-xs font-semibold flex items-center gap-2 ${
+                  fbConfigStatus.includes('Lỗi') || fbConfigStatus.includes('❌')
+                    ? 'bg-rose-50 border border-rose-200 text-rose-800'
+                    : 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                }`}>
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{fbConfigStatus}</span>
+                </div>
+              )}
+
+              {/* Step by step guide */}
+              <div className="p-3.5 bg-neutral-50 border border-neutral-200 rounded-2xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-black text-neutral-800 text-xs">📖 Hướng Dẫn Lấy Token Nhanh (3 Phút):</span>
+                  <a
+                    href="https://developers.facebook.com/tools/explorer/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 text-[11px]"
+                  >
+                    Mở Graph API Explorer <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <ol className="list-decimal pl-4 space-y-1 text-neutral-600 text-[11px] leading-relaxed">
+                  <li>
+                    Vào <strong className="text-neutral-800">developers.facebook.com/tools/explorer</strong>.
+                  </li>
+                  <li>
+                    Mục <strong className="text-neutral-800">Meta App</strong>: Chọn ứng dụng của bạn (hoặc tạo App Business mới).
+                  </li>
+                  <li>
+                    Mục <strong className="text-neutral-800">User or Page</strong>: Chọn <strong className="text-neutral-800">Fanpage Xoăn Media</strong> của bạn (chọn Trang, không chọn User).
+                  </li>
+                  <li>
+                    Mục <strong className="text-neutral-800">Permissions</strong>: Thêm quyền <code className="bg-white px-1 py-0.2 rounded border text-blue-600 font-mono">pages_messaging</code>, <code className="bg-white px-1 py-0.2 rounded border text-blue-600 font-mono">pages_show_list</code>, <code className="bg-white px-1 py-0.2 rounded border text-blue-600 font-mono">pages_read_engagement</code>.
+                  </li>
+                  <li>
+                    Bấm <strong className="text-neutral-800">Generate Access Token</strong> → Cấp quyền cho Fanpage → Sao chép chuỗi mã Token dán vào ô bên trên.
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-5 py-3.5 bg-neutral-50 border-t border-black/[0.06] flex items-center justify-between shrink-0">
+              <button
+                type="button"
+                onClick={handleTestFbConnection}
+                disabled={isTestingFb}
+                className="px-3.5 py-2 text-xs font-bold text-neutral-700 bg-white hover:bg-neutral-100 rounded-xl border border-neutral-200 transition-colors shadow-2xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {isTestingFb ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5 text-blue-600" />}
+                <span>Kiểm Tra Token</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowFbConfigModal(false);
+                    setFbConfigStatus(null);
+                  }}
+                  className="px-4 py-2 text-xs font-bold text-neutral-600 hover:bg-neutral-200 rounded-xl transition-colors cursor-pointer"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveFbConfig}
+                  className="px-4 py-2 text-xs font-black text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Lưu & Đồng Bộ Ngay</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
