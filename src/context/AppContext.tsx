@@ -526,14 +526,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       u === 'user-admin' ||
       u === 'admin@xoanmedia.vn' ||
       u === 'admin' ||
-      u === 'taduy' ||
       u === 'duonghaiminh' ||
       u === 'haiminh' ||
       u === 'duonghaiminh3@gmail.com';
-
-    const isAdminPhone =
-      u === '0981108601' ||
-      (uCleanPhone.length >= 9 && (uCleanPhone === '0981108601' || uCleanPhone === '981108601' || uCleanPhone === '84981108601'));
 
     const isAdminPassword = p === 'XoanAdmin@2026' || p === 'admin123' || p === '123456';
 
@@ -554,21 +549,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else {
         return { success: false, message: 'Mật khẩu tài khoản Admin không chính xác!' };
       }
-    }
-
-    if (isAdminPhone && isAdminPassword) {
-      const adminUser = mockUsers[0];
-      setCurrentUser(adminUser);
-      setCurrentRoleState('admin');
-      setIsAuthenticated(true);
-      setIsImpersonating(false);
-      setActiveTab('dashboard');
-      try {
-        localStorage.setItem('xoan_crm_auth_user', JSON.stringify({ user: adminUser, role: 'admin' }));
-      } catch (e) {
-        console.error(e);
-      }
-      return { success: true };
     }
 
     // 2. Kiểm tra tài khoản Sales Tư Vấn (luôn gộp state + mockSalesStaff cứng để tránh localStorage cũ)
