@@ -1,6 +1,11 @@
 # Quy Tắc & Nghiệp Vụ CRM Xoăn Media
 
 ## 1. Phân Quyền & Quản Lý Tài Khoản (User & Permissions)
+- **Bảo Vệ Tài Khoản Admin Cố Định (Bất Di Bất Dịch)**:
+  - **TUYỆT ĐỐI KHÔNG TỰ Ý ĐỔI TÀI KHOẢN VÀ MẬT KHẨU ADMIN**: Tài khoản và mật khẩu Admin luôn giữ nguyên 100%, không được tự ý sửa, thay thế hoặc can thiệp dưới bất kỳ hình thức nào.
+  - Tài khoản Admin và mật khẩu cố định của hệ thống:
+    - ID đăng nhập: `admin` hoặc `admin@xoanmedia.vn`
+    - Mật khẩu: `XoanAdmin@2026`, `admin123`, `123456`
 - **Cơ chế cấp tài khoản**: Cả nhân sự **Sales** và **Photographer (Thợ chụp / Ekip)** đều là các user thành viên được **Admin** tạo và cấp tài khoản + mật khẩu riêng biệt để đăng nhập và thực hiện các nghiệp vụ theo quyền hạn:
   - **Admin (Toàn quyền)**: Quản trị toàn bộ hệ thống, cấp tài khoản, thiết lập cấu hình, xem dữ liệu doanh thu & phân bổ hoa hồng.
   - **Sales Tư Vấn**: Sử dụng tài khoản được cấp để nhận lead tự động (round-robin), chăm sóc khách hàng trên Pipeline, báo giá, gửi hợp đồng, chốt cọc và tạo booking.

@@ -776,6 +776,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Cập nhật hồ sơ cá nhân (Avatar & Mật khẩu) — cho Sales và Photographer
   const updateProfile = (data: { avatar?: string; newPassword?: string; currentPassword?: string }): { success: boolean; message: string } => {
+    // Tài khoản Admin là tài khoản hệ thống cố định, không được tự ý đổi mật khẩu
+    if (data.newPassword && currentRole === 'admin') {
+      return { success: false, message: 'Tài khoản Admin là tài khoản quản trị cố định của hệ thống, không được tự ý đổi mật khẩu!' };
+    }
+
     // Kiểm tra mật khẩu hiện tại nếu muốn đổi mật khẩu
     if (data.newPassword) {
       if (!data.currentPassword) {

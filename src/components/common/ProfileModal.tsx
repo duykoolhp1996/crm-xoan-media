@@ -206,6 +206,21 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, emb
 
           {/* === PASSWORD SECTION === */}
           {activeSection === 'password' && (
+            currentRole === 'admin' ? (
+              <div className="p-4 bg-neutral-900 text-white rounded-2xl border border-neutral-800 space-y-3">
+                <div className="flex items-center gap-2 text-[#B8F23D] font-bold text-xs">
+                  <Lock className="w-4 h-4" />
+                  <span>Tài Khoản Admin Cố Định</span>
+                </div>
+                <p className="text-[11px] text-neutral-300 leading-relaxed">
+                  Tài khoản và mật khẩu quản trị viên <strong>Admin</strong> được giữ nguyên cố định theo chính sách bảo mật của hệ thống CRM Xoăn Media, không được tự ý thay đổi.
+                </p>
+                <div className="text-[11px] bg-neutral-950 p-3 rounded-xl border border-neutral-800 space-y-1">
+                  <p className="text-neutral-400">Tài khoản đăng nhập: <strong className="text-white">admin</strong> hoặc <strong className="text-white">admin@xoanmedia.vn</strong></p>
+                  <p className="text-neutral-400">Chính sách: <span className="text-[#B8F23D] font-semibold">Tài khoản & mật khẩu giữ nguyên cố định</span></p>
+                </div>
+              </div>
+            ) : (
             <div className="space-y-3">
               {/* Current Password */}
               <div>
@@ -308,6 +323,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, emb
                 {isSubmitting ? 'Đang lưu...' : '🔑 Đổi Mật Khẩu'}
               </button>
             </div>
+            )
           )}
 
           {/* Result Toast */}
