@@ -28,7 +28,8 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
     markMessengerAsRead,
     unreadMessengerCount,
     activeTab,
-    setActiveTab
+    setActiveTab,
+    switchApp
   } = useApp();
 
   // Chỉ hiển thị ở các tài khoản sales hoặc admin / manager
@@ -73,10 +74,10 @@ export const SalesMessengerFloatingWidget: React.FC = () => {
     sendMessengerMessage(activeConv.id, text, 'sales');
   };
 
-  // Mở toàn màn hình
+  // Mở sang App Pancake độc lập
   const handleOpenFullScreen = () => {
     setIsOpen(false);
-    setActiveTab('chat-messenger');
+    switchApp('pancake');
   };
 
   return (

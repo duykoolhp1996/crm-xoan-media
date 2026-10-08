@@ -14,8 +14,7 @@ import {
   CalendarCheck,
   LogOut,
   X,
-  Trash2,
-  MessageSquare
+  Trash2
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -30,9 +29,7 @@ export const Sidebar: React.FC = () => {
     logout,
     photographers,
     isMobileSidebarOpen,
-    setIsMobileSidebarOpen,
-    unreadMessengerCount,
-    switchApp
+    setIsMobileSidebarOpen
   } = useApp();
 
   const newLeadsCount = customers.filter(c => c.pipelineStage === 'New Lead').length;
@@ -82,13 +79,6 @@ export const Sidebar: React.FC = () => {
     {
       groupTitle: 'CRM & KHÁCH HÀNG',
       items: [
-        {
-          id: 'pancake',
-          label: 'App Pancake (Chat & POS)',
-          icon: MessageSquare,
-          badge: unreadMessengerCount > 0 ? unreadMessengerCount : undefined,
-          roles: ['admin', 'manager', 'sales', 'marketing']
-        },
         {
           id: 'customers',
           label: 'Danh Sách Khách Hàng',
@@ -181,11 +171,6 @@ export const Sidebar: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => {
-                      if (item.id === 'pancake') {
-                        switchApp('pancake');
-                        if (isMobile) setIsMobileSidebarOpen(false);
-                        return;
-                      }
                       setActiveTab(item.id);
                       if (isMobile) setIsMobileSidebarOpen(false);
                     }}
