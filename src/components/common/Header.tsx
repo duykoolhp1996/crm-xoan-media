@@ -71,8 +71,6 @@ export const Header: React.FC = () => {
     calendar: 'Calendar Lịch Chụp Ekip',
     photographers: 'Đội Ngũ Thợ Chụp & Ekip',
     services: 'Gói Dịch Vụ & Combo',
-    feedbacks: 'Khoảnh Khắc & Feedback',
-    remarketing: 'Remarketing & Automation',
     'chat-messenger': 'Hộp Thư Chat Khách Hàng (Facebook Messenger)',
     'reports-photographer': 'Hiệu Suất Thợ Chụp',
     settings: 'Cài Đặt Hệ Thống'

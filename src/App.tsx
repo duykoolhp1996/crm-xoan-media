@@ -15,8 +15,6 @@ import { BookingModule } from './components/booking/BookingModule';
 import { PhotoCalendar } from './components/calendar/PhotoCalendar';
 import { PhotographerList } from './components/photographers/PhotographerList';
 import { ServiceModule } from './components/services/ServiceModule';
-import { FeedbackModule } from './components/feedback/FeedbackModule';
-import { RemarketingModule } from './components/remarketing/RemarketingModule';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { SalesMessengerInbox } from './components/chat/SalesMessengerInbox';
@@ -55,8 +53,6 @@ const MainContent: React.FC = () => {
         {activeTab === 'calendar' && <PhotoCalendar />}
         {activeTab === 'photographers' && <PhotographerList />}
         {activeTab === 'services' && <ServiceModule />}
-        {activeTab === 'feedbacks' && <FeedbackModule />}
-        {activeTab === 'remarketing' && <RemarketingModule />}
         {activeTab === 'reports-photographer' && <PhotographerReports />}
         {activeTab === 'settings' && <SettingsModule />}
 

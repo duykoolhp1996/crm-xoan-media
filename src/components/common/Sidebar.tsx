@@ -8,12 +8,10 @@ import {
   CalendarDays,
   Camera,
   Layers,
-  Sparkles,
   BarChart3,
   TrendingUp,
   Settings,
   CalendarCheck,
-  Heart,
   LogOut,
   X,
   Trash2
@@ -27,7 +25,6 @@ export const Sidebar: React.FC = () => {
     notifications,
     customers,
     deletedCustomers,
-    feedbacks,
     currentUser,
     logout,
     photographers,
@@ -131,25 +128,6 @@ export const Sidebar: React.FC = () => {
           label: 'Gói Dịch Vụ Kỷ Yếu',
           icon: Layers,
           roles: ['admin', 'manager', 'sales']
-        }
-      ]
-    },
-    {
-      groupTitle: 'CHĂM SÓC & TĂNG TRƯỞNG',
-      items: [
-        {
-          id: 'feedbacks',
-          label: 'Khoảnh Khắc & Feedback',
-          icon: Heart,
-          badge: feedbacks.length > 0 ? feedbacks.length : undefined,
-          roles: ['admin', 'manager', 'sales', 'marketing', 'photographer']
-        },
-        {
-          id: 'remarketing',
-          label: 'Remarketing & Automation',
-          icon: Sparkles,
-          badge: 3,
-          roles: ['admin', 'manager', 'marketing']
         }
       ]
     },
