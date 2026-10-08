@@ -287,9 +287,19 @@ export const BookingModule: React.FC = () => {
                                 ⚠️ Trùng lịch với đơn khác!
                               </p>
                             )}
+                            {bk.assignments.assistantNames && bk.assignments.assistantNames.length > 0 && (
+                              <p className="text-[10px] text-neutral-500 font-medium truncate max-w-[160px]" title={bk.assignments.assistantNames.join(', ')}>
+                                Phụ: {bk.assignments.assistantNames.join(', ')}
+                              </p>
+                            )}
                             {bk.assignments.videographerName && (
-                              <p className="text-[10px] text-neutral-500">
+                              <p className="text-[10px] text-sky-600 font-medium">
                                 Quay: {bk.assignments.videographerName}
+                              </p>
+                            )}
+                            {bk.assignments.individualPhotographerName && (
+                              <p className="text-[10px] text-purple-600 font-medium">
+                                Cá nhân: {bk.assignments.individualPhotographerName}
                               </p>
                             )}
                           </div>

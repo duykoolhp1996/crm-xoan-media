@@ -9,6 +9,7 @@ import {
   Camera,
   User,
   Phone,
+  Users,
   DollarSign,
   CheckCircle2,
   AlertTriangle,
@@ -30,11 +31,36 @@ export const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { updateBooking, customers, setSelectedCustomerId, setActiveTab } = useApp();
+  const { updateBooking, customers, setSelectedCustomerId, setActiveTab, photographers } = useApp();
 
   if (!isOpen || !booking) return null;
 
   const customer = customers.find(c => c.id === booking.customerId);
+
+  // Tra cứu thông tin chi tiết thợ từ DATA 38 thợ của Xoăn Media
+  const getPhotographerInfo = (id?: string, name?: string) => {
+    if (!id && !name) return null;
+    return photographers.find(p =>
+      (id && p.id === id) ||
+      (name && (
+        p.fullName.toLowerCase() === name.toLowerCase() ||
+        p.fullName.toLowerCase().includes(name.toLowerCase()) ||
+        name.toLowerCase().includes(p.fullName.toLowerCase())
+      ))
+    );
+  };
+
+  const leadPhoto = getPhotographerInfo(booking.assignments?.leadPhotographerId, booking.assignments?.leadPhotographerName);
+  const videoPhoto = getPhotographerInfo(booking.assignments?.videographerId, booking.assignments?.videographerName);
+  const indivPhoto = getPhotographerInfo(booking.assignments?.individualPhotographerId, booking.assignments?.individualPhotographerName);
+
+  const assistantList = (booking.assignments?.assistantNames || []).map((name, i) => {
+    const id = booking.assignments?.assistantPhotographerIds?.[i];
+    return {
+      name,
+      info: getPhotographerInfo(id, name)
+    };
+  });
 
   const bookingStatusBadges: Record<BookingStatus, string> = {
     'Chờ xác nhận': 'bg-neutral-100 text-neutral-700 border-neutral-200',
@@ -179,40 +205,130 @@ export const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Section 3: Đội Ngũ Ekip Được Gán */}
+          {/* Section 3: Đội Ngũ Ekip Được Gán (Đồng bộ từ DATA 38 Thợ Xoăn Media) */}
           <div className="bg-neutral-50 p-4 rounded-2xl border border-black/[0.06] space-y-3">
-            <h3 className="font-bold text-neutral-900 uppercase tracking-wider text-[11px] flex items-center gap-2">
-              <Camera className="w-4 h-4 text-purple-600" />
-              Đội Ngũ Ekip Thực Hiện
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-neutral-900 uppercase tracking-wider text-[11px] flex items-center gap-2">
+                <Camera className="w-4 h-4 text-purple-600" />
+                Đội Ngũ Ekip Thực Hiện
+              </h3>
+              <span className="text-[10px] text-neutral-400 font-semibold bg-white px-2.5 py-0.5 rounded-full border border-black/[0.06]">
+                Đồng bộ từ DATA {photographers.length} Thợ Ekip
+              </span>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-white p-3 rounded-xl border border-black/[0.06] flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
-                  <Camera className="w-4 h-4" />
+              {/* 1. Thợ Chụp Chính */}
+              <div className="bg-white p-3 rounded-xl border border-black/[0.06] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0 font-bold">
+                    <Camera className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-neutral-400 font-bold uppercase">Thợ chụp chính</p>
+                    <p className="font-bold text-neutral-900 mt-0.5 truncate">
+                      {booking.assignments?.leadPhotographerName || leadPhoto?.fullName || (
+                        <span className="text-amber-600 font-bold">⚠️ Chưa gán thợ</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] text-neutral-400 font-bold uppercase">Thợ chụp chính</p>
-                  <p className="font-bold text-neutral-900 mt-0.5">
-                    {booking.assignments.leadPhotographerName || (
-                      <span className="text-amber-600 font-bold">⚠️ Chưa gán thợ</span>
-                    )}
-                  </p>
-                </div>
+                {leadPhoto?.phone && (
+                  <a
+                    href={`tel:${leadPhoto.phone}`}
+                    className="shrink-0 flex items-center gap-1 text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg font-semibold hover:bg-emerald-100 transition-colors"
+                  >
+                    <Phone className="w-3 h-3" />
+                    <span>{leadPhoto.phone}</span>
+                  </a>
+                )}
               </div>
 
-              <div className="bg-white p-3 rounded-xl border border-black/[0.06] flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
-                  <Video className="w-4 h-4" />
+              {/* 2. Thợ Phụ / Trợ Lý Chụp */}
+              {assistantList.length > 0 && (
+                <div className="bg-white p-3 rounded-xl border border-black/[0.06] flex flex-col justify-center gap-1.5 sm:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-neutral-400 font-bold uppercase flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-amber-600" />
+                      Thợ phụ / Trợ lý chụp ({assistantList.length})
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-0.5">
+                    {assistantList.map((ast, idx) => (
+                      <div
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 bg-neutral-50 border border-black/[0.06] px-2.5 py-1 rounded-lg text-xs"
+                      >
+                        <span className="font-bold text-neutral-900">{ast.name}</span>
+                        {ast.info?.phone && (
+                          <a
+                            href={`tel:${ast.info.phone}`}
+                            className="text-[10px] text-emerald-700 hover:underline flex items-center gap-0.5 font-medium ml-1"
+                          >
+                            <Phone className="w-2.5 h-2.5" />
+                            {ast.info.phone}
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] text-neutral-400 font-bold uppercase">Thợ quay phim / Flycam</p>
-                  <p className="font-bold text-neutral-900 mt-0.5">
-                    {booking.assignments.videographerName || 'Theo gói tiêu chuẩn'}
-                  </p>
-                </div>
-              </div>
+              )}
 
-              {booking.assignments.makeupStaffName && (
+              {/* 3. Thợ Quay Phim / Flycam */}
+              {booking.assignments?.videographerName && (
+                <div className="bg-white p-3 rounded-xl border border-black/[0.06] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                      <Video className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-neutral-400 font-bold uppercase">Thợ quay phim / Flycam</p>
+                      <p className="font-bold text-neutral-900 mt-0.5 truncate">
+                        {booking.assignments.videographerName}
+                      </p>
+                    </div>
+                  </div>
+                  {videoPhoto?.phone && (
+                    <a
+                      href={`tel:${videoPhoto.phone}`}
+                      className="shrink-0 flex items-center gap-1 text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg font-semibold hover:bg-emerald-100 transition-colors"
+                    >
+                      <Phone className="w-3 h-3" />
+                      <span>{videoPhoto.phone}</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* 4. Thợ Chụp Cá Nhân */}
+              {booking.assignments?.individualPhotographerName && (
+                <div className="bg-white p-3 rounded-xl border border-black/[0.06] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-neutral-400 font-bold uppercase">Thợ chụp cá nhân</p>
+                      <p className="font-bold text-neutral-900 mt-0.5 truncate">
+                        {booking.assignments.individualPhotographerName}
+                      </p>
+                    </div>
+                  </div>
+                  {indivPhoto?.phone && (
+                    <a
+                      href={`tel:${indivPhoto.phone}`}
+                      className="shrink-0 flex items-center gap-1 text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg font-semibold hover:bg-emerald-100 transition-colors"
+                    >
+                      <Phone className="w-3 h-3" />
+                      <span>{indivPhoto.phone}</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* 5. Chuyên viên Makeup */}
+              {booking.assignments?.makeupStaffName && (
                 <div className="bg-white p-3 rounded-xl border border-black/[0.06] flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center shrink-0">
                     <Sparkles className="w-4 h-4" />
@@ -224,6 +340,23 @@ export const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Chi tiết tài chính công thợ & lợi nhuận nếu có */}
+            {((booking.assignments?.laborCost || 0) > 0 || (booking.assignments?.profit || 0) > 0) && (
+              <div className="mt-2 p-3 bg-white rounded-xl border border-black/[0.06] flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-neutral-500">Công thợ: </span>
+                  <strong className="text-neutral-900">{(booking.assignments?.laborCost || 0).toLocaleString('vi-VN')}đ</strong>
+                </div>
+                <div>
+                  <span className="text-neutral-500">Lợi nhuận dự kiến: </span>
+                  <strong className="text-emerald-700">{(booking.assignments?.profit || 0).toLocaleString('vi-VN')}đ</strong>
+                  {booking.assignments?.profitMargin ? (
+                    <span className="ml-1 text-[10px] text-emerald-600 font-bold">({booking.assignments.profitMargin}%)</span>
+                  ) : null}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Section 4: Đại diện lớp & Ghi chú */}

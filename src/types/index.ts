@@ -234,8 +234,13 @@ export interface BookingAssignment {
   assistantNames?: string[];
   videographerId?: string;
   videographerName?: string;
+  individualPhotographerId?: string;
+  individualPhotographerName?: string;
   makeupStaffId?: string;
   makeupStaffName?: string;
+  laborCost?: number;
+  profit?: number;
+  profitMargin?: number;
 }
 
 export interface Booking {
