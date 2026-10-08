@@ -1889,7 +1889,7 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
                     type="text"
                     value={fbPageIdInput}
                     onChange={e => setFbPageIdInput(e.target.value)}
-                    placeholder="Ví dụ: 411200738737677 hoặc dãy số ID Page"
+                    placeholder="Ví dụ: 100083303952726 hoặc dãy số ID Page"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-neutral-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs text-neutral-900"
                   />
                   <p className="text-[11px] text-neutral-500 mt-1">

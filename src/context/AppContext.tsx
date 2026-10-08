@@ -1949,7 +1949,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [messengerConversations]);
 
   const [isSyncingFacebook, setIsSyncingFacebook] = useState(false);
-  const [facebookPageName, setFacebookPageName] = useState('Duy Hiền Digital Marketing');
+  const [facebookPageName, setFacebookPageName] = useState('Xoăn Media - Chụp Ảnh Kỷ Yếu');
 
   // Hàm phát âm thanh thông báo nhẹ nhàng khi có tin nhắn mới từ khách
   const playMessageChime = () => {

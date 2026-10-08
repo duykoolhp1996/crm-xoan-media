@@ -944,7 +944,7 @@ export const SalesMessengerInbox: React.FC = () => {
                   type="text"
                   value={fbPageIdInput}
                   onChange={e => setFbPageIdInput(e.target.value)}
-                  placeholder="Ví dụ: 411200738737677"
+                  placeholder="Ví dụ: 100083303952726"
                   className="w-full px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl font-mono text-neutral-800 text-xs focus:outline-none focus:border-blue-500"
                 />
               </div>

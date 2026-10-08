@@ -465,7 +465,7 @@ const server = http.createServer(async (req, res) => {
         webhookUrl: 'https://crm.xoanmedia.com/api/facebook/webhook',
         verifyToken: FB_VERIFY_TOKEN,
         appId: '1438809894822067',
-        pageId: '411200738737677',
+        pageId: '100083303952726',
         subscribedFields: ['messages', 'messaging_postbacks', 'message_reads', 'message_deliveries']
       });
     }

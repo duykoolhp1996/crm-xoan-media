@@ -20,10 +20,10 @@ export const PANCAKE_CHANNELS: PancakeChannel[] = [
     badge: 'ALL'
   },
   {
-    id: 'fb-xoan-hn',
-    name: 'Duy Hiền Digital Marketing',
+    id: '100083303952726',
+    name: 'Xoăn Media - Chụp Ảnh Kỷ Yếu',
     platform: 'facebook',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+    avatar: 'https://ui-avatars.com/api/?name=Xoan+Media&background=1877F2&color=fff&bold=true',
     color: '#1877F2',
     badge: 'Fanpage Live'
   }

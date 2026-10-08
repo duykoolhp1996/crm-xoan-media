@@ -49,7 +49,7 @@ export interface FbRawConversation {
 }
 
 const DEFAULT_PAGE_TOKEN = 'EAAUclwiuILMBSnEqBXJuUSZBxPbZAz5nURKtlRJvHp8WGioMFgUiPZCVvZBxay0qJQjwt4MV9wDoiy25luvZC0oKUKWLz1qHPf4QFuM8ITXLOr4zBZAA6ZCw8kL1luV0qSx8wfTecxGd56AQkp2Ob6IMWYwKkOjXIadVWMqkKqtT4fGwRJm4rnMymQGhUwzuwIRuZBETwTLZAnAUJlv0J3t5fuwZDZD';
-const DEFAULT_PAGE_ID = '411200738737677';
+const DEFAULT_PAGE_ID = '100083303952726';
 const DEFAULT_APP_ID = '1438809894822067';
 const DEFAULT_APP_SECRET = 'aea735928835d4cb8ffebd651a5e83be';
 
@@ -88,7 +88,11 @@ export class FacebookApiService {
   }
 
   public static getPageId(): string {
-    return localStorage.getItem(this.pageIdKey) || DEFAULT_PAGE_ID;
+    const saved = localStorage.getItem(this.pageIdKey);
+    if (saved === '411200738737677' || !saved) {
+      return DEFAULT_PAGE_ID;
+    }
+    return saved;
   }
 
   public static setPageId(pageId: string): void {
