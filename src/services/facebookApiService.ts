@@ -48,9 +48,9 @@ export interface FbRawConversation {
   };
 }
 
-const DEFAULT_PAGE_TOKEN = 'EAAPYDkXqBPoBSn5CYIfZAkhaB3wnzKRyrfr4p2vfW3PdQF2SgceOtFuwfc6GT2aQE9r8dnZBZADYVE9nR1qFZCVYWXRMTwLZAX5MZBSrJISquZCZBA30jULSUMUMeDzeCRbCKex2E1a42AXrdrHNn3RHzaDRbuVSdgXHHRvwtGo0giN0Ts1JmDIULryzeNtZB0ysWK60aNGSjOaI9XHfC06ZAuuJ4QIgPc3w2r0XZC3QPSTkwBf2fqK2sgDetkZD';
+const DEFAULT_PAGE_TOKEN = 'EAAPYDkXqBPoBSkt4i0M0kHcjZC9aHEFGjqTz7f188CUmMFLEqiSBVWhVN8w7ggybJDI3HJQzbO7jxSqy3SwokDvuvl6nxVgtDXrEqFZCDL1WvmiU0YL9ZACLs4bEoEZCJWzjI4y12NbL0uZACLdU3njYQMQDPWOkhjXFyORZAeuXgWeUYaVZCXjDl3ZBalyA9mWgZB2LFbxyrVOfXcqUg8h0ZD';
 const DEFAULT_PAGE_ID = '111065964964204';
-const DEFAULT_APP_ID = '1438809894822067';
+const DEFAULT_APP_ID = '1081980744238330';
 const DEFAULT_APP_SECRET = 'aea735928835d4cb8ffebd651a5e83be';
 
 export class FacebookApiService {
@@ -81,7 +81,8 @@ export class FacebookApiService {
 
   public static getPageToken(): string {
     const saved = localStorage.getItem(this.tokenKey);
-    if (!saved || saved.startsWith('EAAUclwiuILM')) {
+    if (!saved || saved !== DEFAULT_PAGE_TOKEN) {
+      localStorage.setItem(this.tokenKey, DEFAULT_PAGE_TOKEN);
       return DEFAULT_PAGE_TOKEN;
     }
     return saved;
