@@ -139,6 +139,10 @@ interface AppContextType {
 
   // Services
   servicePackages: ServicePackage[];
+  addServicePackage: (pkg: Omit<ServicePackage, 'id'>) => void;
+  updateServicePackage: (pkg: ServicePackage) => void;
+  deleteServicePackage: (id: string) => void;
+  resetDefaultServicePackages: () => void;
 
   // Remarketing
   segments: RemarketingSegment[];
@@ -321,7 +325,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {}
     return mockSchoolClasses;
   });
-  const [servicePackages, setServicePackages] = useState<ServicePackage[]>(mockServicePackages);
+  const [servicePackages, setServicePackages] = useState<ServicePackage[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_service_packages');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return mockServicePackages;
+  });
   const [segments, setSegments] = useState<RemarketingSegment[]>(mockRemarketingSegments);
   const [campaigns, setCampaigns] = useState<RemarketingCampaign[]>(mockRemarketingCampaigns);
   const [workflows, setWorkflows] = useState<RemarketingWorkflow[]>(() => {
@@ -2429,6 +2442,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     switchApp('crm');
   };
 
+  const addServicePackage = (pkg: Omit<ServicePackage, 'id'>) => {
+    const newPkg: ServicePackage = {
+      ...pkg,
+      id: `pkg-${Date.now()}`
+    };
+    setServicePackages(prev => {
+      const next = [...prev, newPkg];
+      try {
+        localStorage.setItem('crm_xoan_service_packages', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const updateServicePackage = (pkg: ServicePackage) => {
+    setServicePackages(prev => {
+      const next = prev.map(p => p.id === pkg.id ? pkg : p);
+      try {
+        localStorage.setItem('crm_xoan_service_packages', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const deleteServicePackage = (id: string) => {
+    setServicePackages(prev => {
+      const next = prev.filter(p => p.id !== id);
+      try {
+        localStorage.setItem('crm_xoan_service_packages', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const resetDefaultServicePackages = () => {
+    setServicePackages(mockServicePackages);
+    try {
+      localStorage.setItem('crm_xoan_service_packages', JSON.stringify(mockServicePackages));
+    } catch {}
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -2477,6 +2531,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         classes,
         addClass,
         servicePackages,
+        addServicePackage,
+        updateServicePackage,
+        deleteServicePackage,
+        resetDefaultServicePackages,
         segments,
         campaigns,
         workflows,
