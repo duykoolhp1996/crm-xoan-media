@@ -354,10 +354,11 @@ const server = http.createServer(async (req, res) => {
 
   try {
     // -------------------------------------------------------------
-    // STATIC FILE SERVING CHO UPLOADS (Avatar, Media)
+    // STATIC FILE SERVING CHO UPLOADS (Avatar, Media, Rental)
     // -------------------------------------------------------------
-    if (pathname.startsWith('/uploads/') && req.method === 'GET') {
-      const relativePath = pathname.replace('/uploads/', '').replace(/\.\./g, '');
+    if ((pathname.startsWith('/uploads/') || pathname.startsWith('/api/uploads/')) && (req.method === 'GET' || req.method === 'HEAD')) {
+      const cleanPath = pathname.replace(/^\/api/, '');
+      const relativePath = cleanPath.replace('/uploads/', '').replace(/\.\./g, '');
       const filePath = path.resolve(UPLOADS_DIR, relativePath);
 
       if (!filePath.startsWith(UPLOADS_DIR)) {
@@ -384,6 +385,10 @@ const server = http.createServer(async (req, res) => {
         'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
         'Access-Control-Allow-Origin': '*'
       });
+      if (req.method === 'HEAD') {
+        res.end();
+        return;
+      }
       return fs.createReadStream(filePath).pipe(res);
     }
 
@@ -431,7 +436,8 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, {
         success: true,
         data: {
-          url: avatarUrl,
+          url: fullUrl,
+          relativePath: avatarUrl,
           fullUrl,
           fileName: safeFileName,
           sizeBytes: buffer.length

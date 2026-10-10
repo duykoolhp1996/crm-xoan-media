@@ -27,7 +27,9 @@ export const AvatarUploader: React.FC<AvatarUploaderProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (file: File) => {
-    if (!file.type.startsWith('image/')) {
+    const isImageByMime = file.type && file.type.startsWith('image/');
+    const isImageByName = /\.(jpe?g|png|webp|gif|avif|svg|heic|heif)$/i.test(file.name);
+    if (!isImageByMime && !isImageByName) {
       setUploadMessage({ type: 'error', text: 'Vui lòng chọn đúng file hình ảnh (JPG, PNG, WebP)!' });
       return;
     }

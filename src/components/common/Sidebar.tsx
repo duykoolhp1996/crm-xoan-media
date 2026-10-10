@@ -215,6 +215,9 @@ export const Sidebar: React.FC = () => {
             src={currentUser.avatar}
             alt={currentUser.name}
             className="w-8 h-8 rounded-xl object-cover ring-1 ring-black/[0.06] shrink-0"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+            }}
           />
           <div className="min-w-0">
             <p className="text-xs font-bold text-neutral-900 truncate">{currentUser.name}</p>

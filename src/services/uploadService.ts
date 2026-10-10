@@ -10,20 +10,29 @@ export const compressImageToSquare = (
   quality: number = 0.85
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
+    const isImageByMime = file.type && file.type.startsWith('image/');
+    const isImageByName = /\.(jpe?g|png|webp|gif|avif|svg|heic|heif)$/i.test(file.name);
+    if (!isImageByMime && !isImageByName) {
       return reject(new Error('Vui lòng chọn đúng định dạng file ảnh (JPG, PNG, WebP)'));
     }
 
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('Không thể đọc file ảnh'));
     reader.onload = (e) => {
+      const rawDataUrl = e.target?.result as string;
       const img = new Image();
-      img.onerror = () => reject(new Error('Không thể xử lý hình ảnh'));
+      img.onerror = () => {
+        // Fallback: nếu Canvas không render được định dạng đặc biệt, vẫn giữ nguyên rawDataUrl
+        if (rawDataUrl) {
+          return resolve(rawDataUrl);
+        }
+        reject(new Error('Không thể xử lý hình ảnh'));
+      };
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          return resolve(e.target?.result as string);
+          return resolve(rawDataUrl);
         }
 
         // 1. Tính toán vùng crop vuông ở chính giữa bức ảnh
@@ -57,7 +66,7 @@ export const compressImageToSquare = (
         const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
         resolve(compressedDataUrl);
       };
-      img.src = e.target?.result as string;
+      img.src = rawDataUrl;
     };
     reader.readAsDataURL(file);
   });
@@ -74,12 +83,12 @@ export const uploadAvatarFile = async (
   userId?: string
 ): Promise<{ success: boolean; url: string; message: string }> => {
   try {
-    // 1. Kiểm tra kích thước file gốc (tối đa 10MB trước khi nén)
-    if (file.size > 10 * 1024 * 1024) {
+    // 1. Kiểm tra kích thước file gốc (tối đa 15MB trước khi nén)
+    if (file.size > 15 * 1024 * 1024) {
       return {
         success: false,
         url: '',
-        message: 'File ảnh quá lớn! Vui lòng chọn ảnh dung lượng dưới 10MB.'
+        message: 'File ảnh quá lớn! Vui lòng chọn ảnh dung lượng dưới 15MB.'
       };
     }
 
@@ -95,9 +104,13 @@ export const uploadAvatarFile = async (
     });
 
     if (res && (res.fullUrl || res.url)) {
+      let finalUrl = res.fullUrl || res.url;
+      if (finalUrl.startsWith('/')) {
+        finalUrl = `https://crm.xoanmedia.com${finalUrl}`;
+      }
       return {
         success: true,
-        url: res.fullUrl || res.url,
+        url: finalUrl,
         message: 'Tải ảnh đại diện lên máy chủ thành công!'
       };
     }

@@ -149,7 +149,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, emb
         {/* User Info Strip */}
         <div className="flex items-center gap-3 px-6 py-3 bg-white border-b border-black/[0.04]">
           <div className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-black/[0.08] shrink-0">
-            <img src={avatarPreview || currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+            <img
+              src={avatarPreview || currentUser.avatar}
+              alt={currentUser.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+              }}
+            />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-bold text-neutral-900 text-sm truncate">{currentUser.name}</p>
@@ -187,7 +194,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, emb
                 currentAvatar={avatarPreview || currentUser.avatar}
                 onAvatarChange={(newUrl) => {
                   setAvatarPreview(newUrl);
-                  setResult(null);
+                  const res = updateProfile({ avatar: newUrl });
+                  setResult(res);
                 }}
                 presetAvatars={PRESET_AVATARS}
                 userId={currentUser.id}
