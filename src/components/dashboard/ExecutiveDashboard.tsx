@@ -44,6 +44,7 @@ import {
 import { CRM_CTV_SALES } from '../../data/crmBusinessData';
 import {
   isCustomerBookedOrDeposited,
+  isCustomerInStage,
   getCustomerTotalOrderValue,
   getCustomerPaidDeposit,
   getCustomerRemainingDebt
@@ -198,6 +199,23 @@ export const ExecutiveDashboard: React.FC = () => {
   // CÔNG NỢ CÒN LẠI CẦN THU (DOANH THU ĐÃ CHỐT - THỰC THU ĐÃ NHẬN)
   const totalRemainingDebt = Math.max(0, closedDealsRevenue - totalCollectedRevenue);
 
+  // DANH SÁCH & DOANH THU CÁC ĐƠN ĐÃ HOÀN THÀNH (TẤT TOÁN / BÀN GIAO)
+  const completedDeals = useMemo(() => {
+    return filteredCustomers.filter(c => 
+      ['Giao ảnh', 'Hoàn thành', 'Đã bàn giao'].includes(c.pipelineStage) ||
+      isCustomerInStage(c.pipelineStage, 'Hoàn thành') ||
+      bookings.some(b => b.customerId === c.id && (b.bookingStatus === 'Hoàn thành' || b.bookingStatus === 'Đã bàn giao'))
+    );
+  }, [filteredCustomers, bookings]);
+
+  const completedDealsRevenue = useMemo(() => {
+    return completedDeals.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
+  }, [completedDeals]);
+
+  const completedDealsCollected = useMemo(() => {
+    return completedDeals.reduce((sum, c) => sum + getCustomerPaidDeposit(c), 0);
+  }, [completedDeals]);
+
   // TỔNG TIỀM NĂNG PIPELINE (TOÀN BỘ NGÂN SÁCH DỰ KIẾN KỂ CẢ LEAD MỚI TIẾP NHẬN)
   const pipelinePotentialRevenue = useMemo(() => {
     return filteredCustomers.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
@@ -308,35 +326,43 @@ export const ExecutiveDashboard: React.FC = () => {
 
   const COLORS = ['#111827', '#84cc16', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
-  // 6. Phễu Pipeline Data chuẩn hình phễu kinh doanh (Funnel Architecture)
+  // 6. Phễu Pipeline Data chuẩn hình phễu kinh doanh (Funnel Architecture 7 Giai Đoạn)
   const funnelStages = useMemo(() => {
     const s1 = filteredCustomers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage));
     const s2 = filteredCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ'].includes(c.pipelineStage));
     const s3 = filteredCustomers.filter(c => ['Đã gửi báo giá', 'Đang thương lượng'].includes(c.pipelineStage));
-    const s4 = filteredCustomers.filter(c => ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking'].includes(c.pipelineStage) || (Number(c.paidAmount ?? 0) > 0 || Number(c.depositAmount ?? 0) > 0));
-    const s5 = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ'].includes(c.pipelineStage));
-    const s6 = filteredCustomers.filter(c => ['Giao ảnh', 'Hoàn thành', 'Đã bàn giao'].includes(c.pipelineStage));
+    // Tầng 4: Đã cọc
+    const s4 = filteredCustomers.filter(c => 
+      (['Đã cọc', 'Đã đặt cọc'].includes(c.pipelineStage) || (Number(c.paidAmount ?? 0) > 0 || Number(c.depositAmount ?? 0) > 0)) &&
+      !['Book ngày', 'Đã Booking', 'Đang chụp', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Hoàn thành', 'Đã bàn giao'].includes(c.pipelineStage)
+    );
+    // Tầng 5: Lên lịch Booking (Book ngày)
+    const s5 = filteredCustomers.filter(c => 
+      ['Book ngày', 'Đã Booking'].includes(c.pipelineStage) ||
+      (bookings.some(b => b.customerId === c.id) && !['Đang chụp', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Hoàn thành', 'Đã bàn giao'].includes(c.pipelineStage))
+    );
+    // Tầng 6: Đang chụp & hậu kỳ
+    const s6 = filteredCustomers.filter(c => ['Đang chụp', 'Đã chụp', 'Đang hậu kỳ'].includes(c.pipelineStage));
+    // Tầng 7: Giao ảnh & hoàn thành
+    const s7 = filteredCustomers.filter(c => ['Giao ảnh', 'Hoàn thành', 'Đã bàn giao'].includes(c.pipelineStage));
 
     const sumVal = (list: typeof filteredCustomers) => list.reduce((sum, c) => sum + getCustomerTotalOrderValue(c), 0);
     const totalCount = filteredCustomers.length || 1;
 
-    // Tính độ rộng động theo tỷ lệ thực tế của data:
-    // Tầng có số lượng cao nhất sẽ chiếm 100% độ rộng.
-    // Tầng có 0 lớp sẽ thu gọn về 38% (vừa đủ hiển thị gọn gàng).
-    // Tầng ở giữa sẽ nội suy tuyến tính từ 38% đến 100%.
-    const rawCounts = [s1.length, s2.length, s3.length, s4.length, s5.length, s6.length];
+    // Tính độ rộng động theo tỷ lệ thực tế của data
+    const rawCounts = [s1.length, s2.length, s3.length, s4.length, s5.length, s6.length, s7.length];
     const maxStageCount = Math.max(...rawCounts, 1);
     const getDynamicWidthPct = (count: number) => {
-      if (maxStageCount <= 0) return 40;
+      if (maxStageCount <= 0) return 42;
       const ratio = count / maxStageCount;
-      return Math.round(38 + ratio * 62);
+      return Math.round(40 + ratio * 60);
     };
 
     return [
       {
         id: 'new_lead',
         stageKey: 'New Lead',
-        name: 'Lead Mới Tiếp Nhận',
+        name: 'Lead Tiếp Nhận',
         sub: 'Từ Ads, Zalo, Form',
         count: s1.length,
         revenue: sumVal(s1),
@@ -351,7 +377,7 @@ export const ExecutiveDashboard: React.FC = () => {
       {
         id: 'consulting',
         stageKey: 'Đang tư vấn',
-        name: 'Đang Tư Vấn & Khảo Sát',
+        name: 'Đang Tư Vấn',
         sub: 'Tư vấn concept & sĩ số',
         count: s2.length,
         revenue: sumVal(s2),
@@ -366,7 +392,7 @@ export const ExecutiveDashboard: React.FC = () => {
       {
         id: 'quoted',
         stageKey: 'Đã gửi báo giá',
-        name: 'Đã Gửi Báo Giá Concept',
+        name: 'Đã Gửi Báo Giá',
         sub: 'Báo giá PDF & chốt gói',
         count: s3.length,
         revenue: sumVal(s3),
@@ -379,10 +405,10 @@ export const ExecutiveDashboard: React.FC = () => {
         step: 3
       },
       {
-        id: 'booked',
+        id: 'deposited',
         stageKey: 'Đã cọc',
-        name: 'Đã Chốt Cọc & Book Ngày',
-        sub: 'Cọc VietQR & khóa lịch',
+        name: 'Đã Chốt Cọc',
+        sub: 'Cọc VietQR vào tài khoản',
         count: s4.length,
         revenue: sumVal(s4),
         pct: Math.round((s4.length / totalCount) * 100),
@@ -394,34 +420,49 @@ export const ExecutiveDashboard: React.FC = () => {
         step: 4
       },
       {
-        id: 'shooting',
-        stageKey: 'Đã chụp',
-        name: 'Đang Chụp & Hậu Kỳ',
-        sub: 'Thợ tác nghiệp & dựng album',
+        id: 'booking',
+        stageKey: 'Book ngày',
+        name: 'Lên Lịch Booking',
+        sub: 'Khóa ngày & điều phối ekip',
         count: s5.length,
         revenue: sumVal(s5),
         pct: Math.round((s5.length / totalCount) * 100),
         widthPct: getDynamicWidthPct(s5.length),
-        color: '#06b6d4',
-        gradient: 'from-cyan-50 to-teal-100/90 text-cyan-950 border-cyan-300',
-        barColor: '#06b6d4',
-        badgeClass: 'bg-cyan-100 text-cyan-900 border-cyan-300',
+        color: '#a855f7',
+        gradient: 'from-fuchsia-50 to-purple-100/90 text-purple-950 border-purple-300',
+        barColor: '#a855f7',
+        badgeClass: 'bg-purple-600 text-white font-bold border-purple-700 shadow-2xs',
         step: 5
       },
       {
-        id: 'completed',
-        stageKey: 'Hoàn thành',
-        name: 'Hoàn Thành Bàn Giao',
-        sub: 'Giao Drive, in ảnh & thu đủ',
+        id: 'shooting',
+        stageKey: 'Đã chụp',
+        name: 'Chụp & Hậu Kỳ',
+        sub: 'Thợ tác nghiệp & dựng album',
         count: s6.length,
         revenue: sumVal(s6),
         pct: Math.round((s6.length / totalCount) * 100),
         widthPct: getDynamicWidthPct(s6.length),
+        color: '#06b6d4',
+        gradient: 'from-cyan-50 to-teal-100/90 text-cyan-950 border-cyan-300',
+        barColor: '#06b6d4',
+        badgeClass: 'bg-cyan-100 text-cyan-900 border-cyan-300',
+        step: 6
+      },
+      {
+        id: 'completed',
+        stageKey: 'Hoàn thành',
+        name: 'Hoàn Thành',
+        sub: 'Giao Drive, in ảnh & thu đủ',
+        count: s7.length,
+        revenue: sumVal(s7),
+        pct: Math.round((s7.length / totalCount) * 100),
+        widthPct: getDynamicWidthPct(s7.length),
         color: '#10b981',
         gradient: 'from-emerald-100 to-emerald-200 text-emerald-950 border-emerald-400',
         barColor: '#10b981',
         badgeClass: 'bg-emerald-600 text-white font-bold border-emerald-700 shadow-2xs',
-        step: 6
+        step: 7
       }
     ];
   }, [filteredCustomers]);
@@ -1026,8 +1067,8 @@ export const ExecutiveDashboard: React.FC = () => {
         )}
       </div>
 
-      {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Cards: 5 Cột chuẩn Soft Glassmorphism */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
         {/* Card 1: Doanh thu đơn đã chốt (Tổng giá trị hợp đồng) */}
         <div
           onClick={() => setActiveTab('bookings')}
@@ -1056,6 +1097,38 @@ export const ExecutiveDashboard: React.FC = () => {
             <span>Giá trị TB/đơn:</span>
             <strong className="text-neutral-900 font-bold">
               {closedDeals.length > 0 ? (closedDealsRevenue / closedDeals.length / 1000000).toFixed(1) : 0} Tr
+            </strong>
+          </div>
+        </div>
+
+        {/* Card 2: Doanh thu đã hoàn thành (Tổng số đã hoàn thành) */}
+        <div
+          onClick={() => setActiveTab('customers')}
+          className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-cyan-500"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-800">DOANH THU ĐÃ HOÀN THÀNH</span>
+              <p className="text-[10px] text-cyan-600 font-medium truncate max-w-[130px]">
+                Tổng số đã hoàn thành: {completedDeals.length} đơn
+              </p>
+            </div>
+            <div className="w-9 h-9 rounded-2xl bg-cyan-100 flex items-center justify-center text-cyan-800 group-hover:scale-105 transition-transform">
+              <CheckCircle2 className="w-4 h-4 text-cyan-700" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-cyan-950 tracking-tight">
+              {(completedDealsRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+            </span>
+            <span className="text-xs font-bold text-cyan-800 bg-cyan-100/80 px-2 py-0.5 rounded-full">
+              {completedDeals.length} lớp
+            </span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+            <span>Tiến độ hoàn tất:</span>
+            <strong className="text-cyan-800 font-bold">
+              {closedDeals.length > 0 ? Math.round((completedDeals.length / closedDeals.length) * 100) : 0}% tổng HĐ
             </strong>
           </div>
         </div>
@@ -1319,7 +1392,7 @@ export const ExecutiveDashboard: React.FC = () => {
                         {/* Tầng phễu dạng tháp xếp tầng tự co giãn độ rộng theo tỷ lệ data, căn giữa */}
                         <div
                           onClick={() => setActiveTab('pipeline')}
-                          style={{ width: `${stage.widthPct}%`, minWidth: '148px' }}
+                          style={{ width: `${stage.widthPct}%`, minWidth: '175px' }}
                           title={`${stage.name} (${stage.sub}) - ${stage.count} lớp`}
                           className={`mx-auto px-2.5 py-1.5 rounded-xl border bg-gradient-to-r ${stage.gradient} transition-all duration-300 hover:scale-[1.02] hover:shadow-xs cursor-pointer select-none`}
                         >
@@ -1354,7 +1427,7 @@ export const ExecutiveDashboard: React.FC = () => {
               {/* Chân phễu: Ghi chú tương tác */}
               <div className="mt-2.5 pt-2 border-t border-black/[0.06] text-[10px] text-neutral-400 flex items-center justify-between">
                 <span>💡 Bấm vào tầng để xem trên Kanban</span>
-                <span className="font-semibold text-neutral-600">6 giai đoạn</span>
+                <span className="font-semibold text-neutral-600">7 giai đoạn</span>
               </div>
             </div>
 
