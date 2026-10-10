@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Booking, BookingStatus } from '../../types';
 import {
@@ -17,7 +17,11 @@ import {
   Video,
   Sparkles,
   FileText,
-  Eye
+  Eye,
+  Ban,
+  Trash2,
+  Database,
+  ShieldAlert
 } from 'lucide-react';
 
 interface BookingDetailModalProps {
@@ -31,7 +35,23 @@ export const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { updateBooking, customers, setSelectedCustomerId, setActiveTab, photographers } = useApp();
+  const {
+    updateBooking,
+    deleteBooking,
+    cancelBooking,
+    customers,
+    setSelectedCustomerId,
+    setActiveTab,
+    photographers,
+    currentUser,
+    currentRole
+  } = useApp();
+
+  const isAdmin = currentRole === 'admin' || currentUser?.role === 'admin';
+  const [isConfirmingCancel, setIsConfirmingCancel] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   if (!isOpen || !booking) return null;
 
@@ -400,34 +420,166 @@ export const BookingDetailModal: React.FC<BookingDetailModalProps> = ({
             )}
           </div>
 
-          {/* Update Status Bar */}
-          <div className="p-4 bg-white border border-black/[0.08] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <p className="font-bold text-neutral-900">Cập nhật nhanh trạng thái tiến độ:</p>
-              <p className="text-neutral-500 text-[11px]">Chuyển đổi trạng thái đơn từ đặt cọc, sắp chụp sang hậu kỳ hoặc hoàn thành</p>
+          {/* Admin Cancel Confirmation Box */}
+          {isConfirmingCancel && (
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-3 animate-in fade-in duration-150">
+              <div className="flex items-start gap-2.5 text-amber-900">
+                <Ban className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-xs">Xác Nhận Hủy Đơn Booking {booking.code}</h4>
+                  <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
+                    Đơn sẽ chuyển trạng thái "Hủy" trong Database. Toàn bộ lịch chụp của Ekip sẽ được giải phóng tự động.
+                  </p>
+                </div>
+              </div>
+              <textarea
+                rows={2}
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Nhập lý do hủy (khách dời lịch, hoãn chụp, hủy hợp đồng...)"
+                className="w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-xs text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={() => {
+                    setIsConfirmingCancel(false);
+                    setCancelReason('');
+                  }}
+                  className="px-3.5 py-1.5 bg-white hover:bg-neutral-100 text-neutral-700 font-bold rounded-xl border border-black/[0.08] text-xs transition-colors cursor-pointer"
+                >
+                  Quay Lại
+                </button>
+                <button
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={async () => {
+                    setIsProcessing(true);
+                    const ok = await cancelBooking(booking.id, cancelReason);
+                    setIsProcessing(false);
+                    if (ok) {
+                      onClose();
+                    }
+                  }}
+                  className="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isProcessing ? 'Đang lưu CSDL...' : 'Xác Nhận Hủy (Đồng Bộ DB)'}
+                </button>
+              </div>
             </div>
+          )}
 
-            <select
-              value={booking.bookingStatus}
-              onChange={(e) => handleStatusChange(e.target.value as BookingStatus)}
-              className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-bold text-neutral-800 cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-            >
-              <option value="Chờ xác nhận">Chờ xác nhận</option>
-              <option value="Đã xác nhận">Đã xác nhận</option>
-              <option value="Đã đặt cọc">Đã đặt cọc</option>
-              <option value="Sắp chụp">Sắp chụp</option>
-              <option value="Đang chụp">Đang chụp</option>
-              <option value="Đã chụp">Đã chụp</option>
-              <option value="Hậu kỳ">Hậu kỳ</option>
-              <option value="Đã bàn giao">Đã bàn giao</option>
-              <option value="Hoàn thành">Hoàn thành</option>
-              <option value="Hủy">Hủy</option>
-            </select>
-          </div>
+          {/* Admin Delete Confirmation Box */}
+          {isConfirmingDelete && (
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3 animate-in fade-in duration-150">
+              <div className="flex items-start gap-2.5 text-rose-900">
+                <Trash2 className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-xs">Xác Nhận Xóa Đơn Booking {booking.code} Vào Thùng Rác</h4>
+                  <p className="text-[11px] text-rose-800 mt-0.5 leading-relaxed">
+                    Chỉ Quản trị viên (Admin) mới có quyền xóa. Đơn sẽ được chuyển vào thùng rác CSDL SQLite (is_deleted = 1) và giải phóng lịch thợ.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={() => setIsConfirmingDelete(false)}
+                  className="px-3.5 py-1.5 bg-white hover:bg-neutral-100 text-neutral-700 font-bold rounded-xl border border-black/[0.08] text-xs transition-colors cursor-pointer"
+                >
+                  Hủy Bỏ
+                </button>
+                <button
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={async () => {
+                    setIsProcessing(true);
+                    const ok = await deleteBooking(booking.id);
+                    setIsProcessing(false);
+                    if (ok) {
+                      onClose();
+                    }
+                  }}
+                  className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isProcessing ? 'Đang xóa...' : 'Xóa Đơn (Đồng Bộ Database)'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Update Status Bar */}
+          {!isConfirmingCancel && !isConfirmingDelete && (
+            <div className="p-4 bg-white border border-black/[0.08] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <p className="font-bold text-neutral-900">Cập nhật nhanh trạng thái tiến độ:</p>
+                <p className="text-neutral-500 text-[11px]">Chuyển đổi trạng thái đơn từ đặt cọc, sắp chụp sang hậu kỳ hoặc hoàn thành</p>
+              </div>
+
+              <select
+                value={booking.bookingStatus}
+                onChange={(e) => {
+                  const val = e.target.value as BookingStatus;
+                  if (val === 'Hủy') {
+                    if (!isAdmin) {
+                      alert('⛔ Chỉ tài khoản Quản trị viên (Admin) mới có quyền Hủy đơn booking!');
+                      return;
+                    }
+                    setIsConfirmingCancel(true);
+                    return;
+                  }
+                  handleStatusChange(val);
+                }}
+                className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-bold text-neutral-800 cursor-pointer focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+              >
+                <option value="Chờ xác nhận">Chờ xác nhận</option>
+                <option value="Đã xác nhận">Đã xác nhận</option>
+                <option value="Đã đặt cọc">Đã đặt cọc</option>
+                <option value="Sắp chụp">Sắp chụp</option>
+                <option value="Đang chụp">Đang chụp</option>
+                <option value="Đã chụp">Đã chụp</option>
+                <option value="Hậu kỳ">Hậu kỳ</option>
+                <option value="Đã bàn giao">Đã bàn giao</option>
+                <option value="Hoàn thành">Hoàn thành</option>
+                <option value="Hủy" disabled={!isAdmin}>
+                  {isAdmin ? 'Hủy đơn' : 'Hủy đơn (Chỉ Admin)'}
+                </option>
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-neutral-50/80 border-t border-black/[0.06] flex items-center justify-end">
+        <div className="px-6 py-4 bg-neutral-50/80 border-t border-black/[0.06] flex items-center justify-between">
+          <div>
+            {isAdmin && !isConfirmingCancel && !isConfirmingDelete && (
+              <div className="flex items-center gap-2">
+                {booking.bookingStatus !== 'Hủy' && (
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingCancel(true)}
+                    className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Admin: Hủy đơn & giải phóng lịch thợ"
+                  >
+                    <Ban className="w-3.5 h-3.5" />
+                    <span>Hủy Đơn</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingDelete(true)}
+                  className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Admin: Xóa đơn vào thùng rác CSDL"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Xóa Đơn (Admin)</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           <button
             onClick={onClose}
             className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white font-bold rounded-xl transition-colors shadow-xs"

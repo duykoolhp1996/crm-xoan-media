@@ -1382,6 +1382,31 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { success: true, message: 'Đã xóa lịch chụp vào thùng rác' });
     }
 
+    // POST /api/bookings/:id/restore (Khôi phục Booking)
+    if (pathname.match(/^\/api\/bookings\/[^/]+\/restore$/) && req.method === 'POST') {
+      const id = pathname.split('/')[3].trim();
+      runTransaction(() => {
+        db.prepare(`
+          UPDATE bookings SET 
+            is_deleted = 0, 
+            deleted_at = NULL, 
+            deleted_by = NULL,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run(id);
+
+        logAudit({
+          userId: currentUserId,
+          userName: currentUserName,
+          action: 'RESTORE',
+          tableName: 'bookings',
+          recordId: id,
+          ipAddress
+        });
+      });
+      return sendJson(res, 200, { success: true, message: 'Đã khôi phục lịch booking thành công' });
+    }
+
     // -------------------------------------------------------------
     // 4. AUDIT LOGS, PHOTOGRAPHERS, SALES STAFF
     // -------------------------------------------------------------

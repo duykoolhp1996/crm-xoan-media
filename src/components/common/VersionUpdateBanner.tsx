@@ -56,7 +56,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.3.6
+                Phiên Bản Mới v1.3.7
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -64,25 +64,25 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.3.6
+              Cập Nhật CRM Xoăn Media v1.3.7
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Khắc phục triệt để lỗi kiểm tra trùng lịch thợ: Tự động loại trừ chính đơn đang chỉnh sửa, phân định chuẩn xác ca chụp và chỉ cảnh báo khi thực sự có đơn khác trùng lịch!
+              Bảng Quản Lý Booking liên kết 2 chiều với CSDL SQL Server: Phân quyền bảo mật cao cho phép Quản trị viên (Admin) Hủy đơn (giải phóng lịch thợ) và Xóa đơn vào thùng rác database an toàn!
             </p>
 
             {/* Quick feature tags */}
             <div className="flex items-center gap-2 mt-2 text-[10px] text-neutral-400">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Fix trùng lịch ảo
+                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Phân quyền Admin
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Phân công mượt mà
+                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Hủy & Xóa Booking
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Bell className="w-3 h-3 text-[#B8F23D]" /> Check lịch chuẩn xác
+                <Bell className="w-3 h-3 text-[#B8F23D]" /> Đồng bộ SQL Server
               </span>
             </div>
 

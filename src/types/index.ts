@@ -437,7 +437,7 @@ export interface ActivityLog {
   id: string;
   customerId?: string;
   bookingId?: string;
-  type: 'lead_created' | 'lead_deleted' | 'call' | 'message' | 'quote_sent' | 'deposit_paid' | 'booking_scheduled' | 'photographer_assigned' | 'shooting_done' | 'delivered' | 'remarketing_sent' | 'note';
+  type: 'lead_created' | 'lead_deleted' | 'call' | 'message' | 'quote_sent' | 'deposit_paid' | 'booking_scheduled' | 'photographer_assigned' | 'shooting_done' | 'delivered' | 'remarketing_sent' | 'status_change' | 'note';
   title: string;
   description: string;
   performedByName: string;

@@ -115,6 +115,8 @@ interface AppContextType {
   setSelectedBookingId: (id: string | null) => void;
   addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateBooking: (booking: Booking) => void;
+  deleteBooking: (id: string) => Promise<boolean>;
+  cancelBooking: (id: string, reason?: string) => Promise<boolean>;
   assignPhotographerToBooking: (bookingId: string, photographerId: string, roleType: 'lead' | 'assistant' | 'videographer' | 'makeup') => void;
 
   // Photographers
@@ -1694,6 +1696,96 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  const deleteBooking = async (id: string): Promise<boolean> => {
+    // Phân quyền bảo mật: Chỉ Quản trị viên (Admin) mới có quyền xóa đơn booking khỏi CSDL
+    const isAdmin = currentRole === 'admin' || currentUser?.role === 'admin';
+    if (!isAdmin) {
+      alert('⛔ Chỉ tài khoản Quản trị viên (Admin) mới có quyền Xóa đơn booking khỏi hệ thống!');
+      return false;
+    }
+
+    const targetBooking = bookings.find(b => b.id === id);
+    if (!targetBooking) return false;
+
+    // 1. Cập nhật State & LocalStorage
+    setBookings(prev => {
+      const next = prev.filter(b => b.id !== id);
+      try {
+        localStorage.setItem('crm_xoan_cached_bookings', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    // 2. Gửi request Soft-delete trực tiếp lên SQL Server Database API
+    try {
+      await apiClient.deleteBooking(id);
+    } catch (err) {
+      console.warn('[SQL Database] Lỗi gọi API deleteBooking:', err);
+    }
+
+    // 3. Ghi log kiểm toán
+    addActivityLog({
+      customerId: targetBooking.customerId || 'global',
+      type: 'status_change',
+      title: `🗑️ Xóa đơn booking: ${targetBooking.code || targetBooking.className}`,
+      description: `Admin ${currentUser.name} đã xóa đơn booking ${targetBooking.code || ''} của lớp ${targetBooking.className || ''} (${targetBooking.schoolName || ''}) ngày ${targetBooking.shootDate || ''} vào thùng rác.`,
+      performedByName: currentUser.name
+    });
+
+    return true;
+  };
+
+  const cancelBooking = async (id: string, reason?: string): Promise<boolean> => {
+    // Phân quyền bảo mật: Chỉ Quản trị viên (Admin) mới có quyền hủy đơn booking
+    const isAdmin = currentRole === 'admin' || currentUser?.role === 'admin';
+    if (!isAdmin) {
+      alert('⛔ Chỉ tài khoản Quản trị viên (Admin) mới có quyền Hủy đơn booking!');
+      return false;
+    }
+
+    const targetBooking = bookings.find(b => b.id === id);
+    if (!targetBooking) return false;
+
+    const cancelReasonText = reason?.trim() ? `[LÝ DO HỦY: ${reason.trim()}]` : '[ĐÃ HỦY ĐƠN BOOKING]';
+    const updatedNotes = targetBooking.notes 
+      ? `${targetBooking.notes}\n${cancelReasonText}` 
+      : cancelReasonText;
+
+    const updatedBooking: Booking = {
+      ...targetBooking,
+      bookingStatus: 'Hủy',
+      notes: updatedNotes,
+      updatedAt: new Date().toISOString()
+    };
+
+    // 1. Cập nhật State & LocalStorage
+    setBookings(prev => {
+      const next = prev.map(b => b.id === id ? updatedBooking : b);
+      try {
+        localStorage.setItem('crm_xoan_cached_bookings', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    // 2. Cập nhật bền vững vào SQL Server REST API
+    try {
+      await apiClient.updateBooking(id, updatedBooking);
+    } catch (err) {
+      console.warn('[SQL Database] Lỗi gọi API updateBooking khi hủy:', err);
+    }
+
+    // 3. Ghi log kiểm toán
+    addActivityLog({
+      customerId: targetBooking.customerId || 'global',
+      type: 'status_change',
+      title: `❌ Hủy đơn booking: ${targetBooking.code || targetBooking.className}`,
+      description: `Admin ${currentUser.name} đã hủy đơn booking ${targetBooking.code || ''} của lớp ${targetBooking.className || ''} (${targetBooking.schoolName || ''}). Lý do: ${reason || 'Không nêu'}.`,
+      performedByName: currentUser.name
+    });
+
+    return true;
+  };
+
   // Kiểm tra tính sẵn sàng & xung đột lịch thợ (Loại trừ chính đơn/lớp đang chỉnh sửa)
   const getPhotographerAvailability = (
     photographerId: string, 
@@ -2596,6 +2688,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedBookingId,
         addBooking,
         updateBooking,
+        deleteBooking,
+        cancelBooking,
         assignPhotographerToBooking,
         photographers,
         addPhotographer,
