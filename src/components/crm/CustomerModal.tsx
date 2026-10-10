@@ -127,7 +127,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         studentCount: studentCount,
         serviceType: customerToEdit.serviceType || 'Kỷ yếu Concept',
         servicePackageId: customerToEdit.servicePackageId || (servicePackages[1]?.id || ''),
-        concept: customerToEdit.concept || 'Thanh xuân vườn trường',
+        concept: customerToEdit.concept || '',
         expectedShootDate: customerToEdit.expectedShootDate || '',
         shootingLocations: Array.isArray(customerToEdit.shootingLocations)
           ? customerToEdit.shootingLocations.join(', ')
@@ -191,7 +191,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       studentCount: defaultStudentCount,
       serviceType: 'Kỷ yếu Concept',
       servicePackageId: servicePackages[1]?.id || '',
-      concept: 'Thanh xuân vườn trường',
+      concept: '',
       expectedShootDate: '',
       shootingLocations: 'Trường học & Nhà Hát Lớn / Bãi biển Đồ Sơn',
       
@@ -909,39 +909,26 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
               <Layers className="w-4 h-4 text-indigo-600" /> 4. Giai Đoạn Pipeline (Chuẩn Hóa 10 Bước) & Trường Bổ Trợ
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="font-semibold text-neutral-700 block mb-1">
-                  Giai đoạn hiện tại trên Pipeline *
-                </label>
-                <select
-                  value={formData.pipelineStage}
-                  onChange={e => setFormData({ ...formData, pipelineStage: e.target.value as PipelineStage })}
-                  className="w-full px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 font-bold rounded-xl cursor-pointer focus:bg-white focus:outline-none"
-                >
-                  <option value="New Lead">1. New Lead (Mới tiếp nhận)</option>
-                  <option value="Đang tư vấn">2. Đang tư vấn concept</option>
-                  <option value="Đã gửi báo giá">3. Đã gửi báo giá</option>
-                  <option value="Đã cọc">4. Đã cọc (Đã chốt cọc)</option>
-                  <option value="Book ngày">5. Book ngày (Đã lên lịch chụp)</option>
-                  <option value="Đã chụp">6. Đã chụp (Chờ nộp link Drive)</option>
-                  <option value="Đang hậu kỳ">7. Đang hậu kỳ (Photoshop & Video)</option>
-                  <option value="Giao ảnh">8. Giao ảnh (Bàn giao hoàn thiện)</option>
-                  <option value="Hoàn thành">9. Hoàn thành (Quyết toán 100%)</option>
-                  <option value="Lost">10. Khách từ chối (Lost)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="font-semibold text-neutral-700 block mb-1">Concept kỷ yếu dự kiến</label>
-                <input
-                  type="text"
-                  placeholder="Thanh xuân, Retro, Cổ phục, Cô gái Hà Lan..."
-                  value={formData.concept}
-                  onChange={e => setFormData({ ...formData, concept: e.target.value })}
-                  className="w-full px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl focus:bg-white focus:outline-none"
-                />
-              </div>
+            <div>
+              <label className="font-semibold text-neutral-700 block mb-1">
+                Giai đoạn hiện tại trên Pipeline *
+              </label>
+              <select
+                value={formData.pipelineStage}
+                onChange={e => setFormData({ ...formData, pipelineStage: e.target.value as PipelineStage })}
+                className="w-full px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 font-bold rounded-xl cursor-pointer focus:bg-white focus:outline-none"
+              >
+                <option value="New Lead">1. New Lead (Mới tiếp nhận)</option>
+                <option value="Đang tư vấn">2. Đang tư vấn concept</option>
+                <option value="Đã gửi báo giá">3. Đã gửi báo giá</option>
+                <option value="Đã cọc">4. Đã cọc (Đã chốt cọc)</option>
+                <option value="Book ngày">5. Book ngày (Đã lên lịch chụp)</option>
+                <option value="Đã chụp">6. Đã chụp (Chờ nộp link Drive)</option>
+                <option value="Đang hậu kỳ">7. Đang hậu kỳ (Photoshop & Video)</option>
+                <option value="Giao ảnh">8. Giao ảnh (Bàn giao hoàn thiện)</option>
+                <option value="Hoàn thành">9. Hoàn thành (Quyết toán 100%)</option>
+                <option value="Lost">10. Khách từ chối (Lost)</option>
+              </select>
             </div>
 
             {/* TRƯỜNG ĐẶC THÙ THEO GIAI ĐOẠN (CONDITIONAL FIELDS) */}
