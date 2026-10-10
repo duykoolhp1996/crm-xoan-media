@@ -21,7 +21,8 @@ import {
   Settings2,
   Users,
   Video,
-  ChevronDown
+  ChevronDown,
+  Edit3
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
@@ -72,6 +73,7 @@ export const KanbanPipeline: React.FC = () => {
   const [scheduleBookingCustomer, setScheduleBookingCustomer] = useState<Customer | null>(null);
   const [assignCrewCustomer, setAssignCrewCustomer] = useState<Customer | null>(null);
   const [uploadDriveCustomer, setUploadDriveCustomer] = useState<Customer | null>(null);
+  const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
 
   // Helper lấy thông tin Booking và Ekip thợ chụp của một khách hàng
@@ -965,7 +967,7 @@ export const KanbanPipeline: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Card Sub-actions: Xóa vào thùng rác & Xem chi tiết */}
+                          {/* Card Sub-actions: Xóa vào thùng rác, Sửa nhanh & Xem chi tiết */}
                           <div className="mt-2 pt-1.5 border-t border-black/[0.04] flex items-center justify-between text-[10px] text-neutral-400">
                             <button
                               type="button"
@@ -980,15 +982,30 @@ export const KanbanPipeline: React.FC = () => {
                               <span>Xóa</span>
                             </button>
 
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedCustomerId(cust.id);
-                              }}
-                              className="text-[#79ba07] hover:text-neutral-900 font-bold cursor-pointer"
-                            >
-                              Hồ sơ 360° →
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCustomerToEdit(cust);
+                                }}
+                                className="text-neutral-600 hover:text-amber-700 font-bold flex items-center gap-1 transition-colors px-1.5 py-0.5 rounded-md hover:bg-amber-50"
+                                title="Sửa nhanh thông tin khách hàng"
+                              >
+                                <Edit3 className="w-3 h-3 text-amber-600" />
+                                <span>Sửa</span>
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedCustomerId(cust.id);
+                                }}
+                                className="text-[#79ba07] hover:text-neutral-900 font-bold cursor-pointer"
+                              >
+                                Hồ sơ 360° →
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
@@ -1014,6 +1031,15 @@ export const KanbanPipeline: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+
+      {/* Edit Lead Modal */}
+      {customerToEdit && (
+        <CustomerModal
+          isOpen={Boolean(customerToEdit)}
+          customerToEdit={customerToEdit}
+          onClose={() => setCustomerToEdit(null)}
+        />
+      )}
 
       {/* Modal Xuất Báo Giá PDF Kỷ Yếu */}
       <PriceQuoteModal

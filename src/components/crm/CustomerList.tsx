@@ -357,11 +357,32 @@ export const CustomerList: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border shrink-0 ${
-                  stageBadges[cust.pipelineStage] || 'bg-neutral-100 text-neutral-700 border-neutral-200'
-                }`}>
-                  {cust.pipelineStage}
-                </span>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <select
+                    value={cust.pipelineStage}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      const newStage = e.target.value as PipelineStage;
+                      updateCustomerStage(cust.id, newStage);
+                    }}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black border shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all shadow-2xs ${
+                      stageBadges[cust.pipelineStage] || 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                    }`}
+                    title="Đổi nhanh giai đoạn Lead Pipeline"
+                  >
+                    <option value="New Lead">New Lead</option>
+                    <option value="Đang tư vấn">Đang tư vấn</option>
+                    <option value="Đã gửi báo giá">Đã gửi báo giá</option>
+                    <option value="Đã cọc">Đã cọc</option>
+                    <option value="Book ngày">Book ngày</option>
+                    <option value="Đã chụp">Đã chụp</option>
+                    <option value="Đang hậu kỳ">Đang hậu kỳ</option>
+                    <option value="Giao ảnh">Giao ảnh</option>
+                    <option value="Hoàn thành">Hoàn thành</option>
+                    <option value="Lost">Khách từ chối (Lost)</option>
+                  </select>
+                </div>
               </div>
 
               {/* Thông tin đại diện & SĐT */}
@@ -501,12 +522,31 @@ export const CustomerList: React.FC = () => {
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border inline-block ${
-                        stageBadges[cust.pipelineStage] || 'bg-neutral-100 text-neutral-700 border-neutral-200'
-                      }`}>
-                        {cust.pipelineStage}
-                      </span>
+                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                      <select
+                        value={cust.pipelineStage}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          const newStage = e.target.value as PipelineStage;
+                          updateCustomerStage(cust.id, newStage);
+                        }}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold border inline-block cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all shadow-2xs ${
+                          stageBadges[cust.pipelineStage] || 'bg-neutral-100 text-neutral-700 border-neutral-200'
+                        }`}
+                        title="Đổi nhanh giai đoạn Lead Pipeline (đồng bộ tức thì với Kanban Pipeline)"
+                      >
+                        <option value="New Lead">New Lead</option>
+                        <option value="Đang tư vấn">Đang tư vấn</option>
+                        <option value="Đã gửi báo giá">Đã gửi báo giá</option>
+                        <option value="Đã cọc">Đã cọc</option>
+                        <option value="Book ngày">Book ngày</option>
+                        <option value="Đã chụp">Đã chụp</option>
+                        <option value="Đang hậu kỳ">Đang hậu kỳ</option>
+                        <option value="Giao ảnh">Giao ảnh</option>
+                        <option value="Hoàn thành">Hoàn thành</option>
+                        <option value="Lost">Khách từ chối (Lost)</option>
+                      </select>
                     </td>
 
                     <td className="py-3.5 px-4">
