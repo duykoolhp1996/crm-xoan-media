@@ -85,6 +85,7 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
   const [copiedZalo, setCopiedZalo] = useState(false);
   const [customNote, setCustomNote] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [qrViewMode, setQrViewMode] = useState<'vietqr' | 'original'>('vietqr');
 
   // Cập nhật lại số tiền thanh toán khi customer hoặc mode thay đổi
   useEffect(() => {
@@ -111,13 +112,15 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
 
   if (!isOpen || !customer) return null;
 
-  // Cấu hình ngân hàng chính thức Xoăn Media
+  // Cấu hình ngân hàng chính thức Xoăn Media (VietinBank - DUONG HAI MINH)
   const bankConfig = {
-    bankId: 'MB',
-    bankName: 'MB BANK (Ngân hàng Quân Đội)',
-    accountNumber: '0981108601',
-    accountName: 'CHU DUC DUY',
-    hotline: '0981 108 601'
+    bankId: 'ICB', // Mã BIN VietinBank (970415 / ICB)
+    bankName: 'VietinBank (Ngân hàng TMCP Công Thương Việt Nam)',
+    accountNumber: '106879341760',
+    accountName: 'DUONG HAI MINH',
+    branch: 'CN Hải Phòng - PGD Kiến Thụy',
+    hotline: '0981 108 601',
+    originalQrUrl: './vietinbank-qr.png'
   };
 
   // Làm sạch tên lớp để làm cú pháp chuyển khoản
@@ -159,6 +162,7 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
 
 🏦 THÔNG TIN TÀI KHOẢN THANH TOÁN CHÍNH THỨC:
 • Ngân hàng: ${bankConfig.bankName}
+• Chi nhánh: ${bankConfig.branch}
 • Số tài khoản (STK): ${bankConfig.accountNumber}
 • Chủ tài khoản: ${bankConfig.accountName}
 • Số tiền: ${paymentAmount.toLocaleString('vi-VN')} đ
@@ -179,6 +183,7 @@ Xoăn Media Studio chân thành cảm ơn tập thể lớp đã tin tưởng v�
 
 🏦 THÔNG TIN TÀI KHOẢN NHẬN CỌC CHÍNH THỨC:
 • Ngân hàng: ${bankConfig.bankName}
+• Chi nhánh: ${bankConfig.branch}
 • Số tài khoản (STK): ${bankConfig.accountNumber}
 • Chủ tài khoản: ${bankConfig.accountName}
 • Số tiền: ${paymentAmount.toLocaleString('vi-VN')} đ
@@ -198,13 +203,16 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
 
   // Tải ảnh QR về máy
   const handleDownloadQr = async () => {
+    const targetUrl = qrViewMode === 'original' ? bankConfig.originalQrUrl : vietQrUrl;
     try {
-      const response = await fetch(vietQrUrl);
+      const response = await fetch(targetUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = isFinalPayment
+      a.download = qrViewMode === 'original'
+        ? `QR_VietinBank_${bankConfig.accountNumber}_DUONG_HAI_MINH.png`
+        : isFinalPayment
         ? `QR_TatToan_${cleanClassName}_${paymentAmount}d.png`
         : `QR_DatCoc_${cleanClassName}_${paymentAmount}d.png`;
       document.body.appendChild(a);
@@ -212,7 +220,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch {
-      window.open(vietQrUrl, '_blank');
+      window.open(targetUrl, '_blank');
     }
   };
 
@@ -231,7 +239,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
         totalRevenue: finalRevenue,
         paidAmount: finalRevenue, // Hoàn thành: Đã thu đủ 100% toàn bộ số tiền
         pipelineStage: 'Hoàn thành',
-        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã tất toán toàn bộ hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ (Đợt cuối: ${paymentAmount.toLocaleString('vi-VN')}đ). ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
+        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã tất toán toàn bộ hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ (Đợt cuối: ${paymentAmount.toLocaleString('vi-VN')}đ) qua VietinBank (${bankConfig.accountNumber} - ${bankConfig.accountName}). ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
         updatedAt: new Date().toISOString()
       });
 
@@ -251,7 +259,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
         customerId: customer.id,
         type: 'delivered',
         title: '🎉 Quyết toán & Hoàn thành hợp đồng',
-        description: `Khách hàng ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% toàn bộ số tiền ${finalRevenue.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Hợp đồng chuyển sang 'Hoàn thành'.`,
+        description: `Khách hàng ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% toàn bộ số tiền ${finalRevenue.toLocaleString('vi-VN')}đ qua VietQR VietinBank (${bankConfig.accountNumber} - ${bankConfig.accountName}). Hợp đồng chuyển sang 'Hoàn thành'.`,
         performedByName: currentUser.name
       });
 
@@ -269,7 +277,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
       addNotification({
         type: 'upcoming_booking',
         title: `🎉 TẤT TOÁN XONG: ${customer.className}`,
-        message: `Lớp ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ. Dự án hoàn tất!`,
+        message: `Lớp ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ qua VietinBank. Dự án hoàn tất!`,
         severity: 'info'
       });
     } else {
@@ -285,7 +293,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
         remainingAmount: remainingDebt,
         depositDate: new Date().toISOString().split('T')[0],
         pipelineStage: 'Đã cọc',
-        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã setup giá cọc & xác nhận nhận cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank. ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
+        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã setup giá cọc & xác nhận nhận cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR VietinBank (${bankConfig.accountNumber} - ${bankConfig.accountName}). ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
         updatedAt: new Date().toISOString()
       });
 
@@ -293,7 +301,7 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
         customerId: customer.id,
         type: 'deposit_paid',
         title: 'Xác nhận đặt cọc thành công',
-        description: `Khách đã thanh toán cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR MB Bank (${bankConfig.accountNumber}). Tiến trình chuyển sang 'Đã cọc'.`,
+        description: `Khách đã thanh toán cọc ${paymentAmount.toLocaleString('vi-VN')}đ qua VietQR VietinBank (${bankConfig.accountNumber} - ${bankConfig.accountName}). Tiến trình chuyển sang 'Đã cọc'.`,
         performedByName: currentUser.name
       });
     }
@@ -549,19 +557,26 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
               </h3>
 
               <div className="space-y-2 text-xs">
-                {/* Số tài khoản MB */}
-                <div className="flex items-center justify-between p-2.5 bg-neutral-50 rounded-xl border border-black/[0.04]">
+                {/* Số tài khoản VietinBank */}
+                <div className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl border border-black/[0.04]">
                   <div>
-                    <p className="text-[10px] text-neutral-400 font-medium">{bankConfig.bankName}</p>
-                    <p className="font-mono text-sm font-black text-neutral-900 tracking-wider">
+                    <p className="text-[10px] text-blue-700 font-bold flex items-center gap-1">
+                      <span>🏦 {bankConfig.bankName}</span>
+                    </p>
+                    <p className="text-[10px] text-neutral-500 font-medium">
+                      📍 {bankConfig.branch}
+                    </p>
+                    <p className="font-mono text-base font-black text-neutral-950 tracking-wider mt-0.5">
                       {bankConfig.accountNumber}
                     </p>
-                    <p className="text-[11px] text-neutral-600 font-bold uppercase">{bankConfig.accountName}</p>
+                    <p className="text-[11px] text-neutral-800 font-extrabold uppercase mt-0.5">
+                      👤 {bankConfig.accountName}
+                    </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleCopy(bankConfig.accountNumber, 'stk')}
-                    className="px-2.5 py-1.5 rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-100 text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                    className="px-3 py-2 rounded-xl bg-white border border-neutral-200 text-neutral-800 hover:bg-neutral-100 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
                   >
                     {copiedField === 'stk' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedField === 'stk' ? 'Đã sao chép' : 'Copy STK'}</span>
@@ -612,11 +627,11 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
               <div className={`absolute top-0 right-0 px-3 py-0.5 text-[10px] font-black rounded-bl-xl uppercase tracking-wider ${
                 isFinalPayment ? 'bg-teal-500 text-white' : 'bg-[#B8F23D] text-neutral-950'
               }`}>
-                {isFinalPayment ? 'VietQR Tất Toán' : 'VietQR Napas 247'}
+                {isFinalPayment ? 'VietQR Tất Toán' : 'VietinBank Napas 247'}
               </div>
 
               {/* Logo Xoăn & Ngân hàng */}
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2.5">
                 <img
                   src={logoXoan}
                   alt="Xoăn Media"
@@ -625,13 +640,49 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
                 <span className="font-extrabold text-neutral-900 text-xs">XOĂN MEDIA STUDIO</span>
               </div>
 
+              {/* Tab chuyển đổi chế độ xem QR */}
+              <div className="flex items-center p-1 bg-neutral-100 rounded-xl mb-3 w-full text-[11px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => setQrViewMode('vietqr')}
+                  className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${
+                    qrViewMode === 'vietqr'
+                      ? 'bg-white text-neutral-950 shadow-2xs font-black'
+                      : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                  title="Mã QR tự động điền số tiền và cú pháp lớp"
+                >
+                  ⚡ QR Điền Tiền Sẵn
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQrViewMode('original')}
+                  className={`flex-1 py-1 rounded-lg transition-all cursor-pointer ${
+                    qrViewMode === 'original'
+                      ? 'bg-white text-blue-900 shadow-2xs font-black'
+                      : 'text-neutral-500 hover:text-neutral-900'
+                  }`}
+                  title="Mã QR chuẩn gốc từ VietinBank của chủ Studio"
+                >
+                  📷 QR Gốc VietinBank
+                </button>
+              </div>
+
               {/* Khung Ảnh Mã QR */}
-              <div className="p-3 bg-white rounded-2xl border border-neutral-200 shadow-inner w-56 h-56 flex items-center justify-center">
-                <img
-                  src={vietQrUrl}
-                  alt="Mã QR Chuyển Khoản"
-                  className="w-full h-full object-contain"
-                />
+              <div className="p-3 bg-white rounded-2xl border border-neutral-200 shadow-inner w-56 h-56 sm:w-60 sm:h-60 flex items-center justify-center overflow-hidden">
+                {qrViewMode === 'original' ? (
+                  <img
+                    src={bankConfig.originalQrUrl}
+                    alt="Mã QR Gốc VietinBank DUONG HAI MINH"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <img
+                    src={vietQrUrl}
+                    alt="Mã QR Chuyển Khoản Tự Động VietinBank"
+                    className="w-full h-full object-contain"
+                  />
+                )}
               </div>
 
               {/* Thông tin tóm tắt bên dưới QR */}
@@ -639,12 +690,12 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
                 <p className={`text-lg font-black tracking-tight ${isFinalPayment ? 'text-teal-900' : 'text-neutral-900'}`}>
                   {paymentAmount.toLocaleString('vi-VN')} đ
                 </p>
-                <p className="text-[11px] font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-lg inline-block truncate max-w-full">
-                  {transferSyntax}
+                <p className="text-[11px] font-mono text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded-lg inline-block truncate max-w-full font-bold">
+                  {qrViewMode === 'original' ? `${bankConfig.accountName} - ${bankConfig.accountNumber}` : transferSyntax}
                 </p>
-                <div className="pt-2 flex items-center justify-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
+                <div className="pt-1.5 flex items-center justify-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Quét bằng mọi app Ngân Hàng & Momo</span>
+                  <span>VietinBank • Quét được trên mọi App Ngân Hàng</span>
                 </div>
               </div>
 

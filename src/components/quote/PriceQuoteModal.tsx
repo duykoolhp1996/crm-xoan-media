@@ -452,7 +452,9 @@ ${itemsText}
 3. Đợt 3 (Bàn giao ảnh 20%): ${final20.toLocaleString('vi-VN')} đ
 
 🏦 TÀI KHOẢN NHẬN CỌC:
-• Ngân hàng: MB BANK • STK: 0981108601 • Chủ TK: CHU DUC DUY
+• Ngân hàng: VietinBank (Ngân hàng TMCP Công Thương Việt Nam)
+• Chi nhánh: CN Hải Phòng - PGD Kiến Thụy
+• STK: 106879341760 • Chủ TK: DUONG HAI MINH
 • Cú pháp CK: COC KYYEU ${(customer.className || 'KYYEU').toUpperCase()} ${customer.phone || customer.id.slice(-6)}
 
 📞 Chuyên viên tư vấn: ${customer.assignedSalesName || 'Xoăn Media'}
@@ -1081,9 +1083,10 @@ ${itemsText}
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" /> Tài Khoản Nhận Cọc Studio:
                   </h4>
                   <div className="text-neutral-700 space-y-0.5 font-mono text-[10px]">
-                    <p>Ngân hàng: <strong>MB BANK (Quân Đội)</strong></p>
-                    <p>Số tài khoản: <strong className="text-neutral-950 font-bold text-xs">0981108601</strong></p>
-                    <p>Chủ TK: <strong>CHU DUC DUY</strong></p>
+                    <p>Ngân hàng: <strong>VietinBank (Công Thương Việt Nam)</strong></p>
+                    <p>Chi nhánh: <strong>CN Hải Phòng - PGD Kiến Thụy</strong></p>
+                    <p>Số tài khoản: <strong className="text-neutral-950 font-bold text-xs">106879341760</strong></p>
+                    <p>Chủ TK: <strong>DUONG HAI MINH</strong></p>
                     <p className="text-[9px] text-neutral-500 font-sans mt-0.5">
                       Nội dung CK: <code className="bg-neutral-200 px-1 rounded font-bold">COC KYYEU {(customer.className || 'KYYEU').toUpperCase()} {customer.phone || customer.id.slice(-6)}</code>
                     </p>

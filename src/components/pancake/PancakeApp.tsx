@@ -345,12 +345,13 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
 
     sendPancakeCardMessage(
       activeConv.id,
-      `💰 THÔNG TIN CHUYỂN KHOẢN CỌC VIETQR\n🏦 Ngân hàng: MB Bank (Quân Đội)\n💳 STK: 09876543210\n👤 Chủ TK: TA VAN DUY\n💵 Số tiền cọc: ${posDepositAmount.toLocaleString('vi-VN')} VNĐ\n📝 Cú pháp chuyển khoản: ${transferSyntax}\n👉 Sau khi chuyển khoản, bạn gửi ảnh bill tại đây, CRM sẽ tự động khóa lịch cho Ekip nhé!`,
+      `💰 THÔNG TIN CHUYỂN KHOẢN CỌC VIETQR\n🏦 Ngân hàng: VietinBank (Công Thương)\n📍 Chi nhánh: CN Hải Phòng - PGD Kiến Thụy\n💳 STK: 106879341760\n👤 Chủ TK: DUONG HAI MINH\n💵 Số tiền cọc: ${posDepositAmount.toLocaleString('vi-VN')} VNĐ\n📝 Cú pháp chuyển khoản: ${transferSyntax}\n👉 Sau khi chuyển khoản, bạn gửi ảnh bill tại đây, CRM sẽ tự động khóa lịch cho Ekip nhé!`,
       'vietqr',
       {
-        bankName: 'MB Bank (Quân Đội)',
-        accountNo: '09876543210',
-        accountHolder: 'TA VAN DUY',
+        bankName: 'VietinBank (Công Thương)',
+        accountNo: '106879341760',
+        accountHolder: 'DUONG HAI MINH',
+        branch: 'CN Hải Phòng - PGD Kiến Thụy',
         depositAmount: posDepositAmount,
         transferSyntax
       }
@@ -1138,7 +1139,7 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
                               <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full flex items-center gap-1">
                                 <QrCode className="w-3 h-3" /> VietQR Khóa Lịch
                               </span>
-                              <span className="text-[10px] font-bold text-emerald-200">MB Bank</span>
+                              <span className="text-[10px] font-bold text-emerald-200">VietinBank</span>
                             </div>
                             <h4 className="text-sm font-black mt-1">
                               Số Tiền Cọc: {msg.cardData.depositAmount?.toLocaleString('vi-VN')} VNĐ
@@ -1148,13 +1149,13 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
                             <div className="flex items-center gap-3">
                               <div className="w-20 h-20 bg-white border border-emerald-300 rounded-xl p-1 flex items-center justify-center shrink-0 shadow-2xs">
                                 <img
-                                  src={`https://api.vietqr.io/image/970422-09876543210-vietqr_net.jpg?amount=${msg.cardData.depositAmount}&addInfo=${encodeURIComponent(
+                                  src={`https://img.vietqr.io/image/ICB-106879341760-compact2.png?amount=${msg.cardData.depositAmount}&addInfo=${encodeURIComponent(
                                     msg.cardData.transferSyntax || 'COC KY YEU'
-                                  )}&accountName=TA%20VAN%20DUY`}
-                                  alt="VietQR MB Bank"
+                                  )}&accountName=DUONG%20HAI%20MINH`}
+                                  alt="VietQR VietinBank"
                                   className="w-full h-full object-contain"
                                   onError={(e: any) => {
-                                    e.target.style.display = 'none';
+                                    e.target.src = './vietinbank-qr.png';
                                   }}
                                 />
                               </div>
@@ -1274,7 +1275,7 @@ export const PancakeApp: React.FC<PancakeAppProps> = ({ isStandaloneView = false
               <button
                 onClick={handleSendVietQr}
                 className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold flex items-center gap-1 border border-emerald-200 shrink-0"
-                title="Gửi card VietQR tài khoản cọc kèm mã QR MB Bank"
+                title="Gửi card VietQR tài khoản cọc kèm mã QR VietinBank"
               >
                 <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
                 <span>VietQR cọc</span>

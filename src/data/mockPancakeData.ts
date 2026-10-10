@@ -72,7 +72,7 @@ export const PANCAKE_QUICK_SCRIPTS = [
     category: 'Đặt Cọc',
     code: '/coc',
     title: '💰 STK Chuyển Khoản Cọc (VietQR)',
-    text: `Để giữ ngày chụp đẹp nhất và chốt ekip thợ xịn cho lớp, lớp mình chuyển khoản cọc giúp anh vào tài khoản chính thức của Xoăn Media nhé:\n🏦 Ngân hàng: MB Bank (Ngân Hàng Quân Đội)\n💳 STK: 09876543210\n👤 Chủ TK: TA VAN DUY\n💵 Số tiền cọc: 2.000.000 VNĐ\n📝 Nội dung CK: [Tên Lớp] - [Trường] - Coc ky yeu\n👉 Sau khi chuyển bạn gửi ảnh bill tại đây, CRM sẽ tự động kích hoạt hợp đồng và khóa lịch cho Ekip nhé!`
+    text: `Để giữ ngày chụp đẹp nhất và chốt ekip thợ xịn cho lớp, lớp mình chuyển khoản cọc giúp anh vào tài khoản chính thức của Xoăn Media nhé:\n🏦 Ngân hàng: VietinBank (Công Thương Việt Nam)\n📍 Chi nhánh: CN Hải Phòng - PGD Kiến Thụy\n💳 STK: 106879341760\n👤 Chủ TK: DUONG HAI MINH\n💵 Số tiền cọc: 2.000.000 VNĐ\n📝 Nội dung CK: [Tên Lớp] - [Trường] - Coc ky yeu\n👉 Sau khi chuyển bạn gửi ảnh bill tại đây, CRM sẽ tự động kích hoạt hợp đồng và khóa lịch cho Ekip nhé!`
   },
   {
     id: 'script-phone',
