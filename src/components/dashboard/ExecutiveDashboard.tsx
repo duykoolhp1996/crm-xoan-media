@@ -26,7 +26,8 @@ import {
   FileText,
   CalendarCheck,
   ArrowRight,
-  Bell
+  Bell,
+  Wallet
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -1027,7 +1028,7 @@ export const ExecutiveDashboard: React.FC = () => {
 
       {/* KPI Cards: 4 Cột chuẩn Soft Glassmorphism */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Doanh thu đơn đã chốt (đã phát sinh cọc) */}
+        {/* Card 1: Doanh thu đơn đã chốt (Tổng giá trị hợp đồng) */}
         <div
           onClick={() => setActiveTab('bookings')}
           className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
@@ -1036,7 +1037,7 @@ export const ExecutiveDashboard: React.FC = () => {
             <div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU ĐƠN ĐÃ CHỐT</span>
               <p className="text-[10px] text-neutral-500 font-medium truncate max-w-[130px]">
-                {activeStaff ? activeStaff.name.split('(')[0] : `${closedDeals.length} HĐ Đã Cọc`}
+                {activeStaff ? activeStaff.name.split('(')[0] : `${closedDeals.length} HĐ Đã Cọc / Chốt`}
               </p>
             </div>
             <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
@@ -1047,19 +1048,83 @@ export const ExecutiveDashboard: React.FC = () => {
             <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
               {(closedDealsRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
             </span>
-            <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
-              <ArrowUpRight className="w-3.5 h-3.5" /> Thu: {(totalCollectedRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+            <span className="text-xs font-semibold text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded-full">
+              {closedDeals.length} HĐ
             </span>
           </div>
           <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-            <span>Công nợ còn lại:</span>
-            <strong className="text-rose-600 font-bold">
-              {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr ({((totalRemainingDebt / (closedDealsRevenue || 1)) * 100).toFixed(0)}%)
+            <span>Giá trị TB/đơn:</span>
+            <strong className="text-neutral-900 font-bold">
+              {closedDeals.length > 0 ? (closedDealsRevenue / closedDeals.length / 1000000).toFixed(1) : 0} Tr
             </strong>
           </div>
         </div>
 
-        {/* Card 2: Khách hàng / Leads */}
+        {/* Card 2: Số tiền đã cọc (Thực thu đã vào tài khoản) */}
+        <div
+          onClick={() => setActiveTab('bookings')}
+          className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-emerald-500"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">SỐ TIỀN ĐÃ CỌC (THỰC THU)</span>
+              <p className="text-[10px] text-emerald-600 font-medium truncate max-w-[140px]">
+                Đã thu vào tài khoản Studio
+              </p>
+            </div>
+            <div className="w-9 h-9 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-800 group-hover:scale-105 transition-transform">
+              <Wallet className="w-4 h-4 text-emerald-700" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-emerald-950 tracking-tight">
+              {(totalCollectedRevenue / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+            </span>
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+              <ArrowUpRight className="w-3.5 h-3.5" /> {((totalCollectedRevenue / (closedDealsRevenue || 1)) * 100).toFixed(1)}%
+            </span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+            <span>Đơn đã nộp cọc:</span>
+            <strong className="text-emerald-700 font-bold">
+              {closedDeals.length} đơn có cọc
+            </strong>
+          </div>
+        </div>
+
+        {/* Card 3: Công nợ còn lại (Chưa thu) */}
+        <div
+          onClick={() => setActiveTab('bookings')}
+          className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-rose-400"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">CÔNG NỢ CÒN LẠI (CHƯA THU)</span>
+              <p className="text-[10px] text-rose-600 font-medium truncate max-w-[140px]">
+                Cần thu khi chụp & giao ảnh
+              </p>
+            </div>
+            <div className="w-9 h-9 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 group-hover:scale-105 transition-transform">
+              <Clock className="w-4 h-4 text-rose-600" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-rose-600 tracking-tight">
+              {(totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
+            </span>
+            <span className="text-xs font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-full">
+              {((totalRemainingDebt / (closedDealsRevenue || 1)) * 100).toFixed(0)}% còn nợ
+            </span>
+          </div>
+          <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
+            <span>Tình trạng công nợ:</span>
+            <strong className="text-rose-600 font-bold">
+              {totalRemainingDebt > 0 ? 'Chưa tất toán 100%' : 'Đã tất toán 100%'}
+            </strong>
+          </div>
+        </div>
+
+        {/* Card 4: Tổng Lớp & Học Sinh */}
         <div
           onClick={() => setActiveTab('customers')}
           className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
@@ -1084,96 +1149,6 @@ export const ExecutiveDashboard: React.FC = () => {
           <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
             <span>Đang tư vấn: <strong className="text-neutral-800">{consultingLeads}</strong></span>
             <span>Đã cọc: <strong className="text-emerald-700 font-bold">{bookedLeads}</strong></span>
-          </div>
-        </div>
-
-        {/* Card 3: Hiệu suất chốt Sale (khi lọc theo tài khoản) hoặc Đội ngũ thợ (khi toàn studio) */}
-        {activeStaff ? (
-          <div
-            onClick={() => setActiveTab('pipeline')}
-            className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-blue-500"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">HIỆU SUẤT CHỐT SALE</span>
-                <p className="text-[10px] text-neutral-500 font-medium">Tỷ lệ chuyển đổi lead</p>
-              </div>
-              <div className="w-9 h-9 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-105 transition-transform">
-                <Percent className="w-4 h-4 text-blue-600" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{winRate}%</span>
-              <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full">
-                {bookedLeads}/{totalLeads} HĐ chốt
-              </span>
-            </div>
-            <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-              <span>Đã gửi báo giá: <strong className="text-indigo-600 font-bold">{quotedLeads}</strong></span>
-              <span>Hoàn thành: <strong className="text-emerald-700 font-bold">{completedCustomers}</strong></span>
-            </div>
-          </div>
-        ) : (
-          <div
-            onClick={() => setActiveTab('photographers')}
-            className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">ĐỘI NGŨ THỢ & EKIP</span>
-                <p className="text-[10px] text-neutral-500 font-medium">Năng lực sản xuất</p>
-              </div>
-              <div className="w-9 h-9 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:scale-105 transition-transform">
-                <Camera className="w-4 h-4 text-neutral-800" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">{totalPhotographers} Thợ</span>
-              <span className="text-xs font-bold text-neutral-800 bg-[#B8F23D]/40 px-2 py-0.5 rounded-full">
-                {readinessRate}% sẵn sàng
-              </span>
-            </div>
-            <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-              <span>Đang bấm máy: <strong className="text-amber-600 font-bold">{busyPhotographers}</strong></span>
-              <span>Đánh giá TB: <strong className="text-neutral-900 font-bold">{avgRating}{avgRating !== 'Chưa có review' ? ' ★' : ''}</strong></span>
-            </div>
-          </div>
-        )}
-
-        {/* Card 4: Hoa Hồng Thực Nhận / Tích Lũy */}
-        <div
-          onClick={() => setActiveTab('pipeline')}
-          className="glass-card p-5 sm:p-6 rounded-3xl cursor-pointer group border-b-2 border-b-[#B8F23D]"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
-                {activeStaff ? 'HOA HỒNG THỰC NHẬN' : 'TỔNG HOA HỒNG SALES'}
-              </span>
-              <p className="text-[10px] text-neutral-500 font-medium truncate max-w-[130px]">
-                {activeStaff ? activeStaff.roleTitle : `${salesStaff.length} tài khoản`}
-              </p>
-            </div>
-            <div className="w-9 h-9 rounded-2xl bg-[#B8F23D]/30 flex items-center justify-center text-neutral-900 group-hover:scale-105 transition-transform">
-              <Award className="w-4 h-4 text-neutral-900" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-neutral-900 tracking-tight">
-              {(activeStaffCommission / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} Tr
-            </span>
-            <span className="text-xs font-semibold text-emerald-700 flex items-center gap-0.5">
-              <Award className="w-3.5 h-3.5" /> {activeStaff ? (activeStaff.commissionType === 'percentage' ? `${activeStaff.commissionRate}%` : 'Cố định') : `${salesStaff.length} Sales`}
-            </span>
-          </div>
-          <div className="mt-3 pt-3 border-t border-black/[0.04] flex items-center justify-between text-xs text-neutral-500">
-            <span>{activeStaff ? 'Doanh số tính thưởng:' : 'Tổng DS chốt có hoa hồng:'}</span>
-            <strong className="text-neutral-900 font-bold">
-              {activeStaff 
-                ? `${((staffPerformanceList.find(p => p.staff.id === activeStaff.id)?.closedRev || 0) / 1000000).toFixed(1)} Tr (${bookedLeads} lớp)`
-                : `${(staffPerformanceList.reduce((sum, p) => sum + p.closedRev, 0) / 1000000).toFixed(1)} Tr`
-              }
-            </strong>
           </div>
         </div>
       </div>
