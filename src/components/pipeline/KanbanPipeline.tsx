@@ -16,19 +16,26 @@ import {
   Trash2,
   RotateCcw,
   UserX,
-  AlertCircle
+  AlertCircle,
+  Camera,
+  Settings2,
+  Users,
+  Video,
+  ChevronDown
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
+import { AssignCrewModal } from '../booking/AssignCrewModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 import { TrashBinModal } from '../crm/TrashBinModal';
 import {
   CLOSED_BOOKED_STAGES,
   isCustomerBookedOrDeposited,
-  isCustomerInStage
+  isCustomerInStage,
+  getCustomerTotalOrderValue
 } from '../../lib/revenueUtils';
 import {
   getSalesHierarchyInfo,
@@ -41,6 +48,11 @@ export const KanbanPipeline: React.FC = () => {
     customers,
     deletedCustomers,
     salesStaff,
+    bookings,
+    photographers,
+    updateBooking,
+    addBooking,
+    addActivityLog,
     updateCustomerStage,
     updateCustomer,
     deleteCustomer,
@@ -58,8 +70,123 @@ export const KanbanPipeline: React.FC = () => {
   const [quoteCustomer, setQuoteCustomer] = useState<Customer | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<{ customer: Customer; mode: 'deposit' | 'final' } | null>(null);
   const [scheduleBookingCustomer, setScheduleBookingCustomer] = useState<Customer | null>(null);
+  const [assignCrewCustomer, setAssignCrewCustomer] = useState<Customer | null>(null);
   const [uploadDriveCustomer, setUploadDriveCustomer] = useState<Customer | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
+
+  // Helper lấy thông tin Booking và Ekip thợ chụp của một khách hàng
+  const getCustomerBookingInfo = (cust: Customer) => {
+    const matched = bookings.find(
+      b => b.customerId === cust.id ||
+      (b.className && b.className === cust.className && b.schoolName === cust.schoolName)
+    );
+
+    let leadPhotoName = matched?.assignments?.leadPhotographerName || '';
+    let leadPhotoId = matched?.assignments?.leadPhotographerId || '';
+
+    // Fallback từ ghi chú nếu booking chưa gán tên thợ
+    if (!leadPhotoName && cust.notes) {
+      const found = photographers.find(p => cust.notes?.toLowerCase().includes(p.fullName.toLowerCase()));
+      if (found) {
+        leadPhotoName = found.fullName;
+        leadPhotoId = found.id;
+      }
+    }
+
+    // Tra cứu lại photographer object để lấy id chuẩn
+    const leadPhotographer = photographers.find(
+      p => p.id === leadPhotoId || (leadPhotoName && p.fullName.toLowerCase() === leadPhotoName.toLowerCase())
+    );
+
+    return {
+      booking: matched,
+      leadPhotographerId: leadPhotographer?.id || leadPhotoId,
+      leadPhotographerName: leadPhotographer?.fullName || leadPhotoName,
+      assistantNames: matched?.assignments?.assistantNames || [],
+      videographerName: matched?.assignments?.videographerName || '',
+      shootDate: matched?.shootDate || cust.expectedShootDate || ''
+    };
+  };
+
+  // Đổi nhanh Thợ chụp chính (Trưởng nháy) ngay trên thẻ
+  const handleQuickChangePhotographer = (cust: Customer, newPhotographerId: string) => {
+    const newPhoto = photographers.find(p => p.id === newPhotographerId);
+    const newName = newPhoto ? newPhoto.fullName : '';
+
+    const matchedBooking = bookings.find(
+      b => b.customerId === cust.id ||
+      (b.className && b.className === cust.className && b.schoolName === cust.schoolName)
+    );
+
+    if (matchedBooking) {
+      const updatedAssignments = {
+        ...matchedBooking.assignments,
+        leadPhotographerId: newPhotographerId,
+        leadPhotographerName: newName
+      };
+      updateBooking({
+        ...matchedBooking,
+        assignments: updatedAssignments,
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      // Tạo booking mới nếu chưa có
+      const newBooking = {
+        code: `BK-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${cust.className || 'CLASS'}`,
+        customerId: cust.id,
+        customerName: cust.name,
+        schoolName: cust.schoolName || '',
+        className: cust.className || '',
+        shootDate: cust.expectedShootDate || new Date().toISOString().split('T')[0],
+        startTime: '07:30',
+        endTime: '17:30',
+        location: cust.shootAddress || cust.schoolName || '',
+        city: cust.city || 'Hải Phòng',
+        district: cust.district || '',
+        studentCount: cust.studentCount || 35,
+        packageId: cust.servicePackageId || 'pkg-2',
+        packageName: cust.servicePackageName || 'Gói tùy chọn',
+        concept: cust.concept || 'Tùy chọn',
+        totalAmount: getCustomerTotalOrderValue(cust),
+        depositAmount: Number(cust.depositAmount || cust.paidAmount || 0),
+        remainingAmount: Math.max(0, getCustomerTotalOrderValue(cust) - Number(cust.paidAmount || cust.depositAmount || 0)),
+        paymentStatus: Number(cust.depositAmount || cust.paidAmount || 0) > 0 ? ('Đã cọc' as const) : ('Chưa cọc' as const),
+        bookingStatus: 'Đã xác nhận' as const,
+        assignments: {
+          leadPhotographerId: newPhotographerId,
+          leadPhotographerName: newName
+        },
+        notes: `Trưởng nháy: ${newName || 'Chưa gán'}`
+      };
+      addBooking(newBooking);
+    }
+
+    // Đồng bộ vào ghi chú khách hàng để bảo toàn thông tin
+    let updatedNotes = cust.notes || '';
+    if (newName) {
+      if (updatedNotes.includes('Thợ chụp:')) {
+        updatedNotes = updatedNotes.replace(/Thợ chụp:[^.\n]*\.?/gi, `Thợ chụp: ${newName}.`);
+      } else {
+        updatedNotes = `${updatedNotes ? updatedNotes + '\n' : ''}Thợ chụp: ${newName}.`.trim();
+      }
+    }
+
+    updateCustomer({
+      ...cust,
+      notes: updatedNotes,
+      updatedAt: new Date().toISOString()
+    });
+
+    addActivityLog({
+      customerId: cust.id,
+      type: 'photographer_assigned',
+      title: 'Phân công Trưởng nháy',
+      description: newName
+        ? `Đã phân công Trưởng nháy: ${newName} cho lớp ${cust.className || cust.name}`
+        : `Đã hủy phân công thợ chụp cho lớp ${cust.className || cust.name}`,
+      performedByName: currentUser.name
+    });
+  };
 
   // Thông tin phân cấp Sales & Sales Lead
   const salesHierarchy = React.useMemo(() => {
@@ -623,77 +750,185 @@ export const KanbanPipeline: React.FC = () => {
                             </>
                           )}
 
-                          {/* 4. BADGE LỊCH CHỤP & NÚT NỘP DRIVE (Book ngày) */}
-                          {isCustomerInStage(cust.pipelineStage, 'Book ngày') && (
-                            <>
-                              <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                                <span className="text-purple-900 font-semibold flex items-center gap-1.5">
-                                  <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                                  Lịch chụp:
-                                </span>
-                                <span className="font-extrabold text-purple-950 text-xs bg-white px-2 py-0.5 rounded-lg border border-purple-200">
-                                  {cust.expectedShootDate
-                                    ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN')
-                                    : 'Chưa có ngày'}
-                                </span>
-                              </div>
+                          {/* 4. BADGE LỊCH CHỤP, THỢ CHỤP / EKIP & NÚT NỘP DRIVE (Book ngày) */}
+                          {isCustomerInStage(cust.pipelineStage, 'Book ngày') && (() => {
+                            const crewInfo = getCustomerBookingInfo(cust);
+                            return (
+                              <>
+                                {/* Khối Lịch chụp */}
+                                <div className="mt-2 p-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                                  <span className="text-purple-900 font-semibold flex items-center gap-1.5">
+                                    <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                    Lịch chụp:
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setScheduleBookingCustomer(cust);
+                                    }}
+                                    className="font-extrabold text-purple-950 text-xs bg-white px-2 py-0.5 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors flex items-center gap-1 cursor-pointer"
+                                    title="Bấm để đổi ngày chụp"
+                                  >
+                                    <span>
+                                      {cust.expectedShootDate
+                                        ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN')
+                                        : 'Chưa có ngày'}
+                                    </span>
+                                    <span className="text-[10px] text-purple-700 font-bold">✎</span>
+                                  </button>
+                                </div>
 
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setUploadDriveCustomer(cust);
-                                }}
-                                className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-blue-600 hover:bg-blue-700 text-white border border-blue-700"
-                                title="Nộp Link Google Drive ảnh gốc khi đã chụp xong"
-                              >
-                                <FolderOpen className="w-3.5 h-3.5 text-white" />
-                                <span>📸 Nộp Link Drive (Đã Chụp)</span>
-                              </button>
-                            </>
-                          )}
-
-                          {/* 5. BADGE DRIVE ẢNH GỐC (Đã chụp, Đang hậu kỳ) */}
-                          {(cust.pipelineStage === 'Đã chụp' || cust.pipelineStage === 'Đang hậu kỳ') && (
-                            (cust.rawDriveUrl || cust.driveUrl) ? (
-                              <div className="mt-2 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
-                                <a
-                                  href={cust.rawDriveUrl || cust.driveUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
+                                {/* Khối Chọn & Sửa Thợ Chụp (Ekip) */}
+                                <div
                                   onClick={(e) => e.stopPropagation()}
-                                  className="text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 truncate hover:underline"
-                                  title={cust.rawDriveUrl || cust.driveUrl}
+                                  className="mt-1.5 p-2 bg-gradient-to-br from-purple-50/70 to-indigo-50/70 border border-purple-200/90 rounded-xl text-[11px] shadow-2xs"
                                 >
-                                  <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                                  <span className="truncate">Drive Ảnh Gốc</span>
-                                  <ExternalLink className="w-3 h-3 shrink-0" />
-                                </a>
+                                  <div className="flex items-center justify-between gap-1 mb-1">
+                                    <span className="text-[10px] font-bold text-purple-900 flex items-center gap-1">
+                                      <Camera className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                                      Trưởng nháy:
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAssignCrewCustomer(cust);
+                                      }}
+                                      className="text-[10px] text-purple-700 hover:text-purple-900 font-bold px-1.5 py-0.5 rounded-md bg-white border border-purple-300 hover:border-purple-400 flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
+                                      title="Mở phân công ekip chi tiết: Trưởng nháy, thợ phụ, quay phim, ca chụp..."
+                                    >
+                                      <Settings2 className="w-3 h-3 text-purple-600" />
+                                      <span>+ Ekip</span>
+                                    </button>
+                                  </div>
+
+                                  {/* Dropdown chọn nhanh Thợ chụp chính */}
+                                  {currentRole !== 'photographer' ? (
+                                    <div className="relative">
+                                      <select
+                                        value={crewInfo.leadPhotographerId || ''}
+                                        onChange={(e) => handleQuickChangePhotographer(cust, e.target.value)}
+                                        className="w-full bg-white text-[11px] font-bold text-purple-950 border border-purple-300 rounded-lg px-2 py-1 pr-6 focus:outline-none focus:ring-1 focus:ring-purple-500 cursor-pointer appearance-none truncate shadow-2xs"
+                                        title="Chọn hoặc đổi thợ chụp chính (Trưởng nháy) cho buổi chụp này"
+                                      >
+                                        <option value="">-- Chọn thợ chụp --</option>
+                                        {photographers.map((p) => (
+                                          <option key={p.id} value={p.id}>
+                                            📸 {p.fullName} {p.photographerType ? `(${p.photographerType})` : ''}
+                                          </option>
+                                        ))}
+                                      </select>
+                                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-purple-600">
+                                        <ChevronDown className="w-3 h-3" />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="w-full bg-white text-[11px] font-bold text-purple-950 border border-purple-200 rounded-lg px-2 py-1 truncate">
+                                      {crewInfo.leadPhotographerName ? `📸 ${crewInfo.leadPhotographerName}` : 'Chưa phân công'}
+                                    </div>
+                                  )}
+
+                                  {/* Danh sách Thợ phụ & Quay phim nếu có */}
+                                  {(crewInfo.assistantNames.length > 0 || crewInfo.videographerName) && (
+                                    <div className="mt-1.5 pt-1.5 border-t border-purple-200/60 flex flex-wrap gap-1 text-[10px]">
+                                      {crewInfo.assistantNames.length > 0 && (
+                                        <span className="inline-flex items-center gap-1 bg-white/90 text-purple-800 px-1.5 py-0.5 rounded border border-purple-200 font-medium">
+                                          <Users className="w-2.5 h-2.5 text-purple-600 shrink-0" />
+                                          +{crewInfo.assistantNames.length} thợ phụ ({crewInfo.assistantNames.join(', ')})
+                                        </span>
+                                      )}
+                                      {crewInfo.videographerName && (
+                                        <span className="inline-flex items-center gap-1 bg-white/90 text-indigo-800 px-1.5 py-0.5 rounded border border-indigo-200 font-medium">
+                                          <Video className="w-2.5 h-2.5 text-indigo-600 shrink-0" />
+                                          Quay: {crewInfo.videographerName}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
                                 <button
                                   type="button"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setUploadDriveCustomer(cust);
                                   }}
-                                  className="text-[10px] text-blue-700 hover:text-blue-900 font-bold px-2 py-0.5 rounded-lg bg-white border border-blue-200 shrink-0 cursor-pointer shadow-2xs ml-1"
+                                  className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-blue-600 hover:bg-blue-700 text-white border border-blue-700"
+                                  title="Nộp Link Google Drive ảnh gốc khi đã chụp xong"
                                 >
-                                  Đổi link
+                                  <FolderOpen className="w-3.5 h-3.5 text-white" />
+                                  <span>📸 Nộp Link Drive (Đã Chụp)</span>
                                 </button>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setUploadDriveCustomer(cust);
-                                }}
-                                className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 animate-pulse"
-                              >
-                                <FolderOpen className="w-3.5 h-3.5 text-rose-600" />
-                                <span>⚠️ Thiếu Link Drive! Nộp Ngay</span>
-                              </button>
-                            )
-                          )}
+                              </>
+                            );
+                          })()}
+
+                          {/* 5. BADGE DRIVE ẢNH GỐC & THỢ CHỤP (Đã chụp, Đang hậu kỳ) */}
+                          {(cust.pipelineStage === 'Đã chụp' || cust.pipelineStage === 'Đang hậu kỳ') && (() => {
+                            const crewInfo = getCustomerBookingInfo(cust);
+                            return (
+                              <>
+                                {crewInfo.leadPhotographerName && (
+                                  <div className="mt-1.5 px-2 py-1 bg-neutral-100/90 border border-neutral-200 rounded-xl flex items-center justify-between text-[10px]">
+                                    <span className="text-neutral-700 font-medium flex items-center gap-1 truncate">
+                                      <Camera className="w-3 h-3 text-purple-600 shrink-0" />
+                                      Thợ: <strong className="text-neutral-900 truncate">{crewInfo.leadPhotographerName}</strong>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAssignCrewCustomer(cust);
+                                      }}
+                                      className="text-purple-700 hover:text-purple-900 font-bold hover:underline shrink-0 ml-1"
+                                      title="Xem / Chỉnh sửa ekip"
+                                    >
+                                      Ekip
+                                    </button>
+                                  </div>
+                                )}
+                                {(cust.rawDriveUrl || cust.driveUrl) ? (
+                                  <div className="mt-1.5 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs">
+                                    <a
+                                      href={cust.rawDriveUrl || cust.driveUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="text-blue-700 hover:text-blue-900 font-bold flex items-center gap-1.5 truncate hover:underline"
+                                      title={cust.rawDriveUrl || cust.driveUrl}
+                                    >
+                                      <FolderOpen className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                                      <span className="truncate">Drive Ảnh Gốc</span>
+                                      <ExternalLink className="w-3 h-3 shrink-0" />
+                                    </a>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setUploadDriveCustomer(cust);
+                                      }}
+                                      className="text-[10px] text-blue-700 hover:text-blue-900 font-bold px-2 py-0.5 rounded-lg bg-white border border-blue-200 shrink-0 cursor-pointer shadow-2xs ml-1"
+                                    >
+                                      Đổi link
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setUploadDriveCustomer(cust);
+                                    }}
+                                    className="w-full mt-1.5 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 animate-pulse"
+                                  >
+                                    <FolderOpen className="w-3.5 h-3.5 text-rose-600" />
+                                    <span>⚠️ Thiếu Link Drive! Nộp Ngay</span>
+                                  </button>
+                                )}
+                              </>
+                            );
+                          })()}
 
                           {/* 6. GIAO ẢNH: NÚT QUYẾT TOÁN & BÀN GIAO */}
                           {(cust.pipelineStage === 'Giao ảnh' || cust.pipelineStage === 'Đã bàn giao') && (
@@ -794,6 +1029,13 @@ export const KanbanPipeline: React.FC = () => {
         customer={scheduleBookingCustomer}
         isOpen={Boolean(scheduleBookingCustomer)}
         onClose={() => setScheduleBookingCustomer(null)}
+      />
+
+      {/* Modal Phân Công & Điều Phối Ekip Thợ Chụp */}
+      <AssignCrewModal
+        customer={assignCrewCustomer}
+        isOpen={Boolean(assignCrewCustomer)}
+        onClose={() => setAssignCrewCustomer(null)}
       />
 
       {/* Modal Bắt Buộc Nộp Link Google Drive Khi Sang Đã Chụp */}

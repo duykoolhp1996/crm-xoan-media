@@ -13,7 +13,7 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.3.1';
+const VERSION = '1.3.2';
 
 // Thư mục lưu trữ tĩnh bền vững (nằm trong server/data/ nên không bị rsync đè mất)
 const UPLOADS_DIR = path.resolve(path.dirname(DB_PATH), 'uploads');

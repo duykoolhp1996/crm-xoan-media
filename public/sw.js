@@ -1,7 +1,7 @@
-// Service Worker - CRM Xoăn Media v1.3.1
+// Service Worker - CRM Xoăn Media v1.3.2
 // Hỗ trợ Web Push & In-app System Notifications trên iOS, Android & Desktop
 
-const CACHE_NAME = 'xoan-crm-sw-v1.3.1';
+const CACHE_NAME = 'xoan-crm-sw-v1.3.2';
 
 self.addEventListener('install', (event) => {
   // Kích hoạt ngay service worker mới không chờ đợi

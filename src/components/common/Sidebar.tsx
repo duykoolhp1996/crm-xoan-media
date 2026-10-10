@@ -239,7 +239,7 @@ export const Sidebar: React.FC = () => {
           <span className="text-[10px] font-medium text-neutral-500">Mùa 2026</span>
         </div>
         <span className="text-[10px] font-bold font-mono text-neutral-900 bg-[#B8F23D]/50 border border-[#B8F23D] px-2 py-0.5 rounded-full shadow-sm" title="Phiên bản CRM">
-          v1.3.1
+          v1.3.2
         </span>
       </div>
     </div>
