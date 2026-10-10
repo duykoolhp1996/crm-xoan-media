@@ -100,6 +100,25 @@ export const isCustomerBookedOrDeposited = (
 };
 
 /**
+ * Kiểm tra xem khách hàng đã thanh toán đầy đủ 100% hợp đồng hay chưa
+ * Điều kiện BẮT BUỘC:
+ * 1. Đã chốt cọc hoặc có booking (isCustomerBookedOrDeposited)
+ * 2. Tổng giá trị đơn hàng > 0
+ * 3. Thực thu (tiền cọc + các đợt trả) >= Tổng giá trị đơn hàng VÀ Thực thu > 0
+ * TUYỆT ĐỐI KHÔNG BAO GIỜ tính các New Lead chưa cọc là đã thanh toán đủ 100%!
+ */
+export const isCustomerPaidInFull = (
+  customer: Customer,
+  bookings: Booking[] = []
+): boolean => {
+  if (!customer) return false;
+  if (!isCustomerBookedOrDeposited(customer, bookings)) return false;
+  const total = getCustomerTotalOrderValue(customer);
+  const paid = getCustomerPaidDeposit(customer);
+  return total > 0 && paid > 0 && paid >= total;
+};
+
+/**
  * Lấy DOANH THU TOÀN BỘ ĐƠN của một khách hàng / lớp học
  * (Tính trọn gói theo hợp đồng: Sĩ số * đơn giá + phụ phí - giảm giá, hoặc totalAmount)
  */

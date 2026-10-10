@@ -10,7 +10,8 @@ import {
   getCustomerTotalOrderValue,
   getCustomerPaidDeposit,
   getCustomerRemainingDebt,
-  isCustomerBookedOrDeposited
+  isCustomerBookedOrDeposited,
+  isCustomerPaidInFull
 } from '../../lib/revenueUtils';
 import { DepositQrModal } from '../payment/DepositQrModal';
 import {
@@ -52,9 +53,9 @@ export const FinanceModule: React.FC = () => {
   const [qrCustomer, setQrCustomer] = useState<Customer | null>(null);
   const [qrMode, setQrMode] = useState<'deposit' | 'final'>('deposit');
 
-  // Bộ lọc & Tìm kiếm
+  // Bộ lọc & Tìm kiếm (Mặc định là 'deposited' - Chỉ hiển thị các đơn ĐÃ CHỐT CỌC & CÓ DÒNG TIỀN)
   const [searchTerm, setSearchTerm] = useState('');
-  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid_in_full' | 'has_debt' | 'no_deposit'>('all');
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'deposited' | 'paid_in_full' | 'has_debt' | 'no_deposit'>('deposited');
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [salesFilter, setSalesFilter] = useState<string>('all');
 
@@ -63,7 +64,7 @@ export const FinanceModule: React.FC = () => {
     return filterAccessibleCustomers(customers, currentUser, currentRole, salesStaff);
   }, [customers, currentUser, currentRole, salesStaff]);
 
-  // Danh sách các đơn đã chốt/cọc hoặc có giá trị đơn hàng
+  // Danh sách các đơn (loại trừ đã xóa mềm và Lost)
   const financeCustomers = useMemo(() => {
     return scopedCustomers.filter(c => !c.isDeleted && c.pipelineStage !== 'Lost');
   }, [scopedCustomers]);
@@ -84,18 +85,22 @@ export const FinanceModule: React.FC = () => {
         }
       }
 
-      // 2. Lọc theo trạng thái thanh toán
+      // 2. Lọc theo trạng thái thanh toán chuẩn xác
       const total = getCustomerTotalOrderValue(c);
       const paid = getCustomerPaidDeposit(c);
-      const remaining = getCustomerRemainingDebt(c);
       const isDeposited = isCustomerBookedOrDeposited(c, bookings);
+      const isPaidFull = isCustomerPaidInFull(c, bookings);
+      const hasDebt = isDeposited && total > paid && (total - paid) > 0;
+      const isNoDeposit = !isDeposited || paid === 0;
 
-      if (paymentFilter === 'paid_in_full') {
-        if (!isDeposited || total <= 0 || remaining > 0) return false;
+      if (paymentFilter === 'deposited') {
+        if (!isDeposited) return false;
+      } else if (paymentFilter === 'paid_in_full') {
+        if (!isPaidFull) return false;
       } else if (paymentFilter === 'has_debt') {
-        if (!isDeposited || remaining <= 0) return false;
+        if (!hasDebt) return false;
       } else if (paymentFilter === 'no_deposit') {
-        if (isDeposited) return false;
+        if (!isNoDeposit) return false;
       }
 
       // 3. Lọc theo Pipeline Stage
@@ -112,7 +117,7 @@ export const FinanceModule: React.FC = () => {
     });
   }, [financeCustomers, searchTerm, paymentFilter, stageFilter, salesFilter, bookings]);
 
-  // Thống kê tài chính tổng hợp
+  // Thống kê tài chính tổng hợp (Chỉ tính các đơn ĐÃ CHỐT CỌC / ĐÃ PHÁT SINH BOOKING)
   const stats = useMemo(() => {
     let totalContractValue = 0;
     let totalCollected = 0;
@@ -131,7 +136,7 @@ export const FinanceModule: React.FC = () => {
         totalRemaining += debt;
         totalDepositedCount += 1;
 
-        if (total > 0 && debt === 0) {
+        if (isCustomerPaidInFull(c, bookings)) {
           totalPaidFullCount += 1;
         }
       }
@@ -288,59 +293,109 @@ export const FinanceModule: React.FC = () => {
       </div>
 
       {/* FILTER BAR */}
-      <div className="flex flex-col md:flex-row items-center gap-3 bg-white border border-black/[0.08] p-3.5 sm:p-4 rounded-2xl shadow-xs">
-        <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Tìm theo tên lớp, trường, khách hàng, số điện thoại, Sales..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-          />
+      <div className="bg-white border border-black/[0.08] p-3.5 sm:p-4 rounded-2xl shadow-xs space-y-3">
+        {/* Hàng 1: Quick Filter Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+          <button
+            type="button"
+            onClick={() => setPaymentFilter('deposited')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              paymentFilter === 'deposited'
+                ? 'bg-neutral-900 text-[#B8F23D] shadow-xs'
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+            }`}
+          >
+            Đã chốt cọc ({stats.totalDepositedCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentFilter('paid_in_full')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              paymentFilter === 'paid_in_full'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+            }`}
+          >
+            Đã thu đủ 100% ({stats.totalPaidFullCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentFilter('has_debt')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              paymentFilter === 'has_debt'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'bg-rose-50 text-rose-800 hover:bg-rose-100'
+            }`}
+          >
+            Còn nợ ({Math.max(0, stats.totalDepositedCount - stats.totalPaidFullCount)})
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentFilter('no_deposit')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              paymentFilter === 'no_deposit'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-amber-50 text-amber-800 hover:bg-amber-100'
+            }`}
+          >
+            Chưa chốt cọc (Lead)
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaymentFilter('all')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              paymentFilter === 'all'
+                ? 'bg-neutral-900 text-white shadow-xs'
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+            }`}
+          >
+            Tất cả ({financeCustomers.length})
+          </button>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
-          {/* Lọc tình trạng thanh toán */}
-          <select
-            value={paymentFilter}
-            onChange={(e) => setPaymentFilter(e.target.value as any)}
-            className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
-          >
-            <option value="all">Tất cả thanh toán</option>
-            <option value="paid_in_full">Đã thu đủ 100% (Đã tất toán)</option>
-            <option value="has_debt">Đã cọc (Còn công nợ)</option>
-            <option value="no_deposit">Chưa chốt cọc</option>
-          </select>
+        {/* Hàng 2: Tìm kiếm và các bộ lọc chi tiết */}
+        <div className="flex flex-col md:flex-row items-center gap-3 pt-1 border-t border-black/[0.04]">
+          <div className="relative flex-1 w-full">
+            <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Tìm theo tên lớp, trường, khách hàng, số điện thoại, Sales..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs text-neutral-900 placeholder-neutral-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+            />
+          </div>
 
-          {/* Lọc tiến trình chụp */}
-          <select
-            value={stageFilter}
-            onChange={(e) => setStageFilter(e.target.value)}
-            className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
-          >
-            <option value="all">Tất cả tiến trình chụp</option>
-            <option value="Đã cọc">Đã cọc</option>
-            <option value="Book ngày">Book ngày</option>
-            <option value="Đã chụp">Đã chụp</option>
-            <option value="Đang hậu kỳ">Đang hậu kỳ</option>
-            <option value="Giao ảnh">Giao ảnh</option>
-            <option value="Hoàn thành">Hoàn thành</option>
-          </select>
-
-          {/* Lọc theo Sales (dành cho Admin hoặc Lead) */}
-          {salesStaff.length > 0 && (
+          <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+            {/* Lọc tiến trình chụp */}
             <select
-              value={salesFilter}
-              onChange={(e) => setSalesFilter(e.target.value)}
+              value={stageFilter}
+              onChange={(e) => setStageFilter(e.target.value)}
               className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
             >
-              <option value="all">Tất cả Sales</option>
-              {salesStaff.map(s => (
-                <option key={s.id} value={s.id}>{s.name} ({s.roleTitle})</option>
-              ))}
+              <option value="all">Tất cả tiến trình chụp</option>
+              <option value="Đã cọc">Đã cọc</option>
+              <option value="Book ngày">Book ngày</option>
+              <option value="Đã chụp">Đã chụp</option>
+              <option value="Đang hậu kỳ">Đang hậu kỳ</option>
+              <option value="Giao ảnh">Giao ảnh</option>
+              <option value="Hoàn thành">Hoàn thành</option>
             </select>
-          )}
+
+            {/* Lọc theo Sales (dành cho Admin hoặc Lead) */}
+            {salesStaff.length > 0 && (
+              <select
+                value={salesFilter}
+                onChange={(e) => setSalesFilter(e.target.value)}
+                className="px-3 py-2 bg-neutral-50 border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:bg-white focus:outline-none"
+              >
+                <option value="all">Tất cả Sales</option>
+                {salesStaff.map(s => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.roleTitle})</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
       </div>
 
@@ -366,7 +421,7 @@ export const FinanceModule: React.FC = () => {
                   <td colSpan={8} className="py-12 text-center text-neutral-500">
                     <p className="font-semibold text-sm text-neutral-800">Không tìm thấy bản ghi tài chính nào phù hợp</p>
                     <p className="text-xs text-neutral-400 mt-1">
-                      Thử điều chỉnh lại bộ lọc tìm kiếm hoặc trạng thái thanh toán
+                      Thử chuyển sang tab "Tất cả" hoặc điều chỉnh lại từ khóa tìm kiếm
                     </p>
                   </td>
                 </tr>
@@ -374,9 +429,10 @@ export const FinanceModule: React.FC = () => {
                 filteredList.map((cust) => {
                   const total = getCustomerTotalOrderValue(cust);
                   const paid = getCustomerPaidDeposit(cust);
-                  const debt = getCustomerRemainingDebt(cust);
                   const isDeposited = isCustomerBookedOrDeposited(cust, bookings);
-                  const isFull = total > 0 && debt === 0;
+                  const isPaidFull = isCustomerPaidInFull(cust, bookings);
+                  const debt = isDeposited ? Math.max(0, total - paid) : 0;
+                  const hasDebt = isDeposited && debt > 0;
 
                   return (
                     <tr key={cust.id} className="hover:bg-neutral-50/80 transition-colors">
@@ -436,33 +492,58 @@ export const FinanceModule: React.FC = () => {
 
                       {/* 4. Tổng Giá Trị Hợp Đồng */}
                       <td className="py-3.5 px-4">
-                        <span className="font-black text-neutral-900 text-xs font-mono">
-                          {total.toLocaleString('vi-VN')}đ
-                        </span>
+                        {isDeposited ? (
+                          <span className="font-black text-neutral-900 text-xs font-mono">
+                            {total.toLocaleString('vi-VN')}đ
+                          </span>
+                        ) : (
+                          <div>
+                            <span className="font-bold text-neutral-600 text-xs font-mono">
+                              {total > 0 ? `${total.toLocaleString('vi-VN')}đ` : '0đ'}
+                            </span>
+                            <p className="text-[10px] text-amber-600 font-medium mt-0.5">
+                              (Dự toán chào giá)
+                            </p>
+                          </div>
+                        )}
                       </td>
 
                       {/* 5. Tiền Đã Thu */}
                       <td className="py-3.5 px-4">
-                        <div>
-                          <span className="font-bold text-emerald-700 text-xs font-mono">
-                            {paid.toLocaleString('vi-VN')}đ
-                          </span>
-                          {total > 0 && (
-                            <p className="text-[10px] text-neutral-500 mt-0.5">
-                              Đạt {Math.round((paid / total) * 100)}% HĐ
+                        {paid > 0 ? (
+                          <div>
+                            <span className="font-bold text-emerald-700 text-xs font-mono">
+                              {paid.toLocaleString('vi-VN')}đ
+                            </span>
+                            {total > 0 && (
+                              <p className="text-[10px] text-neutral-500 mt-0.5">
+                                Đạt {Math.min(100, Math.round((paid / total) * 100))}% HĐ
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            <span className="font-medium text-neutral-400 text-xs font-mono">0đ</span>
+                            <p className="text-[10px] text-neutral-400 mt-0.5">
+                              Chưa có cọc
                             </p>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </td>
 
-                      {/* 6. Công Nợ Còn Lại */}
+                      {/* 6. Công Nợ Còn Lại / Tình Trạng Thanh Toán */}
                       <td className="py-3.5 px-4">
-                        {isFull ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-700" />
-                            Đủ 100%
-                          </span>
-                        ) : debt > 0 ? (
+                        {isPaidFull ? (
+                          <div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-700" />
+                              Đã thu đủ 100%
+                            </span>
+                            <p className="text-[10px] text-emerald-600 font-medium mt-0.5">
+                              Hết nợ (Đã tất toán)
+                            </p>
+                          </div>
+                        ) : hasDebt ? (
                           <div>
                             <span className="font-bold text-rose-600 text-xs font-mono">
                               {debt.toLocaleString('vi-VN')}đ
@@ -472,7 +553,14 @@ export const FinanceModule: React.FC = () => {
                             </p>
                           </div>
                         ) : (
-                          <span className="text-neutral-400 text-xs">0đ</span>
+                          <div>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-neutral-100 text-neutral-600 border border-neutral-200">
+                              Chưa chốt cọc
+                            </span>
+                            <p className="text-[10px] text-neutral-400 mt-0.5">
+                              Lead chưa phát sinh nợ
+                            </p>
+                          </div>
                         )}
                       </td>
 
@@ -499,13 +587,19 @@ export const FinanceModule: React.FC = () => {
                             type="button"
                             onClick={() => {
                               setQrCustomer(cust);
-                              setQrMode(isFull ? 'final' : debt > 0 && paid > 0 ? 'final' : 'deposit');
+                              setQrMode(isPaidFull ? 'final' : hasDebt ? 'final' : 'deposit');
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-[11px] font-bold shadow-2xs transition-all active:scale-95 cursor-pointer"
-                            title="Mở mã QR VietQR chuyển khoản VietinBank"
+                            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold shadow-2xs transition-all active:scale-95 cursor-pointer ${
+                              isPaidFull
+                                ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800'
+                                : hasDebt
+                                ? 'bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D]'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            }`}
+                            title={isPaidFull ? "Xem lại mã QR tất toán" : hasDebt ? "Tạo mã QR thu số tiền còn nợ" : "Tạo mã QR VietQR thu cọc"}
                           >
                             <QrCode className="w-3.5 h-3.5" />
-                            <span>{isFull ? 'Xem QR' : 'Thu Tiền'}</span>
+                            <span>{isPaidFull ? 'Xem QR' : hasDebt ? 'Thu Nốt' : 'Thu Cọc'}</span>
                           </button>
 
                           {/* Nút Xem Hồ Sơ CRM */}
