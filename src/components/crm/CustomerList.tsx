@@ -206,10 +206,10 @@ export const CustomerList: React.FC = () => {
           </span>
         </div>
 
-        {/* Card 2: Thực thu cọc */}
+        {/* Card 2: Thực thu đã nhận */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">THỰC THU (CỌC ĐÃ NHẬN)</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">THỰC THU (ĐÃ NHẬN)</span>
             <div className="w-7 h-7 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
               <Wallet className="w-3.5 h-3.5" />
             </div>
@@ -234,7 +234,7 @@ export const CustomerList: React.FC = () => {
             {(financialStats.totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
           </p>
           <span className="text-[10px] text-neutral-500 mt-0.5 block">
-            Chờ thanh toán khi giao ảnh
+            Chờ thanh toán các đợt tiếp & giao ảnh
           </span>
         </div>
 
@@ -395,7 +395,7 @@ export const CustomerList: React.FC = () => {
                         {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
                       </span>
                       <div className="text-[10px] font-semibold flex items-center justify-end gap-1 mt-0.5">
-                        <span className="text-emerald-700">Cọc: {getCustomerPaidDeposit(cust).toLocaleString('vi-VN')}đ</span>
+                        <span className="text-emerald-700">Đã thu: {getCustomerPaidDeposit(cust).toLocaleString('vi-VN')}đ</span>
                         {getCustomerRemainingDebt(cust) > 0 ? (
                           <span className="text-rose-600">• Nợ: {getCustomerRemainingDebt(cust).toLocaleString('vi-VN')}đ</span>
                         ) : (
@@ -410,7 +410,7 @@ export const CustomerList: React.FC = () => {
                         {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
                       </span>
                       <div className="text-[10px] text-neutral-400 font-medium flex items-center justify-end gap-1 mt-0.5">
-                        <span>Đã cọc: 0đ</span>
+                        <span>Đã thu: 0đ</span>
                         <span className="italic">• Chưa chốt (Không nợ)</span>
                       </div>
                     </div>
@@ -516,7 +516,7 @@ export const CustomerList: React.FC = () => {
                             {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
                           </p>
                           <p className="text-[11px] font-semibold flex items-center gap-1.5 flex-wrap">
-                            <span className="text-emerald-700">Đã cọc: {getCustomerPaidDeposit(cust).toLocaleString('vi-VN')}đ</span>
+                            <span className="text-emerald-700">Đã thu: {getCustomerPaidDeposit(cust).toLocaleString('vi-VN')}đ</span>
                             {getCustomerRemainingDebt(cust) > 0 ? (
                               <span className="text-rose-600 font-bold">• Nợ: {getCustomerRemainingDebt(cust).toLocaleString('vi-VN')}đ</span>
                             ) : (
@@ -530,7 +530,7 @@ export const CustomerList: React.FC = () => {
                             {getCustomerTotalOrderValue(cust).toLocaleString('vi-VN')}đ
                           </p>
                           <p className="text-[11px] text-neutral-500 font-medium flex items-center gap-1.5 flex-wrap">
-                            <span className="text-neutral-600 font-semibold">Đã cọc: 0đ</span>
+                            <span className="text-neutral-600 font-semibold">Đã thu: 0đ</span>
                             <span className="text-neutral-400 italic">• Chưa chốt cọc (Không nợ)</span>
                           </p>
                         </div>

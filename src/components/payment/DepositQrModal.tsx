@@ -55,7 +55,7 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
   // Tổng kinh phí hợp đồng & số tiền đã thanh toán trước đó
   const initialBudget = customer ? getCustomerTotalOrderValue(customer) : 0;
   const [finalContractBudget, setFinalContractBudget] = useState<number>(initialBudget);
-  const paidSoFar = Number(customer?.depositAmount ?? customer?.paidAmount ?? 0);
+  const paidSoFar = Math.max(Number(customer?.paidAmount || 0), Number(customer?.depositAmount || 0));
   const totalBudget = isFinalPayment ? finalContractBudget : initialBudget;
   const remainingAmount = Math.max(0, totalBudget - paidSoFar);
 
@@ -66,10 +66,10 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
       return remainingAmount;
     }
     // Ưu tiên 1: Giá cọc đã setup trước đó của khách hàng
-    if (customer.depositAmount !== undefined && customer.depositAmount !== null) {
+    if (customer.depositAmount !== undefined && customer.depositAmount !== null && Number(customer.depositAmount) > 0) {
       return Number(customer.depositAmount);
     }
-    if (customer.paidAmount !== undefined && customer.paidAmount !== null) {
+    if (customer.paidAmount !== undefined && customer.paidAmount !== null && Number(customer.paidAmount) > 0) {
       return Number(customer.paidAmount);
     }
     // Ưu tiên 2: Mức cọc mặc định theo đơn: nếu có tổng bill thì gợi ý 2 triệu hoặc 30%
@@ -91,13 +91,14 @@ export const DepositQrModal: React.FC<DepositQrModalProps> = ({
     if (customer) {
       const initTotal = getCustomerTotalOrderValue(customer);
       setFinalContractBudget(initTotal);
+      const currentPaid = Math.max(Number(customer.paidAmount || 0), Number(customer.depositAmount || 0));
       if (isFinalPayment) {
-        const remaining = Math.max(0, initTotal - (customer.paidAmount || customer.depositAmount || 0));
+        const remaining = Math.max(0, initTotal - currentPaid);
         setPaymentAmount(remaining);
       } else {
-        if (customer.depositAmount !== undefined && customer.depositAmount !== null) {
+        if (customer.depositAmount !== undefined && customer.depositAmount !== null && Number(customer.depositAmount) > 0) {
           setPaymentAmount(Number(customer.depositAmount));
-        } else if (customer.paidAmount !== undefined && customer.paidAmount !== null) {
+        } else if (customer.paidAmount !== undefined && customer.paidAmount !== null && Number(customer.paidAmount) > 0) {
           setPaymentAmount(Number(customer.paidAmount));
         } else {
           const suggested = initTotal > 0 ? Math.min(initTotal, 2000000) : 2000000;
@@ -274,12 +275,13 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
     } else {
       const newDepositAmount = paymentAmount;
       const orderValue = getCustomerTotalOrderValue(customer);
-      const remainingDebt = Math.max(0, orderValue - newDepositAmount);
+      const currentPaid = Math.max(Number(customer.paidAmount || 0), newDepositAmount);
+      const remainingDebt = Math.max(0, orderValue - currentPaid);
 
       updateCustomer({
         ...customer,
         depositAmount: newDepositAmount,
-        paidAmount: newDepositAmount,
+        paidAmount: currentPaid,
         remainingAmount: remainingDebt,
         depositDate: new Date().toISOString().split('T')[0],
         pipelineStage: 'Đã cọc',

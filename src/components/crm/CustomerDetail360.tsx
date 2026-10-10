@@ -889,7 +889,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       </span>
                     </div>
                     <p className="text-xs text-neutral-600">
-                      Tổng bill: <strong>{(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ</strong> • Đã cọc: <strong>{(customer.paidAmount || customer.depositAmount || 0).toLocaleString('vi-VN')}đ</strong> • Còn lại cần thanh toán: <strong className="text-teal-700 font-extrabold">{Math.max(0, (customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0) - (customer.paidAmount || customer.depositAmount || 0)).toLocaleString('vi-VN')}đ</strong>
+                      Tổng bill: <strong>{(customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0).toLocaleString('vi-VN')}đ</strong> • Đã thu: <strong>{(customer.paidAmount || customer.depositAmount || 0).toLocaleString('vi-VN')}đ</strong> • Còn lại cần thanh toán: <strong className="text-teal-700 font-extrabold">{Math.max(0, (customer.totalAmount ?? customer.totalRevenue ?? customer.expectedBudget ?? 0) - (customer.paidAmount || customer.depositAmount || 0)).toLocaleString('vi-VN')}đ</strong>
                     </p>
                   </div>
                   <button
@@ -917,7 +917,7 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                       </span>
                     </div>
                     <p className="text-xs text-neutral-700">
-                      Tổng doanh thu: <strong className="text-emerald-900 font-extrabold">{(customer.totalRevenue || customer.paidAmount || 0).toLocaleString('vi-VN')}đ</strong> • Đã thu đủ: <strong className="text-emerald-900 font-extrabold">{(customer.paidAmount || 0).toLocaleString('vi-VN')}đ (100%)</strong> • Công nợ: <strong className="text-emerald-700">0đ</strong>
+                      Tổng doanh thu: <strong className="text-emerald-900 font-extrabold">{(customer.totalRevenue || customer.totalAmount || customer.paidAmount || 0).toLocaleString('vi-VN')}đ</strong> • Đã thu đủ: <strong className="text-emerald-900 font-extrabold">{(customer.paidAmount || customer.totalRevenue || customer.totalAmount || 0).toLocaleString('vi-VN')}đ (100%)</strong> • Công nợ: <strong className="text-emerald-700">0đ</strong>
                     </p>
                   </div>
                   <div className="px-3.5 py-1.5 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold border border-emerald-300 flex items-center gap-1.5 shrink-0">

@@ -103,10 +103,20 @@ const mapDbRowToCustomer = (row) => {
 
   const depositAmount = (row.deposit_amount !== null && row.deposit_amount !== undefined)
     ? Number(row.deposit_amount)
-    : ((row.paid_amount !== null && row.paid_amount !== undefined) ? Number(row.paid_amount) : 0);
-  const remainingAmount = (row.remaining_amount !== null && row.remaining_amount !== undefined)
-    ? Number(row.remaining_amount)
-    : Math.max(0, totalAmount - depositAmount);
+    : 0;
+  const isCompletedStage = row.pipeline_stage === 'Hoàn thành' || row.pipeline_stage === 'Đã hoàn thành';
+  const rawPaidAmount = (row.paid_amount !== null && row.paid_amount !== undefined)
+    ? Number(row.paid_amount)
+    : depositAmount;
+  let paidAmount = Math.max(rawPaidAmount, depositAmount);
+  if (isCompletedStage && paidAmount === 0 && totalAmount > 0) {
+    paidAmount = totalAmount;
+  }
+  const remainingAmount = isCompletedStage
+    ? 0
+    : ((row.remaining_amount !== null && row.remaining_amount !== undefined)
+        ? Number(row.remaining_amount)
+        : Math.max(0, totalAmount - paidAmount));
   const expectedBudget = (row.expected_budget !== null && row.expected_budget !== undefined)
     ? Number(row.expected_budget)
     : totalAmount;
@@ -162,7 +172,7 @@ const mapDbRowToCustomer = (row) => {
     totalAmount,
     totalRevenue: totalAmount,
     depositAmount,
-    paidAmount: depositAmount,
+    paidAmount,
     contractValue: totalAmount,
     remainingAmount,
 
@@ -806,7 +816,8 @@ const server = http.createServer(async (req, res) => {
       const unitPrice = parseNumericAmount(body.unitPrice ?? body.unit_price ?? 0);
       const extraFee = parseNumericAmount(body.extraFee ?? body.extra_fee ?? 0);
       const discount = parseNumericAmount(body.discount ?? 0);
-      const depositAmount = parseNumericAmount(body.depositAmount ?? body.deposit_amount ?? body.paidAmount ?? 0);
+      const depositAmount = parseNumericAmount(body.depositAmount ?? body.deposit_amount ?? 0);
+      const paidAmount = parseNumericAmount(body.paidAmount ?? body.paid_amount ?? depositAmount);
 
       const subtotal = Math.max(0, studentCount * unitPrice);
       let totalAmount = 0;
@@ -821,8 +832,8 @@ const server = http.createServer(async (req, res) => {
       }
       const stage = body.pipelineStage || body.pipeline_stage || 'New Lead';
       const isClosedStage = ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao', 'Hoàn thành'].includes(stage);
-      const remainingAmount = (isClosedStage || depositAmount > 0)
-        ? Math.max(0, totalAmount - depositAmount)
+      const remainingAmount = (isClosedStage || paidAmount > 0 || depositAmount > 0)
+        ? Math.max(0, totalAmount - paidAmount)
         : 0;
 
       runTransaction(() => {
@@ -877,7 +888,7 @@ const server = http.createServer(async (req, res) => {
           body.pipelineStage || 'New Lead', body.assignedSalesId || '', body.assignedSalesName || 'Chưa gán',
           body.assignedCareStaffId || '', body.assignedCareStaffName || '',
           currentUserId, currentUserName,
-          totalAmount, depositAmount, totalAmount, depositAmount,
+          totalAmount, depositAmount, totalAmount, paidAmount,
           unitPrice, subtotal, extraFee, discount, totalAmount, remainingAmount,
           body.depositDate || null, body.paymentMethod || null, body.shootTime || null, body.shootAddress || null,
           body.editorName || null, body.editDeadline || null, Number(body.editProgress) || 0,
@@ -935,9 +946,15 @@ const server = http.createServer(async (req, res) => {
       const discount = body.discount !== undefined
         ? parseNumericAmount(body.discount)
         : parseNumericAmount(existing.discount ?? 0);
-      const depositAmount = (body.depositAmount !== undefined || body.deposit_amount !== undefined || body.paidAmount !== undefined)
-        ? parseNumericAmount(body.depositAmount ?? body.deposit_amount ?? body.paidAmount)
-        : parseNumericAmount(existing.deposit_amount ?? existing.paid_amount ?? 0);
+      const depositAmount = (body.depositAmount !== undefined || body.deposit_amount !== undefined)
+        ? parseNumericAmount(body.depositAmount ?? body.deposit_amount)
+        : parseNumericAmount(existing.deposit_amount ?? 0);
+
+      const paidAmount = (body.paidAmount !== undefined || body.paid_amount !== undefined)
+        ? parseNumericAmount(body.paidAmount ?? body.paid_amount)
+        : ((existing.paid_amount !== null && existing.paid_amount !== undefined)
+            ? parseNumericAmount(existing.paid_amount)
+            : depositAmount);
 
       const subtotal = Math.max(0, studentCount * unitPrice);
       let totalAmount = 0;
@@ -952,8 +969,8 @@ const server = http.createServer(async (req, res) => {
       }
       const finalStage = body.pipelineStage ?? body.pipeline_stage ?? existing.pipeline_stage;
       const isClosedStage = ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao', 'Hoàn thành'].includes(finalStage);
-      const remainingAmount = (isClosedStage || depositAmount > 0)
-        ? Math.max(0, totalAmount - depositAmount)
+      const remainingAmount = (isClosedStage || paidAmount > 0 || depositAmount > 0)
+        ? Math.max(0, totalAmount - paidAmount)
         : 0;
 
       runTransaction(() => {
@@ -1041,7 +1058,7 @@ const server = http.createServer(async (req, res) => {
           toSql(body.source), toSql(body.campaignName), toSql(utmStr),
           toSql(body.pipelineStage), toSql(body.assignedSalesId), toSql(body.assignedSalesName),
           toSql(body.assignedCareStaffId), toSql(body.assignedCareStaffName),
-          totalAmount, depositAmount, totalAmount, depositAmount,
+          totalAmount, depositAmount, totalAmount, paidAmount,
           unitPrice, subtotal, extraFee, discount, totalAmount, remainingAmount,
           toSql(body.depositDate), toSql(body.paymentMethod), toSql(body.shootTime), toSql(body.shootAddress),
           toSql(body.editorName), toSql(body.editDeadline), body.editProgress !== undefined ? Number(body.editProgress) : null,

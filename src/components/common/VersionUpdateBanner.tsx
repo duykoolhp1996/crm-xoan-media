@@ -55,7 +55,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.3.0
+                Phiên Bản Mới v1.3.1
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -63,11 +63,11 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.3.0
+              Cập Nhật CRM Xoăn Media v1.3.1
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Tối ưu phân quyền bảo mật dữ liệu Sales Lead, khóa quyền chỉnh sửa cơ chế lương thợ chụp (view-only) và nâng cấp hệ thống thông báo đa thiết bị cho iOS!
+              Tách bạch Thực thu đã nhận & Tiền cọc giữ lịch, hỗ trợ ghi nhận các đợt đóng tiếp theo và tất toán 100%, chuẩn hóa bức tranh tài chính và công nợ thực tế!
             </p>
 
             {/* Quick feature tags */}

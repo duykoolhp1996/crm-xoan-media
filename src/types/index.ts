@@ -127,7 +127,7 @@ export interface Customer {
   contractValue?: number;
   depositAmount?: number;    // Tiền cọc đã nhận
   paidAmount: number;        // Tổng tiền đã thanh toán (cọc + tất toán)
-  remainingAmount?: number;  // Còn lại cần thanh toán = totalAmount - depositAmount
+  remainingAmount?: number;  // Còn lại cần thanh toán = totalAmount - paidAmount
 
   // Thông tin cụ thể từng giai đoạn (Stage-Specific Fields)
   depositDate?: string;      // Ngày nhận cọc

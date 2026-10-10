@@ -102,7 +102,7 @@ interface AppContextType {
   loadDeletedCustomers: () => Promise<void>;
   selectedCustomerId: string | null;
   setSelectedCustomerId: (id: string | null) => void;
-  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>) => boolean;
+  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue'> & { paidAmount?: number }) => boolean;
   deleteCustomer: (id: string, reason?: string) => void;
   restoreCustomer: (id: string) => Promise<boolean>;
   permanentDeleteCustomer: (id: string, reason?: string) => Promise<boolean>;
@@ -920,7 +920,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Customer handlers
-  const addCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue' | 'paidAmount'>): boolean => {
+  const addCustomer = (customerData: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue'> & { paidAmount?: number }): boolean => {
     // 1. Kiểm tra trùng SĐT ngay tại nguồn dữ liệu trung tâm (Single Source of Truth)
     const cleanP = (customerData.phone || '').replace(/\D/g, '');
     const cleanZ = (customerData.zalo || '').replace(/\D/g, '');
@@ -958,7 +958,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdByName: creatorName,
       assignedSalesName: salesName,
       totalRevenue: customerData.totalAmount ?? customerData.expectedBudget ?? 0,
-      paidAmount: customerData.depositAmount ?? 0,
+      paidAmount: customerData.paidAmount !== undefined ? customerData.paidAmount : (customerData.depositAmount ?? 0),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -1227,14 +1227,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const next = prev.map(c => {
         if (c.id === customerId) {
           const isLeadOrLost = newStage === 'New Lead' || newStage === 'Lost';
+          const isCompleted = newStage === 'Hoàn thành' || (newStage as string) === 'Đã hoàn thành';
+          const orderTotal = c.totalAmount ?? c.totalRevenue ?? c.expectedBudget ?? 0;
+          let newPaid = c.paidAmount;
+          let newDeposit = c.depositAmount;
+          let newRemaining = c.remainingAmount;
+
+          if (isLeadOrLost && Number(c.depositAmount || 0) === 0 && Number(c.paidAmount || 0) === 0) {
+            newPaid = 0;
+            newDeposit = 0;
+            newRemaining = 0;
+          } else if (isCompleted) {
+            newPaid = Math.max(Number(c.paidAmount || 0), orderTotal);
+            newRemaining = 0;
+          }
+
           updatedCustObj = {
             ...c,
             pipelineStage: newStage,
             assignedSalesName: newSalesName || c.assignedSalesName,
             assignedSalesId: newSalesId || c.assignedSalesId,
-            depositAmount: isLeadOrLost ? 0 : c.depositAmount,
-            paidAmount: isLeadOrLost ? 0 : c.paidAmount,
-            remainingAmount: isLeadOrLost ? 0 : c.remainingAmount,
+            depositAmount: newDeposit,
+            paidAmount: newPaid,
+            remainingAmount: newRemaining,
             updatedAt: new Date().toISOString()
           };
           return updatedCustObj;
@@ -1400,7 +1415,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateCustomer = (updated: Customer) => {
     // Nếu khách hàng ở New Lead hoặc Lost và không có cọc thực tế: Đảm bảo cọc và công nợ = 0
-    if ((updated.pipelineStage === 'New Lead' || updated.pipelineStage === 'Lost') && Number(updated.depositAmount || 0) === 0) {
+    if ((updated.pipelineStage === 'New Lead' || updated.pipelineStage === 'Lost') && Number(updated.depositAmount || 0) === 0 && Number(updated.paidAmount || 0) === 0) {
       updated = {
         ...updated,
         depositAmount: 0,

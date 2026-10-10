@@ -106,20 +106,22 @@ export const isCustomerBookedOrDeposited = (
 export const getCustomerTotalOrderValue = (customer: Customer): number => {
   if (!customer) return 0;
   
-  if (customer.totalAmount !== undefined && customer.totalAmount !== null) {
-    return Number(customer.totalAmount);
-  }
-  if (customer.totalRevenue !== undefined && customer.totalRevenue !== null) {
-    return Number(customer.totalRevenue);
-  }
-  if (customer.contractValue !== undefined && customer.contractValue !== null) {
-    return Number(customer.contractValue);
-  }
-  if (customer.expectedBudget !== undefined && customer.expectedBudget !== null) {
-    return Number(customer.expectedBudget);
+  let val = 0;
+  if (customer.totalAmount !== undefined && customer.totalAmount !== null && Number(customer.totalAmount) > 0) {
+    val = Number(customer.totalAmount);
+  } else if (customer.totalRevenue !== undefined && customer.totalRevenue !== null && Number(customer.totalRevenue) > 0) {
+    val = Number(customer.totalRevenue);
+  } else if (customer.contractValue !== undefined && customer.contractValue !== null && Number(customer.contractValue) > 0) {
+    val = Number(customer.contractValue);
+  } else if (customer.expectedBudget !== undefined && customer.expectedBudget !== null && Number(customer.expectedBudget) > 0) {
+    val = Number(customer.expectedBudget);
+  } else if (customer.studentCount && customer.unitPrice) {
+    const calc = (Number(customer.studentCount) * Number(customer.unitPrice)) + Number(customer.extraFee || 0) - Number(customer.discount || 0);
+    if (calc > 0) val = calc;
   }
 
-  return 0;
+  const paid = Math.max(Number(customer.paidAmount || 0), Number(customer.depositAmount || 0));
+  return Math.max(val, paid);
 };
 
 /**
@@ -127,7 +129,16 @@ export const getCustomerTotalOrderValue = (customer: Customer): number => {
  */
 export const getCustomerPaidDeposit = (customer: Customer): number => {
   if (!customer) return 0;
-  return Number(customer.paidAmount ?? customer.depositAmount ?? 0);
+  const isCompleted = isCustomerInStage(customer.pipelineStage, 'Hoàn thành');
+  const total = getCustomerTotalOrderValue(customer);
+  const paid = Number(customer.paidAmount ?? 0);
+  const deposit = Number(customer.depositAmount ?? 0);
+  const actualPaid = Math.max(paid, deposit);
+
+  if (isCompleted && actualPaid === 0 && total > 0) {
+    return total;
+  }
+  return actualPaid;
 };
 
 /**

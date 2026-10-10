@@ -26,7 +26,8 @@ import {
   Clock,
   FolderOpen,
   UserX,
-  CreditCard
+  CreditCard,
+  Wallet
 } from 'lucide-react';
 
 interface CustomerModalProps {
@@ -102,10 +103,13 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
           : (subtotal + extraFee - discount);
       const depositAmount = (customerToEdit.depositAmount !== undefined && customerToEdit.depositAmount !== null)
         ? Number(customerToEdit.depositAmount)
-        : ((customerToEdit.paidAmount !== undefined && customerToEdit.paidAmount !== null) ? Number(customerToEdit.paidAmount) : 0);
+        : 0;
+      const paidAmount = (customerToEdit.paidAmount !== undefined && customerToEdit.paidAmount !== null)
+        ? Number(customerToEdit.paidAmount)
+        : depositAmount;
       const remainingAmount = (customerToEdit.remainingAmount !== undefined && customerToEdit.remainingAmount !== null)
         ? Number(customerToEdit.remainingAmount)
-        : Math.max(0, totalAmount - depositAmount);
+        : Math.max(0, totalAmount - paidAmount);
       const expectedBudget = (customerToEdit.expectedBudget !== undefined && customerToEdit.expectedBudget !== null)
         ? Number(customerToEdit.expectedBudget)
         : totalAmount;
@@ -140,6 +144,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         discount: discount,
         totalAmount: totalAmount,
         depositAmount: depositAmount,
+        paidAmount: paidAmount,
         remainingAmount: remainingAmount,
         expectedBudget: expectedBudget,
 
@@ -202,6 +207,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       discount: 0,
       totalAmount: defaultSubtotal,
       depositAmount: 0,
+      paidAmount: 0,
       remainingAmount: defaultSubtotal,
       expectedBudget: defaultSubtotal,
 
@@ -244,7 +250,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
   // Realtime recalculate amounts khi số lượng, đơn giá, phụ phí, giảm giá, cọc thay đổi
   const calcSubtotal = (formData.studentCount || 0) * (formData.unitPrice || 0);
   const calcTotalAmount = Math.max(0, calcSubtotal + (formData.extraFee || 0) - (formData.discount || 0));
-  const calcRemainingAmount = Math.max(0, calcTotalAmount - (formData.depositAmount || 0));
+  const calcPaidAmount = formData.paidAmount !== undefined ? Number(formData.paidAmount) : (Number(formData.depositAmount) || 0);
+  const calcRemainingAmount = Math.max(0, calcTotalAmount - calcPaidAmount);
 
   // Kiểm tra giai đoạn có bắt buộc Số điện thoại và Tên lớp hay không
   const isContactRequired = !STAGES_WITHOUT_REQUIRED_CONTACT.includes(formData.pipelineStage);
@@ -395,10 +402,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         discount: Number(formData.discount) || 0,
         totalAmount: calcTotalAmount,
         depositAmount: Number(formData.depositAmount) || 0,
+        paidAmount: formData.paidAmount !== undefined ? Number(formData.paidAmount) : (Number(formData.depositAmount) || (customerToEdit.paidAmount || 0)),
         remainingAmount: calcRemainingAmount,
-        expectedBudget: calcTotalAmount,
-        totalRevenue: calcTotalAmount,
-        paidAmount: formData.depositAmount !== undefined ? Number(formData.depositAmount) : (customerToEdit.paidAmount || 0),
 
         // Stage-specific fields
         depositDate: formData.depositDate,
@@ -462,6 +467,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       discount: Number(formData.discount) || 0,
       totalAmount: calcTotalAmount,
       depositAmount: Number(formData.depositAmount) || 0,
+      paidAmount: formData.paidAmount !== undefined ? Number(formData.paidAmount) : (Number(formData.depositAmount) || 0),
       remainingAmount: calcRemainingAmount,
       expectedBudget: calcTotalAmount,
 
@@ -831,73 +837,153 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                 )}
               </div>
 
-              <div className="pt-3 border-t border-black/[0.04] space-y-2.5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="pt-3 border-t border-black/[0.04] space-y-3">
+                {/* 1. Tổng đơn hàng & Trạng thái thanh toán */}
+                <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-neutral-50 rounded-xl border border-black/[0.04]">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-neutral-500 font-medium uppercase tracking-wider">Tổng Đơn Hàng:</span>
+                    <span className="text-xs text-neutral-500 font-bold uppercase tracking-wider">Tổng Đơn Hàng:</span>
                     <span className="text-base font-black text-neutral-950 font-mono">
                       {calcTotalAmount.toLocaleString('vi-VN')} đ
                     </span>
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <span className="text-neutral-700 font-bold">Setup Giá Cọc:</span>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="0"
-                          value={formData.depositAmount !== undefined && formData.depositAmount !== null && formData.depositAmount > 0 ? formData.depositAmount.toLocaleString('vi-VN') : (formData.depositAmount === 0 ? '0' : '')}
-                          onChange={e => setFormData({ ...formData, depositAmount: parseMoneyInput(e.target.value) })}
-                          className="w-36 px-2.5 py-1.5 bg-emerald-50/70 border border-emerald-300 rounded-lg text-xs font-black text-emerald-950 focus:bg-white focus:outline-none font-mono"
-                        />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 font-bold pointer-events-none">
-                          đ
+                  <div className="flex items-center gap-2">
+                    {calcTotalAmount > 0 && calcRemainingAmount === 0 ? (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Đã tất toán đủ 100%
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-neutral-500 font-medium">Công nợ còn lại:</span>
+                        <span className="font-extrabold text-rose-600 font-mono text-sm">
+                          {calcRemainingAmount.toLocaleString('vi-VN')} đ
                         </span>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <span className="text-neutral-500">Còn lại:</span>
-                      <span className="font-extrabold text-rose-600 font-mono">
-                        {calcRemainingAmount.toLocaleString('vi-VN')} đ
-                      </span>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Phím chọn nhanh mức cọc kỷ yếu */}
-                <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px]">
-                  <span className="text-neutral-400 font-medium text-[10px]">Gợi ý mức cọc:</span>
-                  {[
-                    { label: '0 đ', val: 0 },
-                    { label: '2 Triệu (Chuẩn)', val: 2000000 },
-                    { label: '3 Triệu', val: 3000000 },
-                    { label: '5 Triệu', val: 5000000 },
-                    ...(calcTotalAmount > 0 ? [
-                      { label: '20%', val: Math.round((calcTotalAmount * 0.2) / 10000) * 10000 },
-                      { label: '30%', val: Math.round((calcTotalAmount * 0.3) / 10000) * 10000 },
-                      { label: '50%', val: Math.round((calcTotalAmount * 0.5) / 10000) * 10000 }
-                    ] : [])
-                  ].map((chip, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, depositAmount: chip.val })}
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
-                        formData.depositAmount === chip.val
-                          ? 'bg-neutral-900 text-[#B8F23D] shadow-2xs'
-                          : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-black/[0.04]'
-                      }`}
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                  {formData.depositAmount > 0 && calcTotalAmount > 0 && (
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full ml-auto">
-                      Đạt {Math.round((formData.depositAmount / calcTotalAmount) * 100)}% giá trị đơn
-                    </span>
-                  )}
+                {/* 2. Tiền Cọc Giữ Lịch */}
+                <div className="space-y-1.5 p-2.5 bg-emerald-50/50 rounded-xl border border-emerald-200/60">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <CreditCard className="w-3.5 h-3.5 text-emerald-700" />
+                      <span className="text-emerald-950 font-bold">1. Tiền Cọc Giữ Lịch:</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="0"
+                        value={formData.depositAmount !== undefined && formData.depositAmount !== null && formData.depositAmount > 0 ? formData.depositAmount.toLocaleString('vi-VN') : (formData.depositAmount === 0 ? '0' : '')}
+                        onChange={e => {
+                          const newDeposit = parseMoneyInput(e.target.value);
+                          const prevDeposit = Number(formData.depositAmount) || 0;
+                          const currentPaid = formData.paidAmount !== undefined ? Number(formData.paidAmount) : prevDeposit;
+                          const shouldSyncPaid = currentPaid === 0 || currentPaid === prevDeposit;
+                          setFormData({
+                            ...formData,
+                            depositAmount: newDeposit,
+                            paidAmount: shouldSyncPaid ? newDeposit : currentPaid
+                          });
+                        }}
+                        className="w-36 px-2.5 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-black text-emerald-950 focus:bg-white focus:outline-none font-mono"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 font-bold pointer-events-none">
+                        đ
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Phím chọn nhanh mức cọc kỷ yếu */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5 text-[11px]">
+                    <span className="text-neutral-400 font-medium text-[10px]">Gợi ý cọc:</span>
+                    {[
+                      { label: '0 đ', val: 0 },
+                      { label: '1 Triệu', val: 1000000 },
+                      { label: '2 Triệu (Chuẩn)', val: 2000000 },
+                      { label: '3 Triệu', val: 3000000 },
+                      { label: '5 Triệu', val: 5000000 },
+                      ...(calcTotalAmount > 0 ? [
+                        { label: '20%', val: Math.round((calcTotalAmount * 0.2) / 10000) * 10000 },
+                        { label: '30%', val: Math.round((calcTotalAmount * 0.3) / 10000) * 10000 },
+                        { label: '50%', val: Math.round((calcTotalAmount * 0.5) / 10000) * 10000 }
+                      ] : [])
+                    ].map((chip, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          const prevDeposit = Number(formData.depositAmount) || 0;
+                          const currentPaid = formData.paidAmount !== undefined ? Number(formData.paidAmount) : prevDeposit;
+                          const shouldSyncPaid = currentPaid === 0 || currentPaid === prevDeposit;
+                          setFormData({
+                            ...formData,
+                            depositAmount: chip.val,
+                            paidAmount: shouldSyncPaid ? chip.val : currentPaid
+                          });
+                        }}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                          formData.depositAmount === chip.val
+                            ? 'bg-emerald-900 text-[#B8F23D] shadow-2xs'
+                            : 'bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-200'
+                        }`}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Thực Thu Đã Nhận (Cọc + Các Đợt / Tất Toán) */}
+                <div className="space-y-1.5 p-2.5 bg-blue-50/50 rounded-xl border border-blue-200/70">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <Wallet className="w-3.5 h-3.5 text-blue-700" />
+                      <span className="text-blue-950 font-bold">2. Thực Thu Đã Nhận (Cọc + Đợt 2 + Tất toán):</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="0"
+                        value={formData.paidAmount !== undefined && formData.paidAmount !== null && formData.paidAmount > 0 ? formData.paidAmount.toLocaleString('vi-VN') : (formData.paidAmount === 0 ? '0' : '')}
+                        onChange={e => setFormData({ ...formData, paidAmount: parseMoneyInput(e.target.value) })}
+                        className="w-36 px-2.5 py-1.5 bg-white border border-blue-300 rounded-lg text-xs font-black text-blue-950 focus:bg-white focus:outline-none font-mono"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 font-bold pointer-events-none">
+                        đ
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Nút chọn nhanh Thực Thu */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-0.5 text-[11px]">
+                    <span className="text-neutral-400 font-medium text-[10px]">Cập nhật nhanh thực thu:</span>
+                    {[
+                      { label: 'Bằng tiền cọc', val: Number(formData.depositAmount) || 0 },
+                      ...(calcTotalAmount > 0 ? [
+                        { label: '50% đơn', val: Math.round((calcTotalAmount * 0.5) / 10000) * 10000 },
+                        { label: '70% đơn', val: Math.round((calcTotalAmount * 0.7) / 10000) * 10000 },
+                        { label: 'Tất toán 100%', val: calcTotalAmount }
+                      ] : [])
+                    ].map((chip, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, paidAmount: chip.val })}
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                          calcPaidAmount === chip.val && chip.val > 0
+                            ? 'bg-blue-900 text-white shadow-2xs'
+                            : 'bg-white hover:bg-blue-100 text-blue-900 border border-blue-200'
+                        }`}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                    {calcPaidAmount > 0 && calcTotalAmount > 0 && (
+                      <span className="text-[10px] font-bold text-blue-800 bg-blue-100 px-2 py-0.5 rounded-full ml-auto">
+                        Đã thu {Math.min(100, Math.round((calcPaidAmount / calcTotalAmount) * 100))}% đơn
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -915,7 +1001,14 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
               </label>
               <select
                 value={formData.pipelineStage}
-                onChange={e => setFormData({ ...formData, pipelineStage: e.target.value as PipelineStage })}
+                onChange={e => {
+                  const newStage = e.target.value as PipelineStage;
+                  if (newStage === 'Hoàn thành' && calcTotalAmount > 0 && (Number(formData.paidAmount || 0) < calcTotalAmount)) {
+                    setFormData({ ...formData, pipelineStage: newStage, paidAmount: calcTotalAmount });
+                  } else {
+                    setFormData({ ...formData, pipelineStage: newStage });
+                  }
+                }}
                 className="w-full px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 font-bold rounded-xl cursor-pointer focus:bg-white focus:outline-none"
               >
                 <option value="New Lead">1. New Lead (Mới tiếp nhận)</option>
