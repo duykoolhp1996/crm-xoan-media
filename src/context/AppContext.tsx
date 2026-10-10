@@ -64,6 +64,7 @@ export type NavigationTab =
   | 'pipeline'
   | 'schools'
   | 'bookings'
+  | 'finance'
   | 'calendar'
   | 'photographers'
   | 'services'
@@ -91,7 +92,7 @@ interface AppContextType {
   loginQuick: (role: 'admin' | 'sales' | 'photographer', staffId?: string) => void;
   logout: () => void;
   isImpersonating: boolean;
-  loginAsStaff: (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string }) => void;
+  loginAsStaff: (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string; canViewFinance?: boolean }) => void;
   returnToAdmin: () => void;
   updateProfile: (data: { avatar?: string; newPassword?: string; currentPassword?: string }) => { success: boolean; message: string };
   
@@ -646,7 +647,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           email: matchedSales.email,
           avatar: matchedSales.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
           role: 'sales',
-          phone: matchedSales.phone
+          phone: matchedSales.phone,
+          canViewFinance: matchedSales.canViewFinance ?? false
         };
         setCurrentUser(salesUser);
         setCurrentRoleState('sales');
@@ -799,7 +801,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Đăng nhập với tư cách nhân sự (Sales hoặc Photographer)
-  const loginAsStaff = (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string }) => {
+  const loginAsStaff = (staff: { id: string; name: string; role: 'sales' | 'photographer'; avatar?: string; email?: string; phone?: string; canViewFinance?: boolean }) => {
     setCurrentRoleState(staff.role);
     setCurrentUser({
       id: staff.id,
@@ -807,7 +809,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       email: staff.email || `${staff.id}@xoanmedia.vn`,
       avatar: staff.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       role: staff.role,
-      phone: staff.phone
+      phone: staff.phone,
+      canViewFinance: staff.canViewFinance ?? false
     });
     setIsImpersonating(true);
     if (staff.role === 'sales') {

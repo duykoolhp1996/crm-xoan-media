@@ -8,13 +8,15 @@ import {
   Clock,
   MapPin,
   Camera,
-  Eye
+  Eye,
+  CircleDollarSign
 } from 'lucide-react';
 import { BookingModal } from './BookingModal';
 import { BookingDetailModal } from './BookingDetailModal';
 import {
   filterAccessibleCustomers,
-  filterAccessibleBookingsForSales
+  filterAccessibleBookingsForSales,
+  canUserAccessFinance
 } from '../../utils/salesPermissions';
 
 export const BookingModule: React.FC = () => {
@@ -26,11 +28,13 @@ export const BookingModule: React.FC = () => {
     photographers,
     customers,
     salesStaff,
-    setSelectedCustomerId
+    setSelectedCustomerId,
+    setActiveTab
   } = useApp();
 
   const isPhotographerUser = currentRole === 'photographer' || currentUser?.role === 'photographer';
   const isSalesUser = currentRole === 'sales' || currentUser?.role === 'sales';
+  const hasFinanceAccess = canUserAccessFinance(currentUser, currentRole, salesStaff);
 
   // Danh sách khách hàng Sales được phép xem
   const accessibleCustomers = useMemo(() => {
@@ -166,13 +170,26 @@ export const BookingModule: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          Tạo Đơn Booking Mới
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {hasFinanceAccess && (
+            <button
+              onClick={() => setActiveTab('finance')}
+              className="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
+              title="Mở Bảng Quản Lý Tài Chính & Cọc riêng biệt"
+            >
+              <CircleDollarSign className="w-4 h-4 text-emerald-600" />
+              <span>Bảng Tài Chính & Cọc Riêng</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            Tạo Đơn Booking Mới
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -226,7 +243,7 @@ export const BookingModule: React.FC = () => {
                 <th className="py-3.5 px-4">Thời Gian & Địa Điểm</th>
                 <th className="py-3.5 px-4">Gói Dịch Vụ</th>
                 <th className="py-3.5 px-4">Ekip Thực Hiện</th>
-                <th className="py-3.5 px-4">Tài Chính & Cọc</th>
+                <th className="py-3.5 px-4">{hasFinanceAccess ? 'Tài Chính & Cọc' : 'Thanh Toán'}</th>
                 <th className="py-3.5 px-4">Trạng Thái</th>
                 <th className="py-3.5 px-4 text-right">Cập Nhật</th>
               </tr>
@@ -333,16 +350,28 @@ export const BookingModule: React.FC = () => {
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <p className="font-bold text-neutral-900">
-                          {bk.totalAmount.toLocaleString('vi-VN')}đ
-                        </p>
-                        <p className="text-[11px] text-emerald-700 font-semibold">
-                          Đã cọc: {bk.depositAmount.toLocaleString('vi-VN')}đ
-                        </p>
-                        {bk.remainingAmount > 0 && (
-                          <p className="text-[10px] text-rose-600 font-semibold">
-                            Thiếu: {bk.remainingAmount.toLocaleString('vi-VN')}đ
-                          </p>
+                        {hasFinanceAccess ? (
+                          <>
+                            <p className="font-bold text-neutral-900">
+                              {bk.totalAmount.toLocaleString('vi-VN')}đ
+                            </p>
+                            <p className="text-[11px] text-emerald-700 font-semibold">
+                              Đã cọc: {bk.depositAmount.toLocaleString('vi-VN')}đ
+                            </p>
+                            {bk.remainingAmount > 0 ? (
+                              <p className="text-[10px] text-rose-600 font-semibold">
+                                Thiếu: {bk.remainingAmount.toLocaleString('vi-VN')}đ
+                              </p>
+                            ) : (
+                              <p className="text-[10px] text-emerald-600 font-semibold">
+                                ✓ Đủ 100%
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200">
+                            {bk.paymentStatus || 'Chưa cọc'}
+                          </span>
                         )}
                       </td>
 

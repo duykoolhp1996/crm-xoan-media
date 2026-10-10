@@ -12,6 +12,7 @@ import { CustomerList } from './components/crm/CustomerList';
 import { KanbanPipeline } from './components/pipeline/KanbanPipeline';
 import { SchoolClassModule } from './components/schools/SchoolClassModule';
 import { BookingModule } from './components/booking/BookingModule';
+import { FinanceModule } from './components/finance/FinanceModule';
 import { PhotoCalendar } from './components/calendar/PhotoCalendar';
 import { PhotographerList } from './components/photographers/PhotographerList';
 import { ServiceModule } from './components/services/ServiceModule';
@@ -48,6 +49,7 @@ const MainContent: React.FC = () => {
         )}
         {activeTab === 'schools' && <SchoolClassModule />}
         {activeTab === 'bookings' && <BookingModule />}
+        {activeTab === 'finance' && <FinanceModule />}
         {activeTab === 'calendar' && <PhotoCalendar />}
         {activeTab === 'photographers' && <PhotographerList />}
         {activeTab === 'services' && <ServiceModule />}
@@ -55,7 +57,7 @@ const MainContent: React.FC = () => {
         {activeTab === 'settings' && <SettingsModule />}
 
         {/* Fallback an toàn nếu activeTab không khớp bất kỳ tab CRM nào */}
-        {!['dashboard', 'customers', 'leads', 'pipeline', 'trash', 'schools', 'bookings', 'calendar', 'photographers', 'services', 'reports-photographer', 'settings'].includes(activeTab) && (
+        {!['dashboard', 'customers', 'leads', 'pipeline', 'trash', 'schools', 'bookings', 'finance', 'calendar', 'photographers', 'services', 'reports-photographer', 'settings'].includes(activeTab) && (
           isPhotographer ? <PhotographerDashboard /> : <ExecutiveDashboard />
         )}
 

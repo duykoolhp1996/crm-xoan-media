@@ -7,6 +7,7 @@ export interface User {
   avatar: string;
   role: UserRole;
   phone?: string;
+  canViewFinance?: boolean; // Quyền xem Bảng Tài Chính & Cọc (Admin luôn có quyền, Sales cần được cấp quyền)
 }
 
 // 1. CRM & Customers / Leads
@@ -525,6 +526,7 @@ export interface SalesStaff {
   lastLoginAt?: string;
   leaderId?: string; // ID của Sales Lead quản lý nhân sự này
   leaderName?: string; // Tên của Sales Lead quản lý
+  canViewFinance?: boolean; // Quyền xem Bảng Tài Chính & Cọc (do Admin cấp)
 }
 
 // 12. Bảng Báo Giá Chi Tiết (Sản phẩm / Dịch vụ, Số lượng, Đơn giá, Chiết khấu)

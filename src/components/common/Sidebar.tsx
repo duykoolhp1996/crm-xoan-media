@@ -12,10 +12,12 @@ import {
   TrendingUp,
   Settings,
   CalendarCheck,
+  CircleDollarSign,
   LogOut,
   X,
   Trash2
 } from 'lucide-react';
+import { canUserAccessFinance } from '../../utils/salesPermissions';
 
 export const Sidebar: React.FC = () => {
   const {
@@ -28,6 +30,7 @@ export const Sidebar: React.FC = () => {
     currentUser,
     logout,
     photographers,
+    salesStaff,
     isMobileSidebarOpen,
     setIsMobileSidebarOpen
   } = useApp();
@@ -47,6 +50,8 @@ export const Sidebar: React.FC = () => {
   const isPhotoLead = Boolean(
     myPhoto?.notes?.toUpperCase().includes('LEAD') || myPhoto?.fullName?.toLowerCase().includes('lead')
   );
+
+  const hasFinanceAccess = canUserAccessFinance(currentUser, currentRole, salesStaff);
 
   interface NavItem {
     id: NavigationTab;
@@ -111,6 +116,12 @@ export const Sidebar: React.FC = () => {
           badge: unreadAlerts > 0 ? unreadAlerts : undefined,
           roles: ['admin', 'manager', 'sales']
         },
+        ...(hasFinanceAccess ? [{
+          id: 'finance' as NavigationTab,
+          label: 'Tài Chính & Cọc',
+          icon: CircleDollarSign,
+          roles: ['admin', 'manager', 'sales']
+        }] : []),
         {
           id: 'calendar',
           label: 'Calendar Lịch Chụp',

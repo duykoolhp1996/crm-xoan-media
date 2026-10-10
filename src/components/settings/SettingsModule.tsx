@@ -99,6 +99,7 @@ export const SettingsModule: React.FC = () => {
     deletePhotographer,
     updatePhotographerStatus,
     salesStaff,
+    updateSalesStaff,
     deleteSalesStaff,
     customers,
     bookings,
@@ -1038,6 +1039,25 @@ export const SettingsModule: React.FC = () => {
                               </button>
                             </div>
                           </div>
+
+                          {/* Phân quyền xem Bảng Tài Chính & Cọc */}
+                          <div className="flex items-center justify-between pt-1.5 border-t border-black/[0.05]">
+                            <span className="text-neutral-500 text-[10px] flex items-center gap-1 font-semibold">
+                              <Coins className="w-3 h-3 text-emerald-600" /> Bảng Tài Chính & Cọc:
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateSalesStaff({ ...s, canViewFinance: !s.canViewFinance })}
+                              className={`text-[9px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+                                s.canViewFinance
+                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
+                                  : 'bg-neutral-100 text-neutral-500 border-neutral-200 hover:bg-neutral-200'
+                              }`}
+                              title="Bấm để bật / tắt quyền xem Bảng Tài Chính & Cọc cho nhân sự này"
+                            >
+                              {s.canViewFinance ? '✓ Đã Cấp Quyền' : '🔒 Đang Khóa'}
+                            </button>
+                          </div>
                         </div>
 
                         <button
@@ -1065,7 +1085,7 @@ export const SettingsModule: React.FC = () => {
                       {/* Nút Đăng nhập thử với quyền Sales này */}
                       <button
                         type="button"
-                        onClick={() => loginAsStaff({ id: s.id, name: s.name, role: 'sales', avatar: s.avatar, email: s.email, phone: s.phone })}
+                        onClick={() => loginAsStaff({ id: s.id, name: s.name, role: 'sales', avatar: s.avatar, email: s.email, phone: s.phone, canViewFinance: s.canViewFinance })}
                         className="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs group-hover:border-blue-300"
                         title="Đăng nhập thử bằng tài khoản Sales này để vào Pipeline nhận lead"
                       >

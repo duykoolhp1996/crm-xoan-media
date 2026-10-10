@@ -63,6 +63,7 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
     username: '',
     password: '',
     canLogin: true,
+    canViewFinance: false,
     leaderId: '',
     leaderName: ''
   });
@@ -92,6 +93,7 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         username: staffToEdit.username || staffToEdit.email || '',
         password: staffToEdit.password || 'XoanSales@2024',
         canLogin: staffToEdit.canLogin ?? true,
+        canViewFinance: staffToEdit.canViewFinance ?? false,
         leaderId: staffToEdit.leaderId || '',
         leaderName: staffToEdit.leaderName || ''
       });
@@ -114,6 +116,7 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         username: '',
         password: 'XoanSales@2024',
         canLogin: true,
+        canViewFinance: false,
         leaderId: defaultLead ? defaultLead.id : '',
         leaderName: defaultLead ? defaultLead.name : ''
       });
@@ -162,6 +165,7 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         username: finalUsername,
         password: finalPassword,
         canLogin: formData.canLogin,
+        canViewFinance: formData.canViewFinance,
         leaderId: formData.leaderId || undefined,
         leaderName: formData.leaderName || undefined
       });
@@ -180,6 +184,7 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         username: finalUsername,
         password: finalPassword,
         canLogin: formData.canLogin,
+        canViewFinance: formData.canViewFinance,
         leaderId: formData.leaderId || undefined,
         leaderName: formData.leaderName || undefined
       });
@@ -620,6 +625,28 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
                   className="sr-only peer"
                 />
                 <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
+              </label>
+            </div>
+
+            {/* Toggle Cấp Quyền Xem Bảng Tài Chính & Cọc */}
+            <div className="flex items-center justify-between p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-2xl">
+              <div className="pr-3">
+                <span className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  Cấp Quyền Xem Bảng "Tài Chính & Cọc"
+                </span>
+                <p className="text-[11px] text-neutral-500 mt-0.5 leading-tight">
+                  Cho phép Sales này truy cập xem doanh thu, số tiền đã cọc và công nợ của các lớp. (Mặc định bị khóa nếu tắt).
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={Boolean(formData.canViewFinance)}
+                  onChange={e => setFormData({ ...formData, canViewFinance: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
           </div>

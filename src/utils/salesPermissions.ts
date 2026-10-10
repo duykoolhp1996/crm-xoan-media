@@ -310,3 +310,38 @@ export function getAssignableSalesList(
   // Sales thường chỉ gán cho chính mình
   return [myStaff];
 }
+
+/**
+ * Kiểm tra xem người dùng hiện tại có quyền xem Bảng Tài Chính & Cọc hay không
+ * Quy tắc nghiệp vụ CRM Xoăn Media:
+ * - Admin / Manager: Toàn quyền xem 100%
+ * - Photographer: Tuyệt đối KHÔNG được xem
+ * - Sales: Chỉ được xem khi ĐƯỢC ADMIN CẤP QUYỀN (canViewFinance === true)
+ */
+export function canUserAccessFinance(
+  currentUser: User | null | undefined,
+  currentRole: UserRole,
+  salesStaffList: SalesStaff[] = []
+): boolean {
+  if (!currentUser) return false;
+
+  // 1. Admin & Manager: Toàn quyền xem
+  if (currentRole === 'admin' || currentRole === 'manager' || currentUser.role === 'admin' || currentUser.role === 'manager') {
+    return true;
+  }
+
+  // 2. Thợ chụp (Photographer): Không được xem
+  if (currentRole === 'photographer' || currentUser.role === 'photographer') {
+    return false;
+  }
+
+  // 3. Sales: Chỉ được xem nếu đã được Admin cấp quyền (canViewFinance)
+  if (currentRole === 'sales' || currentUser.role === 'sales') {
+    if (currentUser.canViewFinance === true) return true;
+    const staff = getSalesStaffProfile(currentUser, salesStaffList);
+    if (staff?.canViewFinance === true) return true;
+    return false;
+  }
+
+  return false;
+}
