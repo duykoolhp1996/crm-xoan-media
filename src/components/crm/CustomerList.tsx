@@ -20,7 +20,8 @@ import {
   DollarSign,
   Wallet,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  RotateCcw
 } from 'lucide-react';
 import { CustomerDetail360 } from './CustomerDetail360';
 import { CustomerModal } from './CustomerModal';
@@ -53,6 +54,11 @@ export const CustomerList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSource, setSelectedSource] = useState<string>('all');
   const [selectedStage, setSelectedStage] = useState<string>('all');
+  const [selectedSales, setSelectedSales] = useState<string>('all');
+  const [selectedLocation, setSelectedLocation] = useState<string>('all');
+  const [selectedFinance, setSelectedFinance] = useState<string>('all');
+  const [selectedTime, setSelectedTime] = useState<string>('all');
+  const [quickFilter, setQuickFilter] = useState<string>('all');
   const [leadMemberFilter, setLeadMemberFilter] = useState<string>('all_team');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
@@ -112,25 +118,192 @@ export const CustomerList: React.FC = () => {
     return baseAccessible;
   }, [customers, currentUser, currentRole, salesStaff, salesHierarchy, leadMemberFilter]);
 
-  // Lọc dữ liệu
-  const filteredCustomers = useMemo(() => {
-    return accessibleCustomers.filter(c => {
-      const matchSearch =
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.phone.includes(searchTerm) ||
-        c.schoolName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.className.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.concept.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.city && c.city.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.district && c.district.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (c.region && c.region.toLowerCase().includes(searchTerm.toLowerCase()));
+  // Thống kê Lead Mới & Toàn bộ Lead cho Top KPI Cards & Quick Filters
+  const leadStats = useMemo(() => {
+    const total = accessibleCustomers.length;
+    const newLeads = accessibleCustomers.filter(c => ['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage));
+    const unassigned = accessibleCustomers.filter(c => !c.assignedSalesName || c.assignedSalesName === 'Chưa gán' || c.assignedSalesName.trim() === '');
+    const consulting = accessibleCustomers.filter(c => ['Đang tư vấn', 'Đã liên hệ'].includes(c.pipelineStage));
+    const quote = accessibleCustomers.filter(c => ['Đã gửi báo giá', 'Đang thương lượng'].includes(c.pipelineStage));
+    const deposited = accessibleCustomers.filter(c => ['Đã cọc', 'Đã đặt cọc'].includes(c.pipelineStage));
+    const booked = accessibleCustomers.filter(c => ['Book ngày', 'Đã Booking'].includes(c.pipelineStage));
+    const withDebt = accessibleCustomers.filter(c => getCustomerRemainingDebt(c) > 0);
 
-      const matchSource = selectedSource === 'all' || c.source === selectedSource;
-      const matchStage = selectedStage === 'all' || isCustomerInStage(c.pipelineStage, selectedStage);
+    return {
+      total,
+      newLeadsCount: newLeads.length,
+      unassignedCount: unassigned.length,
+      consultingCount: consulting.length,
+      quoteCount: quote.length,
+      depositedCount: deposited.length,
+      bookedCount: booked.length,
+      withDebtCount: withDebt.length
+    };
+  }, [accessibleCustomers]);
 
-      return matchSearch && matchSource && matchStage;
+  // Danh sách các Tỉnh/Thành phố có trong data
+  const availableLocations = useMemo(() => {
+    const locs = new Set<string>();
+    accessibleCustomers.forEach(c => {
+      if (c.city && c.city.trim()) locs.add(c.city.trim());
+      else if (c.district && c.district.trim()) locs.add(c.district.trim());
+      else if (c.region && c.region.trim()) locs.add(c.region.trim());
     });
-  }, [accessibleCustomers, searchTerm, selectedSource, selectedStage]);
+    return Array.from(locs).sort();
+  }, [accessibleCustomers]);
+
+  // Danh sách các Nhân viên Sales có trong hệ thống + trong data
+  const availableSalesList = useMemo(() => {
+    const map = new Map<string, string>();
+    salesStaff.forEach(s => map.set(s.name, s.name));
+    accessibleCustomers.forEach(c => {
+      if (c.assignedSalesName && c.assignedSalesName !== 'Chưa gán' && c.assignedSalesName.trim()) {
+        map.set(c.assignedSalesName, c.assignedSalesName);
+      }
+    });
+    return Array.from(map.values()).sort();
+  }, [salesStaff, accessibleCustomers]);
+
+  const isFiltered = useMemo(() => {
+    return Boolean(
+      searchTerm ||
+      selectedSource !== 'all' ||
+      selectedStage !== 'all' ||
+      selectedSales !== 'all' ||
+      selectedLocation !== 'all' ||
+      selectedFinance !== 'all' ||
+      selectedTime !== 'all' ||
+      quickFilter !== 'all' ||
+      leadMemberFilter !== 'all_team'
+    );
+  }, [searchTerm, selectedSource, selectedStage, selectedSales, selectedLocation, selectedFinance, selectedTime, quickFilter, leadMemberFilter]);
+
+  const handleResetFilters = () => {
+    setSearchTerm('');
+    setSelectedSource('all');
+    setSelectedStage('all');
+    setSelectedSales('all');
+    setSelectedLocation('all');
+    setSelectedFinance('all');
+    setSelectedTime('all');
+    setQuickFilter('all');
+    setLeadMemberFilter('all_team');
+  };
+
+  // Lọc dữ liệu đa chiều
+  const filteredCustomers = useMemo(() => {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+
+    return accessibleCustomers.filter(c => {
+      // 1. Text Search
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const match =
+          c.name.toLowerCase().includes(term) ||
+          c.phone.includes(term) ||
+          c.schoolName.toLowerCase().includes(term) ||
+          c.className.toLowerCase().includes(term) ||
+          c.concept.toLowerCase().includes(term) ||
+          (c.city && c.city.toLowerCase().includes(term)) ||
+          (c.district && c.district.toLowerCase().includes(term)) ||
+          (c.region && c.region.toLowerCase().includes(term)) ||
+          (c.representativeRole && c.representativeRole.toLowerCase().includes(term)) ||
+          (c.assignedSalesName && c.assignedSalesName.toLowerCase().includes(term));
+        if (!match) return false;
+      }
+
+      // 2. Nguồn
+      if (selectedSource !== 'all' && c.source !== selectedSource) {
+        return false;
+      }
+
+      // 3. Giai đoạn
+      if (selectedStage !== 'all' && !isCustomerInStage(c.pipelineStage, selectedStage)) {
+        return false;
+      }
+
+      // 4. Sales phụ trách
+      if (selectedSales !== 'all') {
+        if (selectedSales === 'unassigned') {
+          if (c.assignedSalesName && c.assignedSalesName !== 'Chưa gán' && c.assignedSalesName.trim() !== '') {
+            return false;
+          }
+        } else {
+          if (c.assignedSalesName?.toLowerCase() !== selectedSales.toLowerCase()) {
+            return false;
+          }
+        }
+      }
+
+      // 5. Khu vực / Tỉnh thành
+      if (selectedLocation !== 'all') {
+        const loc = selectedLocation.toLowerCase();
+        const matchLoc = (c.city && c.city.toLowerCase().includes(loc)) ||
+                         (c.district && c.district.toLowerCase().includes(loc)) ||
+                         (c.region && c.region.toLowerCase().includes(loc));
+        if (!matchLoc) return false;
+      }
+
+      // 6. Tài chính / Cọc
+      if (selectedFinance !== 'all') {
+        const isBooked = isCustomerBookedOrDeposited(c, bookings);
+        const debt = getCustomerRemainingDebt(c);
+        const total = getCustomerTotalOrderValue(c);
+        const paid = getCustomerPaidDeposit(c);
+
+        if (selectedFinance === 'deposited') {
+          if (!isBooked) return false;
+        } else if (selectedFinance === 'unbooked') {
+          if (isBooked) return false;
+        } else if (selectedFinance === 'has_debt') {
+          if (debt <= 0) return false;
+        } else if (selectedFinance === 'paid_full') {
+          if (!isBooked || total === 0 || paid < total) return false;
+        }
+      }
+
+      // 7. Thời gian
+      if (selectedTime !== 'all') {
+        const createdDate = c.createdAt ? new Date(c.createdAt) : null;
+        if (selectedTime === 'today') {
+          if (!createdDate || c.createdAt?.slice(0, 10) !== todayStr) return false;
+        } else if (selectedTime === '7days') {
+          if (!createdDate) return false;
+          const diffDays = (now.getTime() - createdDate.getTime()) / (1000 * 3600 * 24);
+          if (diffDays > 7) return false;
+        } else if (selectedTime === 'this_month') {
+          if (!createdDate) return false;
+          if (createdDate.getMonth() !== now.getMonth() || createdDate.getFullYear() !== now.getFullYear()) return false;
+        } else if (selectedTime === 'has_shoot_date') {
+          if (!c.expectedShootDate && !c.shotDate) return false;
+        } else if (selectedTime === 'no_shoot_date') {
+          if (c.expectedShootDate || c.shotDate) return false;
+        }
+      }
+
+      // 8. Quick Filter Chips
+      if (quickFilter !== 'all') {
+        if (quickFilter === 'new_lead') {
+          if (!['New Lead', 'Mới tiếp nhận'].includes(c.pipelineStage)) return false;
+        } else if (quickFilter === 'consulting') {
+          if (!['Đang tư vấn', 'Đã liên hệ'].includes(c.pipelineStage)) return false;
+        } else if (quickFilter === 'quote') {
+          if (!['Đã gửi báo giá', 'Đang thương lượng'].includes(c.pipelineStage)) return false;
+        } else if (quickFilter === 'deposited') {
+          if (!['Đã cọc', 'Đã đặt cọc'].includes(c.pipelineStage)) return false;
+        } else if (quickFilter === 'booked') {
+          if (!['Book ngày', 'Đã Booking'].includes(c.pipelineStage)) return false;
+        } else if (quickFilter === 'unassigned') {
+          if (c.assignedSalesName && c.assignedSalesName !== 'Chưa gán' && c.assignedSalesName.trim() !== '') return false;
+        } else if (quickFilter === 'has_debt') {
+          if (getCustomerRemainingDebt(c) <= 0) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [accessibleCustomers, searchTerm, selectedSource, selectedStage, selectedSales, selectedLocation, selectedFinance, selectedTime, quickFilter, bookings]);
 
   // Thống kê tài chính thời gian thực: chỉ tính doanh thu với các lớp đã book & cọc, tách cọc và công nợ
   const financialStats = useMemo(() => {
@@ -188,9 +361,39 @@ export const CustomerList: React.FC = () => {
         </div>
       </div>
 
-      {/* Financial Overview Summary Bar: Ghi nhận Tổng Doanh Thu với Lớp Đã Book & Cọc, tách riêng Thực Thu & Công Nợ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {/* Card 1: Doanh thu đơn đã book & cọc */}
+      {/* Financial & Lead Overview Summary Bar: 5 Thẻ KPI Toàn Diện (Bổ sung SỐ LƯỢNG LEAD MỚI) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {/* Card 1: Số lượng Lead mới (Yêu cầu trọng tâm của người dùng) */}
+        <div 
+          onClick={() => {
+            setQuickFilter(quickFilter === 'new_lead' ? 'all' : 'new_lead');
+            setSelectedStage(quickFilter === 'new_lead' ? 'all' : 'New Lead');
+          }}
+          className={`bg-white border p-4 rounded-2xl shadow-2xs transition-all cursor-pointer hover:border-[#B8F23D] active:scale-[0.98] ${
+            selectedStage === 'New Lead' || quickFilter === 'new_lead'
+              ? 'ring-2 ring-[#B8F23D] border-[#B8F23D] bg-[#B8F23D]/5'
+              : 'border-black/[0.08]'
+          }`}
+          title="Bấm để lọc nhanh các Lead Mới tiếp nhận"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">SỐ LƯỢNG LEAD MỚI</span>
+            <div className="w-7 h-7 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+            </div>
+          </div>
+          <p className="text-lg sm:text-xl font-black text-neutral-900 mt-1">
+            {leadStats.newLeadsCount} <span className="text-xs font-bold text-neutral-500">Lead Mới</span>
+          </p>
+          <div className="text-[10px] text-neutral-500 mt-0.5 flex items-center justify-between gap-1">
+            <span>Tổng: <strong>{leadStats.total}</strong></span>
+            <span className={leadStats.unassignedCount > 0 ? 'text-amber-700 font-bold' : 'text-neutral-400'}>
+              • Chưa gán: {leadStats.unassignedCount}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Doanh thu đơn đã book & cọc */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">DOANH THU ĐÃ CHỐT</span>
@@ -206,7 +409,7 @@ export const CustomerList: React.FC = () => {
           </span>
         </div>
 
-        {/* Card 2: Thực thu đã nhận */}
+        {/* Card 3: Thực thu đã nhận */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">THỰC THU (ĐÃ NHẬN)</span>
@@ -222,8 +425,18 @@ export const CustomerList: React.FC = () => {
           </span>
         </div>
 
-        {/* Card 3: Công nợ phải thu */}
-        <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
+        {/* Card 4: Công nợ phải thu */}
+        <div 
+          onClick={() => {
+            setSelectedFinance(selectedFinance === 'has_debt' ? 'all' : 'has_debt');
+          }}
+          className={`bg-white border p-4 rounded-2xl shadow-2xs transition-all cursor-pointer hover:border-rose-400 active:scale-[0.98] ${
+            selectedFinance === 'has_debt'
+              ? 'ring-2 ring-rose-400 border-rose-400 bg-rose-50/20'
+              : 'border-black/[0.08]'
+          }`}
+          title="Bấm để lọc nhanh các lớp còn công nợ"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">CÔNG NỢ CÒN LẠI</span>
             <div className="w-7 h-7 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
@@ -234,11 +447,11 @@ export const CustomerList: React.FC = () => {
             {(financialStats.totalRemainingDebt / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
           </p>
           <span className="text-[10px] text-neutral-500 mt-0.5 block">
-            Chờ thanh toán các đợt tiếp & giao ảnh
+            {leadStats.withDebtCount} lớp cần thanh toán tiếp
           </span>
         </div>
 
-        {/* Card 4: Dự toán chào giá */}
+        {/* Card 5: Dự toán chào giá */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">DỰ TOÁN CHƯA CỌC</span>
@@ -250,84 +463,306 @@ export const CustomerList: React.FC = () => {
             {(financialStats.unbookedPotential / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}M đ
           </p>
           <span className="text-[10px] text-neutral-500 mt-0.5 block">
-            {financialStats.totalCount - financialStats.bookedCount} lead đang chăm sóc/báo giá
+            {accessibleCustomers.length - financialStats.bookedCount} lead đang chăm sóc/báo giá
           </span>
         </div>
       </div>
 
-      {/* Filters Bar */}
-      <div className="glass-panel-subtle p-3.5 sm:p-4 rounded-2xl flex flex-col md:flex-row items-stretch md:items-center gap-3">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Tìm theo tên học sinh, SĐT, trường (Ams, Chu Văn An...), lớp..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
-          />
-        </div>
+      {/* Filters Bar & Quick Filters Section (Hệ Thống Bộ Lọc Toàn Diện) */}
+      <div className="glass-panel p-4 rounded-3xl space-y-3.5 shadow-xs">
+        {/* Row 1: Search & Dropdown Filters Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {/* 1. Search Box */}
+          <div className="relative sm:col-span-2 md:col-span-3 lg:col-span-2">
+            <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Tìm tên, SĐT, trường, lớp, concept..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 bg-neutral-50 hover:bg-white focus:bg-white border border-black/[0.08] text-neutral-900 placeholder-neutral-400 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#B8F23D] transition-all"
+            />
+          </div>
 
-        {/* Source Filter */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-neutral-500 shrink-0">Nguồn:</span>
-          <select
-            value={selectedSource}
-            onChange={(e) => setSelectedSource(e.target.value)}
-            className="px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
-          >
-            <option value="all">Tất cả nguồn ({accessibleCustomers.length})</option>
-            <option value="Facebook Organic">Facebook Organic</option>
-            <option value="Facebook Ads">Facebook Ads</option>
-            <option value="TikTok Ads">TikTok Ads</option>
-            <option value="Website">Website</option>
-            <option value="Referral">Referral</option>
-            <option value="Khách hàng cũ">Khách hàng cũ</option>
-          </select>
-        </div>
-
-        {/* Stage Filter */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-neutral-500 shrink-0">Trạng thái:</span>
-          <select
-            value={selectedStage}
-            onChange={(e) => setSelectedStage(e.target.value)}
-            className="px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
-          >
-            <option value="all">Tất cả giai đoạn</option>
-            <option value="New Lead">New Lead</option>
-            <option value="Đang tư vấn">Đang tư vấn</option>
-            <option value="Đã gửi báo giá">Đã gửi báo giá</option>
-            <option value="Đã cọc">Đã cọc (Đã chốt)</option>
-            <option value="Book ngày">Book ngày</option>
-            <option value="Đã chụp">Đã chụp</option>
-            <option value="Đang hậu kỳ">Đang hậu kỳ</option>
-            <option value="Giao ảnh">Giao ảnh</option>
-            <option value="Hoàn thành">Hoàn thành</option>
-            <option value="Lost">Khách từ chối (Lost)</option>
-          </select>
-        </div>
-
-        {/* Bộ Lọc Theo Nhân Sự Cho Sales Lead */}
-        {salesHierarchy.isLead && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-neutral-500 shrink-0">Nhóm:</span>
+          {/* 2. Giai đoạn Lead Pipeline */}
+          <div>
             <select
-              value={leadMemberFilter}
-              onChange={(e) => setLeadMemberFilter(e.target.value)}
-              className="px-3 py-2 bg-neutral-900 text-[#B8F23D] border border-black/[0.08] rounded-xl text-xs font-bold cursor-pointer focus:outline-none"
+              value={selectedStage}
+              onChange={(e) => {
+                setSelectedStage(e.target.value);
+                if (e.target.value !== 'all') setQuickFilter('all');
+              }}
+              className="w-full px-2.5 py-2 bg-neutral-50 hover:bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
             >
-              <option value="all_team">👑 Toàn bộ nhóm Sales ({salesHierarchy.subordinateStaff.length + 1} nhân sự)</option>
-              <option value="mine">👤 Riêng của tôi (Sales Lead)</option>
-              {salesHierarchy.subordinateStaff.map(sub => (
-                <option key={sub.id} value={sub.id}>
-                  ↳ {sub.name} ({sub.roleTitle || 'Sales'})
+              <option value="all">🎯 Tất cả giai đoạn ({accessibleCustomers.length})</option>
+              <option value="New Lead">⚡ New Lead ({leadStats.newLeadsCount})</option>
+              <option value="Đang tư vấn">💬 Đang tư vấn ({leadStats.consultingCount})</option>
+              <option value="Đã gửi báo giá">📄 Đã gửi báo giá ({leadStats.quoteCount})</option>
+              <option value="Đã cọc">💰 Đã cọc ({leadStats.depositedCount})</option>
+              <option value="Book ngày">📅 Book ngày ({leadStats.bookedCount})</option>
+              <option value="Đã chụp">📸 Đã chụp</option>
+              <option value="Đang hậu kỳ">🎨 Đang hậu kỳ</option>
+              <option value="Giao ảnh">📦 Giao ảnh</option>
+              <option value="Hoàn thành">✅ Hoàn thành</option>
+              <option value="Lost">❌ Khách từ chối (Lost)</option>
+            </select>
+          </div>
+
+          {/* 3. Sales phụ trách */}
+          <div>
+            <select
+              value={selectedSales}
+              onChange={(e) => setSelectedSales(e.target.value)}
+              className="w-full px-2.5 py-2 bg-neutral-50 hover:bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+            >
+              <option value="all">👤 Tất cả Sales</option>
+              <option value="unassigned">⚠️ Chưa gán Sales ({leadStats.unassignedCount})</option>
+              {availableSalesList.map(salesName => (
+                <option key={salesName} value={salesName}>
+                  👤 {salesName}
                 </option>
               ))}
             </select>
           </div>
-        )}
+
+          {/* 4. Khu vực / Tỉnh thành */}
+          <div>
+            <select
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+              className="w-full px-2.5 py-2 bg-neutral-50 hover:bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+            >
+              <option value="all">📍 Tất cả khu vực</option>
+              {availableLocations.map(loc => (
+                <option key={loc} value={loc}>
+                  📍 {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 5. Tình trạng Cọc & Tài chính */}
+          <div>
+            <select
+              value={selectedFinance}
+              onChange={(e) => setSelectedFinance(e.target.value)}
+              className="w-full px-2.5 py-2 bg-neutral-50 hover:bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
+            >
+              <option value="all">💳 Tất cả tài chính</option>
+              <option value="deposited">💰 Đã cọc & Book ({financialStats.bookedCount})</option>
+              <option value="unbooked">📝 Chưa cọc (Báo giá/Lead)</option>
+              <option value="has_debt">⏳ Còn nợ công nợ ({leadStats.withDebtCount})</option>
+              <option value="paid_full">✅ Đã thu đủ 100%</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Row 2: Secondary Filters (Nguồn marketing, Khoảng thời gian, Nhóm Lead, Bộ đếm & Nút Đặt lại) */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-black/[0.04]">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Nguồn tiếp cận */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-neutral-400">Nguồn:</span>
+              <select
+                value={selectedSource}
+                onChange={(e) => setSelectedSource(e.target.value)}
+                className="px-2.5 py-1.5 bg-neutral-50 hover:bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
+              >
+                <option value="all">Tất cả nguồn</option>
+                <option value="Facebook Organic">Facebook Organic</option>
+                <option value="Facebook Ads">Facebook Ads</option>
+                <option value="TikTok Ads">TikTok Ads</option>
+                <option value="Website">Website</option>
+                <option value="Referral">Referral</option>
+                <option value="Khách hàng cũ">Khách hàng cũ</option>
+              </select>
+            </div>
+
+            {/* Thời gian */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-bold text-neutral-400">Thời gian:</span>
+              <select
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                className="px-2.5 py-1.5 bg-neutral-50 hover:bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
+              >
+                <option value="all">Toàn bộ thời gian</option>
+                <option value="today">Hôm nay</option>
+                <option value="7days">7 ngày qua</option>
+                <option value="this_month">Tháng này</option>
+                <option value="has_shoot_date">Đã có ngày chụp</option>
+                <option value="no_shoot_date">Chưa chốt ngày</option>
+              </select>
+            </div>
+
+            {/* Phân quyền nhóm Sales Lead */}
+            {salesHierarchy.isLead && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-neutral-400">Nhóm:</span>
+                <select
+                  value={leadMemberFilter}
+                  onChange={(e) => setLeadMemberFilter(e.target.value)}
+                  className="px-2.5 py-1.5 bg-neutral-900 text-[#B8F23D] border border-black/[0.08] rounded-xl text-xs font-bold cursor-pointer focus:outline-none"
+                >
+                  <option value="all_team">👑 Toàn bộ nhóm Sales ({salesHierarchy.subordinateStaff.length + 1})</option>
+                  <option value="mine">👤 Riêng của tôi (Sales Lead)</option>
+                  {salesHierarchy.subordinateStaff.map(sub => (
+                    <option key={sub.id} value={sub.id}>
+                      ↳ {sub.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          {/* Bộ đếm kết quả & Nút Reset Filter */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-neutral-500 font-medium">
+              Hiển thị <strong className="text-neutral-900 font-bold">{filteredCustomers.length}</strong> / {accessibleCustomers.length} khách hàng
+            </span>
+            {isFiltered && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-xs flex items-center gap-1 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                title="Xóa toàn bộ bộ lọc và quay về mặc định"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Đặt lại</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Row 3: Quick Filter Chips (1 Chạm là lọc) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none pt-1">
+          <span className="text-[11px] font-bold text-neutral-400 shrink-0 mr-1">Lọc nhanh:</span>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter('all');
+              setSelectedStage('all');
+              setSelectedFinance('all');
+              setSelectedSales('all');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              quickFilter === 'all' && selectedStage === 'all' && selectedFinance === 'all' && selectedSales === 'all'
+                ? 'bg-neutral-900 text-[#B8F23D] shadow-xs'
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+            }`}
+          >
+            Tất cả ({accessibleCustomers.length})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter(quickFilter === 'new_lead' ? 'all' : 'new_lead');
+              setSelectedStage(quickFilter === 'new_lead' ? 'all' : 'New Lead');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1 ${
+              quickFilter === 'new_lead' || selectedStage === 'New Lead'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/60'
+            }`}
+          >
+            <Sparkles className="w-3 h-3" />
+            <span>Lead Mới ({leadStats.newLeadsCount})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter(quickFilter === 'consulting' ? 'all' : 'consulting');
+              setSelectedStage(quickFilter === 'consulting' ? 'all' : 'Đang tư vấn');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              quickFilter === 'consulting' || selectedStage === 'Đang tư vấn'
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'bg-sky-50 text-sky-800 hover:bg-sky-100 border border-sky-200/60'
+            }`}
+          >
+            💬 Đang tư vấn ({leadStats.consultingCount})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter(quickFilter === 'quote' ? 'all' : 'quote');
+              setSelectedStage(quickFilter === 'quote' ? 'all' : 'Đã gửi báo giá');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              quickFilter === 'quote' || selectedStage === 'Đã gửi báo giá'
+                ? 'bg-purple-600 text-white shadow-xs'
+                : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200/60'
+            }`}
+          >
+            📄 Báo giá ({leadStats.quoteCount})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter(quickFilter === 'deposited' ? 'all' : 'deposited');
+              setSelectedStage(quickFilter === 'deposited' ? 'all' : 'Đã cọc');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              quickFilter === 'deposited' || selectedStage === 'Đã cọc'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60'
+            }`}
+          >
+            💰 Đã cọc ({leadStats.depositedCount})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter(quickFilter === 'booked' ? 'all' : 'booked');
+              setSelectedStage(quickFilter === 'booked' ? 'all' : 'Book ngày');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              quickFilter === 'booked' || selectedStage === 'Book ngày'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'bg-indigo-50 text-indigo-800 hover:bg-indigo-100 border border-indigo-200/60'
+            }`}
+          >
+            📅 Book ngày ({leadStats.bookedCount})
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter(quickFilter === 'unassigned' ? 'all' : 'unassigned');
+              setSelectedSales(quickFilter === 'unassigned' ? 'all' : 'unassigned');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1 ${
+              quickFilter === 'unassigned' || selectedSales === 'unassigned'
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'bg-rose-50 text-rose-800 hover:bg-rose-100 border border-rose-200/60'
+            }`}
+          >
+            <AlertCircle className="w-3 h-3" />
+            <span>Chưa gán Sales ({leadStats.unassignedCount})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setQuickFilter(quickFilter === 'has_debt' ? 'all' : 'has_debt');
+              setSelectedFinance(quickFilter === 'has_debt' ? 'all' : 'has_debt');
+            }}
+            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              quickFilter === 'has_debt' || selectedFinance === 'has_debt'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200/60'
+            }`}
+          >
+            ⏳ Còn công nợ ({leadStats.withDebtCount})
+          </button>
+        </div>
       </div>
 
       {/* Mobile Card View (Chuyên dụng cho màn hình điện thoại - Tuyệt đối không bị vỡ/tràn) */}
