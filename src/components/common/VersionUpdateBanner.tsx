@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Sparkles, X, ArrowRight, Bell, Smartphone, ShieldCheck } from 'lucide-react';
 
 interface VersionUpdateBannerProps {
@@ -10,7 +11,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
 
   useEffect(() => {
     try {
-      const seen = localStorage.getItem('xoan_crm_seen_update_v127');
+      const seen = localStorage.getItem('xoan_crm_seen_update_v132');
       if (!seen) {
         // Trì hoãn 1s sau khi tải trang để hiệu ứng mượt mà
         const timer = setTimeout(() => {
@@ -26,7 +27,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
   const handleDismiss = () => {
     setIsVisible(false);
     try {
-      localStorage.setItem('xoan_crm_seen_update_v127', 'true');
+      localStorage.setItem('xoan_crm_seen_update_v132', 'true');
     } catch {}
   };
 
@@ -35,12 +36,12 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
     onOpenNotifications();
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <aside
       aria-label="Thông báo cập nhật phiên bản"
-      className="fixed z-50 bottom-24 lg:bottom-6 right-3 lg:right-6 left-3 sm:left-auto sm:max-w-md animate-in slide-in-from-bottom-5 fade-in duration-300"
+      className="fixed z-[9999] bottom-20 lg:bottom-6 right-3 lg:right-6 left-3 sm:left-auto sm:max-w-md animate-in slide-in-from-bottom-5 fade-in duration-300 pointer-events-auto"
     >
       <div className="bg-neutral-900/95 backdrop-blur-xl border border-neutral-700/80 text-white rounded-3xl p-4 sm:p-4.5 shadow-[0_16px_40px_rgba(0,0,0,0.45)] ring-1 ring-white/10 relative overflow-hidden">
         {/* Glow ambient background */}
@@ -117,6 +118,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           </button>
         </div>
       </div>
-    </aside>
+    </aside>,
+    document.body
   );
 };
