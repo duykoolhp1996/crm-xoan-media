@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { Customer } from '../../types';
 import {
@@ -20,6 +21,15 @@ interface TrashBinModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const safeDecode = (val?: string, fallback = '') => {
+  if (!val) return fallback;
+  try {
+    return decodeURIComponent(val);
+  } catch {
+    return val;
+  }
+};
 
 export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose }) => {
   const {
@@ -43,18 +53,21 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
 
   const isAdmin = currentUser.role === 'admin' || currentRole === 'admin';
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   // Lọc theo tìm kiếm
   const filteredList = deletedCustomers.filter(c => {
     const term = searchTerm.toLowerCase().trim();
     if (!term) return true;
+    const deletedByDecoded = safeDecode(c.deletedBy).toLowerCase();
+    const reasonDecoded = safeDecode(c.deleteReason).toLowerCase();
     return (
       (c.name && c.name.toLowerCase().includes(term)) ||
       (c.phone && c.phone.includes(term)) ||
       (c.className && c.className.toLowerCase().includes(term)) ||
       (c.schoolName && c.schoolName.toLowerCase().includes(term)) ||
-      (c.deletedBy && c.deletedBy.toLowerCase().includes(term))
+      deletedByDecoded.includes(term) ||
+      reasonDecoded.includes(term)
     );
   });
 
@@ -89,8 +102,8 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
       <div className="bg-white rounded-3xl border border-black/[0.08] shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
         
         {/* Header */}
@@ -147,7 +160,7 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
 
           <div className="flex items-center gap-2 text-xs text-neutral-500">
             <Info className="w-4 h-4 text-neutral-400 shrink-0" />
-            <span className="hidden sm:inline">Phân quyền: Sales xóa mềm $\rightarrow$ Admin xóa vĩnh viễn</span>
+            <span className="hidden sm:inline">Phân quyền: Sales xóa mềm → Admin xóa vĩnh viễn</span>
           </div>
         </div>
 
@@ -170,112 +183,116 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
             </div>
           ) : (
             <div className="border border-black/[0.06] rounded-2xl overflow-hidden bg-white shadow-2xs">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-neutral-50/80 border-b border-black/[0.06] text-[11px] font-black text-neutral-500 uppercase tracking-wider">
-                    <th className="py-3 px-3.5">Khách hàng & Lớp</th>
-                    <th className="py-3 px-3.5">Giá trị đơn / Budget</th>
-                    <th className="py-3 px-3.5">Người xóa & Lý do</th>
-                    <th className="py-3 px-3.5">Thời gian xóa</th>
-                    <th className="py-3 px-3.5 text-right">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-black/[0.04]">
-                  {filteredList.map((cust) => {
-                    const deleteTimeFormatted = cust.deletedAt
-                      ? new Date(cust.deletedAt).toLocaleString('vi-VN', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })
-                      : 'Không rõ';
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full min-w-[760px] text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-neutral-50/80 border-b border-black/[0.06] text-[11px] font-black text-neutral-500 uppercase tracking-wider">
+                      <th className="py-3 px-3.5 min-w-[200px]">Khách hàng & Lớp</th>
+                      <th className="py-3 px-3.5 min-w-[140px]">Giá trị đơn / Budget</th>
+                      <th className="py-3 px-3.5 min-w-[200px] max-w-[240px]">Người xóa & Lý do</th>
+                      <th className="py-3 px-3.5 min-w-[130px]">Thời gian xóa</th>
+                      <th className="py-3 px-3.5 min-w-[140px] text-right">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black/[0.04]">
+                    {filteredList.map((cust) => {
+                      const deleteTimeFormatted = cust.deletedAt
+                        ? new Date(cust.deletedAt).toLocaleString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        : 'Không rõ';
 
-                    const amountDisplay = (cust.totalAmount || cust.totalRevenue || cust.expectedBudget || 0).toLocaleString('vi-VN');
+                      const amountDisplay = (cust.totalAmount || cust.totalRevenue || cust.expectedBudget || 0).toLocaleString('vi-VN');
+                      const deletedByName = safeDecode(cust.deletedBy, 'Nhân sự CRM');
+                      const deleteReasonText = safeDecode(cust.deleteReason, 'Xóa thủ công');
 
-                    return (
-                      <tr key={cust.id} className="hover:bg-neutral-50/70 transition-colors">
-                        {/* Cột 1: Thông tin khách */}
-                        <td className="py-3 px-3.5 align-top">
-                          <div className="font-bold text-neutral-900">{cust.name}</div>
-                          <div className="text-[11px] text-neutral-500 flex items-center gap-1.5 mt-0.5">
-                            <School className="w-3 h-3 text-neutral-400 shrink-0" />
-                            <span>{cust.className ? `${cust.className} • ` : ''}{cust.schoolName}</span>
-                          </div>
-                          <div className="text-[10px] text-neutral-400 flex items-center gap-1.5 mt-0.5">
-                            <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
-                            <span>{cust.phone || cust.facebook || 'Chưa có SĐT'}</span>
-                          </div>
-                        </td>
+                      return (
+                        <tr key={cust.id} className="hover:bg-neutral-50/70 transition-colors">
+                          {/* Cột 1: Thông tin khách */}
+                          <td className="py-3 px-3.5 align-top min-w-[200px]">
+                            <div className="font-bold text-neutral-900">{cust.name}</div>
+                            <div className="text-[11px] text-neutral-500 flex items-center gap-1.5 mt-0.5">
+                              <School className="w-3 h-3 text-neutral-400 shrink-0" />
+                              <span>{cust.className ? `${cust.className} • ` : ''}{cust.schoolName}</span>
+                            </div>
+                            <div className="text-[10px] text-neutral-400 flex items-center gap-1.5 mt-0.5">
+                              <Phone className="w-3 h-3 text-neutral-400 shrink-0" />
+                              <span>{cust.phone || cust.facebook || 'Chưa có SĐT'}</span>
+                            </div>
+                          </td>
 
-                        {/* Cột 2: Giá trị */}
-                        <td className="py-3 px-3.5 align-top">
-                          <div className="font-extrabold text-neutral-900">{amountDisplay} đ</div>
-                          <div className="text-[10px] text-neutral-400 mt-0.5">
-                            Giai đoạn cũ: <span className="font-semibold text-neutral-600">{cust.pipelineStage}</span>
-                          </div>
-                        </td>
+                          {/* Cột 2: Giá trị */}
+                          <td className="py-3 px-3.5 align-top min-w-[140px]">
+                            <div className="font-extrabold text-neutral-900">{amountDisplay} đ</div>
+                            <div className="text-[10px] text-neutral-400 mt-0.5">
+                              Giai đoạn cũ: <span className="font-semibold text-neutral-600">{cust.pipelineStage}</span>
+                            </div>
+                          </td>
 
-                        {/* Cột 3: Người xóa & Lý do */}
-                        <td className="py-3 px-3.5 align-top max-w-xs">
-                          <div className="flex items-center gap-1 font-semibold text-neutral-800">
-                            <User className="w-3 h-3 text-neutral-400 shrink-0" />
-                            <span>{cust.deletedBy || 'Nhân sự CRM'}</span>
-                          </div>
-                          <div className="text-[11px] text-neutral-500 mt-1 italic line-clamp-2" title={cust.deleteReason}>
-                            "{cust.deleteReason || 'Xóa thủ công'}"
-                          </div>
-                        </td>
+                          {/* Cột 3: Người xóa & Lý do */}
+                          <td className="py-3 px-3.5 align-top min-w-[200px] max-w-[240px] break-words">
+                            <div className="flex items-center gap-1.5 font-bold text-neutral-800 break-words">
+                              <User className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                              <span className="break-words">{deletedByName}</span>
+                            </div>
+                            <div className="text-[11px] text-neutral-500 mt-1 italic break-words line-clamp-2" title={deleteReasonText}>
+                              "{deleteReasonText}"
+                            </div>
+                          </td>
 
-                        {/* Cột 4: Thời gian xóa */}
-                        <td className="py-3 px-3.5 align-top text-neutral-500 text-[11px] whitespace-nowrap">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-neutral-400 shrink-0" />
-                            <span>{deleteTimeFormatted}</span>
-                          </div>
-                        </td>
+                          {/* Cột 4: Thời gian xóa */}
+                          <td className="py-3 px-3.5 align-top text-neutral-500 text-[11px] min-w-[130px] whitespace-nowrap">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-neutral-400 shrink-0" />
+                              <span>{deleteTimeFormatted}</span>
+                            </div>
+                          </td>
 
-                        {/* Cột 5: Nút thao tác */}
-                        <td className="py-3 px-3.5 align-top text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {/* Nút Khôi phục */}
-                            <button
-                              onClick={() => handleRestore(cust)}
-                              disabled={restoringId === cust.id}
-                              className="px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs active:scale-95 transition-all cursor-pointer"
-                              title="Khôi phục Lead này về Pipeline"
-                            >
-                              <RotateCcw className={`w-3.5 h-3.5 ${restoringId === cust.id ? 'animate-spin' : ''}`} />
-                              <span>{restoringId === cust.id ? 'Đang khôi phục...' : 'Khôi phục'}</span>
-                            </button>
-
-                            {/* Nút Xóa vĩnh viễn (Admin only) */}
-                            {isAdmin ? (
+                          {/* Cột 5: Nút thao tác */}
+                          <td className="py-3 px-3.5 align-top text-right min-w-[140px] whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* Nút Khôi phục */}
                               <button
-                                onClick={() => handleOpenPermanentConfirm(cust)}
-                                className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs active:scale-95 transition-all cursor-pointer"
-                                title="Xóa vĩnh viễn khỏi Database (Không thể hoàn tác)"
+                                onClick={() => handleRestore(cust)}
+                                disabled={restoringId === cust.id}
+                                className="px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-[#B8F23D] rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs active:scale-95 transition-all cursor-pointer"
+                                title="Khôi phục Lead này về Pipeline"
                               >
-                                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                                <span>Xóa hẳn</span>
+                                <RotateCcw className={`w-3.5 h-3.5 ${restoringId === cust.id ? 'animate-spin' : ''}`} />
+                                <span>{restoringId === cust.id ? 'Đang khôi phục...' : 'Khôi phục'}</span>
                               </button>
-                            ) : (
-                              <button
-                                disabled
-                                className="px-2 py-1.5 bg-neutral-100 text-neutral-400 rounded-xl text-xs font-medium cursor-not-allowed opacity-60"
-                                title="Chỉ Admin mới có quyền xóa vĩnh viễn"
-                              >
-                                Admin only
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+                              {/* Nút Xóa vĩnh viễn (Admin only) */}
+                              {isAdmin ? (
+                                <button
+                                  onClick={() => handleOpenPermanentConfirm(cust)}
+                                  className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs active:scale-95 transition-all cursor-pointer"
+                                  title="Xóa vĩnh viễn khỏi Database (Không thể hoàn tác)"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Xóa hẳn</span>
+                                </button>
+                              ) : (
+                                <button
+                                  disabled
+                                  className="px-2 py-1.5 bg-neutral-100 text-neutral-400 rounded-xl text-xs font-medium cursor-not-allowed opacity-60"
+                                  title="Chỉ Admin mới có quyền xóa vĩnh viễn"
+                                >
+                                  Admin only
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
@@ -285,7 +302,7 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
           <span>Tổng số {filteredList.length} lead trong thùng rác</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl font-bold transition-all"
+            className="px-4 py-1.5 bg-neutral-200 hover:bg-neutral-300 text-neutral-800 rounded-xl font-bold transition-all cursor-pointer"
           >
             Đóng
           </button>
@@ -294,7 +311,7 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
 
       {/* MODAL XÁC NHẬN XÓA VĨNH VIỄN LẦN 2 (ADMIN ONLY) */}
       {confirmDeleteCustomer && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl border-2 border-rose-500/50 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3 text-rose-600">
               <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center shrink-0">
@@ -337,7 +354,7 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
                 type="button"
                 onClick={() => setConfirmDeleteCustomer(null)}
                 disabled={isSubmittingPermanent}
-                className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all"
+                className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 Hủy bỏ
               </button>
@@ -354,6 +371,7 @@ export const TrashBinModal: React.FC<TrashBinModalProps> = ({ isOpen, onClose })
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 };

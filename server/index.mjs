@@ -193,8 +193,8 @@ const mapDbRowToCustomer = (row) => {
     // Soft delete & Thùng rác
     isDeleted: Boolean(row.is_deleted),
     deletedAt: row.deleted_at || undefined,
-    deletedBy: row.deleted_by || undefined,
-    deleteReason: row.delete_reason || '',
+    deletedBy: row.deleted_by ? (() => { try { return decodeURIComponent(row.deleted_by); } catch { return row.deleted_by; } })() : undefined,
+    deleteReason: row.delete_reason ? (() => { try { return decodeURIComponent(row.delete_reason); } catch { return row.delete_reason; } })() : '',
 
     createdAt: row.created_at || new Date().toISOString(),
     updatedAt: row.updated_at || new Date().toISOString(),
@@ -360,7 +360,13 @@ const server = http.createServer(async (req, res) => {
   const searchParams = url.searchParams;
   const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
   const currentUserId = req.headers['x-user-id'] || 'system';
-  const currentUserName = req.headers['x-user-name'] || 'Người dùng CRM';
+  const rawUserName = req.headers['x-user-name'] || 'Người dùng CRM';
+  let currentUserName = rawUserName;
+  try {
+    currentUserName = decodeURIComponent(rawUserName);
+  } catch {
+    currentUserName = rawUserName;
+  }
 
   try {
     // -------------------------------------------------------------
