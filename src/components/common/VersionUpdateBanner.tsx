@@ -56,7 +56,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.3.8
+                Phiên Bản Mới v1.3.9
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -64,25 +64,25 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.3.8
+              Cập Nhật CRM Xoăn Media v1.3.9
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Đồng bộ tương tác 2 chiều giữa Danh Sách Khách Hàng & Lead Pipeline: Đổi giai đoạn trực tiếp trên bảng và nút Sửa Nhanh trên từng thẻ Kanban, tự động cập nhật ngay lập tức vào CSDL SQL Server!
+              Chuẩn hóa 100% nguồn tiếp cận toàn hệ thống CRM thành Facebook Organic (Tự nhiên / Fanpage): Tự động cập nhật CSDL SQL Server, bộ lọc danh sách khách hàng và báo cáo Marketing đa kênh!
             </p>
 
             {/* Quick feature tags */}
             <div className="flex items-center gap-2 mt-2 text-[10px] text-neutral-400">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Đồng bộ 2 chiều
+                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Facebook Organic 100%
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Sửa nhanh Kanban
+                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Chuẩn hóa CSDL
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Bell className="w-3 h-3 text-[#B8F23D]" /> Dropdown Giai đoạn
+                <Bell className="w-3 h-3 text-[#B8F23D]" /> Báo Cáo Tự Động
               </span>
             </div>
 

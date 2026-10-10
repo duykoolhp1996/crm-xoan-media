@@ -12,8 +12,8 @@ export interface User {
 
 // 1. CRM & Customers / Leads
 export type LeadSource = 
-  | 'Facebook Ads'
   | 'Facebook Organic'
+  | 'Facebook Ads'
   | 'TikTok'
   | 'TikTok Ads'
   | 'Website'

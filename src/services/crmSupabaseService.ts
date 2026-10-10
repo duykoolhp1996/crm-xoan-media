@@ -50,7 +50,7 @@ export const crmSupabaseService = {
         expectedBudget: Number(row.expected_budget || 0),
         specialRequests: row.special_requests,
         notes: row.notes || '',
-        source: row.source || 'Facebook',
+        source: row.source || 'Facebook Organic',
         campaignName: row.campaign_name,
         pipelineStage: row.pipeline_stage || 'Chưa liên hệ',
         assignedSalesId: row.assigned_sales_id || 'user-2',

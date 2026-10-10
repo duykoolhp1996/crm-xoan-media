@@ -522,7 +522,7 @@ const runSafeMigrations = () => {
         'notif-admin-1',
         'new_lead',
         '🌟 LEAD MỚI TIẾP NHẬN: Cô Giá',
-        'Khách hàng Cô Giá (12A3 - THPT Marie Curie Hải Phòng) từ kênh Facebook Ads đã được tiếp nhận vào Pipeline.',
+        'Khách hàng Cô Giá (12A3 - THPT Marie Curie Hải Phòng) từ kênh Facebook Organic đã được tiếp nhận vào Pipeline.',
         'cust-1',
         null,
         'admin',
@@ -583,6 +583,23 @@ const runSafeMigrations = () => {
       console.log('[Migration] ✅ Đã hoàn tất Migration 9: Phân quyền Sales Lead và Cấp Dưới (leader_id, leader_name)');
     } catch (mig9Err) {
       console.warn('[Migration 9] Lỗi phân quyền Sales Lead:', mig9Err.message);
+    }
+  }
+
+  // Migration 10: Chuẩn hóa toàn bộ Lead Source trong CRM thành 'Facebook Organic' theo yêu cầu doanh nghiệp
+  if (!existingMigrations.has(10)) {
+    try {
+      db.prepare(`
+        UPDATE customers 
+        SET lead_source = 'Facebook Organic'
+        WHERE lead_source IS NULL OR lead_source != 'Facebook Organic'
+      `).run();
+
+      db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
+        .run('mig-10', 10, 'standardize_all_lead_sources_to_facebook_organic');
+      console.log('[Migration] ✅ Đã hoàn tất Migration 10: Chuẩn hóa toàn bộ Lead Source trong CRM thành Facebook Organic');
+    } catch (mig10Err) {
+      console.warn('[Migration 10] Lỗi chuẩn hóa nguồn Facebook Organic:', mig10Err.message);
     }
   }
 };

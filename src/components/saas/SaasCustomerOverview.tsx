@@ -34,7 +34,7 @@ export const SaasCustomerOverview: React.FC = () => {
         </div>
         <div className="text-right">
           <span className="text-[11px] text-neutral-400 font-medium">Kênh hiệu quả nhất</span>
-          <p className="text-xs font-extrabold text-[#79ba07]">Đội CTV Sale (42%)</p>
+          <p className="text-xs font-extrabold text-[#1877F2]">Facebook Organic (100%)</p>
         </div>
       </div>
 

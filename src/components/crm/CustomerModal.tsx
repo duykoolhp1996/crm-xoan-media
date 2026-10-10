@@ -197,11 +197,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
 
         specialRequests: customerToEdit.specialRequests || '',
         notes: customerToEdit.notes || '',
-        source: (customerToEdit.source || 'Facebook Ads') as LeadSource,
+        source: (customerToEdit.source || 'Facebook Organic') as LeadSource,
         campaignName: customerToEdit.campaignName || 'Mùa_Kỷ_Yếu_2026',
         utmSource: customerToEdit.utm?.source || 'facebook',
-        utmMedium: customerToEdit.utm?.medium || 'cpc',
-        utmCampaign: customerToEdit.utm?.campaign || 'lead_form_kyyeu',
+        utmMedium: customerToEdit.utm?.medium || 'organic',
+        utmCampaign: customerToEdit.utm?.campaign || 'fanpage_post',
         pipelineStage: (customerToEdit.pipelineStage || 'New Lead') as PipelineStage,
         assignedSalesName: customerToEdit.assignedSalesName || initialSalesName,
         assignedCareStaffName: customerToEdit.assignedCareStaffName || 'Phạm Quỳnh Nga (CSKH)'
@@ -265,11 +265,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
 
       specialRequests: '',
       notes: '',
-      source: 'Facebook Ads' as LeadSource,
+      source: 'Facebook Organic' as LeadSource,
       campaignName: 'Mùa_Kỷ_Yếu_2026',
       utmSource: 'facebook',
-      utmMedium: 'cpc',
-      utmCampaign: 'lead_form_kyyeu',
+      utmMedium: 'organic',
+      utmCampaign: 'fanpage_post',
       pipelineStage: 'New Lead' as PipelineStage,
       assignedSalesName: initialSalesName,
       assignedCareStaffName: 'Phạm Quỳnh Nga (CSKH)'
@@ -1614,8 +1614,8 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                   onChange={e => setFormData({ ...formData, source: e.target.value as LeadSource })}
                   className="w-full mt-1 px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 rounded-xl cursor-pointer focus:bg-white focus:outline-none"
                 >
+                  <option value="Facebook Organic">Facebook Organic (Tự nhiên / Fanpage)</option>
                   <option value="Facebook Ads">Facebook Ads</option>
-                  <option value="Facebook Organic">Facebook Organic</option>
                   <option value="TikTok Ads">TikTok Ads</option>
                   <option value="TikTok">TikTok Tự Nhiên</option>
                   <option value="Zalo">Zalo OA / Chatbot</option>

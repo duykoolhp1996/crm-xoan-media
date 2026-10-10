@@ -278,6 +278,7 @@ export const CustomerList: React.FC = () => {
             className="px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-xs font-semibold text-neutral-800 cursor-pointer focus:outline-none"
           >
             <option value="all">Tất cả nguồn ({accessibleCustomers.length})</option>
+            <option value="Facebook Organic">Facebook Organic</option>
             <option value="Facebook Ads">Facebook Ads</option>
             <option value="TikTok Ads">TikTok Ads</option>
             <option value="Website">Website</option>

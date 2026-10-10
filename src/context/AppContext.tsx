@@ -985,6 +985,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const newCustomer: Customer = {
       ...customerData,
+      source: customerData.source || 'Facebook Organic',
       id: newId,
       createdById: creatorId,
       createdByName: creatorName,

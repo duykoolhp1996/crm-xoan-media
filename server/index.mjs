@@ -153,7 +153,7 @@ const mapDbRowToCustomer = (row) => {
     photoNotes: row.photo_notes || '',
     shotDate: row.shot_date || '',
     photoCount: Number(row.photo_count) || 0,
-    source: row.lead_source || 'Facebook Ads',
+    source: row.lead_source || 'Facebook Organic',
     campaignName: row.campaign_name || '',
     utm,
     pipelineStage: row.pipeline_stage || 'New Lead',
@@ -890,7 +890,7 @@ const server = http.createServer(async (req, res) => {
           body.serviceType || 'Kỷ yếu Concept', body.servicePackageId || '', body.servicePackageName || '', body.concept || '',
           body.expectedShootDate || '', shootingLocationsStr, totalAmount, body.specialRequests || '', body.notes || '',
           body.rawDriveUrl || '', body.driveUrl || '', body.photoNotes || '', body.shotDate || '', Number(body.photoCount) || 0,
-          body.source || 'Facebook Ads', body.campaignName || '', utmStr,
+          body.source || 'Facebook Organic', body.campaignName || '', utmStr,
           body.pipelineStage || 'New Lead', body.assignedSalesId || '', body.assignedSalesName || 'Chưa gán',
           body.assignedCareStaffId || '', body.assignedCareStaffName || '',
           currentUserId, currentUserName,
@@ -1925,7 +1925,7 @@ const server = http.createServer(async (req, res) => {
               version=excluded.version + 1, updated_at=CURRENT_TIMESTAMP
           `).run(
             c.id, c.name, c.phone || '', c.email || '', c.schoolName || '', c.className || '',
-            c.province || c.city || '', c.leadSource || c.source || '', c.pipelineStage || 'New Lead',
+            c.province || c.city || '', c.leadSource || c.source || 'Facebook Organic', c.pipelineStage || 'New Lead',
             c.assignedSalesId || '', c.assignedSalesName || '', c.contractValue || c.totalRevenue || 0,
             c.depositAmount || c.paidAmount || 0, c.shootDate || '', c.notes || '', shootingLocStr
           );

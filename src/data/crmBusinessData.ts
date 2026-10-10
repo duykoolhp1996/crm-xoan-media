@@ -351,10 +351,7 @@ export const CRM_SALES_PERIODS: Record<'day' | 'week' | 'month', CrmSalesPeriodD
 
 // 7. Nguồn tiếp cận khách hàng kỷ yếu
 export const CRM_LEAD_SOURCES: CrmLeadSourceData[] = [
-  { name: 'Đội Ngũ CTV Sale', value: 42, classCount: 62, revenue: '1.168.000.000đ', color: '#B8F23D' },
-  { name: 'Facebook Ads', value: 30, classCount: 44, revenue: '834.000.000đ', color: '#111827' },
-  { name: 'TikTok Organic & Ads', value: 18, classCount: 27, revenue: '500.000.000đ', color: '#94a3b8' },
-  { name: 'Lớp Cũ Giới Thiệu', value: 10, classCount: 15, revenue: '278.000.000đ', color: '#cbd5e1' }
+  { name: 'Facebook Organic', value: 100, classCount: 148, revenue: '2.780.000.000đ', color: '#1877F2' }
 ];
 
 // 8. Nhật ký vận hành Studio & Chốt đơn thời gian thực
