@@ -71,7 +71,6 @@ export const Header: React.FC = () => {
     finance: 'Bảng Quản Lý Tài Chính & Cọc',
     calendar: 'Calendar Lịch Chụp Ekip',
     photographers: 'Đội Ngũ Thợ Chụp & Ekip',
-    services: 'Gói Dịch Vụ & Combo',
     pancake: 'App Pancake (Hộp Thư Đa Kênh & POS Bán Hàng)',
     'chat-messenger': 'App Pancake (Hộp Thư Đa Kênh & POS Bán Hàng)',
     'reports-photographer': 'Hiệu Suất Thợ Chụp',

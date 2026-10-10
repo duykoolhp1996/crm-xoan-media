@@ -654,13 +654,13 @@ export const ExecutiveDashboard: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setActiveTab('services')}
+            onClick={() => setActiveTab('finance')}
             className="flex flex-col items-center gap-1.5 p-2.5 rounded-2xl bg-white hover:bg-neutral-50 border border-black/[0.06] shadow-xs active:scale-95 transition-all group"
           >
             <div className="w-10 h-10 rounded-full bg-[#F4FBE8] text-neutral-900 flex items-center justify-center group-hover:bg-[#B8F23D] transition-colors shadow-2xs">
               <DollarSign className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-bold text-neutral-800 tracking-tight">Báo Giá</span>
+            <span className="text-[10px] font-bold text-neutral-800 tracking-tight">Tài Chính</span>
           </button>
 
           <button

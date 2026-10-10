@@ -67,7 +67,6 @@ export type NavigationTab =
   | 'finance'
   | 'calendar'
   | 'photographers'
-  | 'services'
   | 'feedbacks'
   | 'remarketing'
   | 'tasks'

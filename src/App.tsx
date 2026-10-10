@@ -15,7 +15,6 @@ import { BookingModule } from './components/booking/BookingModule';
 import { FinanceModule } from './components/finance/FinanceModule';
 import { PhotoCalendar } from './components/calendar/PhotoCalendar';
 import { PhotographerList } from './components/photographers/PhotographerList';
-import { ServiceModule } from './components/services/ServiceModule';
 import { PhotographerReports } from './components/reports/PhotographerReports';
 import { SettingsModule } from './components/settings/SettingsModule';
 import { TrashBinModal } from './components/crm/TrashBinModal';
@@ -52,12 +51,11 @@ const MainContent: React.FC = () => {
         {activeTab === 'finance' && <FinanceModule />}
         {activeTab === 'calendar' && <PhotoCalendar />}
         {activeTab === 'photographers' && <PhotographerList />}
-        {activeTab === 'services' && <ServiceModule />}
         {activeTab === 'reports-photographer' && <PhotographerReports />}
         {activeTab === 'settings' && <SettingsModule />}
 
         {/* Fallback an toàn nếu activeTab không khớp bất kỳ tab CRM nào */}
-        {!['dashboard', 'customers', 'leads', 'pipeline', 'trash', 'schools', 'bookings', 'finance', 'calendar', 'photographers', 'services', 'reports-photographer', 'settings'].includes(activeTab) && (
+        {!['dashboard', 'customers', 'leads', 'pipeline', 'trash', 'schools', 'bookings', 'finance', 'calendar', 'photographers', 'reports-photographer', 'settings'].includes(activeTab) && (
           isPhotographer ? <PhotographerDashboard /> : <ExecutiveDashboard />
         )}
 

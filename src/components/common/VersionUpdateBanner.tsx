@@ -11,7 +11,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
 
   useEffect(() => {
     try {
-      const seen = localStorage.getItem('xoan_crm_seen_update_v134');
+      const seen = localStorage.getItem('xoan_crm_seen_update_v135');
       if (!seen) {
         // Trì hoãn 1s sau khi tải trang để hiệu ứng mượt mà
         const timer = setTimeout(() => {
@@ -27,7 +27,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
   const handleDismiss = () => {
     setIsVisible(false);
     try {
-      localStorage.setItem('xoan_crm_seen_update_v134', 'true');
+      localStorage.setItem('xoan_crm_seen_update_v135', 'true');
     } catch {}
   };
 
@@ -56,7 +56,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.3.4
+                Phiên Bản Mới v1.3.5
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -64,25 +64,25 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.3.4
+              Cập Nhật CRM Xoăn Media v1.3.5
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Quản lý Gói Dịch Vụ Kỷ Yếu linh hoạt: Cho phép xóa gói chụp, thêm gói chụp mới tùy biến theo nhu cầu và khôi phục cấu hình mặc định!
+              Tối ưu hóa không gian làm việc: Loại bỏ mục Gói Dịch Vụ Kỷ Yếu không cần thiết, tập trung toàn diện vào Quản lý Lead, Booking, Lịch chụp & Tài chính!
             </p>
 
             {/* Quick feature tags */}
             <div className="flex items-center gap-2 mt-2 text-[10px] text-neutral-400">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Xóa/Thêm gói kỷ yếu
+                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Tinh gọn Sidebar
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Lưu trữ tức thì
+                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Tối ưu tốc độ
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Bell className="w-3 h-3 text-[#B8F23D]" /> Bảo vệ đơn hàng cũ
+                <Bell className="w-3 h-3 text-[#B8F23D]" /> Tập trung nghiệp vụ
               </span>
             </div>
 

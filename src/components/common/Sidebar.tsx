@@ -7,7 +7,6 @@ import {
   Kanban,
   CalendarDays,
   Camera,
-  Layers,
   BarChart3,
   TrendingUp,
   Settings,
@@ -133,12 +132,6 @@ export const Sidebar: React.FC = () => {
           label: isPhotoRole ? (isPhotoLead ? 'Thành Viên Trong Team' : 'Hồ Sơ Của Tôi') : 'Đội Ngũ Thợ & Ekip',
           icon: Camera,
           roles: ['admin', 'manager', 'photographer']
-        },
-        {
-          id: 'services',
-          label: 'Gói Dịch Vụ Kỷ Yếu',
-          icon: Layers,
-          roles: ['admin', 'manager', 'sales']
         }
       ]
     },
@@ -250,7 +243,7 @@ export const Sidebar: React.FC = () => {
           <span className="text-[10px] font-medium text-neutral-500">Mùa 2026</span>
         </div>
         <span className="text-[10px] font-bold font-mono text-neutral-900 bg-[#B8F23D]/50 border border-[#B8F23D] px-2 py-0.5 rounded-full shadow-sm" title="Phiên bản CRM">
-          v1.3.4
+          v1.3.5
         </span>
       </div>
     </div>
