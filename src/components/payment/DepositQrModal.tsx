@@ -234,21 +234,30 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
     if (isFinalPayment) {
       const finalRevenue = Math.max(finalContractBudget, paidSoFar + paymentAmount);
 
+      // Nghiệp vụ Xoăn Media: Thu đủ tiền nhưng chưa chụp thì chưa thể hoàn thành được!
+      const hasShotOrDelivered = ['Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao'].includes(customer.pipelineStage) || Boolean(customer.shotDate);
+      const targetStage: PipelineStage = hasShotOrDelivered
+        ? 'Hoàn thành'
+        : (customer.pipelineStage === 'Book ngày' || (customer.pipelineStage as string) === 'Đã Booking'
+            ? 'Book ngày'
+            : 'Đã cọc');
+
       updateCustomer({
         ...customer,
         totalRevenue: finalRevenue,
-        paidAmount: finalRevenue, // Hoàn thành: Đã thu đủ 100% toàn bộ số tiền
-        pipelineStage: 'Hoàn thành',
-        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã tất toán toàn bộ hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ (Đợt cuối: ${paymentAmount.toLocaleString('vi-VN')}đ) qua VietinBank (${bankConfig.accountNumber} - ${bankConfig.accountName}). ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
+        paidAmount: finalRevenue, // Đã thu đủ 100% toàn bộ số tiền
+        remainingAmount: 0,
+        pipelineStage: targetStage,
+        notes: `${customer.notes ? customer.notes + '\n' : ''}[${new Date().toLocaleDateString('vi-VN')}] Đã thu đủ 100% hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ (Đợt cuối: ${paymentAmount.toLocaleString('vi-VN')}đ) qua VietinBank (${bankConfig.accountNumber} - ${bankConfig.accountName}). ${!hasShotOrDelivered ? '⚠️ Đã thu đủ nhưng chưa chụp, tiến trình giữ ở ' + targetStage + '.' : 'Hợp đồng hoàn thành.'} ${customNote ? 'Ghi chú: ' + customNote : ''}`.trim(),
         updatedAt: new Date().toISOString()
       });
 
-      // Đồng bộ đơn Booking sang Hoàn thành & Đã thanh toán đủ
+      // Đồng bộ đơn Booking sang Hoàn thành & Đã thanh toán đủ nếu đã chụp/giao ảnh
       const matchedBk = bookings.find(b => b.customerId === customer.id);
       if (matchedBk) {
         updateBooking({
           ...matchedBk,
-          bookingStatus: 'Hoàn thành',
+          bookingStatus: hasShotOrDelivered ? 'Hoàn thành' : matchedBk.bookingStatus,
           paymentStatus: 'Đã thanh toán đủ',
           totalAmount: finalRevenue,
           remainingAmount: 0
@@ -257,9 +266,9 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
 
       addActivityLog({
         customerId: customer.id,
-        type: 'delivered',
-        title: '🎉 Quyết toán & Hoàn thành hợp đồng',
-        description: `Khách hàng ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% toàn bộ số tiền ${finalRevenue.toLocaleString('vi-VN')}đ qua VietQR VietinBank (${bankConfig.accountNumber} - ${bankConfig.accountName}). Hợp đồng chuyển sang 'Hoàn thành'.`,
+        type: hasShotOrDelivered ? 'delivered' : 'deposit_paid',
+        title: hasShotOrDelivered ? '🎉 Quyết toán & Hoàn thành hợp đồng' : '💰 Thu đủ 100% hợp đồng (Chờ chụp)',
+        description: `Khách hàng ${customer.className} (${customer.schoolName}) đã thu đủ 100% số tiền ${finalRevenue.toLocaleString('vi-VN')}đ qua VietQR VietinBank. ${hasShotOrDelivered ? "Hợp đồng chuyển sang 'Hoàn thành'." : `Tiến trình giữ nguyên '${targetStage}' vì chưa chụp.`}`,
         performedByName: currentUser.name
       });
 
@@ -276,8 +285,10 @@ Trân trọng cảm ơn tập thể lớp đã tin tưởng đồng hành cùng 
       // Chuông thông báo nội bộ
       addNotification({
         type: 'upcoming_booking',
-        title: `🎉 TẤT TOÁN XONG: ${customer.className}`,
-        message: `Lớp ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ qua VietinBank. Dự án hoàn tất!`,
+        title: hasShotOrDelivered ? `🎉 TẤT TOÁN XONG: ${customer.className}` : `💰 THU ĐỦ 100%: ${customer.className}`,
+        message: hasShotOrDelivered
+          ? `Lớp ${customer.className} (${customer.schoolName}) đã tất toán đủ 100% hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ qua VietinBank. Dự án hoàn tất!`
+          : `Lớp ${customer.className} (${customer.schoolName}) đã thu đủ 100% hợp đồng ${finalRevenue.toLocaleString('vi-VN')}đ. Tiến trình: ${targetStage} (chờ chụp).`,
         severity: 'info'
       });
     } else {

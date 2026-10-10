@@ -327,10 +327,16 @@ export const KanbanPipeline: React.FC = () => {
         }
       }
 
-      // 4. Muốn chuyển sang "Hoàn thành": Bắt buộc mở modal quyết toán để xác nhận số tiền
+      // 4. Muốn chuyển sang "Hoàn thành": Bắt buộc đã chụp/giao ảnh và mở modal quyết toán
       if (targetStage === 'Hoàn thành') {
         const cust = customers.find(c => c.id === customerId);
         if (cust) {
+          const hasShotOrDelivered = ['Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao'].includes(cust.pipelineStage) || Boolean(cust.shotDate);
+          if (!hasShotOrDelivered) {
+            alert(`⚠️ Khách hàng ${cust.className || cust.name} (${cust.schoolName}) CHƯA CHỤP KỶ YẾU nên chưa thể chuyển sang "Hoàn thành" được!\n\nTiến trình chỉ được chuyển sang Hoàn thành sau khi đã chụp và bàn giao sản phẩm.`);
+            setDraggedCustomerId(null);
+            return;
+          }
           setPaymentConfig({ customer: cust, mode: 'final' });
           setDraggedCustomerId(null);
           return;

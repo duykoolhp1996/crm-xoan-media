@@ -1202,11 +1202,18 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                 value={formData.pipelineStage}
                 onChange={e => {
                   const newStage = e.target.value as PipelineStage;
-                  if (newStage === 'Hoàn thành' && calcTotalAmount > 0 && (Number(formData.paidAmount || 0) < calcTotalAmount)) {
-                    setFormData({ ...formData, pipelineStage: newStage, paidAmount: calcTotalAmount });
-                  } else {
-                    setFormData({ ...formData, pipelineStage: newStage });
+                  if (newStage === 'Hoàn thành') {
+                    const hasShotOrDelivered = ['Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao'].includes(formData.pipelineStage) || Boolean(customerToEdit?.shotDate);
+                    if (!hasShotOrDelivered) {
+                      alert('⚠️ Lớp này chưa chụp kỷ yếu (chưa qua giai đoạn Đã chụp/Giao ảnh) nên chưa thể chuyển sang "Hoàn thành" được!\n\nNếu lớp đã thu đủ 100% tiền nhưng chưa chụp, vui lòng giữ ở giai đoạn "Đã cọc" hoặc "Book ngày".');
+                      return;
+                    }
+                    if (calcTotalAmount > 0 && (Number(formData.paidAmount || 0) < calcTotalAmount)) {
+                      setFormData({ ...formData, pipelineStage: newStage, paidAmount: calcTotalAmount });
+                      return;
+                    }
                   }
+                  setFormData({ ...formData, pipelineStage: newStage });
                 }}
                 className="w-full px-3 py-2 bg-neutral-50 border border-black/[0.08] text-neutral-900 font-bold rounded-xl cursor-pointer focus:bg-white focus:outline-none"
               >
