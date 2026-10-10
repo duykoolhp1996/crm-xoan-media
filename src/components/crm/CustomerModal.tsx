@@ -358,7 +358,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
     if ((!salesName || salesName === 'Chưa gán') && currentUser.role === 'sales') {
       salesName = currentUser.name;
     } else if (formData.pipelineStage !== 'New Lead' && salesName === 'Chưa gán') {
-      salesName = currentUser.role === 'sales' ? currentUser.name : (salesStaff[0]?.name || 'Lê Hoàng Sơn (Sales Lead)');
+      salesName = currentUser.role === 'sales' ? currentUser.name : (salesStaff[0]?.name || '');
     }
     const matchedSales = salesStaff.find(s => s.name === salesName);
     const salesId = matchedSales?.id || (salesName === currentUser.name ? currentUser.id : '');

@@ -32,7 +32,8 @@ import {
 } from '../../lib/revenueUtils';
 import {
   getSalesHierarchyInfo,
-  filterAccessibleCustomers
+  filterAccessibleCustomers,
+  getAssignableSalesList
 } from '../../utils/salesPermissions';
 
 export const KanbanPipeline: React.FC = () => {
@@ -64,6 +65,12 @@ export const KanbanPipeline: React.FC = () => {
   const salesHierarchy = React.useMemo(() => {
     return getSalesHierarchyInfo(currentUser, currentRole, salesStaff);
   }, [currentUser, currentRole, salesStaff]);
+
+  const assignableSales = React.useMemo(() => {
+    return getAssignableSalesList(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
+
+  const canReassignSales = currentRole === 'admin' || currentRole === 'manager' || salesHierarchy.isLead;
 
   // Chỉ hiển thị các khách hàng thuộc quyền hạn:
   // - Admin: Xem toàn bộ
@@ -493,31 +500,43 @@ export const KanbanPipeline: React.FC = () => {
                                 cust.assignedSalesName && cust.assignedSalesName !== 'Chưa gán' ? 'text-blue-600' : 'text-neutral-400'
                               }`} />
                               <span className="text-[10px] font-bold text-neutral-600 shrink-0">Sales:</span>
-                              <select
-                                value={cust.assignedSalesName || 'Chưa gán'}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  const matched = salesStaff.find(s => s.name === val);
-                                  updateCustomer({
-                                    ...cust,
-                                    assignedSalesName: val,
-                                    assignedSalesId: matched?.id || (val === currentUser.name ? currentUser.id : 'user-2'),
-                                    updatedAt: new Date().toISOString()
-                                  });
-                                }}
-                                className="bg-transparent text-[11px] font-bold text-neutral-900 focus:outline-none cursor-pointer truncate w-full"
-                                title="Đổi nhân viên Sales tư vấn"
-                              >
-                                <option value="Chưa gán">Chưa gán Sales</option>
-                                {salesStaff.map((staff) => (
-                                  <option key={staff.id} value={staff.name}>
-                                    {staff.name}
-                                  </option>
-                                ))}
-                                {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
-                                  <option value={currentUser.name}>{currentUser.name}</option>
-                                )}
-                              </select>
+                              {canReassignSales ? (
+                                <select
+                                  value={cust.assignedSalesName || 'Chưa gán'}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    const matched = assignableSales.find(s => s.name === val);
+                                    const newSalesId = val === 'Chưa gán'
+                                      ? ''
+                                      : (matched?.id || (val === currentUser.name ? currentUser.id : ''));
+                                    updateCustomer({
+                                      ...cust,
+                                      assignedSalesName: val,
+                                      assignedSalesId: newSalesId,
+                                      updatedAt: new Date().toISOString()
+                                    });
+                                  }}
+                                  className="bg-transparent text-[11px] font-bold text-neutral-900 focus:outline-none cursor-pointer truncate w-full"
+                                  title="Đổi nhân viên Sales tư vấn phụ trách"
+                                >
+                                  <option value="Chưa gán">Chưa gán Sales</option>
+                                  {assignableSales.map((staff) => (
+                                    <option key={staff.id} value={staff.name}>
+                                      {staff.name} {staff.roleTitle ? `(${staff.roleTitle})` : ''}
+                                    </option>
+                                  ))}
+                                  {currentUser.role === 'sales' && !assignableSales.some(s => s.name === currentUser.name) && (
+                                    <option value={currentUser.name}>{currentUser.name}</option>
+                                  )}
+                                </select>
+                              ) : (
+                                <span 
+                                  className="text-[11px] font-bold text-neutral-900 truncate w-full"
+                                  title="Sales phụ trách khách hàng này"
+                                >
+                                  {cust.assignedSalesName || 'Chưa gán Sales'}
+                                </span>
+                              )}
                             </div>
                           </div>
 

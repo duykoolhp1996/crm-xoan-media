@@ -91,28 +91,23 @@ export function getSalesHierarchyInfo(
   if (isLead) {
     // 1. Tìm các nhân sự có leaderId hoặc leaderName trùng với Lead
     subordinateStaff = salesStaffList.filter(s => {
-      if (s.id === myId) return false; // Không tính chính mình
-      const matchesLeaderId = s.leaderId && s.leaderId === myId;
-      const matchesLeaderName = s.leaderName && s.leaderName.toLowerCase() === myName.toLowerCase();
+      if (!s || s.id === myId) return false; // Không tính chính mình
+      const sLeaderId = (s.leaderId || '').trim();
+      const sLeaderName = (s.leaderName || '').trim().toLowerCase();
+      const matchesLeaderId = Boolean(sLeaderId && sLeaderId === myId);
+      const matchesLeaderName = Boolean(sLeaderName && myName && sLeaderName === myName.toLowerCase());
       return matchesLeaderId || matchesLeaderName;
     });
 
-    // 2. Fallback: Nếu không có ai có leaderId rõ ràng (dữ liệu cũ), mà Lead là Lê Hoàng Sơn (hoặc Lead duy nhất)
-    if (subordinateStaff.length === 0) {
-      subordinateStaff = salesStaffList.filter(s => {
-        if (s.id === myId) return false;
-        const sTitle = (s.roleTitle || '').toLowerCase();
-        // Cấp dưới là những người không phải Lead
-        return !sTitle.includes('lead') && !sTitle.includes('trưởng nhóm');
-      });
-    }
+    // LƯU Ý BẢO MẬT: Tuyệt đối KHÔNG fallback gom toàn bộ nhân sự khi subordinateStaff rỗng.
+    // Mỗi Sales Lead chỉ quản lý đúng các nhân sự được Admin phân vào Team của mình.
   }
 
-  const subordinateIds = new Set<string>(subordinateStaff.map(s => s.id));
-  const subordinateNames = new Set<string>(subordinateStaff.map(s => s.name.toLowerCase()));
+  const subordinateIds = new Set<string>(subordinateStaff.map(s => s.id).filter(Boolean));
+  const subordinateNames = new Set<string>(subordinateStaff.map(s => s.name?.trim().toLowerCase()).filter(Boolean));
 
-  const teamMemberIds = new Set<string>([myId, ...subordinateIds]);
-  const teamMemberNames = new Set<string>([myName.toLowerCase(), ...subordinateNames]);
+  const teamMemberIds = new Set<string>([myId, ...subordinateIds].filter(Boolean));
+  const teamMemberNames = new Set<string>([myName.toLowerCase(), ...subordinateNames].filter(Boolean));
 
   return {
     isSalesUser: true,
@@ -128,6 +123,17 @@ export function getSalesHierarchyInfo(
 
 /**
  * Kiểm tra quyền truy cập vào một Khách hàng (Customer / Lead)
+ * Quy tắc nghiệp vụ chuẩn CRM Xoăn Media:
+ * 1. Admin / Manager: Toàn quyền xem 100% data.
+ * 2. Photographer: Xem lịch chụp / ca chụp của mình.
+ * 3. Sales Lead (Trưởng Nhóm Sales):
+ *    - Toàn quyền xem data của TEAM MÌNH (bao gồm data của Lead + data của các nhân sự trong Team mình).
+ *    - TUYỆT ĐỐI KHÔNG xem data của Team khác!
+ * 4. Sales Thường (Nhân viên / CTV):
+ *    - Chỉ xem được khách hàng ĐƯỢC CẤP CHĂM SÓC (Admin cấp hoặc Sales Lead cấp).
+ *    - Khách do chính mình tự tạo ra mà chưa gán cho ai thì được xem.
+ *    - NẾU khách đó đang do Sales Lead hoặc nhân sự khác chăm sóc ("còn sale lead chăm sóc thì thôi") -> KHÔNG ĐƯỢC XEM.
+ *    - KHÔNG xem khách của Sales khác hoặc của Team khác.
  */
 export function canSalesAccessCustomer(
   customer: Customer,
@@ -135,13 +141,13 @@ export function canSalesAccessCustomer(
   currentRole: UserRole,
   salesStaffList: SalesStaff[]
 ): boolean {
-  // Admin và Manager xem được tất cả
+  // Admin và Manager xem được tất cả 100%
   if (currentRole === 'admin' || currentRole === 'manager' || currentUser?.role === 'admin' || currentUser?.role === 'manager') {
     return true;
   }
 
-  // Photographer không trực tiếp quản lý CRM (sẽ có màn hình riêng theo Lịch chụp)
-  if (currentRole === 'photographer') {
+  // Photographer không giới hạn xem CRM (sẽ có phân hệ Lịch chụp riêng)
+  if (currentRole === 'photographer' || currentUser?.role === 'photographer') {
     return true;
   }
 
@@ -151,39 +157,76 @@ export function canSalesAccessCustomer(
   }
 
   const myId = hierarchy.myStaff?.id || currentUser.id;
-  const myName = (hierarchy.myStaff?.name || currentUser.name || '').toLowerCase();
+  const myName = (hierarchy.myStaff?.name || currentUser.name || '').trim().toLowerCase();
 
-  const cAssignedId = customer.assignedSalesId || '';
-  const cAssignedName = (customer.assignedSalesName || '').toLowerCase();
-  const cCreatedId = customer.createdById || '';
-  const cCreatedName = (customer.createdByName || '').toLowerCase();
+  const cAssignedId = (customer.assignedSalesId || '').trim();
+  const cAssignedName = (customer.assignedSalesName || '').trim().toLowerCase();
+  const cCreatedId = (customer.createdById || '').trim();
+  const cCreatedName = (customer.createdByName || '').trim().toLowerCase();
 
-  // Kiểm tra gán cho chính mình hoặc do chính mình tạo ra
-  const isAssignedToMe = cAssignedId === myId || (cAssignedName && cAssignedName === myName);
-  const isCreatedByMe = cCreatedId === myId || (cCreatedName && cCreatedName === myName);
+  // Khách được cấp/gán cho chính mình chăm sóc
+  const isAssignedToMe = Boolean(
+    (cAssignedId && cAssignedId === myId) || 
+    (cAssignedName && myName && cAssignedName === myName)
+  );
 
+  // Khách do chính mình tạo ra / thu thập được
+  const isCreatedByMe = Boolean(
+    (cCreatedId && cCreatedId === myId) || 
+    (cCreatedName && myName && cCreatedName === myName)
+  );
+
+  // --- TRƯỜNG HỢP 1: SALES THƯỜNG (Nhân viên / CTV, không phải Lead) ---
+  if (!hierarchy.isLead) {
+    // 1. Khách được cấp cho chính mình chăm sóc (Admin cấp hoặc Lead cấp) -> ĐƯỢC XEM
+    if (isAssignedToMe) {
+      return true;
+    }
+
+    // 2. Khách do chính mình thu thập/tạo ra:
+    // "sale thường sẽ chỉ coi được thông tin khách hàng được cấp (Admin cấp hoặc sale Lead cấp khi không chăm sóc, còn sale lead chăm sóc thì thôi)"
+    // Nếu khách đã được phân bổ cho ai đó (có assignedSalesId hoặc assignedSalesName khác rỗng/khác 'chưa gán')
+    const hasAssignee = Boolean(
+      (cAssignedId && cAssignedId !== '') || 
+      (cAssignedName && cAssignedName !== '' && cAssignedName !== 'chưa gán')
+    );
+
+    // Nếu do mình tạo ra và CHƯA gán cho ai chăm sóc -> ĐƯỢC XEM
+    if (isCreatedByMe && !hasAssignee) {
+      return true;
+    }
+
+    // Nếu khách đã được gán cho Sales Lead hoặc người khác chăm sóc -> KHÔNG ĐƯỢC XEM ("còn sale lead chăm sóc thì thôi")
+    return false;
+  }
+
+  // --- TRƯỜNG HỢP 2: SALES LEAD (Trưởng nhóm Sales) ---
+  // "Sales Lead có quyền xem toàn bộ data của Team mình (Của team mình không phải team khác)"
+  
+  // a. Data của chính Sales Lead:
+  // - Được cấp/gán cho Lead, HOẶC do Lead tự tạo và chưa bàn giao cho team khác
   if (isAssignedToMe || isCreatedByMe) {
     return true;
   }
 
-  // Nếu là Sales Lead (Trưởng Nhóm): Xem thêm data của cấp dưới
-  if (hierarchy.isLead) {
-    // 1. Data do cấp dưới thu thập được
-    const isCreatedBySubordinate =
-      (cCreatedId && hierarchy.subordinateIds.has(cCreatedId)) ||
-      (cCreatedName && hierarchy.subordinateNames.has(cCreatedName));
+  // b. Data của các thành viên trong Team mình:
+  // - Do nhân sự trong Team thu thập/tạo ra:
+  const isCreatedBySubordinate = Boolean(
+    (cCreatedId && hierarchy.subordinateIds.has(cCreatedId)) ||
+    (cCreatedName && hierarchy.subordinateNames.has(cCreatedName))
+  );
 
-    // 2. Data được Admin hoặc Lead phân quyền cho cấp dưới chăm sóc
-    const isAssignedToSubordinate =
-      (cAssignedId && hierarchy.subordinateIds.has(cAssignedId)) ||
-      (cAssignedName && hierarchy.subordinateNames.has(cAssignedName));
+  // - Được Admin hoặc Lead cấp/gán cho nhân sự trong Team chăm sóc:
+  const isAssignedToSubordinate = Boolean(
+    (cAssignedId && hierarchy.subordinateIds.has(cAssignedId)) ||
+    (cAssignedName && hierarchy.subordinateNames.has(cAssignedName))
+  );
 
-    if (isCreatedBySubordinate || isAssignedToSubordinate) {
-      return true;
-    }
+  if (isCreatedBySubordinate || isAssignedToSubordinate) {
+    return true;
   }
 
-  // Sales thường hoặc Lead không có quyền với các data ngoài phạm vi
+  // Data thuộc về Team khác hoặc data ngoài nhóm -> TUYỆT ĐỐI KHÔNG XEM
   return false;
 }
 

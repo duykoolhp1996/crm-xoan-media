@@ -1209,7 +1209,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Tự động hóa: Chốt cọc thành công (từ báo giá/tư vấn sang Đã cọc)
     const isDepositWon = (prevStage !== 'Đã cọc' && prevStage !== 'Đã đặt cọc') && (newStage === 'Đã cọc' || newStage === 'Đã đặt cọc');
-    const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (newSalesName || targetCustomer.assignedSalesName || 'Lê Hoàng Sơn (Sales Lead)');
+    const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (newSalesName || targetCustomer.assignedSalesName || 'Chuyên viên Sales');
 
     if (isMovingToConsulting) {
       if (currentUser.role === 'sales') {
@@ -1217,8 +1217,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         newSalesId = currentUser.id;
       } else {
         const defaultSales = salesStaff.find(s => s.status === 'active') || salesStaff[0];
-        newSalesName = (newSalesName && newSalesName !== 'Chưa gán') ? newSalesName : (defaultSales?.name || 'Lê Hoàng Sơn (Sales Lead)');
-        newSalesId = newSalesId && newSalesId !== '' ? newSalesId : (defaultSales?.id || 'user-2');
+        newSalesName = (newSalesName && newSalesName !== 'Chưa gán') ? newSalesName : (defaultSales?.name || 'Chưa gán');
+        newSalesId = newSalesId && newSalesId !== '' ? newSalesId : (defaultSales?.id || '');
       }
     }
 

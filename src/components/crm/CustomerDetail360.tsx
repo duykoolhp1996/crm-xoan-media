@@ -36,6 +36,11 @@ import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
 import { CustomerModal } from './CustomerModal';
 import { isCustomerInStage } from '../../lib/revenueUtils';
+import {
+  canSalesAccessCustomer,
+  getSalesHierarchyInfo,
+  getAssignableSalesList
+} from '../../utils/salesPermissions';
 
 interface CustomerDetail360Props {
   customerId: string;
@@ -73,6 +78,49 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [customLostNote, setCustomLostNote] = useState('');
 
   if (!customer) return null;
+
+  const currentRole = currentUser?.role || 'admin';
+  const hasAccess = React.useMemo(() => {
+    if (!customer) return false;
+    return canSalesAccessCustomer(customer, currentUser, currentRole, salesStaff);
+  }, [customer, currentUser, currentRole, salesStaff]);
+
+  const salesHierarchy = React.useMemo(() => {
+    return getSalesHierarchyInfo(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
+
+  const assignableSales = React.useMemo(() => {
+    return getAssignableSalesList(currentUser, currentRole, salesStaff);
+  }, [currentUser, currentRole, salesStaff]);
+
+  // Quyền đổi nhân sự Sales phụ trách: Admin / Manager, hoặc Sales Lead đối với nhân sự thuộc Team mình
+  const canReassignSales = currentRole === 'admin' || currentRole === 'manager' || salesHierarchy.isLead;
+
+  if (!hasAccess) {
+    return createPortal(
+      <div className="fixed inset-0 z-[120] bg-neutral-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl text-center space-y-4 border border-black/[0.08] animate-in zoom-in-95 duration-200">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+            <UserX className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-base font-extrabold text-neutral-900">Giới Hạn Quyền Truy Cập</h3>
+            <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+              Bạn không có quyền xem thông tin chi tiết của khách hàng này.
+              Khách hàng thuộc phạm vi quản lý của nhóm khác hoặc đang do Sales Lead trực tiếp chăm sóc.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 bg-neutral-900 text-[#B8F23D] rounded-xl text-xs font-bold hover:bg-black transition-all cursor-pointer shadow-md"
+          >
+            Đóng Cửa Sổ
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  }
 
   const handleCopy = (text: string, key: string) => {
     if (!text) return;
@@ -302,30 +350,43 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
               Sales tư vấn phụ trách
             </p>
             <div className="mt-0.5">
-              <select
-                value={customer.assignedSalesName || 'Chưa gán'}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const matched = salesStaff.find(s => s.name === val);
-                  updateCustomer({
-                    ...customer,
-                    assignedSalesName: val,
-                    assignedSalesId: matched?.id || (val === currentUser.name ? currentUser.id : 'user-2'),
-                    updatedAt: new Date().toISOString()
-                  });
-                }}
-                className="font-bold text-blue-700 bg-transparent focus:outline-none cursor-pointer text-xs truncate max-w-full hover:underline"
-              >
-                <option value="Chưa gán">Chưa gán (Tự động khi liên hệ)</option>
-                {salesStaff.map((staff) => (
-                  <option key={staff.id} value={staff.name}>
-                    {staff.name}
-                  </option>
-                ))}
-                {currentUser.role === 'sales' && !salesStaff.some(s => s.name === currentUser.name) && (
-                  <option value={currentUser.name}>{currentUser.name}</option>
-                )}
-              </select>
+              {canReassignSales ? (
+                <select
+                  value={customer.assignedSalesName || 'Chưa gán'}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const matched = assignableSales.find(s => s.name === val);
+                    const newSalesId = val === 'Chưa gán' 
+                      ? '' 
+                      : (matched?.id || (val === currentUser.name ? currentUser.id : ''));
+                    updateCustomer({
+                      ...customer,
+                      assignedSalesName: val,
+                      assignedSalesId: newSalesId,
+                      updatedAt: new Date().toISOString()
+                    });
+                  }}
+                  className="font-bold text-blue-700 bg-transparent focus:outline-none cursor-pointer text-xs truncate max-w-full hover:underline"
+                  title="Chuyển giao hoặc phân bổ Sales phụ trách"
+                >
+                  <option value="Chưa gán">Chưa gán (Tự động khi liên hệ)</option>
+                  {assignableSales.map((staff) => (
+                    <option key={staff.id} value={staff.name}>
+                      {staff.name} {staff.roleTitle ? `(${staff.roleTitle})` : ''}
+                    </option>
+                  ))}
+                  {currentUser.role === 'sales' && !assignableSales.some(s => s.name === currentUser.name) && (
+                    <option value={currentUser.name}>{currentUser.name}</option>
+                  )}
+                </select>
+              ) : (
+                <span 
+                  className="font-bold text-blue-700 text-xs truncate block py-0.5" 
+                  title="Chỉ Quản lý hoặc Sales Lead mới có quyền chuyển giao khách hàng"
+                >
+                  {customer.assignedSalesName || 'Chưa gán'}
+                </span>
+              )}
             </div>
           </div>
           <div>

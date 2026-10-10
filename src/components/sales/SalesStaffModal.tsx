@@ -63,8 +63,8 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
     username: '',
     password: '',
     canLogin: true,
-    leaderId: 'user-2',
-    leaderName: 'Lê Hoàng Sơn'
+    leaderId: '',
+    leaderName: ''
   });
 
   const generatePassword = () => {
@@ -96,6 +96,10 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         leaderName: staffToEdit.leaderName || ''
       });
     } else {
+      const defaultLead = salesStaff.find(s => 
+        (s.roleTitle || '').toLowerCase().includes('lead') || 
+        (s.roleTitle || '').toLowerCase().includes('trưởng nhóm')
+      );
       setFormData({
         name: '',
         phone: '',
@@ -110,11 +114,11 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
         username: '',
         password: 'XoanSales@2024',
         canLogin: true,
-        leaderId: 'user-2',
-        leaderName: 'Lê Hoàng Sơn'
+        leaderId: defaultLead ? defaultLead.id : '',
+        leaderName: defaultLead ? defaultLead.name : ''
       });
     }
-  }, [staffToEdit, isOpen]);
+  }, [staffToEdit, isOpen, salesStaff]);
 
   if (!isOpen) return null;
 
@@ -288,13 +292,18 @@ export const SalesStaffModal: React.FC<SalesStaffModalProps> = ({
                     className="w-full mt-1 px-3 py-2 bg-sky-50/60 border border-sky-200 text-sky-950 rounded-xl text-xs font-bold cursor-pointer focus:bg-white focus:outline-none"
                   >
                     <option value="">Không có (Trực thuộc Admin quản lý trực tiếp)</option>
-                    {salesStaff
-                      .filter(s => s.id !== staffToEdit?.id)
-                      .map(lead => (
+                    {(() => {
+                      const leads = salesStaff.filter(s => 
+                        s.id !== staffToEdit?.id && 
+                        ((s.roleTitle || '').toLowerCase().includes('lead') || (s.roleTitle || '').toLowerCase().includes('trưởng nhóm') || s.id === 'user-2')
+                      );
+                      const displayList = leads.length > 0 ? leads : salesStaff.filter(s => s.id !== staffToEdit?.id);
+                      return displayList.map(lead => (
                         <option key={lead.id} value={lead.id}>
-                          {lead.name} ({lead.roleTitle || 'Sales Lead'})
+                          👑 {lead.name} ({lead.roleTitle || 'Sales Lead'})
                         </option>
-                      ))}
+                      ));
+                    })()}
                   </select>
                 </div>
               ) : (
