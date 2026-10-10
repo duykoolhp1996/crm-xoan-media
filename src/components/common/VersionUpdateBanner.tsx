@@ -11,7 +11,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
 
   useEffect(() => {
     try {
-      const seen = localStorage.getItem('xoan_crm_seen_update_v132');
+      const seen = localStorage.getItem('xoan_crm_seen_update_v133');
       if (!seen) {
         // Trì hoãn 1s sau khi tải trang để hiệu ứng mượt mà
         const timer = setTimeout(() => {
@@ -27,7 +27,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
   const handleDismiss = () => {
     setIsVisible(false);
     try {
-      localStorage.setItem('xoan_crm_seen_update_v132', 'true');
+      localStorage.setItem('xoan_crm_seen_update_v133', 'true');
     } catch {}
   };
 
@@ -56,7 +56,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.3.2
+                Phiên Bản Mới v1.3.3
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -64,11 +64,11 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.3.2
+              Cập Nhật CRM Xoăn Media v1.3.3
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Trực tiếp chọn & sửa Trưởng nháy (Thợ chụp chính) và phân công toàn bộ Ekip (thợ phụ, quay phim, ca chụp) ngay trên thẻ Book Ngày của Pipeline!
+              Bảng riêng Tài Chính & Cọc với phân quyền bảo mật cao, theo dõi công nợ chuẩn xác, sửa triệt để giao diện Thùng Rác và tối ưu hiển thị!
             </p>
 
             {/* Quick feature tags */}
