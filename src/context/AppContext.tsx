@@ -946,7 +946,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
-    const newId = `cust-${Date.now()}`;
+    const newId = (customerData as any).id || `cust-${Date.now()}`;
     const creatorName = customerData.createdByName || currentUser.name;
     const creatorId = customerData.createdById || currentUser.id;
     const salesName = customerData.assignedSalesName || (currentUser.role === 'sales' ? currentUser.name : 'Chưa gán');

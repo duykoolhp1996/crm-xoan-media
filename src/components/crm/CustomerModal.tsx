@@ -27,7 +27,9 @@ import {
   FolderOpen,
   UserX,
   CreditCard,
-  Wallet
+  Wallet,
+  Users,
+  Video
 } from 'lucide-react';
 
 interface CustomerModalProps {
@@ -62,6 +64,12 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
     schools,
     servicePackages,
     salesStaff,
+    photographers,
+    bookings,
+    updateBooking,
+    addBooking,
+    getPhotographerAvailability,
+    addActivityLog,
     currentUser,
     currentRole,
     customers
@@ -114,6 +122,26 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         ? Number(customerToEdit.expectedBudget)
         : totalAmount;
 
+      // Tra cứu booking tương ứng (nếu có) để lấy chính xác ekip và lịch chụp
+      const matchedBk = bookings.find(
+        b => b.customerId === customerToEdit.id ||
+        (b.className && b.className === customerToEdit.className && b.schoolName === customerToEdit.schoolName)
+      );
+
+      let initialLeadId = matchedBk?.assignments?.leadPhotographerId || customerToEdit.leadPhotographerId || '';
+      let initialLeadName = matchedBk?.assignments?.leadPhotographerName || customerToEdit.leadPhotographerName || '';
+      if (!initialLeadId && customerToEdit.notes) {
+        const foundPhoto = photographers.find(p => customerToEdit.notes?.toLowerCase().includes(p.fullName.toLowerCase()));
+        if (foundPhoto) {
+          initialLeadId = foundPhoto.id;
+          initialLeadName = foundPhoto.fullName;
+        }
+      }
+
+      const initialVideoId = matchedBk?.assignments?.videographerId || customerToEdit.videographerId || '';
+      const initialAssistantIds = matchedBk?.assignments?.assistantPhotographerIds || customerToEdit.assistantPhotographerIds || [];
+      const initialPhotoNotes = matchedBk?.photoNotes || matchedBk?.notes || customerToEdit.photoNotes || '';
+
       return {
         name: customerToEdit.name || '',
         phone: customerToEdit.phone || '',
@@ -132,7 +160,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         serviceType: customerToEdit.serviceType || 'Kỷ yếu Concept',
         servicePackageId: customerToEdit.servicePackageId || (servicePackages[1]?.id || ''),
         concept: customerToEdit.concept || '',
-        expectedShootDate: customerToEdit.expectedShootDate || '',
+        expectedShootDate: matchedBk?.shootDate || customerToEdit.expectedShootDate || '',
         shootingLocations: Array.isArray(customerToEdit.shootingLocations)
           ? customerToEdit.shootingLocations.join(', ')
           : (customerToEdit.shootingLocations || 'Trường học & Nhà Hát Lớn / Bãi biển Đồ Sơn'),
@@ -151,8 +179,13 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         // Stage-specific fields
         depositDate: customerToEdit.depositDate || '',
         paymentMethod: customerToEdit.paymentMethod || 'vietqr',
-        shootTime: customerToEdit.shootTime || '07:30',
-        shootAddress: customerToEdit.shootAddress || '',
+        shootTime: matchedBk?.startTime || customerToEdit.shootTime || '07:30',
+        shootAddress: matchedBk?.location || customerToEdit.shootAddress || '',
+        leadPhotographerId: initialLeadId,
+        leadPhotographerName: initialLeadName,
+        videographerId: initialVideoId,
+        assistantPhotographerIds: initialAssistantIds,
+        photoNotes: initialPhotoNotes,
         editorName: customerToEdit.editorName || '',
         editDeadline: customerToEdit.editDeadline || '',
         editProgress: customerToEdit.editProgress || 0,
@@ -216,6 +249,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       paymentMethod: 'vietqr',
       shootTime: '07:30',
       shootAddress: '',
+      leadPhotographerId: '',
+      leadPhotographerName: '',
+      videographerId: '',
+      assistantPhotographerIds: [] as string[],
+      photoNotes: '',
       editorName: '',
       editDeadline: '',
       editProgress: 0,
@@ -239,6 +277,14 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
   };
 
   const [formData, setFormData] = useState(getInitialFormData);
+
+  // Tính toán tình trạng lịch bận/rảnh của Thợ chính (Trưởng nháy)
+  const selectedLeadPhotoAvailability = useMemo(() => {
+    if (!formData.leadPhotographerId || !formData.expectedShootDate) {
+      return { available: true, totalShootsOnDay: 0 };
+    }
+    return getPhotographerAvailability(formData.leadPhotographerId, formData.expectedShootDate);
+  }, [formData.leadPhotographerId, formData.expectedShootDate, getPhotographerAvailability]);
 
   // Tự động làm mới form mỗi khi mở modal hoặc đổi khách hàng cần sửa
   React.useEffect(() => {
@@ -370,6 +416,24 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
     const matchedSales = salesStaff.find(s => s.name === salesName);
     const salesId = matchedSales?.id || (salesName === currentUser.name ? currentUser.id : '');
 
+    // Thông tin Ekip Thợ Chụp (CSDL CRM Thực Tế)
+    const leadPhoto = photographers.find(p => p.id === formData.leadPhotographerId);
+    const leadName = leadPhoto?.fullName || formData.leadPhotographerName || '';
+    const videoPhoto = photographers.find(p => p.id === formData.videographerId);
+    const videoName = videoPhoto?.fullName || '';
+    const assistantNames = (formData.assistantPhotographerIds || [])
+      .map(id => photographers.find(p => p.id === id)?.fullName)
+      .filter(Boolean) as string[];
+
+    let updatedNotes = formData.notes || '';
+    if (leadName) {
+      if (updatedNotes.includes('Thợ chụp:')) {
+        updatedNotes = updatedNotes.replace(/Thợ chụp:[^.\n]*\.?/gi, `Thợ chụp: ${leadName}.`);
+      } else {
+        updatedNotes = `${updatedNotes ? updatedNotes + '\n' : ''}Thợ chụp: ${leadName}.`.trim();
+      }
+    }
+
     // Nếu đang ở chế độ CHỈNH SỬA khách hàng đã có
     if (customerToEdit) {
       updateCustomer({
@@ -410,6 +474,13 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         paymentMethod: formData.paymentMethod,
         shootTime: formData.shootTime,
         shootAddress: formData.shootAddress,
+        leadPhotographerId: formData.leadPhotographerId || undefined,
+        leadPhotographerName: leadName || undefined,
+        videographerId: formData.videographerId || undefined,
+        videographerName: videoName || undefined,
+        assistantPhotographerIds: formData.assistantPhotographerIds,
+        assistantNames: assistantNames,
+        photoNotes: formData.photoNotes,
         editorName: formData.editorName,
         editDeadline: formData.editDeadline,
         editProgress: Number(formData.editProgress) || 0,
@@ -420,7 +491,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         lostNote: formData.lostNote,
 
         specialRequests: formData.specialRequests,
-        notes: formData.notes,
+        notes: updatedNotes,
         source: formData.source,
         campaignName: formData.campaignName,
         utm: {
@@ -433,12 +504,88 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
         assignedSalesName: salesName,
         assignedCareStaffName: formData.assignedCareStaffName
       });
+
+      // Đồng bộ / Tạo Booking để thợ chụp nhìn thấy trong tài khoản cá nhân
+      const matchedBooking = bookings.find(
+        b => b.customerId === customerToEdit.id ||
+        (b.className && b.className === formData.className && b.schoolName === formData.schoolName)
+      );
+
+      const bookingAssignments = {
+        leadPhotographerId: formData.leadPhotographerId || undefined,
+        leadPhotographerName: leadName || undefined,
+        videographerId: formData.videographerId || undefined,
+        videographerName: videoName || undefined,
+        assistantPhotographerIds: formData.assistantPhotographerIds,
+        assistantNames: assistantNames
+      };
+
+      if (matchedBooking) {
+        updateBooking({
+          ...matchedBooking,
+          customerName: formData.name,
+          schoolName: formData.schoolName,
+          className: formData.className,
+          shootDate: formData.expectedShootDate || matchedBooking.shootDate,
+          startTime: formData.shootTime || matchedBooking.startTime || '07:30',
+          location: formData.shootAddress || formData.shootingLocations || matchedBooking.location,
+          totalAmount: calcTotalAmount,
+          depositAmount: Number(formData.depositAmount) || 0,
+          remainingAmount: calcRemainingAmount,
+          assignments: {
+            ...matchedBooking.assignments,
+            ...bookingAssignments
+          },
+          notes: formData.photoNotes || matchedBooking.notes,
+          photoNotes: formData.photoNotes || matchedBooking.photoNotes,
+          updatedAt: new Date().toISOString()
+        });
+      } else if (formData.leadPhotographerId || formData.expectedShootDate || formData.pipelineStage === 'Book ngày') {
+        addBooking({
+          code: `BK-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${formData.className || 'CLASS'}`,
+          customerId: customerToEdit.id,
+          customerName: formData.name,
+          schoolName: formData.schoolName || '',
+          className: formData.className || '',
+          shootDate: formData.expectedShootDate || new Date().toISOString().split('T')[0],
+          startTime: formData.shootTime || '07:30',
+          endTime: '17:30',
+          location: formData.shootAddress || formData.schoolName || 'Studio Xoăn Media',
+          city: formData.city || 'Hải Phòng',
+          district: formData.district || '',
+          studentCount: Number(formData.studentCount) || 35,
+          packageId: formData.servicePackageId || 'pkg-2',
+          packageName: selectedPkg?.name || customerToEdit.servicePackageName || 'Gói Tùy Chọn',
+          concept: formData.concept || 'Tùy chọn',
+          totalAmount: calcTotalAmount,
+          depositAmount: Number(formData.depositAmount) || 0,
+          remainingAmount: calcRemainingAmount,
+          paymentStatus: Number(formData.depositAmount) > 0 ? 'Đã cọc' : 'Chưa cọc',
+          bookingStatus: 'Đã xác nhận',
+          assignments: bookingAssignments,
+          notes: formData.photoNotes || (leadName ? `Trưởng nháy: ${leadName}` : ''),
+          photoNotes: formData.photoNotes || ''
+        });
+      }
+
+      if (formData.leadPhotographerId && leadName) {
+        addActivityLog({
+          customerId: customerToEdit.id,
+          type: 'photographer_assigned',
+          title: `Phân công Trưởng nháy: ${leadName}`,
+          description: `Phân công Trưởng nháy: ${leadName} cho lớp ${formData.className || ''} - ${formData.schoolName || ''} ngày ${formData.expectedShootDate || ''}`,
+          performedByName: currentUser.name
+        });
+      }
+
       onClose();
       return;
     }
 
     // Chế độ TẠO MỚI khách hàng
+    const newCustId = `cust-${Date.now()}`;
     const success = addCustomer({
+      id: newCustId,
       name: formData.name,
       phone: formData.phone,
       email: formData.email,
@@ -476,6 +623,13 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       paymentMethod: formData.paymentMethod,
       shootTime: formData.shootTime,
       shootAddress: formData.shootAddress,
+      leadPhotographerId: formData.leadPhotographerId || undefined,
+      leadPhotographerName: leadName || undefined,
+      videographerId: formData.videographerId || undefined,
+      videographerName: videoName || undefined,
+      assistantPhotographerIds: formData.assistantPhotographerIds,
+      assistantNames: assistantNames,
+      photoNotes: formData.photoNotes,
       editorName: formData.editorName,
       editDeadline: formData.editDeadline,
       editProgress: Number(formData.editProgress) || 0,
@@ -486,7 +640,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       lostNote: formData.lostNote,
 
       specialRequests: formData.specialRequests,
-      notes: formData.notes,
+      notes: updatedNotes,
       source: formData.source,
       campaignName: formData.campaignName,
       utm: {
@@ -500,7 +654,52 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
       assignedCareStaffName: formData.assignedCareStaffName,
       createdById: currentUser.id,
       createdByName: currentUser.name
-    });
+    } as any);
+
+    if (success && (formData.leadPhotographerId || formData.expectedShootDate || formData.pipelineStage === 'Book ngày')) {
+      addBooking({
+        code: `BK-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${formData.className || 'CLASS'}`,
+        customerId: newCustId,
+        customerName: formData.name,
+        schoolName: formData.schoolName || '',
+        className: formData.className || '',
+        shootDate: formData.expectedShootDate || new Date().toISOString().split('T')[0],
+        startTime: formData.shootTime || '07:30',
+        endTime: '17:30',
+        location: formData.shootAddress || formData.schoolName || 'Studio Xoăn Media',
+        city: formData.city || 'Hải Phòng',
+        district: formData.district || '',
+        studentCount: Number(formData.studentCount) || 35,
+        packageId: formData.servicePackageId || 'pkg-2',
+        packageName: selectedPkg?.name || 'Gói Tùy Chọn',
+        concept: formData.concept || 'Tùy chọn',
+        totalAmount: calcTotalAmount,
+        depositAmount: Number(formData.depositAmount) || 0,
+        remainingAmount: calcRemainingAmount,
+        paymentStatus: Number(formData.depositAmount) > 0 ? 'Đã cọc' : 'Chưa cọc',
+        bookingStatus: 'Đã xác nhận',
+        assignments: {
+          leadPhotographerId: formData.leadPhotographerId || undefined,
+          leadPhotographerName: leadName || undefined,
+          videographerId: formData.videographerId || undefined,
+          videographerName: videoName || undefined,
+          assistantPhotographerIds: formData.assistantPhotographerIds || [],
+          assistantNames: assistantNames
+        },
+        notes: formData.photoNotes || (leadName ? `Trưởng nháy: ${leadName}` : ''),
+        photoNotes: formData.photoNotes || ''
+      });
+
+      if (formData.leadPhotographerId && leadName) {
+        addActivityLog({
+          customerId: newCustId,
+          type: 'photographer_assigned',
+          title: `Phân công Trưởng nháy: ${leadName}`,
+          description: `Phân công Trưởng nháy: ${leadName} cho lớp ${formData.className || ''} - ${formData.schoolName || ''} ngày ${formData.expectedShootDate || ''}`,
+          performedByName: currentUser.name
+        });
+      }
+    }
 
     if (success) {
       onClose();
@@ -1060,10 +1259,17 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
 
             {/* 2. Nếu ở giai đoạn: BOOK NGÀY */}
             {formData.pipelineStage === 'Book ngày' && (
-              <div className="p-3.5 bg-purple-50/70 border border-purple-200 rounded-2xl space-y-2 animate-in fade-in duration-150">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
-                  <Calendar className="w-4 h-4 text-purple-600" /> Thông Tin Lịch Chụp (Lên Booking)
+              <div className="p-4 bg-purple-50/80 border border-purple-200 rounded-2xl space-y-3.5 animate-in fade-in duration-150 shadow-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-purple-200/80">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-purple-900">
+                    <Calendar className="w-4 h-4 text-purple-600" /> Thông Tin Lịch Chụp & Ekip (Lên Booking)
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-semibold border border-purple-200">
+                    Đồng bộ tự động vào tài khoản Thợ
+                  </span>
                 </div>
+
+                {/* Hàng 1: Thời gian & Địa điểm */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
                     <label className="font-semibold text-neutral-700">Ngày chụp chính thức *</label>
@@ -1071,7 +1277,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                       type="date"
                       value={formData.expectedShootDate}
                       onChange={e => setFormData({ ...formData, expectedShootDate: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-neutral-900 focus:outline-none"
+                      className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium"
                     />
                   </div>
                   <div>
@@ -1080,7 +1286,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                       type="time"
                       value={formData.shootTime}
                       onChange={e => setFormData({ ...formData, shootTime: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-neutral-900 focus:outline-none"
+                      className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium"
                     />
                   </div>
                   <div>
@@ -1090,7 +1296,151 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                       placeholder="Trường -> Phim trường Wonderland..."
                       value={formData.shootAddress}
                       onChange={e => setFormData({ ...formData, shootAddress: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-neutral-900 focus:outline-none"
+                      className="w-full mt-1 px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                    />
+                  </div>
+                </div>
+
+                {/* Hàng 2: Chọn Thợ Chụp & Quay Phim từ CSDL CRM */}
+                <div className="pt-2 border-t border-purple-200/60 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[11px] font-bold text-purple-900 flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5 text-purple-600" />
+                      Phân Công Ekip Chụp (Dữ liệu Thợ thực tế trong CSDL CRM)
+                    </div>
+                    <span className="text-[10px] text-neutral-500 italic">
+                      {photographers.length} thợ có trong hệ thống
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    {/* 1. Chọn Trưởng nháy (Thợ chụp chính) */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="font-semibold text-neutral-700 flex items-center gap-1">
+                          <UserCheck className="w-3.5 h-3.5 text-purple-600" />
+                          Trưởng nháy (Chụp chính) *
+                        </label>
+                        {formData.leadPhotographerId && formData.expectedShootDate && (
+                          selectedLeadPhotoAvailability.available ? (
+                            <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
+                              <CheckCircle2 className="w-3 h-3" /> Trống lịch
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-amber-600 font-bold flex items-center gap-0.5">
+                              <AlertTriangle className="w-3 h-3" /> Đã có {selectedLeadPhotoAvailability.totalShootsOnDay} ca
+                            </span>
+                          )
+                        )}
+                      </div>
+                      <select
+                        value={formData.leadPhotographerId}
+                        onChange={e => {
+                          const selectedId = e.target.value;
+                          const photo = photographers.find(p => p.id === selectedId);
+                          setFormData({
+                            ...formData,
+                            leadPhotographerId: selectedId,
+                            leadPhotographerName: photo ? photo.fullName : ''
+                          });
+                        }}
+                        className="w-full px-3 py-2 bg-white border border-purple-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium"
+                      >
+                        <option value="">-- Chọn Thợ chụp chính từ CRM --</option>
+                        {photographers.map(p => {
+                          const isBusy = formData.expectedShootDate
+                            ? !getPhotographerAvailability(p.id, formData.expectedShootDate).available
+                            : false;
+                          return (
+                            <option key={p.id} value={p.id}>
+                              {p.fullName} • {p.photographerType} {p.phone ? `(${p.phone})` : ''} {isBusy ? '⚠️ [Trùng lịch]' : ''}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      {formData.leadPhotographerId && (
+                        <p className="mt-1 text-[11px] text-purple-700 font-medium">
+                          ✓ Lịch chụp sẽ hiển thị trong tài khoản của: <strong>{photographers.find(p => p.id === formData.leadPhotographerId)?.fullName}</strong>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* 2. Chọn Thợ quay phim (Videographer) */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="font-semibold text-neutral-700 flex items-center gap-1">
+                          <Video className="w-3.5 h-3.5 text-purple-600" />
+                          Thợ quay phim (Videographer)
+                        </label>
+                        <span className="text-[10px] text-neutral-400">Tùy chọn</span>
+                      </div>
+                      <select
+                        value={formData.videographerId}
+                        onChange={e => setFormData({ ...formData, videographerId: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border border-purple-200 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                      >
+                        <option value="">-- Không có thợ quay / Chưa gán --</option>
+                        {photographers.map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.fullName} • {p.photographerType} {p.phone ? `(${p.phone})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 3. Chọn Thợ phụ (Assistants) - Dạng chip danh sách từ CRM */}
+                  <div className="text-xs">
+                    <label className="font-semibold text-neutral-700 block mb-1">
+                      Thợ phụ / Trợ lý Ekip (Assistants):
+                    </label>
+                    <div className="flex flex-wrap gap-1.5 p-2 bg-white border border-purple-200 rounded-xl min-h-[38px] items-center">
+                      {photographers.map(p => {
+                        const isSelected = formData.assistantPhotographerIds?.includes(p.id);
+                        const isLead = formData.leadPhotographerId === p.id;
+                        return (
+                          <button
+                            type="button"
+                            key={p.id}
+                            disabled={isLead}
+                            onClick={() => {
+                              const current = formData.assistantPhotographerIds || [];
+                              const next = isSelected
+                                ? current.filter(id => id !== p.id)
+                                : [...current, p.id];
+                              setFormData({ ...formData, assistantPhotographerIds: next });
+                            }}
+                            className={`text-[11px] px-2.5 py-1 rounded-lg border font-medium transition-all flex items-center gap-1 cursor-pointer ${
+                              isLead
+                                ? 'opacity-40 cursor-not-allowed bg-neutral-100 text-neutral-400 border-neutral-200'
+                                : isSelected
+                                ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
+                                : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-purple-100/60 hover:border-purple-300'
+                            }`}
+                            title={isLead ? 'Đang được chọn làm Trưởng nháy' : ''}
+                          >
+                            <span>{p.fullName}</span>
+                            {isSelected && <span className="text-[10px] font-bold">✕</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-1 text-[10px] text-neutral-500">
+                      Bấm vào tên để chọn hoặc bỏ chọn thợ phụ tham gia hỗ trợ ca chụp.
+                    </p>
+                  </div>
+
+                  {/* 4. Dặn dò & Ghi chú Ekip */}
+                  <div className="text-xs">
+                    <label className="font-semibold text-neutral-700 block mb-1">
+                      Dặn dò & Ghi chú cho Ekip chụp
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ví dụ: Mang flycam, tập trung trước 30 phút tại cổng trường, mang hắt sáng..."
+                      value={formData.photoNotes}
+                      onChange={e => setFormData({ ...formData, photoNotes: e.target.value })}
+                      className="w-full px-3 py-2 bg-white border border-black/[0.08] rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-purple-400"
                     />
                   </div>
                 </div>

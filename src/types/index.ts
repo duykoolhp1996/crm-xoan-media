@@ -134,6 +134,12 @@ export interface Customer {
   paymentMethod?: string;    // VietQR, Tiền mặt, Chuyển khoản
   shootTime?: string;        // Giờ chụp (07:30 - 17:00)
   shootAddress?: string;     // Địa điểm chụp chính thức
+  leadPhotographerId?: string;   // Thợ chụp chính / Trưởng nháy
+  leadPhotographerName?: string; // Tên Thợ chụp chính
+  videographerId?: string;       // Thợ quay phim (Videographer)
+  videographerName?: string;     // Tên Thợ quay phim
+  assistantPhotographerIds?: string[]; // Danh sách thợ phụ
+  assistantNames?: string[];     // Tên thợ phụ
   editorName?: string;       // Editor phụ trách hậu kỳ
   editDeadline?: string;     // Hạn chót trả ảnh
   editProgress?: number;     // Tiến độ hậu kỳ (0 - 100%)
