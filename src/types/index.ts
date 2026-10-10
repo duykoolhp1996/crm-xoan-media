@@ -285,6 +285,8 @@ export interface Booking {
   photoCount?: number; // Số lượng ảnh bàn giao
   
   notes?: string;
+  isDeleted?: boolean;
+  status?: string;
   createdAt: string;
   updatedAt: string;
 }

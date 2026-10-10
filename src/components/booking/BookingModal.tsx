@@ -179,9 +179,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   const remainingAmount = Math.max(0, totalAmount - formData.depositAmount);
 
-  // Kiểm tra tình trạng sẵn sàng của thợ chính được chọn
+  // Kiểm tra tình trạng sẵn sàng của thợ chính được chọn (Loại trừ chính đơn/lớp này)
   const photoAvailability = formData.leadPhotographerId
-    ? getPhotographerAvailability(formData.leadPhotographerId, formData.shootDate)
+    ? getPhotographerAvailability(formData.leadPhotographerId, formData.shootDate, {
+        excludeCustomerId: formData.customerId,
+        excludeClassName: selectedCustomer?.className,
+        excludeSchoolName: selectedCustomer?.schoolName
+      })
     : { available: true, totalShootsOnDay: 0 };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -529,11 +533,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   className="w-full mt-1.5 px-3 py-2 bg-white border border-black/[0.08] text-neutral-900 rounded-xl font-semibold cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#B8F23D]"
                 >
                   <option value="">-- Chưa gán thợ (Hệ thống sẽ gửi cảnh báo) --</option>
-                  {photographers.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.fullName} - {p.skills.join(', ')} ({p.ratePerShoot.toLocaleString('vi-VN')}đ)
-                    </option>
-                  ))}
+                  {photographers.map(p => {
+                    const isBusy = formData.shootDate
+                      ? !getPhotographerAvailability(p.id, formData.shootDate, {
+                          excludeCustomerId: formData.customerId,
+                          excludeClassName: selectedCustomer?.className,
+                          excludeSchoolName: selectedCustomer?.schoolName
+                        }).available
+                      : false;
+                    return (
+                      <option key={p.id} value={p.id}>
+                        {p.fullName} - {p.skills.join(', ')} ({p.ratePerShoot.toLocaleString('vi-VN')}đ) {isBusy ? '⚠️ [Trùng lịch đơn khác]' : ''}
+                      </option>
+                    );
+                  })}
                 </select>
 
                 {/* Alert nếu thợ bị trùng lịch trong ngày */}

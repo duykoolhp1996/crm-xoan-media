@@ -278,13 +278,37 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
 
   const [formData, setFormData] = useState(getInitialFormData);
 
-  // Tính toán tình trạng lịch bận/rảnh của Thợ chính (Trưởng nháy)
+  // Tìm booking tương ứng với khách hàng đang sửa (nếu có)
+  const currentMatchedBooking = useMemo(() => {
+    if (!customerToEdit?.id) return null;
+    return bookings.find(
+      b => !b.isDeleted && (
+        b.customerId === customerToEdit.id ||
+        (b.className && b.className === customerToEdit.className && b.schoolName === customerToEdit.schoolName)
+      )
+    ) || null;
+  }, [customerToEdit, bookings]);
+
+  // Tính toán tình trạng lịch bận/rảnh của Thợ chính (Trưởng nháy) - Loại trừ chính đơn đang sửa
   const selectedLeadPhotoAvailability = useMemo(() => {
     if (!formData.leadPhotographerId || !formData.expectedShootDate) {
       return { available: true, totalShootsOnDay: 0 };
     }
-    return getPhotographerAvailability(formData.leadPhotographerId, formData.expectedShootDate);
-  }, [formData.leadPhotographerId, formData.expectedShootDate, getPhotographerAvailability]);
+    return getPhotographerAvailability(formData.leadPhotographerId, formData.expectedShootDate, {
+      excludeBookingId: currentMatchedBooking?.id,
+      excludeCustomerId: customerToEdit?.id,
+      excludeClassName: formData.className || customerToEdit?.className,
+      excludeSchoolName: formData.schoolName || customerToEdit?.schoolName
+    });
+  }, [
+    formData.leadPhotographerId, 
+    formData.expectedShootDate, 
+    formData.className,
+    formData.schoolName,
+    customerToEdit, 
+    currentMatchedBooking, 
+    getPhotographerAvailability
+  ]);
 
   // Tự động làm mới form mỗi khi mở modal hoặc đổi khách hàng cần sửa
   React.useEffect(() => {
@@ -1334,8 +1358,11 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                               <CheckCircle2 className="w-3 h-3" /> Trống lịch
                             </span>
                           ) : (
-                            <span className="text-[10px] text-amber-600 font-bold flex items-center gap-0.5">
-                              <AlertTriangle className="w-3 h-3" /> Đã có {selectedLeadPhotoAvailability.totalShootsOnDay} ca
+                            <span 
+                              className="text-[10px] text-amber-600 font-bold flex items-center gap-0.5"
+                              title={`Trùng với đơn khác: ${selectedLeadPhotoAvailability.conflictDetails || selectedLeadPhotoAvailability.conflictBookingCode || ''}`}
+                            >
+                              <AlertTriangle className="w-3 h-3" /> Đã có {selectedLeadPhotoAvailability.totalShootsOnDay} ca khác
                             </span>
                           )
                         )}
@@ -1345,10 +1372,14 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                         onChange={e => {
                           const selectedId = e.target.value;
                           const photo = photographers.find(p => p.id === selectedId);
+                          // Tự động gỡ khỏi danh sách thợ phụ nếu trước đó đang làm thợ phụ của lớp này
+                          const currentAssistants = formData.assistantPhotographerIds || [];
+                          const updatedAssistants = currentAssistants.filter(id => id !== selectedId);
                           setFormData({
                             ...formData,
                             leadPhotographerId: selectedId,
-                            leadPhotographerName: photo ? photo.fullName : ''
+                            leadPhotographerName: photo ? photo.fullName : '',
+                            assistantPhotographerIds: updatedAssistants
                           });
                         }}
                         className="w-full px-3 py-2 bg-white border border-purple-300 rounded-xl text-neutral-900 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium"
@@ -1356,11 +1387,16 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, c
                         <option value="">-- Chọn Thợ chụp chính từ CRM --</option>
                         {photographers.map(p => {
                           const isBusy = formData.expectedShootDate
-                            ? !getPhotographerAvailability(p.id, formData.expectedShootDate).available
+                            ? !getPhotographerAvailability(p.id, formData.expectedShootDate, {
+                                excludeBookingId: currentMatchedBooking?.id,
+                                excludeCustomerId: customerToEdit?.id,
+                                excludeClassName: formData.className || customerToEdit?.className,
+                                excludeSchoolName: formData.schoolName || customerToEdit?.schoolName
+                              }).available
                             : false;
                           return (
                             <option key={p.id} value={p.id}>
-                              {p.fullName} • {p.photographerType} {p.phone ? `(${p.phone})` : ''} {isBusy ? '⚠️ [Trùng lịch]' : ''}
+                              {p.fullName} • {p.photographerType} {p.phone ? `(${p.phone})` : ''} {isBusy ? '⚠️ [Trùng lịch đơn khác]' : ''}
                             </option>
                           );
                         })}

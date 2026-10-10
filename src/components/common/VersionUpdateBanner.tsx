@@ -11,7 +11,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
 
   useEffect(() => {
     try {
-      const seen = localStorage.getItem('xoan_crm_seen_update_v135');
+      const seen = localStorage.getItem('xoan_crm_seen_update_v136');
       if (!seen) {
         // Trì hoãn 1s sau khi tải trang để hiệu ứng mượt mà
         const timer = setTimeout(() => {
@@ -27,7 +27,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
   const handleDismiss = () => {
     setIsVisible(false);
     try {
-      localStorage.setItem('xoan_crm_seen_update_v135', 'true');
+      localStorage.setItem('xoan_crm_seen_update_v136', 'true');
     } catch {}
   };
 
@@ -56,7 +56,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.3.5
+                Phiên Bản Mới v1.3.6
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -64,25 +64,25 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.3.5
+              Cập Nhật CRM Xoăn Media v1.3.6
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Tối ưu hóa không gian làm việc: Loại bỏ mục Gói Dịch Vụ Kỷ Yếu không cần thiết, tập trung toàn diện vào Quản lý Lead, Booking, Lịch chụp & Tài chính!
+              Khắc phục triệt để lỗi kiểm tra trùng lịch thợ: Tự động loại trừ chính đơn đang chỉnh sửa, phân định chuẩn xác ca chụp và chỉ cảnh báo khi thực sự có đơn khác trùng lịch!
             </p>
 
             {/* Quick feature tags */}
             <div className="flex items-center gap-2 mt-2 text-[10px] text-neutral-400">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Tinh gọn Sidebar
+                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Fix trùng lịch ảo
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Tối ưu tốc độ
+                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Phân công mượt mà
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Bell className="w-3 h-3 text-[#B8F23D]" /> Tập trung nghiệp vụ
+                <Bell className="w-3 h-3 text-[#B8F23D]" /> Check lịch chuẩn xác
               </span>
             </div>
 

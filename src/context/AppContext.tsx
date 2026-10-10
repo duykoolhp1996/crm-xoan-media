@@ -123,7 +123,22 @@ interface AppContextType {
   updatePhotographer: (photographer: Photographer) => void;
   deletePhotographer: (id: string) => void;
   updatePhotographerStatus: (id: string, status: Photographer['status']) => void;
-  getPhotographerAvailability: (photographerId: string, date: string) => { available: boolean; conflictBookingCode?: string; totalShootsOnDay: number };
+  getPhotographerAvailability: (
+    photographerId: string, 
+    date: string,
+    options?: {
+      excludeBookingId?: string;
+      excludeCustomerId?: string;
+      excludeClassName?: string;
+      excludeSchoolName?: string;
+    }
+  ) => { 
+    available: boolean; 
+    conflictBookingCode?: string; 
+    conflictDetails?: string;
+    totalShootsOnDay: number;
+    conflictingBookings?: Booking[];
+  };
 
   // Sales Staff Team
   salesStaff: SalesStaff[];
@@ -1679,19 +1694,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  // Kiểm tra tính sẵn sàng & xung đột lịch thợ
-  const getPhotographerAvailability = (photographerId: string, date: string) => {
-    const shootsOnDay = bookings.filter(
-      b => b.shootDate === date && 
-      (b.assignments.leadPhotographerId === photographerId || 
-       b.assignments.assistantPhotographerIds?.includes(photographerId) ||
-       b.assignments.videographerId === photographerId)
-    );
+  // Kiểm tra tính sẵn sàng & xung đột lịch thợ (Loại trừ chính đơn/lớp đang chỉnh sửa)
+  const getPhotographerAvailability = (
+    photographerId: string, 
+    date: string,
+    options?: {
+      excludeBookingId?: string;
+      excludeCustomerId?: string;
+      excludeClassName?: string;
+      excludeSchoolName?: string;
+    }
+  ) => {
+    if (!photographerId || !date) {
+      return { available: true, totalShootsOnDay: 0, conflictingBookings: [] };
+    }
+
+    const targetDate = String(date).split('T')[0].trim();
+    const targetPhoto = photographers.find(p => p.id === photographerId);
+    const targetPhotoName = targetPhoto?.fullName?.trim().toLowerCase();
+
+    const shootsOnDay = bookings.filter(b => {
+      // 1. Bỏ qua các đơn đã xóa hoặc đã hủy
+      if (b.isDeleted || b.status === 'cancelled' || b.bookingStatus === 'Hủy') {
+        return false;
+      }
+
+      // 2. So sánh ngày chụp (chuẩn hóa YYYY-MM-DD)
+      const bDate = String(b.shootDate || '').split('T')[0].trim();
+      if (!bDate || bDate !== targetDate) {
+        return false;
+      }
+
+      // 3. Loại trừ chính đơn đang chỉnh sửa
+      if (options?.excludeBookingId && b.id === options.excludeBookingId) {
+        return false;
+      }
+      if (options?.excludeCustomerId && b.customerId === options.excludeCustomerId) {
+        return false;
+      }
+      if (
+        options?.excludeClassName && 
+        options?.excludeSchoolName && 
+        b.className?.trim().toLowerCase() === options.excludeClassName.trim().toLowerCase() && 
+        b.schoolName?.trim().toLowerCase() === options.excludeSchoolName.trim().toLowerCase()
+      ) {
+        return false;
+      }
+
+      // 4. Kiểm tra xem thợ này có trong ca chụp của đơn KHÁC trong ngày đó không
+      const bLeadId = b.assignments?.leadPhotographerId;
+      const bLeadName = b.assignments?.leadPhotographerName?.trim().toLowerCase();
+      const isLead = bLeadId === photographerId || (targetPhotoName && bLeadName === targetPhotoName);
+
+      const bAssistantIds = b.assignments?.assistantPhotographerIds || [];
+      const bAssistantNames = (b.assignments?.assistantNames || []).map(n => n?.trim().toLowerCase());
+      const isAssistant = bAssistantIds.includes(photographerId) || 
+                          (targetPhotoName && bAssistantNames.includes(targetPhotoName));
+
+      const bVideoId = b.assignments?.videographerId;
+      const bVideoName = b.assignments?.videographerName?.trim().toLowerCase();
+      const isVideo = bVideoId === photographerId || (targetPhotoName && bVideoName === targetPhotoName);
+
+      const bIndivId = (b.assignments as any)?.individualPhotographerId;
+      const bIndivName = (b.assignments as any)?.individualPhotographerName?.trim().toLowerCase();
+      const isIndiv = bIndivId === photographerId || (targetPhotoName && bIndivName === targetPhotoName);
+
+      return isLead || isAssistant || isVideo || isIndiv;
+    });
+
+    const firstConflict = shootsOnDay[0];
+    const conflictInfo = firstConflict 
+      ? `${firstConflict.className ? `Lớp ${firstConflict.className}` : ''} (${firstConflict.schoolName || firstConflict.code || 'Đơn khác'})`
+      : undefined;
 
     return {
       available: shootsOnDay.length === 0,
-      conflictBookingCode: shootsOnDay.length > 0 ? shootsOnDay[0].code : undefined,
-      totalShootsOnDay: shootsOnDay.length
+      conflictBookingCode: firstConflict?.code || conflictInfo,
+      conflictDetails: conflictInfo,
+      totalShootsOnDay: shootsOnDay.length,
+      conflictingBookings: shootsOnDay
     };
   };
 

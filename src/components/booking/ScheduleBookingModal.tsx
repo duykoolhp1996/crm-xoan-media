@@ -105,9 +105,13 @@ export const ScheduleBookingModal: React.FC<ScheduleBookingModalProps> = ({
 
   const quickDates = getQuickDates();
 
-  // Kiểm tra tình trạng sẵn sàng của thợ được chọn
+  // Kiểm tra tình trạng sẵn sàng của thợ được chọn (Loại trừ chính đơn/lớp này)
   const photoAvailability = selectedPhotoId
-    ? getPhotographerAvailability(selectedPhotoId, shootDate)
+    ? getPhotographerAvailability(selectedPhotoId, shootDate, {
+        excludeCustomerId: customer?.id,
+        excludeClassName: customer?.className,
+        excludeSchoolName: customer?.schoolName
+      })
     : { available: true, totalShootsOnDay: 0 };
 
   const selectedPhotographer = photographers.find(p => p.id === selectedPhotoId);

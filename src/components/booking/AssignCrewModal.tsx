@@ -113,8 +113,13 @@ export const AssignCrewModal: React.FC<AssignCrewModalProps> = ({
   // Lọc danh sách thợ khả dụng (loại studio đối tác)
   const availablePhotographers = photographers.filter(p => p.photographerType !== 'Đối tác Studio');
 
-  // Kiểm tra tình trạng bận/rảnh của thợ chính đã chọn
-  const leadAvailability = leadPhotoId ? getPhotographerAvailability(leadPhotoId, shootDate) : null;
+  // Kiểm tra tình trạng bận/rảnh của thợ chính đã chọn (Loại trừ chính đơn/lớp này)
+  const leadAvailability = leadPhotoId ? getPhotographerAvailability(leadPhotoId, shootDate, {
+    excludeBookingId: matchedBooking?.id,
+    excludeCustomerId: customer?.id,
+    excludeClassName: customer?.className,
+    excludeSchoolName: customer?.schoolName
+  }) : null;
   const selectedLead = photographers.find(p => p.id === leadPhotoId);
 
   // Toggle thợ phụ
@@ -367,11 +372,21 @@ export const AssignCrewModal: React.FC<AssignCrewModalProps> = ({
                 className="w-full p-2.5 bg-white rounded-xl border border-purple-300 font-extrabold text-xs text-purple-950 focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer appearance-none pr-8"
               >
                 <option value="">-- Chưa gán thợ chụp chính --</option>
-                {availablePhotographers.map(p => (
-                  <option key={p.id} value={p.id}>
-                    📸 {p.fullName} ({p.experienceYears} năm KN - {p.photographerType})
-                  </option>
-                ))}
+                {availablePhotographers.map(p => {
+                  const isBusy = shootDate
+                    ? !getPhotographerAvailability(p.id, shootDate, {
+                        excludeBookingId: matchedBooking?.id,
+                        excludeCustomerId: customer?.id,
+                        excludeClassName: customer?.className,
+                        excludeSchoolName: customer?.schoolName
+                      }).available
+                    : false;
+                  return (
+                    <option key={p.id} value={p.id}>
+                      📸 {p.fullName} ({p.experienceYears} năm KN - {p.photographerType}) {isBusy ? '⚠️ [Trùng lịch đơn khác]' : ''}
+                    </option>
+                  );
+                })}
               </select>
               <ChevronDown className="w-4 h-4 text-purple-600 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
