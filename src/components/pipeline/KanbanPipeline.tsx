@@ -350,10 +350,10 @@ export const KanbanPipeline: React.FC = () => {
     setDraggedCustomerId(null);
   };
 
-  const handleDeleteToTrash = (cust: Customer) => {
+  const handleDeleteToTrash = async (cust: Customer) => {
     const reason = prompt(`Chuyển Lead "${cust.name}" vào thùng rác?\nNhập lý do xóa (tùy chọn):`, 'Khách hủy hoặc trùng dữ liệu');
     if (reason !== null) {
-      deleteCustomer(cust.id, reason);
+      await deleteCustomer(cust.id, reason);
     }
   };
 

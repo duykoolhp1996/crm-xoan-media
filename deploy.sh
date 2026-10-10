@@ -2,7 +2,7 @@
 set -e
 
 echo "=========================================================="
-echo "🚀 CRM Xoăn Media - Zero-Data-Loss Deployment (v1.4.0)"
+echo "🚀 CRM Xoăn Media - Zero-Data-Loss Deployment (v1.4.1)"
 echo "=========================================================="
 
 # 1. Tự động sao lưu Database trên Server trước khi deploy bất kỳ thay đổi nào

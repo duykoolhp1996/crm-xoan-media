@@ -1037,10 +1037,10 @@ export const CustomerList: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
                             if (window.confirm(`Bạn có chắc chắn muốn xóa khách hàng "${cust.name}" (${cust.className ? `${cust.className} - ` : ''}${cust.phone || 'Chưa có SĐT'}) khỏi hệ thống CRM không?`)) {
-                              deleteCustomer(cust.id);
+                              await deleteCustomer(cust.id);
                             }
                           }}
                           title="Xóa khách hàng này"

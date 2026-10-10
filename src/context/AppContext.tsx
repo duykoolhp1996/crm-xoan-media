@@ -103,7 +103,7 @@ interface AppContextType {
   selectedCustomerId: string | null;
   setSelectedCustomerId: (id: string | null) => void;
   addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt' | 'totalRevenue'> & { paidAmount?: number }) => boolean;
-  deleteCustomer: (id: string, reason?: string) => void;
+  deleteCustomer: (id: string, reason?: string) => Promise<boolean>;
   restoreCustomer: (id: string) => Promise<boolean>;
   permanentDeleteCustomer: (id: string, reason?: string) => Promise<boolean>;
   updateCustomerStage: (customerId: string, newStage: PipelineStage, note?: string) => void;
@@ -1068,7 +1068,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  const deleteCustomer = (id: string, reason?: string) => {
+  const deleteCustomer = async (id: string, reason?: string): Promise<boolean> => {
     const target = customers.find(c => c.id === id);
     const deleteReasonText = reason || 'Xóa thủ công từ giao diện';
 
@@ -1097,10 +1097,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
-    apiClient.deleteCustomer(id, deleteReasonText).catch(err => {
-      console.warn('[SQL Database] Lỗi gọi API deleteCustomer:', err);
-    });
     crmSupabaseService.deleteCustomer(id).catch(() => {});
+
+    try {
+      await apiClient.deleteCustomer(id, deleteReasonText);
+    } catch (err) {
+      console.warn('[SQL Database] Lỗi gọi API deleteCustomer:', err);
+    }
 
     if (target) {
       addActivityLog({
@@ -1122,6 +1125,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       setNotifications(prev => [notif, ...prev]);
     }
+    return true;
   };
 
   const restoreCustomer = async (id: string): Promise<boolean> => {

@@ -62,6 +62,9 @@ const parseNumericAmount = (val) => {
   return isNaN(parsed) ? 0 : Math.max(0, parsed);
 };
 
+// Helper chuyển undefined sang null để SQLite không bị lỗi parameter binding
+const toSql = (val) => (val === undefined ? null : val);
+
 // ==========================================
 // DATA MAPPERS (SQLite Row <-> CRM Entity)
 // ==========================================
@@ -1047,9 +1050,6 @@ const server = http.createServer(async (req, res) => {
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
         `);
-
-        // Helper chuyển undefined sang null để SQLite không bị lỗi parameter binding
-        const toSql = (val) => (val === undefined ? null : val);
 
         stmt.run(
           toSql(body.name), toSql(body.phone), toSql(body.email), toSql(body.facebook), toSql(body.tiktok), toSql(body.zalo),
