@@ -243,12 +243,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentRole, setCurrentRoleState] = useState<UserRole>('admin');
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
   
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-  const [deletedCustomers, setDeletedCustomers] = useState<Customer[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_cached_customers');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return mockCustomers;
+  });
+  const [deletedCustomers, setDeletedCustomers] = useState<Customer[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_cached_deleted_customers');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
   const [isLoadingDeleted, setIsLoadingDeleted] = useState<boolean>(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
-  const [bookings, setBookings] = useState<Booking[]>(mockBookings);
+  const [bookings, setBookings] = useState<Booking[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_xoan_cached_bookings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return mockBookings;
+  });
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   const [photographers, setPhotographers] = useState<Photographer[]>(() => {
@@ -440,6 +467,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const res = await apiClient.getDeletedCustomers();
       if (Array.isArray(res)) {
         setDeletedCustomers(res);
+        try {
+          localStorage.setItem('crm_xoan_cached_deleted_customers', JSON.stringify(res));
+        } catch {}
         console.log(`[SQL Database] 🗑️ Đã nạp ${res.length} lead trong thùng rác từ SQL Server.`);
       }
     } catch (e) {
@@ -462,24 +492,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           apiClient.getNotifications(currentUser?.id, currentRole)
         ]);
 
-        if (custRes.status === 'fulfilled' && custRes.value && custRes.value.customers) {
+        if (custRes.status === 'fulfilled' && custRes.value && Array.isArray(custRes.value.customers)) {
           const sqlCusts = custRes.value.customers;
-          if (sqlCusts.length > 0) {
-            setCustomers(sqlCusts);
-            console.log(`[SQL Database] 🖥️ Đã nạp thành công ${sqlCusts.length} khách hàng từ SQL Server.`);
-          }
+          setCustomers(sqlCusts);
+          try {
+            localStorage.setItem('crm_xoan_cached_customers', JSON.stringify(sqlCusts));
+          } catch {}
+          console.log(`[SQL Database] 🖥️ Đã nạp thành công ${sqlCusts.length} khách hàng từ SQL Server.`);
         }
 
-        if (bookRes.status === 'fulfilled' && bookRes.value && bookRes.value.bookings) {
+        if (bookRes.status === 'fulfilled' && bookRes.value && Array.isArray(bookRes.value.bookings)) {
           const sqlBooks = bookRes.value.bookings;
-          if (sqlBooks.length > 0) {
-            setBookings(sqlBooks);
-            console.log(`[SQL Database] 🖥️ Đã nạp thành công ${sqlBooks.length} lịch booking từ SQL Server.`);
-          }
+          setBookings(sqlBooks);
+          try {
+            localStorage.setItem('crm_xoan_cached_bookings', JSON.stringify(sqlBooks));
+          } catch {}
+          console.log(`[SQL Database] 🖥️ Đã nạp thành công ${sqlBooks.length} lịch booking từ SQL Server.`);
         }
 
         if (delRes.status === 'fulfilled' && Array.isArray(delRes.value)) {
           setDeletedCustomers(delRes.value);
+          try {
+            localStorage.setItem('crm_xoan_cached_deleted_customers', JSON.stringify(delRes.value));
+          } catch {}
         }
 
         if (photoRes.status === 'fulfilled' && Array.isArray(photoRes.value) && photoRes.value.length > 0) {
@@ -534,20 +569,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 20000);
 
     return () => clearInterval(notifPollingTimer);
-
-    // 2. Nạp thêm từ Supabase Replica (nếu có dữ liệu mới hơn trên cloud)
-    crmSupabaseService.getCustomers().then(remoteCustomers => {
-      if (remoteCustomers && remoteCustomers.length > 0) {
-        setCustomers(prev => {
-          const map = new Map<string, Customer>();
-          prev.forEach(c => map.set(c.id, c));
-          remoteCustomers.forEach(c => {
-            if (!map.has(c.id)) map.set(c.id, c);
-          });
-          return Array.from(map.values());
-        });
-      }
-    }).catch(() => {});
   }, []);
 
   // Xử lý đăng nhập bằng username / ID / email / số điện thoại & password
@@ -941,7 +962,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setCustomers(prev => [newCustomer, ...prev]);
+    setCustomers(prev => {
+      const next = [newCustomer, ...prev];
+      try {
+        localStorage.setItem('crm_xoan_cached_customers', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     // 1. Lưu bền vững vào SQL Server REST API
     apiClient.createCustomer(newCustomer).catch(err => {
       console.warn('[SQL Database] Lỗi gọi API createCustomer:', err);
@@ -1012,7 +1039,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = customers.find(c => c.id === id);
     const deleteReasonText = reason || 'Xóa thủ công từ giao diện';
 
-    setCustomers(prev => prev.filter(c => c.id !== id));
+    setCustomers(prev => {
+      const next = prev.filter(c => c.id !== id);
+      try {
+        localStorage.setItem('crm_xoan_cached_customers', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
     if (target) {
       const softDeletedCust: Customer = {
         ...target,
@@ -1021,7 +1055,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deletedBy: currentUser.name,
         deleteReason: deleteReasonText
       };
-      setDeletedCustomers(prev => [softDeletedCust, ...prev.filter(c => c.id !== id)]);
+      setDeletedCustomers(prev => {
+        const next = [softDeletedCust, ...prev.filter(c => c.id !== id)];
+        try {
+          localStorage.setItem('crm_xoan_cached_deleted_customers', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
     }
 
     apiClient.deleteCustomer(id, deleteReasonText).catch(err => {
@@ -1056,7 +1096,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const target = deletedCustomers.find(c => c.id === id);
       await apiClient.restoreCustomer(id);
 
-      setDeletedCustomers(prev => prev.filter(c => c.id !== id));
+      setDeletedCustomers(prev => {
+        const next = prev.filter(c => c.id !== id);
+        try {
+          localStorage.setItem('crm_xoan_cached_deleted_customers', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
       if (target) {
         const restored: Customer = {
           ...target,
@@ -1066,7 +1112,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           deleteReason: undefined,
           updatedAt: new Date().toISOString()
         };
-        setCustomers(prev => [restored, ...prev]);
+        setCustomers(prev => {
+          const next = [restored, ...prev];
+          try {
+            localStorage.setItem('crm_xoan_cached_customers', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
 
         addActivityLog({
           customerId: id,
@@ -1106,7 +1158,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const target = deletedCustomers.find(c => c.id === id);
       await apiClient.permanentDeleteCustomer(id, reason);
 
-      setDeletedCustomers(prev => prev.filter(c => c.id !== id));
+      setDeletedCustomers(prev => {
+        const next = prev.filter(c => c.id !== id);
+        try {
+          localStorage.setItem('crm_xoan_cached_deleted_customers', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
 
       if (target) {
         addActivityLog({
@@ -1165,8 +1223,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     let updatedCustObj: Customer | null = null;
-    setCustomers(prev =>
-      prev.map(c => {
+    setCustomers(prev => {
+      const next = prev.map(c => {
         if (c.id === customerId) {
           const isLeadOrLost = newStage === 'New Lead' || newStage === 'Lost';
           updatedCustObj = {
@@ -1182,8 +1240,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return updatedCustObj;
         }
         return c;
-      })
-    );
+      });
+      try {
+        localStorage.setItem('crm_xoan_cached_customers', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
 
     // Lưu vào SQL Server REST API & Lịch sử Stage History
     apiClient.changeCustomerStage(customerId, newStage, note).catch(err => {
@@ -1350,7 +1412,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const isNewDeposit = prevCust && !['Đã cọc', 'Đã đặt cọc'].includes(prevCust.pipelineStage) && ['Đã cọc', 'Đã đặt cọc'].includes(updated.pipelineStage);
     const closerSalesName = currentUser.role === 'sales' ? currentUser.name : (updated.assignedSalesName || currentUser.name);
 
-    setCustomers(prev => prev.map(c => c.id === updated.id ? updated : c));
+    setCustomers(prev => {
+      const next = prev.map(c => c.id === updated.id ? updated : c);
+      try {
+        localStorage.setItem('crm_xoan_cached_customers', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     // 1. Cập nhật bền vững vào SQL Server REST API
     apiClient.updateCustomer(updated.id, updated).catch(err => {
       console.warn('[SQL Database] Lỗi gọi API updateCustomer:', err);
@@ -1445,7 +1513,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    setBookings(prev => [newBooking, ...prev]);
+    setBookings(prev => {
+      const next = [newBooking, ...prev];
+      try {
+        localStorage.setItem('crm_xoan_cached_bookings', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     // 1. Lưu bền vững vào SQL Server REST API
     apiClient.createBooking(newBooking).catch(err => {
       console.warn('[SQL Database] Lỗi gọi API createBooking:', err);
@@ -1555,7 +1629,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateBooking = (updated: Booking) => {
-    setBookings(prev => prev.map(b => b.id === updated.id ? updated : b));
+    setBookings(prev => {
+      const next = prev.map(b => b.id === updated.id ? updated : b);
+      try {
+        localStorage.setItem('crm_xoan_cached_bookings', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     // 1. Cập nhật bền vững vào SQL Server REST API
     apiClient.updateBooking(updated.id, updated).catch(err => {
       console.warn('[SQL Database] Lỗi gọi API updateBooking:', err);
@@ -1615,8 +1695,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setNotifications(prev => [photoNotif, ...prev]);
     }
 
-    setBookings(prev =>
-      prev.map(b => {
+    setBookings(prev => {
+      const next = prev.map(b => {
         if (b.id === bookingId) {
           const updatedAssignments = { ...b.assignments };
           if (roleType === 'lead') {
@@ -1635,8 +1715,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return { ...b, assignments: updatedAssignments, updatedAt: new Date().toISOString() };
         }
         return b;
-      })
-    );
+      });
+      try {
+        localStorage.setItem('crm_xoan_cached_bookings', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   const addPhotographer = (data: Omit<Photographer, 'id' | 'rating' | 'completedShootsCount'>) => {

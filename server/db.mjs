@@ -685,4 +685,501 @@ const initStaffAndPhotographers = () => {
 };
 initStaffAndPhotographers();
 
+// 9. BẢNG DỮ LIỆU SẢN PHẨM CHO THUÊ ĐỒ (XOĂN RENTAL - ZERO DATA LOSS)
+const initRentalTables = () => {
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS rental_products (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        gender TEXT DEFAULT 'unisex',
+        price INTEGER NOT NULL,
+        class_price INTEGER,
+        deposit INTEGER,
+        sizes TEXT,
+        badge TEXT,
+        image TEXT NOT NULL,
+        gallery TEXT,
+        desc TEXT,
+        includes TEXT,
+        rating REAL DEFAULT 5.0,
+        rent_count INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'active',
+        is_deleted INTEGER DEFAULT 0,
+        version INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        deleted_at TEXT
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_rental_products_cat ON rental_products(category);
+      CREATE INDEX IF NOT EXISTS idx_rental_products_deleted ON rental_products(is_deleted);
+    `);
+
+    // Tự động seed 16 mẫu mặc định nếu bảng đang rỗng
+    const count = db.prepare('SELECT count(*) as c FROM rental_products').get().c;
+    if (count === 0) {
+      console.log('[Rental DB] Khởi tạo 16 mẫu trang phục mặc định ban đầu...');
+      const seedProducts = [
+        {
+          id: "ad-01",
+          name: "Áo Dài Trắng Nữ Sinh 4 Tà Lụa Mỹ Truyền Thống",
+          category: "ao-dai",
+          gender: "nu",
+          price: 120000,
+          classPrice: 90000,
+          deposit: 200000,
+          sizes: ["S", "M", "L", "XL"],
+          badge: "BEST SELLER",
+          image: "assets/img/albums/to-hieu/artboard-1-cover-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-1-cover-800.webp"],
+          desc: "Tà áo dài trắng tinh khôi chất liệu lụa Mỹ cao cấp 4 tà mềm mại, bay bổng trong từng bước chân.",
+          includes: ["Áo dài trắng 4 tà", "Quần lụa phi bóng", "Nón lá bài thơ", "Băng đô hoa"],
+          rating: 5.0,
+          rentCount: 840
+        },
+        {
+          id: "ad-02",
+          name: "Áo Dài Cô Ba Sài Gòn Retro Thập Niên 90s",
+          category: "ao-dai",
+          gender: "nu",
+          price: 130000,
+          classPrice: 95000,
+          deposit: 200000,
+          sizes: ["S", "M", "L"],
+          badge: "HOT CONCEPT",
+          image: "assets/img/albums/to-hieu/artboard-2-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-2-tap-the-800.webp"],
+          desc: "Họa tiết gạch bông cổ điển, chấm bi vintage mang đậm hơi thở Sài Gòn xưa.",
+          includes: ["Áo dài Cô Ba", "Băng đô cùng tone", "Kính râm mắt mèo vintage", "Quạt gỗ nan"],
+          rating: 4.9,
+          rentCount: 520
+        },
+        {
+          id: "ad-03",
+          name: "Áo Dài Gấm Tơ Tằm Hoa Nhí Quý Phái",
+          category: "ao-dai",
+          gender: "nu",
+          price: 150000,
+          classPrice: 110000,
+          deposit: 250000,
+          sizes: ["S", "M", "L", "XL"],
+          badge: "CAO CẤP",
+          image: "assets/img/albums/to-hieu/artboard-3-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-3-tap-the-800.webp"],
+          desc: "Chất liệu gấm tơ dệt nổi hoa văn hoa nhí ánh kim sang trọng, giữ phom cực chuẩn.",
+          includes: ["Áo dài gấm", "Quần lụa ngọc trai", "Kiềng bạc cổ điển", "Bó sen lụa cầm tay"],
+          rating: 5.0,
+          rentCount: 430
+        },
+        {
+          id: "vest-01",
+          name: "Bộ Suit / Vest Nam Hàn Quốc Màu Đen Classic",
+          category: "vest",
+          gender: "nam",
+          price: 150000,
+          classPrice: 110000,
+          deposit: 300000,
+          sizes: ["M (50-60kg)", "L (60-70kg)", "XL (70-80kg)", "XXL (>80kg)"],
+          badge: "CHUẨN FORM",
+          image: "assets/img/albums/to-hieu/artboard-4-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-4-tap-the-800.webp"],
+          desc: "Form Slimfit tôn dáng, ve áo lượn chuẩn phong cách Hàn Quốc trẻ trung.",
+          includes: ["Áo vest nam", "Quần âu cùng tone", "Cà vạt hoặc nơ cổ", "Khăn cài túi áo"],
+          rating: 5.0,
+          rentCount: 920
+        },
+        {
+          id: "vest-02",
+          name: "Bộ Vest Nam Trẻ Trung Tone Ghi Xám Hiện Đại",
+          category: "vest",
+          gender: "nam",
+          price: 150000,
+          classPrice: 110000,
+          deposit: 300000,
+          sizes: ["M", "L", "XL", "XXL"],
+          badge: "TRENDING",
+          image: "assets/img/albums/to-hieu/artboard-5-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-5-tap-the-800.webp"],
+          desc: "Sắc ghi xám thời thượng mang lại vẻ ngoài lịch lãm, hiện đại, ăn ảnh trong mọi điều kiện ánh sáng.",
+          includes: ["Áo vest ghi xám", "Quần âu slimfit", "Cà vạt lụa cao cấp"],
+          rating: 4.8,
+          rentCount: 610
+        },
+        {
+          id: "vest-03",
+          name: "Bộ Vest Nam Màu Be Sáng Lãng Tử Phong Cách Vintage",
+          category: "vest",
+          gender: "nam",
+          price: 160000,
+          classPrice: 120000,
+          deposit: 300000,
+          sizes: ["M", "L", "XL"],
+          badge: "VINTAGE",
+          image: "assets/img/albums/to-hieu/artboard-1-cover-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-1-cover-800.webp"],
+          desc: "Tone be pastel ấm áp, hoàn hảo cho các bộ ảnh kỷ yếu ngoại cảnh công viên, hoàng hôn, cối xay gió.",
+          includes: ["Áo vest màu be", "Quần âu be", "Nơ bướm màu nâu tây", "Hoa cài ngực vintage"],
+          rating: 4.9,
+          rentCount: 390
+        },
+        {
+          id: "cn-01",
+          name: "Full Set Áo Thụng Cử Nhân Tốt Nghiệp Cấp 3 / Đại Học",
+          category: "cu-nhan",
+          gender: "unisex",
+          price: 60000,
+          classPrice: 40000,
+          deposit: 100000,
+          sizes: ["Size 1 (<1m60)", "Size 2 (1m60 - 1m75)", "Size 3 (>1m75)"],
+          badge: "ĐẦY ĐỦ PHỤ KIỆN",
+          image: "assets/img/albums/tot-nghiep/ao-cu-nhan-chuan.webp",
+          gallery: [
+            "assets/img/albums/tot-nghiep/ao-cu-nhan-chuan.webp",
+            "assets/img/albums/tot-nghiep/tot-nghiep-card-01-800.webp",
+            "assets/img/albums/tot-nghiep/tot-nghiep-page-01-800.webp",
+            "assets/img/albums/tot-nghiep/tot-nghiep-spread-panorama-800.webp"
+          ],
+          desc: "Trang phục thụng cử nhân chuẩn nghi thức tốt nghiệp quốc gia. Vải gabadin mềm rủ không nhăn, cổ viền đỏ/xanh sắc nét.",
+          includes: ["Áo thụng cử nhân dáng dài", "Mũ tốt nghiệp cử nhân", "Tua rua mũ năm tốt nghiệp", "Bằng tốt nghiệp da ép kim", "Cà vạt đỏ sinh viên"],
+          rating: 5.0,
+          rentCount: 1650
+        },
+        {
+          id: "cn-02",
+          name: "Set Áo Cử Nhân Thạc Sĩ / Master Nón Bát Giác",
+          category: "cu-nhan",
+          gender: "unisex",
+          price: 90000,
+          classPrice: 65000,
+          deposit: 150000,
+          sizes: ["Size M", "Size L", "Size XL"],
+          badge: "CAO CẤP",
+          image: "assets/img/albums/tot-nghiep/tot-nghiep-card-02-800.webp",
+          gallery: ["assets/img/albums/tot-nghiep/tot-nghiep-card-02-800.webp"],
+          desc: "Mẫu áo thụng nhung phối dạ cao cấp cho tân Thạc sĩ, Bác sĩ, Dược sĩ hoặc các lớp chuyên cần độ trang trọng đặc biệt.",
+          includes: ["Áo thụng nhung viền vàng", "Khăn choàng dải danh dự (Stole)", "Mũ bát giác nhung", "Bằng kẹp nhung"],
+          rating: 4.9,
+          rentCount: 480
+        },
+        {
+          id: "cp-01",
+          name: "Set Cổ Phục Nhật Bình Triều Nguyễn Quý Phái",
+          category: "co-phuc",
+          gender: "nu",
+          price: 180000,
+          classPrice: 135000,
+          deposit: 300000,
+          sizes: ["S", "M", "L"],
+          badge: "DI SẢN VIỆT",
+          image: "assets/img/albums/vo-thi-sau/photo-01-800.webp",
+          gallery: ["assets/img/albums/vo-thi-sau/photo-01-800.webp", "assets/img/albums/vo-thi-sau/photo-02-800.webp"],
+          desc: "Phục dựng chuẩn thức hoa văn cổ truyền áo Nhật Bình cung đình Huế. Cổ áo thêu ngũ phúc, dải ngũ sắc tay áo rực rỡ, chất liệu gấm lụa thượng hạng.",
+          includes: ["Áo Nhật Bình", "Áo lót trong & Quần tơ tằm", "Khăn vành đóng đầu mạ vàng", "Quạt lông cung đình", "Hài nhung thêu hoa"],
+          rating: 5.0,
+          rentCount: 540
+        },
+        {
+          id: "cp-02",
+          name: "Set Áo Tấc Truyền Thống Nam Nữ Quý Tộc",
+          category: "co-phuc",
+          gender: "unisex",
+          price: 150000,
+          classPrice: 110000,
+          deposit: 250000,
+          sizes: ["M", "L", "XL"],
+          badge: "TRUYỀN THỐNG",
+          image: "assets/img/albums/vo-thi-sau/photo-03-800.webp",
+          gallery: ["assets/img/albums/vo-thi-sau/photo-03-800.webp"],
+          desc: "Áo Tấc (áo ngũ thân tay thụng) trang nhã, mực thước cho lễ tốt nghiệp hoặc bộ ảnh concept di sản trang trọng.",
+          includes: ["Áo Tấc lụa gấm", "Áo lót trắng ngũ thân", "Khăn lụa xếp đầu", "Quạt giấy thư pháp"],
+          rating: 4.9,
+          rentCount: 380
+        },
+        {
+          id: "tx-01",
+          name: "Set Đồng Phục Thái Lan Học Đường Hormones",
+          category: "thanh-xuan",
+          gender: "unisex",
+          price: 100000,
+          classPrice: 75000,
+          deposit: 150000,
+          sizes: ["S", "M", "L", "XL"],
+          badge: "HOT TREND",
+          image: "assets/img/albums/thoi-nien-thieu/thoi-nien-thieu-800.webp",
+          gallery: ["assets/img/albums/thoi-nien-thieu/thoi-nien-thieu-800.webp"],
+          desc: "Set sơ mi trắng phối chân váy xếp ly xanh navy/quần short kaki chuẩn học sinh Thái Lan. Trẻ trung, năng động, cực kỳ hợp kỷ yếu dã ngoại.",
+          includes: ["Áo sơ mi thêu logo", "Chân váy xếp ly / Quần âu", "Thắt lưng da học sinh", "Cà vạt sọc"],
+          rating: 4.9,
+          rentCount: 890
+        },
+        {
+          id: "tx-02",
+          name: "Set Đồng Phục Hàn Quốc Học Viện SOPA / Kirin",
+          category: "thanh-xuan",
+          gender: "unisex",
+          price: 120000,
+          classPrice: 85000,
+          deposit: 200000,
+          sizes: ["S", "M", "L", "XL"],
+          badge: "K-POP STYLE",
+          image: "assets/img/albums/to-hieu/artboard-2-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-2-tap-the-800.webp"],
+          desc: "Set blazer vàng mù tạt hoặc xanh navy phối carô đình đám từ các idol Hàn Quốc. Đậm chất điện ảnh thanh xuân rực rỡ.",
+          includes: ["Áo Blazer form chuẩn", "Áo gile len lót trong", "Chân váy carô / Quần tây", "Nơ cổ phong cách Hàn"],
+          rating: 4.8,
+          rentCount: 760
+        },
+        {
+          id: "pr-01",
+          name: "Đầm Dạ Hội Công Chúa Cúp Ngực Đan Dây Sang Trọng",
+          category: "prom-party",
+          gender: "nu",
+          price: 250000,
+          classPrice: 190000,
+          deposit: 500000,
+          sizes: ["S", "M", "L"],
+          badge: "LỘNG LẪY",
+          image: "assets/img/albums/to-hieu/artboard-3-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-3-tap-the-800.webp"],
+          desc: "Chất liệu voan lưới kim tuyến đa tầng bồng bềnh, thân áo corset tôn vòng eo thon gọn cho đêm tiệc Prom Night rực rỡ.",
+          includes: ["Đầm dạ hội công chúa", "Găng tay satin trắng dài", "Vương miện công chúa đính đá"],
+          rating: 5.0,
+          rentCount: 290
+        },
+        {
+          id: "pr-02",
+          name: "Đầm Lụa Satin Cut-out Quyến Rũ Tone Champagne",
+          category: "prom-party",
+          gender: "nu",
+          price: 220000,
+          classPrice: 170000,
+          deposit: 400000,
+          sizes: ["S", "M"],
+          badge: "QUÝ PHÁI",
+          image: "assets/img/albums/to-hieu/artboard-1-cover-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-1-cover-800.webp"],
+          desc: "Lụa satin thượng hạng độ bóng nhẹ mướt mắt, thiết kế xẻ tà khoe trọn nét nữ tính kiêu kỳ.",
+          includes: ["Đầm lụa satin", "Khuyên tai đá pha lê", "Khăn choàng lông"],
+          rating: 4.9,
+          rentCount: 210
+        },
+        {
+          id: "dc-01",
+          name: "Loa Kéo Di Động Công Suất Khủng Kèm 2 Micro Không Dây",
+          category: "dao-cu",
+          gender: "unisex",
+          price: 250000,
+          classPrice: 200000,
+          deposit: 500000,
+          sizes: ["Freesize"],
+          badge: "KHUẤY ĐỘNG",
+          image: "assets/img/albums/to-hieu/artboard-4-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-4-tap-the-800.webp"],
+          desc: "Âm thanh cực đỉnh, bass chắc nịch, pin trâu 6-8 tiếng liên tục, kết nối Bluetooth nhanh nhạy phục vụ nhảy Flashmob hoặc Party đêm.",
+          includes: ["Loa kéo công suất lớn", "02 Micro không dây UHF", "Dây sạc & Cáp âm thanh 3.5mm", "Pin dự phòng"],
+          rating: 5.0,
+          rentCount: 710
+        },
+        {
+          id: "dc-02",
+          name: "Set Đạo Cụ Chụp Ảnh Kỷ Yếu (Hoa lụa, Bằng cử nhân, Kính râm, Loa mini)",
+          category: "dao-cu",
+          gender: "unisex",
+          price: 70000,
+          classPrice: 45000,
+          deposit: 150000,
+          sizes: ["Freesize"],
+          badge: "TIỆN LỢI",
+          image: "assets/img/albums/to-hieu/artboard-5-tap-the-800.webp",
+          gallery: ["assets/img/albums/to-hieu/artboard-5-tap-the-800.webp"],
+          desc: "Full hộp đạo cụ phụ trợ giúp các bạn không bị lóng ngóng tay chân khi tạo dáng.",
+          includes: ["03 Bó hoa cầm tay nghệ thuật", "10 Kính râm mát đen ngầu", "02 Bằng cử nhân da cầm tay", "Máy ảnh film vintage đạo cụ"],
+          rating: 4.9,
+          rentCount: 1120
+        }
+      ];
+
+      const stmt = db.prepare(`
+        INSERT INTO rental_products (
+          id, name, category, gender, price, class_price, deposit, sizes, badge, image, gallery, desc, includes, rating, rent_count, status, is_deleted, version, created_at, updated_at
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 0, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        )
+      `);
+
+      for (const p of seedProducts) {
+        stmt.run(
+          p.id,
+          p.name,
+          p.category,
+          p.gender || 'unisex',
+          p.price,
+          p.classPrice || Math.round(p.price * 0.7),
+          p.deposit || 100000,
+          JSON.stringify(p.sizes || []),
+          p.badge || '',
+          p.image,
+          JSON.stringify(p.gallery || [p.image]),
+          p.desc || '',
+          JSON.stringify(p.includes || []),
+          p.rating || 5.0,
+          p.rentCount || 0
+        );
+      }
+      console.log(`[Rental DB] ✅ Đã nạp thành công ${seedProducts.length} mẫu trang phục mặc định vào SQLite!`);
+    }
+  } catch (err) {
+    console.warn('[Rental DB] Lỗi khởi tạo bảng rental_products:', err.message);
+  }
+};
+initRentalTables();
+
+// Helper lấy danh sách sản phẩm active
+export const getActiveRentalProducts = () => {
+  const rows = db.prepare('SELECT * FROM rental_products WHERE is_deleted = 0 ORDER BY updated_at DESC').all();
+  return rows.map(r => ({
+    id: r.id,
+    name: r.name,
+    category: r.category,
+    gender: r.gender,
+    price: r.price,
+    classPrice: r.class_price,
+    deposit: r.deposit,
+    sizes: JSON.parse(r.sizes || '[]'),
+    badge: r.badge || '',
+    image: r.image,
+    gallery: JSON.parse(r.gallery || '[]'),
+    desc: r.desc || '',
+    includes: JSON.parse(r.includes || '[]'),
+    rating: r.rating || 5.0,
+    rentCount: r.rent_count || 0,
+    status: r.status || 'active',
+    version: r.version || 1,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at
+  }));
+};
+
+// Helper lưu sản phẩm (Tự động tăng version, không bao giờ mất)
+export const saveRentalProduct = (prod, user = 'admin') => {
+  const existing = db.prepare('SELECT * FROM rental_products WHERE id = ?').get(prod.id);
+  const now = new Date().toISOString();
+
+  if (existing) {
+    const newVersion = (existing.version || 1) + 1;
+    const stmt = db.prepare(`
+      UPDATE rental_products SET
+        name = ?,
+        category = ?,
+        gender = ?,
+        price = ?,
+        class_price = ?,
+        deposit = ?,
+        sizes = ?,
+        badge = ?,
+        image = ?,
+        gallery = ?,
+        desc = ?,
+        includes = ?,
+        is_deleted = 0,
+        version = ?,
+        updated_at = ?
+      WHERE id = ?
+    `);
+    stmt.run(
+      prod.name,
+      prod.category,
+      prod.gender || 'unisex',
+      prod.price,
+      prod.classPrice,
+      prod.deposit,
+      JSON.stringify(prod.sizes || []),
+      prod.badge || '',
+      prod.image,
+      JSON.stringify(prod.gallery || [prod.image]),
+      prod.desc || '',
+      JSON.stringify(prod.includes || []),
+      newVersion,
+      now,
+      prod.id
+    );
+
+    logAudit({
+      userId: user,
+      userName: user,
+      action: 'UPDATE_RENTAL_PRODUCT',
+      tableName: 'rental_products',
+      recordId: prod.id,
+      oldData: existing,
+      newData: prod
+    });
+
+    return { success: true, action: 'updated', version: newVersion };
+  } else {
+    const stmt = db.prepare(`
+      INSERT INTO rental_products (
+        id, name, category, gender, price, class_price, deposit, sizes, badge, image, gallery, desc, includes, rating, rent_count, status, is_deleted, version, created_at, updated_at
+      ) VALUES (
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 5.0, ?, 'active', 0, 1, ?, ?
+      )
+    `);
+    stmt.run(
+      prod.id,
+      prod.name,
+      prod.category,
+      prod.gender || 'unisex',
+      prod.price,
+      prod.classPrice,
+      prod.deposit,
+      JSON.stringify(prod.sizes || []),
+      prod.badge || '',
+      prod.image,
+      JSON.stringify(prod.gallery || [prod.image]),
+      prod.desc || '',
+      JSON.stringify(prod.includes || []),
+      prod.rentCount || 0,
+      now,
+      now
+    );
+
+    logAudit({
+      userId: user,
+      userName: user,
+      action: 'CREATE_RENTAL_PRODUCT',
+      tableName: 'rental_products',
+      recordId: prod.id,
+      oldData: null,
+      newData: prod
+    });
+
+    return { success: true, action: 'created', version: 1 };
+  }
+};
+
+// Helper Soft Delete an toàn (Không bao giờ xóa vật lý)
+export const softDeleteRentalProduct = (id, user = 'admin') => {
+  const existing = db.prepare('SELECT * FROM rental_products WHERE id = ?').get(id);
+  if (!existing) {
+    throw new Error('Sản phẩm không tồn tại trong database');
+  }
+
+  const now = new Date().toISOString();
+  db.prepare('UPDATE rental_products SET is_deleted = 1, deleted_at = ?, updated_at = ? WHERE id = ?')
+    .run(now, now, id);
+
+  logAudit({
+    userId: user,
+    userName: user,
+    action: 'SOFT_DELETE_RENTAL_PRODUCT',
+    tableName: 'rental_products',
+    recordId: id,
+    oldData: existing,
+    newData: { is_deleted: 1, deleted_at: now }
+  });
+
+  return { success: true, message: `Đã đánh dấu ẩn an toàn mẫu trang phục ${id}` };
+};
+
 export { db, DATA_DIR, BACKUP_DIR, DB_BACKUP_DIR, DB_PATH };

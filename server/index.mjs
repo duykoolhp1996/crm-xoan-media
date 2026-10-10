@@ -1,7 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { db, BACKUP_DIR, DB_BACKUP_DIR, DB_PATH, logAudit, runTransaction, verifyProductionSafety } from './db.mjs';
+import { db, BACKUP_DIR, DB_BACKUP_DIR, DB_PATH, logAudit, runTransaction, verifyProductionSafety, getActiveRentalProducts, saveRentalProduct, softDeleteRentalProduct } from './db.mjs';
 import { exportCrmExcelReport } from './excelExporter.mjs';
 import { 
   enqueueSyncTask, 
@@ -13,13 +13,17 @@ import { startMonthlyCronScheduler, executeMonthlyExport } from './cronService.m
 import { createDatabaseBackup, listDatabaseBackups } from './backup.mjs';
 
 const PORT = process.env.PORT || 4321;
-const VERSION = '1.3.0';
+const VERSION = '1.3.1';
 
 // Thư mục lưu trữ tĩnh bền vững (nằm trong server/data/ nên không bị rsync đè mất)
 const UPLOADS_DIR = path.resolve(path.dirname(DB_PATH), 'uploads');
 const AVATARS_DIR = path.resolve(UPLOADS_DIR, 'avatars');
+const RENTAL_DIR = path.resolve(UPLOADS_DIR, 'rental');
 if (!fs.existsSync(AVATARS_DIR)) {
   fs.mkdirSync(AVATARS_DIR, { recursive: true });
+}
+if (!fs.existsSync(RENTAL_DIR)) {
+  fs.mkdirSync(RENTAL_DIR, { recursive: true });
 }
 
 // Helper đọc body request JSON
@@ -433,6 +437,80 @@ const server = http.createServer(async (req, res) => {
           sizeBytes: buffer.length
         },
         message: 'Tải lên ảnh đại diện thành công!'
+      });
+    }
+
+    // -------------------------------------------------------------
+    // XOĂN RENTAL REST APIS (LƯU TRỮ DATABASE VĨNH VIỄN - ZERO DATA LOSS)
+    // -------------------------------------------------------------
+    // 1. GET: Lấy danh sách sản phẩm active từ SQLite Database
+    if (pathname === '/api/rental/products' && req.method === 'GET') {
+      const products = getActiveRentalProducts();
+      return sendJson(res, 200, {
+        success: true,
+        count: products.length,
+        data: products
+      });
+    }
+
+    // 2. POST: Thêm mới hoặc cập nhật sản phẩm (lưu ảnh vào đĩa, không bao giờ mất)
+    if (pathname === '/api/rental/products' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      if (!body.id || !body.name || !body.price) {
+        return sendJson(res, 400, { success: false, message: 'Thiếu trường bắt buộc (id, name, price)' });
+      }
+
+      // Xử lý lưu ảnh nếu là Base64
+      let mainImage = body.image || '';
+      if (mainImage && mainImage.startsWith('data:image/')) {
+        try {
+          const match = mainImage.match(/^data:image\/([a-zA-Z+]+);base64,/);
+          const ext = match ? (match[1] === 'jpeg' ? 'jpg' : match[1]) : 'webp';
+          const base64Data = mainImage.replace(/^data:image\/[a-zA-Z+]+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          const cleanSku = String(body.id).replace(/[^a-zA-Z0-9_-]/g, '');
+          const filename = `${cleanSku}-${Date.now()}.${ext}`;
+          const filePath = path.join(RENTAL_DIR, filename);
+          fs.writeFileSync(filePath, buffer);
+          mainImage = `/uploads/rental/${filename}`;
+        } catch (imgErr) {
+          console.warn('[Rental] Lưu file ảnh thất bại:', imgErr.message);
+        }
+      }
+
+      const productToSave = {
+        ...body,
+        image: mainImage,
+        gallery: [mainImage]
+      };
+
+      const result = saveRentalProduct(productToSave, currentUserName || 'admin');
+      return sendJson(res, 200, {
+        success: true,
+        message: result.action === 'created' ? 'Đã thêm mới trang phục vào Database thành công' : 'Đã cập nhật trang phục trong Database thành công',
+        version: result.version,
+        data: productToSave
+      });
+    }
+
+    // 3. DELETE: Soft-delete an toàn có xác thực mật khẩu Admin
+    if (pathname.startsWith('/api/rental/products/') && req.method === 'DELETE') {
+      const prodId = pathname.replace('/api/rental/products/', '').trim();
+      const body = await readJsonBody(req).catch(() => ({}));
+      const providedPass = req.headers['x-admin-password'] || body.adminPassword || '';
+
+      // Kiểm tra mật khẩu Admin xác nhận (chống thao tác nhầm hoặc tấn công trái phép)
+      if (providedPass !== 'xoanmedia2026') {
+        return sendJson(res, 403, {
+          success: false,
+          message: 'Lỗi bảo mật: Cần mật khẩu xác nhận của Admin mới được phép thao tác xóa!'
+        });
+      }
+
+      const result = softDeleteRentalProduct(prodId, currentUserName || 'admin');
+      return sendJson(res, 200, {
+        success: true,
+        message: result.message
       });
     }
 
