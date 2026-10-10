@@ -159,10 +159,10 @@ export const BookingModule: React.FC = () => {
         <div>
           <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
             <CalendarCheck className="w-5 h-5 text-orange-500" />
-            Quản Lý Booking & Lịch Chụp Kỷ Yếu
+            Quản Lý Booking
           </h1>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Theo dõi tiến trình từ đặt lịch, cọc tiền, gán thợ chụp đến hậu kỳ và bàn giao album
+            Theo dõi tiến trình từ đặt lịch, gán thợ chụp đến hậu kỳ và bàn giao album
           </p>
         </div>
 

@@ -67,7 +67,7 @@ export const Header: React.FC = () => {
     customers: 'Danh Sách Khách Hàng',
     pipeline: 'Customer Pipeline (13 Bước)',
     schools: 'Quản Lý Trường / Lớp Kỷ Yếu',
-    bookings: 'Quản Lý Booking & Hợp Đồng',
+    bookings: 'Quản Lý Booking',
     calendar: 'Calendar Lịch Chụp Ekip',
     photographers: 'Đội Ngũ Thợ Chụp & Ekip',
     services: 'Gói Dịch Vụ & Combo',

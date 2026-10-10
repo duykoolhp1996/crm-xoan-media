@@ -106,7 +106,7 @@ export const Sidebar: React.FC = () => {
       items: [
         {
           id: 'bookings',
-          label: 'Quản Lý Booking & Cọc',
+          label: 'Quản Lý Booking',
           icon: CalendarCheck,
           badge: unreadAlerts > 0 ? unreadAlerts : undefined,
           roles: ['admin', 'manager', 'sales']
