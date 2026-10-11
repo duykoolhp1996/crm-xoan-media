@@ -56,7 +56,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.4.2
+                Phiên Bản Mới v1.4.3
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -64,11 +64,11 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.4.2
+              Cập Nhật CRM Xoăn Media v1.4.3
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Phân quyền bảo mật tài chính: Ẩn toàn bộ thông tin Doanh Thu Mang Về đối với tài khoản Thợ Chụp (cả thẻ KPI thống kê, bảng hiệu suất và file xuất CSV).
+              Tối ưu giao diện Dashboard Thợ Chụp: Bỏ thẻ "Tổng Lương Cả Mùa (Dự Kiến)", tinh gọn 3 thẻ KPI trọng tâm thực tế (Lớp Đã Chụp, Lớp Sẽ Chụp và Lương Nhận Được).
             </p>
 
             {/* Quick feature tags */}

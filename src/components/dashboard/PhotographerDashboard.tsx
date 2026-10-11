@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Coins,
-  TrendingUp,
   Star,
   Users,
   ChevronRight,
@@ -299,8 +298,8 @@ export const PhotographerDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* ── 4 THẺ KPI TRỌNG TÂM: SỐ LỚP ĐÃ CHỤP, SỐ LỚP SẼ CHỤP, LƯƠNG NHẬN ĐƯỢC ─── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── 3 THẺ KPI TRỌNG TÂM: SỐ LỚP ĐÃ CHỤP, SỐ LỚP SẼ CHỤP, LƯƠNG NHẬN ĐƯỢC ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* KPI 1: Số lượng lớp đã chụp */}
         <div className="p-5 bg-white rounded-3xl border border-black/[0.08] shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
           <div className="flex items-center justify-between">
@@ -342,8 +341,16 @@ export const PhotographerDashboard: React.FC = () => {
               ⏳ Đã chốt lịch, sẵn sàng tác nghiệp
             </p>
           </div>
-          <div className="mt-3 pt-3 border-t border-black/[0.06] text-[11px] text-neutral-500 font-medium">
-            Lương dự kiến thêm: <strong className="text-amber-700 font-bold">+{totalPendingAmount.toLocaleString('vi-VN')} đ</strong>
+          <div className="mt-3 pt-3 border-t border-black/[0.06] flex items-center justify-between text-[11px]">
+            <span className="text-neutral-500">
+              Lương tạm tính: <strong className="text-amber-700 font-bold">+{totalPendingAmount.toLocaleString('vi-VN')} đ</strong>
+            </span>
+            <button
+              onClick={() => setActiveTab('calendar')}
+              className="font-bold text-neutral-900 hover:text-black flex items-center gap-0.5 cursor-pointer"
+            >
+              Mở Calendar <ChevronRight className="w-3 h-3" />
+            </button>
           </div>
         </div>
 
@@ -375,35 +382,6 @@ export const PhotographerDashboard: React.FC = () => {
               : isMonthlySalary
               ? `Lương cứng: ${(monthlySalary).toLocaleString('vi-VN')} đ/tháng`
               : `Mức lương: ${(ratePerShoot).toLocaleString('vi-VN')} đ / lớp`}
-          </div>
-        </div>
-
-        {/* KPI 4: Tổng lương cả mùa (Thực nhận + Tạm tính) */}
-        <div className="p-5 bg-white rounded-3xl border border-black/[0.08] shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
-              Tổng Lương Cả Mùa (Dự Kiến)
-            </span>
-            <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-200/60 shadow-2xs">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="text-3xl font-black text-neutral-900 tracking-tight">
-              {(totalEarnedAmount + totalPendingAmount).toLocaleString('vi-VN')} <span className="text-base font-bold text-neutral-500">đ</span>
-            </div>
-            <p className="text-xs text-neutral-600 font-medium mt-1">
-              Tổng cộng <strong>{relevantBookings.length} lớp</strong> phụ trách
-            </p>
-          </div>
-          <div className="mt-3 pt-3 border-t border-black/[0.06] flex items-center justify-between text-[11px]">
-            <span className="text-neutral-500">Xem toàn bộ lịch</span>
-            <button
-              onClick={() => setActiveTab('calendar')}
-              className="font-bold text-neutral-900 hover:text-black flex items-center gap-0.5"
-            >
-              Mở Calendar <ChevronRight className="w-3 h-3" />
-            </button>
           </div>
         </div>
       </div>
