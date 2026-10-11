@@ -215,7 +215,7 @@ export const PhotographerReports: React.FC = () => {
       'Ca Hoàn Thành',
       'Giờ Làm Việc',
       'Đánh Giá',
-      'Doanh Thu Mang Về (đ)',
+      ...(!isPhotographerUser ? ['Doanh Thu Mang Về (đ)'] : []),
       'Thù Lao Đã Nghiệm Thu (đ)',
       'Thù Lao Tạm Tính (đ)'
     ];
@@ -231,7 +231,7 @@ export const PhotographerReports: React.FC = () => {
       p.completedCount,
       p.hoursWorked,
       p.actualRating ? p.actualRating : 'Chưa có',
-      p.totalRevenueGenerated,
+      ...(!isPhotographerUser ? [p.totalRevenueGenerated] : []),
       p.totalEarnings,
       p.pendingEarnings
     ]);
@@ -262,7 +262,7 @@ export const PhotographerReports: React.FC = () => {
               <BarChart3 className="w-5 h-5 text-orange-500" />
               {isPhotographerUser
                 ? isPhotoLead
-                  ? `Báo Cáo Hiệu Suất & Doanh Thu - Team ${myTeam}`
+                  ? `Báo Cáo Hiệu Suất & Thù Lao - Team ${myTeam}`
                   : 'Báo Cáo Hiệu Suất & Thù Lao Cá Nhân'
                 : 'Báo Cáo Hiệu Suất & Thù Lao Đội Ngũ Thợ Chụp'}
             </h1>
@@ -275,7 +275,7 @@ export const PhotographerReports: React.FC = () => {
           <p className="text-xs text-neutral-500 mt-1">
             {isPhotographerUser
               ? isPhotoLead
-                ? `Quyền Đội Trưởng Ekip: Xem tổng hợp doanh thu team và chi tiết thù lao, ca chụp của từng thành viên Team ${myTeam}`
+                ? `Quyền Đội Trưởng Ekip: Theo dõi lịch tác nghiệp, số ca hoàn thành và chi tiết thù lao của từng thành viên Team ${myTeam}`
                 : 'Tài khoản Thợ Chụp cá nhân: Theo dõi lịch tác nghiệp, số ca hoàn thành và tổng thù lao thực nhận của bạn'
               : 'Dữ liệu thực tế 100% được liên kết tự động từ danh sách Ekip chính thức và tiến độ Booking'}
           </p>
@@ -290,7 +290,7 @@ export const PhotographerReports: React.FC = () => {
       </div>
 
       {/* KPI Cards từ Data Thực */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className={`grid gap-4 ${isPhotographerUser ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2 md:grid-cols-4'}`}>
         {/* Card 1: Tổng Ekip / Hồ sơ */}
         <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
           <div className="flex items-center justify-between text-neutral-500 mb-2">
@@ -368,27 +368,21 @@ export const PhotographerReports: React.FC = () => {
           </p>
         </div>
 
-        {/* Card 4: Doanh Thu Mang Về */}
-        <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
-          <div className="flex items-center justify-between text-neutral-500 mb-2">
-            <span className="text-xs font-semibold">
-              {!isPhotographerUser
-                ? 'Doanh Thu Các Ca Chụp'
-                : isPhotoLead
-                ? `Doanh Thu Team Mang Về`
-                : 'Doanh Thu Các Ca Bạn Chụp'}
-            </span>
-            <Camera className="w-4 h-4 text-purple-600" />
+        {/* Card 4: Doanh Thu Mang Về (Chỉ Admin / Quản lý được xem, ẩn hoàn toàn với tài khoản thợ chụp) */}
+        {!isPhotographerUser && (
+          <div className="bg-white border border-black/[0.08] p-4 rounded-2xl shadow-xs">
+            <div className="flex items-center justify-between text-neutral-500 mb-2">
+              <span className="text-xs font-semibold">Doanh Thu Các Ca Chụp</span>
+              <Camera className="w-4 h-4 text-purple-600" />
+            </div>
+            <div className="text-2xl font-black text-neutral-900 tracking-tight">
+              {totalSummary.totalRevenue.toLocaleString('vi-VN')}đ
+            </div>
+            <p className="text-[11px] text-neutral-400 mt-1">
+              Tổng giá trị hợp đồng các lớp tác nghiệp
+            </p>
           </div>
-          <div className="text-2xl font-black text-neutral-900 tracking-tight">
-            {totalSummary.totalRevenue.toLocaleString('vi-VN')}đ
-          </div>
-          <p className="text-[11px] text-neutral-400 mt-1">
-            {!isPhotographerUser || isPhotoLead
-              ? `Từ hợp đồng các lớp Team ${myTeam} thực hiện`
-              : 'Tổng giá trị hợp đồng các lớp bạn tác nghiệp'}
-          </p>
-        </div>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -473,14 +467,14 @@ export const PhotographerReports: React.FC = () => {
                 <th className="py-3.5 px-4">Số Ca Thực Tế</th>
                 <th className="py-3.5 px-4">Giờ Tác Nghiệp</th>
                 <th className="py-3.5 px-4">Đánh Giá (Rating)</th>
-                <th className="py-3.5 px-4">Doanh Thu Mang Về</th>
+                {!isPhotographerUser && <th className="py-3.5 px-4">Doanh Thu Mang Về</th>}
                 <th className="py-3.5 px-4 text-right">Thù Lao Thực Tế</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/[0.04] font-medium text-neutral-700">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-neutral-400">
+                  <td colSpan={isPhotographerUser ? 6 : 7} className="py-12 text-center text-neutral-400">
                     <AlertCircle className="w-8 h-8 mx-auto mb-2 text-neutral-300" />
                     Không tìm thấy nhân sự phù hợp với bộ lọc tìm kiếm.
                   </td>
@@ -580,17 +574,19 @@ export const PhotographerReports: React.FC = () => {
                       )}
                     </td>
 
-                    {/* Cột 6: Doanh thu thực tế */}
-                    <td className="py-3.5 px-4">
-                      <p className="font-bold text-neutral-900">
-                        {item.totalRevenueGenerated.toLocaleString('vi-VN')}đ
-                      </p>
-                      <p className="text-[10px] text-neutral-400">
-                        {item.currentBookingsCount > 0
-                          ? `Từ ${item.currentBookingsCount} ca được gán`
-                          : 'Chưa phát sinh'}
-                      </p>
-                    </td>
+                    {/* Cột 6: Doanh thu thực tế (Chỉ hiển thị cho Admin / Quản lý) */}
+                    {!isPhotographerUser && (
+                      <td className="py-3.5 px-4">
+                        <p className="font-bold text-neutral-900">
+                          {item.totalRevenueGenerated.toLocaleString('vi-VN')}đ
+                        </p>
+                        <p className="text-[10px] text-neutral-400">
+                          {item.currentBookingsCount > 0
+                            ? `Từ ${item.currentBookingsCount} ca được gán`
+                            : 'Chưa phát sinh'}
+                        </p>
+                      </td>
+                    )}
 
                     {/* Cột 7: Lương nhận được */}
                     <td className="py-3.5 px-4 text-right">
