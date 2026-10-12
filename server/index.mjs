@@ -193,6 +193,16 @@ const mapDbRowToCustomer = (row) => {
     lostReason: row.lost_reason || '',
     lostNote: row.lost_note || '',
 
+    // Chi phí buổi chụp
+    shootExpenses: (() => {
+      try {
+        return row.shoot_expenses_json ? JSON.parse(row.shoot_expenses_json) : [];
+      } catch {
+        return [];
+      }
+    })(),
+    totalShootExpenses: Number(row.total_shoot_expenses) || 0,
+
     // Soft delete & Thùng rác
     isDeleted: Boolean(row.is_deleted),
     deletedAt: row.deleted_at || undefined,
@@ -211,6 +221,11 @@ const mapDbRowToBooking = (row) => {
   let assignments = {};
   try {
     if (row.assignments_json) assignments = JSON.parse(row.assignments_json);
+  } catch {}
+
+  let shootExpenses = [];
+  try {
+    if (row.shoot_expenses_json) shootExpenses = JSON.parse(row.shoot_expenses_json);
   } catch {}
 
   return {
@@ -243,6 +258,8 @@ const mapDbRowToBooking = (row) => {
     paymentStatus: row.payment_status || (row.deposit_paid ? 'Đã cọc' : 'Chưa cọc'),
     bookingStatus: row.booking_status || row.status || 'Chờ xác nhận',
     notes: row.notes || '',
+    shootExpenses,
+    totalShootExpenses: Number(row.total_shoot_expenses) || 0,
     createdAt: row.created_at || new Date().toISOString(),
     updatedAt: row.updated_at || new Date().toISOString(),
     version: row.version || 1
@@ -977,10 +994,19 @@ const server = http.createServer(async (req, res) => {
         totalAmount = Math.max(0, subtotal + extraFee - discount);
       }
       const finalStage = body.pipelineStage ?? body.pipeline_stage ?? existing.pipeline_stage;
-      const isClosedStage = ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao', 'Hoàn thành'].includes(finalStage);
+      const isClosedStage = ['Đã cọc', 'Đã đặt cọc', 'Book ngày', 'Đã Booking', 'Đang chụp', 'Đã chụp', 'Đang hậu kỳ', 'Giao ảnh', 'Đã bàn giao', 'Hoàn thành'].includes(finalStage);
       const remainingAmount = (isClosedStage || paidAmount > 0 || depositAmount > 0)
         ? Math.max(0, totalAmount - paidAmount)
         : 0;
+
+      const shootExpensesStr = body.shootExpenses !== undefined
+        ? JSON.stringify(body.shootExpenses)
+        : (body.shoot_expenses_json ?? existing.shoot_expenses_json ?? null);
+      const totalShootExpenses = body.totalShootExpenses !== undefined
+        ? parseNumericAmount(body.totalShootExpenses)
+        : (Array.isArray(body.shootExpenses)
+            ? body.shootExpenses.reduce((sum, item) => sum + parseNumericAmount(item.amount), 0)
+            : parseNumericAmount(existing.total_shoot_expenses ?? 0));
 
       runTransaction(() => {
         const stmt = db.prepare(`
@@ -1045,6 +1071,8 @@ const server = http.createServer(async (req, res) => {
             delivery_method = COALESCE(?, delivery_method),
             lost_reason = COALESCE(?, lost_reason),
             lost_note = COALESCE(?, lost_note),
+            shoot_expenses_json = COALESCE(?, shoot_expenses_json),
+            total_shoot_expenses = ?,
             last_contacted_at = COALESCE(?, last_contacted_at),
             version = version + 1,
             updated_at = CURRENT_TIMESTAMP
@@ -1060,7 +1088,7 @@ const server = http.createServer(async (req, res) => {
           toSql(body.expectedShootDate), toSql(shootingLocationsStr),
           totalAmount,
           toSql(body.specialRequests), toSql(body.notes),
-          toSql(body.rawDriveUrl), toSql(body.driveUrl), toSql(body.photoNotes), toSql(body.shotDate), body.photoCount !== undefined ? Number(body.photoCount) : null,
+          toSql(body.rawDriveUrl), toSql(body.driveUrl), toSql(photoNotes), toSql(body.shotDate), body.photoCount !== undefined ? Number(body.photoCount) : null,
           toSql(body.source), toSql(body.campaignName), toSql(utmStr),
           toSql(body.pipelineStage), toSql(body.assignedSalesId), toSql(body.assignedSalesName),
           toSql(body.assignedCareStaffId), toSql(body.assignedCareStaffName),
@@ -1070,6 +1098,7 @@ const server = http.createServer(async (req, res) => {
           toSql(body.editorName), toSql(body.editDeadline), body.editProgress !== undefined ? Number(body.editProgress) : null,
           toSql(body.deliveredDate), toSql(body.deliveredDriveUrl), toSql(body.deliveryMethod),
           toSql(body.lostReason), toSql(body.lostNote),
+          toSql(shootExpensesStr), totalShootExpenses,
           toSql(body.lastContactedAt),
           id
         );
@@ -1302,6 +1331,14 @@ const server = http.createServer(async (req, res) => {
 
       const body = await readJsonBody(req);
       const assignmentsStr = body.assignments ? JSON.stringify(body.assignments) : existing.assignments_json;
+      const shootExpensesStr = body.shootExpenses !== undefined
+        ? JSON.stringify(body.shootExpenses)
+        : (body.shoot_expenses_json ?? existing.shoot_expenses_json ?? null);
+      const totalShootExpenses = body.totalShootExpenses !== undefined
+        ? parseNumericAmount(body.totalShootExpenses)
+        : (Array.isArray(body.shootExpenses)
+            ? body.shootExpenses.reduce((sum, item) => sum + parseNumericAmount(item.amount), 0)
+            : parseNumericAmount(existing.total_shoot_expenses ?? 0));
 
       runTransaction(() => {
         db.prepare(`
@@ -1326,6 +1363,8 @@ const server = http.createServer(async (req, res) => {
             payment_status = COALESCE(?, payment_status),
             booking_status = COALESCE(?, booking_status),
             notes = COALESCE(?, notes),
+            shoot_expenses_json = COALESCE(?, shoot_expenses_json),
+            total_shoot_expenses = ?,
             version = version + 1,
             updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
@@ -1338,6 +1377,7 @@ const server = http.createServer(async (req, res) => {
           body.depositAmount !== undefined ? Number(body.depositAmount) : null,
           body.remainingAmount !== undefined ? Number(body.remainingAmount) : null,
           toSql(body.paymentStatus), toSql(body.bookingStatus), toSql(body.notes),
+          toSql(shootExpensesStr), totalShootExpenses,
           id
         );
 

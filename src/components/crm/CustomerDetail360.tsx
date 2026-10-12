@@ -28,12 +28,14 @@ import {
   FolderOpen,
   ExternalLink,
   CheckCircle2,
-  Edit3
+  Edit3,
+  Receipt
 } from 'lucide-react';
 import { PriceQuoteModal } from '../quote/PriceQuoteModal';
 import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
+import { ShootExpensesModal } from '../booking/ShootExpensesModal';
 import { CustomerModal } from './CustomerModal';
 import { isCustomerInStage } from '../../lib/revenueUtils';
 import {
@@ -72,6 +74,7 @@ export const CustomerDetail360: React.FC<CustomerDetail360Props> = ({ customerId
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showUploadDriveModal, setShowUploadDriveModal] = useState(false);
+  const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [showEditCustomerModal, setShowEditCustomerModal] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'deposit' | 'final'>('deposit');
   const [lostReason, setLostReason] = useState('Giá cao hơn ngân sách dự kiến của lớp');
@@ -820,6 +823,46 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
                   </div>
                 </div>
               )}
+
+              {/* Banner Giai Đoạn Đang Chụp: Đang tác nghiệp & Kê khai chi phí buổi hôm đó */}
+              {isCustomerInStage(customer.pipelineStage, 'Đang chụp') && (() => {
+                const totalExp = customer.totalShootExpenses || (customer.shootExpenses?.reduce((s, e) => s + (Number(e.amount) || 0), 0) ?? 0);
+                const expCount = customer.shootExpenses?.length || 0;
+
+                return (
+                  <div className="p-4 bg-gradient-to-r from-amber-50 via-orange-50 to-neutral-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping shrink-0" />
+                        <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                          🔴 Đang Tác Nghiệp – Buổi Chụp Đang Diễn Ra
+                        </span>
+                      </div>
+                      <p className="text-xs text-neutral-700">
+                        📅 Ngày chụp: <strong className="text-amber-950 font-black">{customer.expectedShootDate ? new Date(customer.expectedShootDate).toLocaleDateString('vi-VN') : 'Hôm nay'}</strong> • Chi phí đã kê khai: <strong className="text-rose-700 font-extrabold">{totalExp.toLocaleString('vi-VN')} đ</strong> ({expCount} khoản chi)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={() => setShowExpensesModal(true)}
+                        className="flex-1 sm:flex-initial px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                      >
+                        <Receipt className="w-3.5 h-3.5" />
+                        <span>💰 Điền Chi Phí Buổi Chụp</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowUploadDriveModal(true)}
+                        className="flex-1 sm:flex-initial px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 shrink-0 cursor-pointer"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5" />
+                        <span>📸 Chụp Xong & Nộp Drive</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Banner Giai Đoạn Đã Chụp: Bàn giao file gốc & Link Google Drive */}
               {(customer.pipelineStage === 'Đã chụp' || customer.pipelineStage === 'Đang hậu kỳ') && (
@@ -1672,6 +1715,18 @@ ${customer.notes ? `📝 Ghi chú: ${customer.notes}` : ''}`;
         isOpen={showUploadDriveModal}
         onClose={() => setShowUploadDriveModal(false)}
       />
+
+      {/* Modal Kê Khai Toàn Bộ Chi Phí Buổi Chụp */}
+      {showExpensesModal && (
+        <ShootExpensesModal
+          customer={customer}
+          onClose={() => setShowExpensesModal(false)}
+          onSave={async (updatedCustomer) => {
+            await updateCustomer(updatedCustomer);
+            setShowExpensesModal(false);
+          }}
+        />
+      )}
 
       {/* Modal Chỉnh Sửa Hồ Sơ Khách Hàng */}
       <CustomerModal

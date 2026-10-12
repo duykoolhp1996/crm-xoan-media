@@ -7,6 +7,7 @@ import { Customer, Booking, PipelineStage } from '../types';
 export const CLOSED_BOOKED_STAGES: readonly PipelineStage[] = [
   'Đã cọc',
   'Book ngày',
+  'Đang chụp',
   'Đã chụp',
   'Đang hậu kỳ',
   'Giao ảnh',
@@ -16,6 +17,44 @@ export const CLOSED_BOOKED_STAGES: readonly PipelineStage[] = [
   'Đã Booking',
   'Đã bàn giao'
 ] as const;
+
+/**
+ * Kiểm tra xem lịch chụp đã tới ngày hoặc đã qua hay chưa (dựa trên thời gian hiện tại)
+ * Hỗ trợ định dạng YYYY-MM-DD, DD/MM/YYYY, ISO string...
+ */
+export const isShootDateReached = (dateStr?: string): boolean => {
+  if (!dateStr || typeof dateStr !== 'string' || !dateStr.trim()) return false;
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const trimmed = dateStr.trim();
+    let targetDate: Date;
+    if (trimmed.includes('/')) {
+      const parts = trimmed.split('/');
+      if (parts.length === 3) {
+        // DD/MM/YYYY
+        targetDate = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+      } else {
+        targetDate = new Date(trimmed);
+      }
+    } else {
+      // YYYY-MM-DD
+      const parts = trimmed.split('-');
+      if (parts.length === 3) {
+        targetDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      } else {
+        targetDate = new Date(trimmed);
+      }
+    }
+    targetDate.setHours(0, 0, 0, 0);
+
+    if (isNaN(targetDate.getTime())) return false;
+    return today.getTime() >= targetDate.getTime();
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Kiểm tra xem khách hàng có khớp với một giai đoạn Pipeline hay không
@@ -36,22 +75,27 @@ export const isCustomerInStage = (custStage?: string, targetStage?: PipelineStag
     return custStage === 'Book ngày' || custStage === 'Đã Booking';
   }
 
-  // 3. Nhóm Giao ảnh / Bàn giao
+  // 3. Nhóm Đang chụp
+  if (targetStage === 'Đang chụp') {
+    return custStage === 'Đang chụp' || custStage === 'Đang tác nghiệp';
+  }
+
+  // 4. Nhóm Giao ảnh / Bàn giao
   if (targetStage === 'Giao ảnh' || targetStage === 'Đã bàn giao') {
     return ['Giao ảnh', 'Đã bàn giao', 'Đã gửi link ảnh', 'Đã giao ảnh'].includes(custStage);
   }
 
-  // 4. Nhóm Báo giá
+  // 5. Nhóm Báo giá
   if (targetStage === 'Đã gửi báo giá') {
     return custStage === 'Đã gửi báo giá' || custStage === 'Đang thương lượng';
   }
 
-  // 5. Nhóm Tư vấn
+  // 6. Nhóm Tư vấn
   if (targetStage === 'Đang tư vấn') {
     return custStage === 'Đang tư vấn' || custStage === 'Đã liên hệ' || custStage === 'Mới tiếp nhận';
   }
 
-  // 6. Nhóm Hoàn thành
+  // 7. Nhóm Hoàn thành
   if (targetStage === 'Hoàn thành') {
     return custStage === 'Hoàn thành' || custStage === 'Đã hoàn thành';
   }

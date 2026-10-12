@@ -22,7 +22,8 @@ import {
   Users,
   Video,
   ChevronDown,
-  Edit3
+  Edit3,
+  Receipt
 } from 'lucide-react';
 import { CustomerDetail360 } from '../crm/CustomerDetail360';
 import { CustomerModal } from '../crm/CustomerModal';
@@ -31,6 +32,7 @@ import { DepositQrModal } from '../payment/DepositQrModal';
 import { ScheduleBookingModal } from '../booking/ScheduleBookingModal';
 import { AssignCrewModal } from '../booking/AssignCrewModal';
 import { UploadPhotoDriveModal } from '../booking/UploadPhotoDriveModal';
+import { ShootExpensesModal } from '../booking/ShootExpensesModal';
 import { TrashBinModal } from '../crm/TrashBinModal';
 import {
   CLOSED_BOOKED_STAGES,
@@ -73,6 +75,7 @@ export const KanbanPipeline: React.FC = () => {
   const [scheduleBookingCustomer, setScheduleBookingCustomer] = useState<Customer | null>(null);
   const [assignCrewCustomer, setAssignCrewCustomer] = useState<Customer | null>(null);
   const [uploadDriveCustomer, setUploadDriveCustomer] = useState<Customer | null>(null);
+  const [expenseModalCustomer, setExpenseModalCustomer] = useState<Customer | null>(null);
   const [customerToEdit, setCustomerToEdit] = useState<Customer | null>(null);
   const boardRef = React.useRef<HTMLDivElement>(null);
 
@@ -253,13 +256,14 @@ export const KanbanPipeline: React.FC = () => {
     }
   };
 
-  // 9 Giai đoạn chính chuẩn tuần tự của Lead Pipeline Xoăn Media (Lost tách thành tab nhánh riêng)
+  // 10 Giai đoạn chính chuẩn tuần tự của Lead Pipeline Xoăn Media (Lost tách thành tab nhánh riêng)
   const STAGES: PipelineStage[] = [
     'New Lead',
     'Đang tư vấn',
     'Đã gửi báo giá',
     'Đã cọc',
     'Book ngày',
+    'Đang chụp',
     'Đã chụp',
     'Đang hậu kỳ',
     'Giao ảnh',
@@ -273,6 +277,7 @@ export const KanbanPipeline: React.FC = () => {
     'Đã gửi báo giá': 'border-t-indigo-500',
     'Đã cọc': 'border-t-[#79ba07]',
     'Book ngày': 'border-t-purple-500',
+    'Đang chụp': 'border-t-amber-500',
     'Đã chụp': 'border-t-blue-500',
     'Đang hậu kỳ': 'border-t-amber-500',
     'Giao ảnh': 'border-t-teal-500',
@@ -856,6 +861,122 @@ export const KanbanPipeline: React.FC = () => {
                                   )}
                                 </div>
 
+                                <div className="flex items-center gap-1.5 mt-2">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      updateCustomerStage(cust.id, 'Đang chụp');
+                                    }}
+                                    className="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95 bg-amber-500 hover:bg-amber-600 text-white border border-amber-600"
+                                    title="Chuyển sang Đang chụp để tác nghiệp và kê khai chi phí buổi hôm đó"
+                                  >
+                                    <span>🔴 Bắt Đầu Chụp</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setUploadDriveCustomer(cust);
+                                    }}
+                                    className="py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 transition-all shadow-2xs cursor-pointer active:scale-95 bg-blue-600 hover:bg-blue-700 text-white border border-blue-700"
+                                    title="Nộp Link Google Drive ảnh gốc khi đã chụp xong"
+                                  >
+                                    <FolderOpen className="w-3.5 h-3.5 text-white" />
+                                    <span>Nộp Drive</span>
+                                  </button>
+                                </div>
+                              </>
+                            );
+                          })()}
+
+                          {/* 4.5. BADGE ĐANG CHỤP, EKIP & KÊ KHAI CHI PHÍ BUỔI HÔM ĐÓ (Đang chụp) */}
+                          {isCustomerInStage(cust.pipelineStage, 'Đang chụp') && (() => {
+                            const crewInfo = getCustomerBookingInfo(cust);
+                            const totalExp = cust.totalShootExpenses || (cust.shootExpenses?.reduce((s, e) => s + (Number(e.amount) || 0), 0) ?? 0);
+                            const expCount = cust.shootExpenses?.length || 0;
+
+                            return (
+                              <>
+                                {/* Banner Đang chụp */}
+                                <div className="mt-2 p-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-xl flex items-center justify-between text-[11px] shadow-2xs animate-pulse">
+                                  <span className="text-amber-950 font-extrabold flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+                                    🔴 Đang tác nghiệp
+                                  </span>
+                                  <span className="text-[10px] font-bold text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-md">
+                                    {cust.expectedShootDate ? new Date(cust.expectedShootDate).toLocaleDateString('vi-VN') : 'Hôm nay'}
+                                  </span>
+                                </div>
+
+                                {/* Ekip Trưởng nháy & thợ */}
+                                <div
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="mt-1.5 p-2 bg-gradient-to-br from-amber-50/60 to-orange-50/60 border border-amber-200 rounded-xl text-[11px] shadow-2xs"
+                                >
+                                  <div className="flex items-center justify-between gap-1 mb-1">
+                                    <span className="text-[10px] font-bold text-amber-900 flex items-center gap-1">
+                                      <Camera className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                      Trưởng nháy:
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setAssignCrewCustomer(cust);
+                                      }}
+                                      className="text-[10px] text-amber-800 hover:text-amber-950 font-bold px-1.5 py-0.5 rounded-md bg-white border border-amber-300 hover:border-amber-400 flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
+                                      title="Xem / Đổi ekip thợ"
+                                    >
+                                      <Settings2 className="w-3 h-3 text-amber-600" />
+                                      <span>Ekip</span>
+                                    </button>
+                                  </div>
+                                  <div className="w-full bg-white text-[11px] font-bold text-neutral-900 border border-amber-200/80 rounded-lg px-2 py-1 truncate">
+                                    📸 {crewInfo.leadPhotographerName || 'Chưa gán thợ chính'}
+                                  </div>
+                                  {(crewInfo.assistantNames.length > 0 || crewInfo.videographerName) && (
+                                    <div className="mt-1.5 pt-1.5 border-t border-amber-200/60 flex flex-wrap gap-1 text-[10px]">
+                                      {crewInfo.assistantNames.length > 0 && (
+                                        <span className="inline-flex items-center gap-1 bg-white/90 text-amber-800 px-1.5 py-0.5 rounded border border-amber-200 font-medium">
+                                          <Users className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                                          +{crewInfo.assistantNames.length} thợ phụ
+                                        </span>
+                                      )}
+                                      {crewInfo.videographerName && (
+                                        <span className="inline-flex items-center gap-1 bg-white/90 text-orange-800 px-1.5 py-0.5 rounded border border-orange-200 font-medium">
+                                          <Video className="w-2.5 h-2.5 text-orange-600 shrink-0" />
+                                          Quay: {crewInfo.videographerName}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* KHỐI KÊ KHAI CHI PHÍ BUỔI CHỤP HÔM ĐÓ */}
+                                <div
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpenseModalCustomer(cust);
+                                  }}
+                                  className="mt-1.5 p-2 bg-gradient-to-r from-rose-50 to-amber-50 hover:from-rose-100 hover:to-amber-100 border border-rose-200/90 rounded-xl flex items-center justify-between text-[11px] shadow-2xs cursor-pointer transition-all group"
+                                  title="Bấm để xem và kê khai toàn bộ chi phí phát sinh trong buổi hôm đó"
+                                >
+                                  <span className="text-rose-900 font-bold flex items-center gap-1">
+                                    <Receipt className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                                    <span>Chi phí buổi chụp:</span>
+                                  </span>
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-black text-rose-700 text-xs">
+                                      {totalExp > 0 ? `${totalExp.toLocaleString('vi-VN')} đ` : 'Chưa kê khai'}
+                                    </span>
+                                    <span className="text-[10px] text-rose-800 bg-rose-200/70 px-1.5 py-0.5 rounded font-bold group-hover:bg-rose-300">
+                                      {totalExp > 0 ? `Sửa (${expCount})` : '+ Điền'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* NÚT CHỤP XONG & NỘP LINK DRIVE -> Chuyển sang Đã chụp */}
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -863,10 +984,10 @@ export const KanbanPipeline: React.FC = () => {
                                     setUploadDriveCustomer(cust);
                                   }}
                                   className="w-full mt-2 py-1.5 px-2 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95 bg-blue-600 hover:bg-blue-700 text-white border border-blue-700"
-                                  title="Nộp Link Google Drive ảnh gốc khi đã chụp xong"
+                                  title="Buổi chụp hoàn tất, bấm để nộp Link Drive và chuyển sang giai đoạn Đã chụp"
                                 >
                                   <FolderOpen className="w-3.5 h-3.5 text-white" />
-                                  <span>📸 Nộp Link Drive (Đã Chụp)</span>
+                                  <span>📸 Chụp Xong & Nộp Drive</span>
                                 </button>
                               </>
                             );
@@ -1076,6 +1197,18 @@ export const KanbanPipeline: React.FC = () => {
         isOpen={Boolean(uploadDriveCustomer)}
         onClose={() => setUploadDriveCustomer(null)}
       />
+
+      {/* Modal Kê Khai Toàn Bộ Chi Phí Buổi Chụp */}
+      {expenseModalCustomer && (
+        <ShootExpensesModal
+          customer={expenseModalCustomer}
+          onClose={() => setExpenseModalCustomer(null)}
+          onSave={async (updatedCustomer) => {
+            await updateCustomer(updatedCustomer);
+            setExpenseModalCustomer(null);
+          }}
+        />
+      )}
 
       {/* Modal Quản Lý Thùng Rác / Leads Đã Xóa */}
       <TrashBinModal

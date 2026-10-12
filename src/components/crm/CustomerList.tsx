@@ -127,6 +127,7 @@ export const CustomerList: React.FC = () => {
     const quote = accessibleCustomers.filter(c => ['Đã gửi báo giá', 'Đang thương lượng'].includes(c.pipelineStage));
     const deposited = accessibleCustomers.filter(c => ['Đã cọc', 'Đã đặt cọc'].includes(c.pipelineStage));
     const booked = accessibleCustomers.filter(c => ['Book ngày', 'Đã Booking'].includes(c.pipelineStage));
+    const shooting = accessibleCustomers.filter(c => ['Đang chụp'].includes(c.pipelineStage));
     const withDebt = accessibleCustomers.filter(c => getCustomerRemainingDebt(c) > 0);
 
     return {
@@ -137,6 +138,7 @@ export const CustomerList: React.FC = () => {
       quoteCount: quote.length,
       depositedCount: deposited.length,
       bookedCount: booked.length,
+      shootingCount: shooting.length,
       withDebtCount: withDebt.length
     };
   }, [accessibleCustomers]);
@@ -317,6 +319,7 @@ export const CustomerList: React.FC = () => {
     'Đã gửi báo giá': 'bg-purple-50 text-purple-700 border-purple-200',
     'Đã cọc': 'bg-emerald-50 text-emerald-800 border-emerald-300 font-extrabold',
     'Book ngày': 'bg-purple-50 text-purple-800 border-purple-300 font-extrabold',
+    'Đang chụp': 'bg-amber-50 text-amber-900 border-amber-300 font-extrabold',
     'Đã chụp': 'bg-blue-50 text-blue-800 border-blue-300 font-extrabold',
     'Đang hậu kỳ': 'bg-amber-50 text-amber-800 border-amber-300 font-extrabold',
     'Giao ảnh': 'bg-teal-50 text-teal-800 border-teal-300 font-extrabold',
@@ -500,6 +503,7 @@ export const CustomerList: React.FC = () => {
               <option value="Đã gửi báo giá">📄 Đã gửi báo giá ({leadStats.quoteCount})</option>
               <option value="Đã cọc">💰 Đã cọc ({leadStats.depositedCount})</option>
               <option value="Book ngày">📅 Book ngày ({leadStats.bookedCount})</option>
+              <option value="Đang chụp">🔴 Đang chụp ({leadStats.shootingCount})</option>
               <option value="Đã chụp">📸 Đã chụp</option>
               <option value="Đang hậu kỳ">🎨 Đang hậu kỳ</option>
               <option value="Giao ảnh">📦 Giao ảnh</option>
@@ -812,6 +816,7 @@ export const CustomerList: React.FC = () => {
                     <option value="Đã gửi báo giá">Đã gửi báo giá</option>
                     <option value="Đã cọc">Đã cọc</option>
                     <option value="Book ngày">Book ngày</option>
+                    <option value="Đang chụp">Đang chụp</option>
                     <option value="Đã chụp">Đã chụp</option>
                     <option value="Đang hậu kỳ">Đang hậu kỳ</option>
                     <option value="Giao ảnh">Giao ảnh</option>
@@ -977,6 +982,7 @@ export const CustomerList: React.FC = () => {
                         <option value="Đã gửi báo giá">Đã gửi báo giá</option>
                         <option value="Đã cọc">Đã cọc</option>
                         <option value="Book ngày">Book ngày</option>
+                        <option value="Đang chụp">Đang chụp</option>
                         <option value="Đã chụp">Đã chụp</option>
                         <option value="Đang hậu kỳ">Đang hậu kỳ</option>
                         <option value="Giao ảnh">Giao ảnh</option>

@@ -29,6 +29,7 @@ export type PipelineStage =
   | 'Đã gửi báo giá'
   | 'Đã cọc'
   | 'Book ngày'
+  | 'Đang chụp'
   | 'Đã chụp'
   | 'Đang hậu kỳ'
   | 'Giao ảnh'
@@ -42,6 +43,27 @@ export type PipelineStage =
   | 'Đã bàn giao'
   | 'Chăm sóc lại'
   | 'Mới tiếp nhận';
+
+// Danh mục và chi tiết các khoản chi phí phát sinh trong buổi chụp kỷ yếu
+export type ShootExpenseCategory = 
+  | 'xe_co' 
+  | 'an_uong' 
+  | 've_cong' 
+  | 'dao_cu' 
+  | 'trang_phuc' 
+  | 'phu_phi_tho' 
+  | 'khac';
+
+export interface ShootExpenseItem {
+  id: string;
+  category: ShootExpenseCategory;
+  title: string;          // Mô tả chi phí (VD: Thuê xe 16 chỗ đón lớp, Vé vào cổng Văn Miếu, Ăn trưa ekip...)
+  amount: number;         // Số tiền chi (VNĐ)
+  payer?: string;         // Người chi (Admin, Trưởng nháy, Sales, Quỹ...)
+  note?: string;          // Ghi chú thêm
+  receiptUrl?: string;    // Link / Ảnh hóa đơn nếu có
+  createdAt?: string;     // Thời điểm ghi nhận
+}
 
 export interface UtmDetails {
   source?: string;
@@ -149,6 +171,10 @@ export interface Customer {
   deliveryMethod?: string;   // Link Drive, USB, In ảnh album
   lostReason?: string;       // Lý do khách từ chối
   lostNote?: string;         // Ghi chú chi tiết khi Lost
+
+  // Toàn bộ Chi Phí trong buổi chụp hôm đó
+  shootExpenses?: ShootExpenseItem[]; // Danh sách các khoản chi (xe cộ, ăn uống, vé, đạo cụ...)
+  totalShootExpenses?: number;        // Tổng chi phí buổi chụp (VNĐ)
 
   // Quản lý Soft Delete & Thùng Rác
   isDeleted?: boolean;
@@ -283,6 +309,10 @@ export interface Booking {
   driveUrl?: string; // Link Google Drive
   photoNotes?: string; // Lời dặn dò của Photo cho bộ phận Hậu Kỳ
   photoCount?: number; // Số lượng ảnh bàn giao
+  
+  // Chi phí buổi chụp
+  shootExpenses?: ShootExpenseItem[]; // Toàn bộ chi phí trong buổi chụp
+  totalShootExpenses?: number;        // Tổng chi phí buổi chụp (VNĐ)
   
   notes?: string;
   isDeleted?: boolean;

@@ -602,6 +602,22 @@ const runSafeMigrations = () => {
       console.warn('[Migration 10] Lỗi chuẩn hóa nguồn Facebook Organic:', mig10Err.message);
     }
   }
+
+  // Migration 11: Kê khai chi phí buổi chụp kỷ yếu (shoot_expenses_json & total_shoot_expenses)
+  if (!existingMigrations.has(11)) {
+    try {
+      addColumnIfNotExists('customers', 'shoot_expenses_json', 'TEXT');
+      addColumnIfNotExists('customers', 'total_shoot_expenses', 'NUMERIC DEFAULT 0');
+      addColumnIfNotExists('bookings', 'shoot_expenses_json', 'TEXT');
+      addColumnIfNotExists('bookings', 'total_shoot_expenses', 'NUMERIC DEFAULT 0');
+
+      db.prepare('INSERT INTO schema_migrations (id, version, name) VALUES (?, ?, ?)')
+        .run('mig-11', 11, 'shoot_expenses_and_in_progress_stage');
+      console.log('[Migration] ✅ Đã hoàn tất Migration 11: Lưu trữ chi phí buổi chụp (shoot_expenses_json, total_shoot_expenses)');
+    } catch (mig11Err) {
+      console.warn('[Migration 11] Lỗi migration chi phí buổi chụp:', mig11Err.message);
+    }
+  }
 };
 
 runSafeMigrations();

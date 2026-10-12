@@ -54,6 +54,7 @@ import {
   triggerNativePushNotification,
   unlockAudio
 } from '../utils/notificationAudio';
+import { isShootDateReached } from '../lib/revenueUtils';
 
 
 
@@ -600,6 +601,68 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => clearInterval(notifPollingTimer);
   }, []);
+
+  // TỰ ĐỘNG CHUYỂN "ĐANG CHỤP" KHI TỚI NGÀY TRONG CỘT BOOKING
+  const checkedAutoTransitionIds = React.useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (customers.length === 0) return;
+
+    const toTransition: { customer: Customer; shootDateStr: string }[] = [];
+
+    customers.forEach(c => {
+      if (['Book ngày', 'Đã Booking'].includes(c.pipelineStage) && !checkedAutoTransitionIds.current.has(c.id)) {
+        const matchedBooking = bookings.find(
+          b => b.customerId === c.id ||
+          (b.className && b.className === c.className && b.schoolName === c.schoolName)
+        );
+        const shootDateStr = matchedBooking?.shootDate || c.shootDate || c.expectedShootDate;
+
+        if (shootDateStr && isShootDateReached(shootDateStr)) {
+          toTransition.push({ customer: c, shootDateStr });
+          checkedAutoTransitionIds.current.add(c.id);
+        }
+      }
+    });
+
+    if (toTransition.length > 0) {
+      console.log(`[Auto Transition] 🔴 Đã tới ngày chụp: tự động chuyển ${toTransition.length} lớp sang "Đang chụp"!`, toTransition.map(t => t.customer.name));
+
+      setCustomers(prev => prev.map(c => {
+        const matched = toTransition.find(t => t.customer.id === c.id);
+        if (matched) {
+          return {
+            ...c,
+            pipelineStage: 'Đang chụp' as PipelineStage,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return c;
+      }));
+
+      toTransition.forEach(({ customer: c, shootDateStr }) => {
+        apiClient.updateCustomer(c.id, {
+          pipelineStage: 'Đang chụp'
+        }).catch(err => {
+          console.warn(`[Auto Transition] Lỗi đồng bộ server cho khách ${c.id}:`, err);
+        });
+
+        // Bắn thông báo nội bộ
+        const notif: SystemNotification = {
+          id: `notif-${Date.now()}-${c.id}`,
+          type: 'shoot_scheduled',
+          title: `🔴 TỰ ĐỘNG CHUYỂN "ĐANG CHỤP": ${c.className || c.name}`,
+          message: `Lớp ${c.className || c.name} (${c.schoolName}) đã đến ngày chụp (${shootDateStr}). Lead Pipeline tự động chuyển sang "Đang chụp".`,
+          customerId: c.id,
+          targetRole: 'admin',
+          severity: 'info',
+          timestamp: new Date().toISOString(),
+          read: false
+        };
+        setNotifications(prev => [notif, ...prev]);
+      });
+    }
+  }, [customers, bookings]);
 
   // Xử lý đăng nhập bằng username / ID / email / số điện thoại & password
   const login = (username: string, password: string): { success: boolean; message?: string } => {
@@ -1434,6 +1497,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       }
       setNotifications(prev => [...bookingStageNotifs, ...prev]);
+    } else if (newStage === 'Đang chụp') {
+      const shootNotif: SystemNotification = {
+        id: `notif-${Date.now()}-shoot-progress`,
+        type: 'shoot_scheduled',
+        title: `🔴 ĐANG CHỤP KỶ YẾU: ${targetCustomer.className || targetCustomer.name}`,
+        message: `Lớp ${targetCustomer.className || targetCustomer.name} (${targetCustomer.schoolName}) đang diễn ra ca chụp hôm nay. Ekip hãy cập nhật chi phí và tiến độ tác nghiệp!`,
+        customerId: customerId,
+        targetRole: 'admin',
+        severity: 'info',
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      setNotifications(prev => [shootNotif, ...prev]);
     } else if (newStage === 'Lost') {
       const lostNotif: SystemNotification = {
         id: `notif-${Date.now()}`,

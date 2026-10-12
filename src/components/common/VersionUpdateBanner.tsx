@@ -11,7 +11,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
 
   useEffect(() => {
     try {
-      const seen = localStorage.getItem('xoan_crm_seen_update_v136');
+      const seen = localStorage.getItem('xoan_crm_seen_update_v150');
       if (!seen) {
         // Trì hoãn 1s sau khi tải trang để hiệu ứng mượt mà
         const timer = setTimeout(() => {
@@ -27,7 +27,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
   const handleDismiss = () => {
     setIsVisible(false);
     try {
-      localStorage.setItem('xoan_crm_seen_update_v136', 'true');
+      localStorage.setItem('xoan_crm_seen_update_v150', 'true');
     } catch {}
   };
 
@@ -56,7 +56,7 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
           <div className="flex-1 min-w-0 pr-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#B8F23D]/20 text-[#B8F23D] px-2 py-0.5 rounded-full border border-[#B8F23D]/30">
-                Phiên Bản Mới v1.4.3
+                Phiên Bản Mới v1.5.0
               </span>
               <span className="text-[10px] text-neutral-400 font-mono hidden sm:inline">
                 Chính thức
@@ -64,25 +64,25 @@ export const VersionUpdateBanner: React.FC<VersionUpdateBannerProps> = ({ onOpen
             </div>
 
             <h3 className="text-xs sm:text-sm font-extrabold text-white mt-1 leading-snug">
-              Cập Nhật CRM Xoăn Media v1.4.3
+              Cập Nhật CRM Xoăn Media v1.5.0
             </h3>
 
             <p className="text-[11px] text-neutral-300 mt-1 leading-relaxed">
-              Tối ưu giao diện Dashboard Thợ Chụp: Bỏ thẻ "Tổng Lương Cả Mùa (Dự Kiến)", tinh gọn 3 thẻ KPI trọng tâm thực tế (Lớp Đã Chụp, Lớp Sẽ Chụp và Lương Nhận Được).
+              Bổ sung giai đoạn <strong>Đang chụp</strong> giữa Book ngày & Đã chụp, tự động chuyển trạng thái khi tới ngày chụp, hỗ trợ bảng kê khai toàn bộ chi phí buổi chụp và tối ưu text biểu đồ kênh.
             </p>
 
             {/* Quick feature tags */}
             <div className="flex items-center gap-2 mt-2 text-[10px] text-neutral-400">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Thẻ Số Lượng Lead Mới
+                <ShieldCheck className="w-3 h-3 text-[#B8F23D]" /> Cột Đang Chụp
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Bộ Lọc Đa Chiều
+                <Smartphone className="w-3 h-3 text-[#B8F23D]" /> Kê Khai Chi Phí
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Bell className="w-3 h-3 text-[#B8F23D]" /> Lọc Nhanh 1 Chạm
+                <Bell className="w-3 h-3 text-[#B8F23D]" /> Tự Động Theo Lịch
               </span>
             </div>
 

@@ -324,7 +324,10 @@ export const ExecutiveDashboard: React.FC = () => {
     }));
   }, [filteredCustomers]);
 
-  const COLORS = ['#111827', '#84cc16', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+  const totalChannelClasses = useMemo(() => sourceStats.reduce((sum, s) => sum + s.value, 0), [sourceStats]);
+  const totalChannelRevenue = useMemo(() => sourceStats.reduce((sum, s) => sum + s.revenue, 0), [sourceStats]);
+
+  const COLORS = ['#1877F2', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
   // 6. Phễu Pipeline Data chuẩn hình phễu kinh doanh (Funnel Architecture 7 Giai Đoạn)
   const funnelStages = useMemo(() => {
@@ -1293,37 +1296,70 @@ export const ExecutiveDashboard: React.FC = () => {
                 <h2 className="text-sm font-bold text-neutral-900 tracking-tight">Phân Bổ Kênh Khách Hàng</h2>
                 <p className="text-xs text-neutral-400 mt-0.5">Tỷ lệ lớp và doanh thu từ CTV, Facebook, TikTok...</p>
 
-                <div className="h-56 mt-2 flex items-center justify-center">
+                <div className="relative h-56 mt-2 flex items-center justify-center">
                   {sourceStats.length === 0 ? (
                     <div className="text-center text-neutral-400 text-xs px-4">
                       <p className="font-semibold text-neutral-600">Chưa có dữ liệu kênh tiếp cận</p>
                       <p className="text-[11px] text-neutral-400 mt-1">Dữ liệu sẽ tự động tổng hợp khi bạn thêm khách hàng đầu tiên!</p>
                     </div>
                   ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={sourceStats}
-                          innerRadius={50}
-                          outerRadius={80}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {sourceStats.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: '#111827',
-                            borderRadius: '12px',
-                            border: 'none',
-                            color: '#fff',
-                            fontSize: '11px'
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    <>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={sourceStats}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={55}
+                            outerRadius={80}
+                            paddingAngle={4}
+                            dataKey="value"
+                            stroke="none"
+                            cornerRadius={4}
+                          >
+                            {sourceStats.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            content={({ active, payload }: any) => {
+                              if (active && payload && payload.length) {
+                                const data = payload[0].payload;
+                                const percent = totalChannelClasses > 0 ? ((data.value / totalChannelClasses) * 100).toFixed(0) : 0;
+                                return (
+                                  <div className="bg-neutral-900/95 backdrop-blur-md text-white p-2.5 rounded-xl shadow-xl border border-white/10 text-xs z-50">
+                                    <div className="flex items-center gap-1.5 font-bold text-neutral-200">
+                                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: payload[0].payload.fill || COLORS[0] }} />
+                                      <span>{data.name}</span>
+                                    </div>
+                                    <p className="font-black text-[#B8F23D] text-sm mt-1">
+                                      {data.value} Lớp ({percent}%)
+                                    </p>
+                                    <p className="text-[11px] text-neutral-300 mt-0.5">
+                                      Doanh thu: {(data.revenue / 1000000).toFixed(1)} Tr đ
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+
+                      {/* Text hiển thị số lượng và doanh thu ở tâm biểu đồ Donut */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+                        <span className="text-2xl font-black text-neutral-900 tracking-tight leading-none">
+                          {totalChannelClasses}
+                        </span>
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mt-1">
+                          Tổng Lớp
+                        </span>
+                        <span className="text-[10px] font-semibold text-neutral-500 mt-0.5">
+                          ({(totalChannelRevenue / 1000000).toFixed(1)} Tr)
+                        </span>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
